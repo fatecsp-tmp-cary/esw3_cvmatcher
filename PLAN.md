@@ -212,7 +212,7 @@ esw3_cvmatcher/
 │   │   ├── semantic/
 │   │   └── ranking/
 │   │
-│   ├── models/
+│   ├── persistence/
 │   │   └── job/
 |   |
 │   └── normalization/
