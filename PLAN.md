@@ -1,230 +1,101 @@
 # CV-Match — Implementation Plan
 
-## 1. Objective
+## Objective
 
-CV-Match is a REST API for recommending and ranking job opportunities based on a structured CV provided as JSON.
+REST API that matches/ranks jobs against a **structured CV JSON**. CV parsing is out of scope — input is already structured.
 
-The system must:
+MVP is open-source, free/local-first, with no paid LLM, embedding API, or required paid infrastructure. Initial sources prioritize **Brazilian opportunities**; this is a source-selection constraint, **not geographic eligibility filtering**.
 
-* receive a structured CV in JSON;
-* collect jobs from public sources;
-* restrict ingestion to Brazilian job opportunities;
-* normalize jobs into a common schema;
-* index the data for efficient search;
-* identify and remove expired jobs;
-* perform CV × job matching;
-* combine textual search and semantic similarity;
-* return jobs ordered by compatibility and score.
+## In Scope
 
-The MVP must use open-source, free tools that can run locally or on free-tier infrastructure, with no dependency on paid LLM APIs.
+* Structured CV ingestion and normalization
+* Modular multi-source job ingestion (≥1 source for MVP)
+* Job normalization and source-specific identity
+* `content_hash` change detection
+* Lifecycle management and expiration
+* PostgreSQL FTS + pgvector semantic search
+* Local PT/EN-capable, CPU-feasible embedding model
+* Matching: filters → textual → semantic → structured scoring → ranking
+* Unit/integration/API/e2e tests
+* OpenAPI documentation
+* Docker Compose/local execution and optional free-tier deployment
 
-The system is exclusively a REST API. The MVP does not include a frontend, automated applications, ATS integration, or CV adaptation.
+## Explicitly Out of Scope
 
-## 2. MVP Scope
+Job deduplication/cross-source merging, geographic eligibility classification/filtering, frontend, user accounts, automated applications/ATS submission, CV generation/adaptation, cover letters, mandatory LLM, paid/distributed infrastructure, Redis/Kafka/RabbitMQ or other dedicated brokers, indiscriminate crawling, sophisticated entity resolution/personalization.
 
-### Included
+## Architectural Principles
 
-```text
-Structured CV JSON
-      ↓
-Job Ingestion
-      ↓
-Normalization
-      ↓
-Indexing
-      ↓
-Matching
-      ↓
-Ranking
-      ↓
-REST API
-```
+* Separate ingestion, normalization, indexing, matching/ranking, and API.
+* Matching is independent from ingestion.
+* Prioritize public APIs/structured sources; scraping is an optional fallback.
+* Isolate each source behind a common interface; never couple the domain model to source formats.
+* Keep textual search and semantic similarity separate.
+* PostgreSQL is the **only application-state store**, including scheduler state and worker locking.
+* Candidate profile, embedding, and match results are **request-scoped only**: never persist or log them, including request bodies, exceptions, tracing, or telemetry.
+* Ranking must be deterministic given identical normalized inputs, job data, model/version, configuration, and algorithm version.
+* Respect source terms, rate limits, robots/access restrictions, and storage restrictions.
+* `Job` has exactly the fields defined below; additional persisted data belongs in separate structures.
+* Lifecycle status describes availability and is independent of other job properties.
+* Expired jobs remain as historical records but are excluded from active retrieval.
+* Every source-specific job is independent; **no cross-source deduplication, merging, or same-opportunity detection**.
+* Embeddings regenerate independently after job-content changes or embedding-model/version changes.
+* Location/mode may be stored, normalized, indexed, and included in matching representations, but are **never used for geographic eligibility classification/filtering**.
 
-Features:
+## Technology
 
-* structured CV ingestion;
-* Brazilian job collection;
-* multiple job sources;
-* normalization;
-* job lifecycle management;
-* job expiration/removal;
-* textual indexing;
-* local embeddings;
-* semantic search;
-* CV × job matching;
-* compatibility ranking;
-* explainable scores;
-* unit and integration tests;
-* end-to-end testing;
-* API documentation.
+Python, FastAPI, Pydantic, SQLAlchemy, PostgreSQL + pgvector, local embedding model, async HTTP client, lightweight scheduler/worker, Docker Compose, pytest.
 
-### Out of Scope
+No dedicated queue/broker is required.
 
-* frontend;
-* user registration/interface;
-* automated applications;
-* ATS integration;
-* application submission;
-* CV generation or adaptation;
-* cover-letter generation;
-* mandatory external LLM;
-* paid infrastructure.
-
-## 3. Architectural Principles
-
-1. Maintain modular separation between ingestion, normalization, indexing, matching/ranking, and API.
-2. Prioritize public APIs and structured sources.
-3. Use scraping only when necessary.
-4. Isolate each source behind a common interface.
-5. Do not couple the domain model to any specific source format.
-6. Keep matching independent from the ingestion layer.
-7. Separate textual search from semantic similarity.
-8. Make ranking deterministic and reproducible.
-9. Store enough data for debugging and reprocessing.
-10. Avoid proprietary or paid service dependencies.
-11. Support fully local execution.
-12. Restrict ingestion to Brazilian job opportunities.
-13. Respect source terms of use, rate limits, and access rules.
-
-## 4. Architecture
-
-```text
-                    Candidate JSON
-                         │
-                         ▼
-                 Candidate Normalizer
-                         │
-                         ▼
-                  Candidate Profile
-                         │
-                         │
-                         ▼
-                  ┌──────────────┐
-                  │              │
-                  │  PostgreSQL  │
-                  │  + Indexes   │
-                  │  + pgvector  │
-                  │              │
-                  └──────▲───────┘
-                         │
-                         │
-       ┌─────────────────┴─────────────────┐
-       │           Job Ingestion            │
-       │                                    │
-       │  Public APIs / ATS / RSS / Web     │
-       └─────────────────┬─────────────────┘
-                         │
-                         ▼
-                  Job Normalization
-                         │
-                         ▼
-                  Expiration Control
-                         │
-                         ▼
-                     Indexing
-                  ┌──────┴──────┐
-                  ▼             ▼
-             Text Index    Vector Index
-                  │             │
-                  └──────┬──────┘
-                         ▼
-                  Matching / Ranking
-                         │
-                         ▼
-                     REST API
-```
-
-## 5. Technology
-
-### Backend
-
-* Python
-* FastAPI
-* Pydantic
-* SQLAlchemy
-* PostgreSQL
-
-### Indexing
-
-PostgreSQL is the primary data store.
-
-For textual search:
-
-* PostgreSQL Full-Text Search;
-* appropriate indexes on searchable fields.
-
-For semantic search:
-
-* pgvector;
-* a locally executed open-source embedding model.
-
-### Processing
-
-* Python;
-* asynchronous HTTP client;
-* scheduler/cron;
-* simple worker;
-* PostgreSQL for persistence and, if necessary, an initial task queue.
-
-### Testing
-
-* pytest;
-* unit tests;
-* integration tests;
-* API tests;
-* end-to-end tests.
-
-### Execution
-
-* Docker;
-* Docker Compose;
-* local execution;
-* free-tier deployment where applicable.
-
-## 6. Project Structure
+## Project Structure
 
 ```text
 esw3_cvmatcher/
 ├── docs/
-│   └── reports/
-│       └── project-charter.md
-|
+│   └── reports/
+│
 ├── src/
-│   ├── api/
-│   ├── indexing/
-│   │   ├── text/
-│   │   └── vector/
+│   ├── api/
 │   │
-│   ├── ingestion/
-|   |   └── worker/
-|   │       ├── base/
-│   |       ├── sources/
-│   │       └── scheduler/
-|   |
-│   ├── schemas/
+│   ├── indexing/          # text, vector, embeddings
+│   │   ├── text/
+│   │   ├── vector/
+│   │   └── embeddings/
+│   │
+│   ├── ingestion/         # base, sources, scheduler, worker
+│   │   ├── base/
+│   │   ├── sources/
+│   │   ├── scheduler/
+│   │   └── worker/
+│   │
+│   ├── schemas/           # candidate, job, matching
 │   │   ├── candidate/
 │   │   ├── job/
 │   │   └── matching/
 │   │
-│   ├── matching/
+│   ├── matching/          # filters, textual, semantic, ranking
 │   │   ├── filters/
 │   │   ├── textual/
 │   │   ├── semantic/
 │   │   └── ranking/
 │   │
-│   ├── persistence/
-│   │   └── job/
-|   |
-│   └── normalization/
+│   ├── persistence/       # persisted DB data only
+│   │   ├── jobs/
+│   │   ├── sources/
+│   │   └── skills/
+│   │
+│   └── normalization/     # candidates, jobs, skills, locations
+│       ├── candidates/
 │       ├── jobs/
 │       ├── skills/
 │       └── locations/
-│   
+│
 ├── tests/
 │   ├── unit/
 │   ├── integration/
 │   └── e2e/
-|
+│
 ├── docker/
 ├── docker-compose.yml
 ├── migrations/
@@ -233,215 +104,43 @@ esw3_cvmatcher/
 └── pyproject.toml
 ```
 
-`models/` contains only persisted job domain and database models. The
-`models/job/` package represents jobs and their persisted relationships.
+`schemas/` contains request/response representations. `persistence/` contains persisted data models. Candidate data has no persistence model.
 
-`schemas/` contains Pydantic and request-scoped representations. Candidate
-profiles, candidate embeddings, match results, and match responses are created
-in memory and are never persisted.
+## Canonical Job Entity
 
-## 7. Candidate Module
-
-The system receives the CV already structured as JSON.
-
-The application must convert this JSON into an internal representation independent of the input format.
+Exactly:
 
 ```text
-Candidate JSON
-      ↓
-Schema Validation
-      ↓
-CandidateNormalizer
-      ↓
-CandidateProfile
+id, source, source_job_id, company, title, description, location, mode,
+salary, currency, employment_type, requirements, published_at,
+source_expires_at, first_seen_at, last_seen_at, last_verified_at,
+status, canonical_url, raw, embedding, content_hash
 ```
 
-The input and normalized profile schemas belong in `schemas/candidate/`.
-CandidateProfile exists only for the duration of the matching request and is
-never persisted or logged.
+`source + source_job_id` is uniquely constrained and represents **source identity, not deduplication**.
 
-The profile should represent, when available:
+* `source_expires_at` = explicit source-provided expiration; absence is not expiration.
+* `raw` = retained source payload, subject to source terms/storage constraints.
+* `embedding = NULL` = embedding missing/invalid for the currently configured model.
+* Embedding model/version and ranking algorithm version are configuration/metadata, not `Job` fields.
+
+## CandidateProfile
+
+Request-scoped and never persisted:
 
 ```text
-CandidateProfile
-├── skills[]
-├── job_titles[]
-├── occupations[]
-├── experience[]
-├── education[]
-├── certifications[]
-├── languages[]
-├── locations[]
-├── seniority
-├── years_experience
-└── preferences
+skills[], job_titles[], occupations[], experience[], education[],
+certifications[], languages[], locations[], seniority,
+years_experience, preferences
 ```
 
-The normalized profile must be usable by both textual and semantic search. It
-must not introduce a candidate database model or candidate table.
+The external parser supplies the structured JSON. CV-Match validates it and converts it to its internal representation.
 
-## 8. Job Ingestion
+The profile must support both textual and semantic matching. Candidate locations remain data but are not used for geographic eligibility.
 
-Ingestion must be modular and independent from the API.
+## Skill Taxonomy
 
-Conceptual interface:
-
-```python
-class JobSource:
-    async def discover(self):
-        ...
-
-    async def fetch_jobs(self):
-        ...
-
-    async def fetch_job(self, job_id):
-        ...
-
-    def normalize(self, raw_job):
-        ...
-```
-
-Possible sources:
-
-```text
-JobSource
-├── PublicAPI
-├── Greenhouse
-├── Lever
-├── Ashby
-├── RSS
-└── GenericWebSource
-```
-
-The initial implementation should prioritize public and structured sources.
-
-Generic scraping should be used as a fallback.
-
-## 9. Geographic Restriction
-
-The platform must collect Brazilian job opportunities exclusively.
-
-Normalization must identify:
-
-* country;
-* state;
-* city;
-* remote status;
-* location declared by the job.
-
-The Brazilian filter should be applied during ingestion/normalization, preventing out-of-scope opportunities from entering the final index.
-
-Remote jobs must be evaluated according to their geographic eligibility. A job marked only as "remote" must not automatically be considered Brazilian without evidence that candidates in Brazil are eligible.
-
-## 10. Canonical Job Model
-
-All sources must produce the same internal model.
-
-```text
-Job
-├── id
-├── source
-├── source_job_id
-├── company
-├── title
-├── description
-├── location
-├── mode
-├── salary
-├── currency
-├── employment_type
-├── requirements
-├── published_at
-      ├── expires_at
-├── first_seen_at
-├── last_seen_at
-├── last_verified_at
-├── status
-├── canonical_url
-├── raw
-├── embeddings
-└── content_hash
-```
-
-The original source payload should be preserved whenever possible for debugging and reprocessing.
-
-## 11. Job Lifecycle
-
-Jobs must have an explicit lifecycle:
-
-```text
-DISCOVERED
-    ↓
-ACTIVE
-    ↓
-STALE
-    ↓
-EXPIRED
-```
-
-States:
-
-* `DISCOVERED`: newly identified job;
-* `ACTIVE`: confirmed as available;
-* `STALE`: temporarily not found;
-* `EXPIRED`: confirmed unavailable.
-
-A job must not be marked as expired solely because a polling operation failed.
-
-Example:
-
-```text
-Polling failure
-      ↓
-Record failure
-      ↓
-Keep existing jobs active
-```
-
-Expiration should occur only after confirmed absence from successful polling runs or through a reliable `expires_at` value.
-
-## 12. Polling
-
-Each source should have its own configuration:
-
-```text
-job_sources
-├── id
-├── name
-├── type
-├── enabled
-├── polling_interval
-├── last_run_at
-├── last_success_at
-├── next_run_at
-└── last_error
-```
-
-Flow:
-
-```text
-Scheduler
-    ↓
-Poll source
-    ↓
-Fetch
-    ↓
-Validate
-    ↓
-Normalize
-    ↓
-Upsert
-    ↓
-Update lifecycle
-    ↓
-Index changed jobs
-```
-
-Failures must be recorded separately and must not invalidate previously collected data.
-
-## 13. Skill Taxonomy
-
-Create a canonical skill taxonomy.
+Canonical taxonomy shared by candidates and jobs:
 
 ```text
 skills
@@ -452,60 +151,73 @@ skills
 └── aliases
 ```
 
-Examples:
+Examples: `Kubernetes ← {k8s, kube}`, `PostgreSQL ← {Postgres}`, `JavaScript ← {JS, ECMAScript}`.
 
-```text
-Kubernetes
-├── k8s
-└── kube
+Candidate-side taxonomy processing remains transient.
 
-PostgreSQL
-├── Postgres
-└── PostgreSQL
+## Job Ingestion
 
-JavaScript
-├── JS
-└── ECMAScript
+Common interface:
+
+```python
+class JobSource:
+    async def discover(self): ...
+    async def fetch_jobs(self, discovered_jobs): ...
+    async def fetch_job(self, source_job_id): ...
+    def normalize(self, raw_job): ...
 ```
 
-The same taxonomy must be applied to both candidates and jobs.
+Sources declare:
 
-This reduces false negatives caused by naming differences.
+* `INCREMENTAL`: returns new/changed jobs; absence means nothing about expiration.
+* `SNAPSHOT`: successful run represents the complete covered set; only a **successful complete snapshot** can use absence to mark jobs `STALE`.
 
-## 14. Job Normalization
-
-Normalization must transform unstructured job text into searchable data.
-
-Initial pipeline:
+Possible adapters:
 
 ```text
-Job Description
-      ↓
-Text normalization
-      ↓
-Section detection
-      ↓
-Skill/keyword extraction
-      ↓
-Alias normalization
-      ↓
-Structured requirements
+PublicAPI
+ATS: Greenhouse / Lever / Ashby
+WebSource: optional fallback
 ```
 
-Detect, when possible:
+Sources should provide stable source-specific IDs whenever available. MVP implements at least one public/structured source.
+
+## Change Detection
 
 ```text
-Required
-Must have
-Requirements
-
-Preferred
-Nice to have
-Bonus
-Plus
+normalized Job → content_hash → compare stored hash
 ```
 
-Requirements may be classified as:
+If unchanged: no content update.
+
+If changed:
+
+```text
+update Job → re-index text → embedding = NULL → background regeneration
+```
+
+Rediscovery updates the existing `source + source_job_id` record.
+
+* `last_seen_at` = successful observation.
+* `last_verified_at` = successful fetch/validation according to source semantics.
+* Embedding-model changes invalidate embeddings independently of `content_hash`.
+
+No cross-source identity resolution.
+
+## Job Normalization
+
+```text
+Raw Job
+→ source parsing
+→ HTML/whitespace/Unicode normalization
+→ section detection
+→ skill/keyword extraction
+→ alias normalization
+→ requirement classification
+→ Canonical Job
+```
+
+Requirement classes:
 
 ```text
 REQUIRED
@@ -513,555 +225,400 @@ PREFERRED
 NICE_TO_HAVE
 ```
 
-Initial extraction should use deterministic techniques such as:
+Detect sections such as Required/Must Have/Requirements and Preferred/Nice to Have/Bonus/Plus.
 
-* dictionaries;
-* aliases;
-* regular expressions;
-* phrase matching;
-* fuzzy matching;
-* section detection.
+Use deterministic techniques: dictionaries, aliases, regex, phrase matching, fuzzy matching, section detection.
 
-## 15. Indexing
+**Do not assume every detected skill is mandatory.**
 
-Indexing is a dedicated component of the architecture.
+PostgreSQL FTS handles DB-level tokenization, stemming, and ranking.
 
-### Textual Index
+## Job Lifecycle
 
-Use PostgreSQL Full-Text Search to index fields such as:
-
-* title;
-* company;
-* description;
-* skills;
-* requirements;
-* location.
-
-Create appropriate indexes for efficient search.
-
-### Semantic Index
-
-Use:
+States:
 
 ```text
-CandidateProfile
-      ↓
-Local embedding model
-      ↓
-request-scoped candidate embedding
+                 ┌────────────────┐
+                 v                │
+DISCOVERED ──> ACTIVE ──► STALE ──┘
+    │            │           │
+    │            v           v
+    └────────> EXPIRED <─────┘
 ```
 
-and:
+Valid transitions:
 
 ```text
-Job
- ↓
-Local embedding model
- ↓
-job_embedding
+DISCOVERED→ACTIVE
+DISCOVERED→EXPIRED
+ACTIVE→STALE
+ACTIVE→EXPIRED
+STALE→ACTIVE
+STALE→EXPIRED
 ```
 
-Vectors are stored in PostgreSQL using pgvector.
+* `DISCOVERED` = newly identified job not yet through required validation/ingestion.
+* `ACTIVE` = successfully validated as available.
+* `STALE` = absent from a successful complete snapshot but not yet confirmed unavailable.
+* `EXPIRED` = confirmed unavailable.
+* Only `ACTIVE` jobs participate in active retrieval/matching.
+* Polling failures **never change lifecycle state**.
+* Incremental-source absence never creates `STALE`.
+* `STALE → EXPIRED` uses configurable consecutive-missing-snapshot count and/or maximum stale duration; either configured condition may trigger expiration.
+* Reliable explicit `source_expires_at` may cause immediate expiration.
+* Rediscovery can reactivate `STALE → ACTIVE`.
+* Expired jobs are retained; physical deletion is out of MVP.
 
-Only job embeddings are persisted. Candidate embeddings are generated in
-memory for the request and discarded after matching.
+## Polling
 
-No external embedding API should be required.
-
-## 16. Matching
-
-Matching combines two retrieval mechanisms:
+Per-source state:
 
 ```text
-Candidate
-    │
-    ├──────────────► Text Search
-    │
-    └──────────────► Semantic Search
-                          │
-                          ▼
-                   Candidate Jobs
-                          │
-                          ▼
-                       Ranking
+job_sources:
+id, name, type, polling_mode, enabled,
+polling_interval, last_run_at, last_success_at,
+next_run_at, last_error
 ```
 
-### Stage 1 — Filters
-
-Remove clear incompatibilities:
-
-* location;
-* remote eligibility;
-* employment type;
-* seniority;
-* language;
-* mandatory requirements.
-
-### Stage 2 — Textual Search
-
-Match:
-
-* skills;
-* titles;
-* occupations;
-* requirements;
-* relevant CV terms;
-* job descriptions.
-
-### Stage 3 — Semantic Similarity
-
-Use local embeddings to identify conceptual compatibility even when the exact terms differ.
-
-### Stage 4 — Ranking
-
-Combine textual and semantic results into a final compatibility score.
-
-Example:
+Flow:
 
 ```text
-final_score =
+Scheduler
+→ acquire source lock
+→ poll/fetch
+→ validate
+→ normalize
+→ upsert
+→ lifecycle update
+→ schedule indexing/embedding
+```
+
+Each run distinguishes:
+
+```text
+found / created / updated / unchanged / absent-from-complete-snapshot
+```
+
+A failed run is never treated as a missing snapshot.
+
+`source_runs` must record enough information to prove whether snapshot-based lifecycle transitions are safe.
+
+Overlapping runs for the same source are prevented through PostgreSQL locking/coordination.
+
+## Indexing
+
+Only `status = ACTIVE` belongs to the active retrieval dataset.
+
+### Text
+
+PostgreSQL Full-Text Search over:
+
+```text
+title, company, description, skills, requirements, location
+```
+
+Partial indexes may optimize active jobs. "De-indexing" means excluding a job from active retrieval, not necessarily physically removing database index entries.
+
+### Semantic
+
+Job embedding representation:
+
+```text
+title + normalized skills + requirements
++ relevant description + location + mode
+```
+
+Candidate representation:
+
+```text
+job titles + occupations + skills + experience
++ education + certifications + languages + preferences
+```
+
+Location/mode may appear in representations but must never become geographic eligibility logic.
+
+Only job embeddings are persisted in pgvector. Candidate embeddings remain in memory.
+
+If the model/version changes:
+
+```text
+invalidate embeddings → background regeneration → update/rebuild vector index as needed
+```
+
+This must not depend on `content_hash`.
+
+## Matching
+
+1. **Eligibility filters** — hard-exclude only sufficiently certain incompatibilities:
+   employment type, seniority, language, clearly mandatory requirements. No geographic filtering.
+2. **Textual retrieval** — FTS over skills, titles, occupations, requirements, relevant CV terms and descriptions.
+3. **Semantic retrieval** — pgvector similarity. Jobs without a current valid embedding are temporarily excluded from semantic retrieval.
+4. **Structured scoring** — skill coverage, seniority, experience, employment type, language. Geographic/location/mode compatibility is excluded.
+5. **Ranking** — combine normalized component scores.
+
+Default:
+
+```text
+final =
     0.45 * textual_score
   + 0.35 * semantic_score
   + 0.20 * structured_score
 ```
 
-Weights must be configurable and may later be adjusted based on evaluation results.
+All components and final score are normalized to `[0,100]`. Weights are configurable.
 
-The algorithm version must be stored so that rankings remain reproducible.
+Uncertain extraction should preferably affect scoring rather than cause hard exclusion.
 
-## 17. Match Result
+The final score is a **compatibility score, not an employment probability**.
 
-The internal result should contain:
+## MatchResult
 
 ```text
-MatchResult
-├── job_id
-├── score
-├── eligibility
-├── textual_score
-├── semantic_score
-├── structured_score
-├── matched_skills[]
-├── missing_requirements[]
-└── algorithm_version
+job_id, score, eligibility,
+textual_score, semantic_score, structured_score,
+matched_skills[], missing_requirements[],
+embedding_model, algorithm_version
 ```
 
-The API must return jobs ordered by score.
+`eligibility` means matching eligibility, **not geographic eligibility**.
 
-Example:
+Component scores may remain internal unless exposed by the API.
 
-```json
-{
-  "job_id": "123",
-  "score": 91.4,
-  "eligibility": "PASS",
-  "matched_skills": [
-    "Linux",
-    "Python",
-    "Docker"
-  ],
-  "missing_requirements": [
-    "AWS"
-  ]
-}
-```
-
-## 18. REST API
-
-The API receives a structured CV, processes it in memory, and returns ranked job recommendations. Candidate information is not persisted.
-
-Initial endpoint:
+## REST API
 
 ```text
 POST /matches
+GET  /health   # optional
 ```
 
-Input:
+`POST /matches` receives structured CV JSON and returns ranked recommendations.
 
-```json
-{
-  "candidate": {
-    "skills": ["Python", "Docker"],
-    "job_titles": ["Backend Developer"],
-    "experience": [],
-    "education": [],
-    "languages": ["Portuguese", "English"],
-    "locations": ["São Paulo, SP"],
-    "seniority": "mid",
-    "years_experience": 3,
-    "preferences": {}
-  },
-  "limit": 20
-}
-```
-
-Output:
-
-```json
-{
-  "results": [
-    {
-      "job_id": "job-001",
-      "score": 91.4,
-      "eligibility": "PASS",
-      "matched_skills": ["Python", "Docker"],
-      "missing_requirements": []
-    }
-  ],
-  "algorithm_version": "v1"
-}
-```
-
-Candidate data must be used only during request processing and must not be
-stored in the database or written to logs.
-
-Candidate profiles, candidate embeddings, and match results are not persisted.
-
-The API must be documented through the OpenAPI specification generated by FastAPI.
-
-## 19. Processing and Scheduler
-
-Asynchronous processing should handle:
+Response includes at minimum:
 
 ```text
-job polling
-job normalization
+job_id, score, eligibility, matched_skills, missing_requirements
+```
+
+and system metadata:
+
+```text
+algorithm_version
+embedding_model
+```
+
+Candidate data must never be persisted or logged, including application/access/request bodies, exceptions, tracing, or telemetry.
+
+FastAPI provides OpenAPI documentation.
+
+## Processing & Scheduler
+
+Background worker handles:
+
+```text
+polling
+normalization
 expiration
-indexing
+text indexing
 embedding generation
+embedding reprocessing after model changes
 ```
 
-Initially:
+Scheduler may be bundled into the worker or run separately.
 
-```text
-Scheduler
-    ↓
-Worker
-    ↓
-PostgreSQL
-```
+PostgreSQL handles scheduling state, locking, and coordination. Prevent concurrent processing of the same source/conflicting lifecycle operations.
 
-Do not initially introduce Kafka, RabbitMQ, or Redis without an actual requirement.
+Embedding generation should be asynchronous and must not block ingestion/API requests.
 
-## 20. Database
+## Database
 
-Primary entities:
+Persisted entities:
 
 ```text
 job_sources
 source_runs
-
 jobs
 skills
 job_skills
 job_requirements
-
-embeddings
 ```
 
-The database must support:
+`jobs` maps exactly to the canonical `Job`.
 
-* normalized data storage;
-* textual search;
-* vector storage/search;
-* source polling and lifecycle tracking.
+PostgreSQL is the only application-state store. Model files are deployment/cache artifacts.
 
-Candidate profiles, candidate embeddings, matches, and match explanations are
-request-scoped and must not be persisted.
+Database supports:
 
-## 21. Testing
+* normalized jobs
+* source identity/change detection
+* FTS/vector search
+* lifecycle/expiration
+* polling state/history
+* scheduler/worker coordination
 
-The MVP must have three levels of testing.
+No candidate tables.
 
-### Unit Tests
+## Observability
 
-Test independently:
-
-* CV normalization;
-* job normalization;
-* skill taxonomy;
-* lifecycle;
-* requirement extraction;
-* filters;
-* scoring;
-* ranking.
-
-### Integration Tests
-
-Test:
+Record per-source execution:
 
 ```text
-Source
-  ↓
-Ingestion
-  ↓
-Normalization
-  ↓
-Database
-  ↓
-Index
+source_runs:
+id, source_id, started_at, finished_at, status,
+snapshot_complete, jobs_found, jobs_created,
+jobs_updated, lifecycle_changes, errors
 ```
 
-The Resume API adapter should also have integration coverage.
+Also record duration, polling mode, parsing/HTTP/indexing/embedding failures, and matching duration.
 
-### End-to-End Tests
+Lifecycle changes may be aggregate counts or structured transitions.
 
-Validate the complete flow:
+## Security & Privacy
+
+* Credentials only through environment variables/secrets.
+* HTTPS in production.
+* Minimize stored personal data.
+* Candidate data is transient and never logged/persisted.
+* Restrict database access.
+* Apply relevant LGPD principles.
+* Production/public candidate-data endpoints require authentication.
+
+## Local Execution
+
+Docker Compose:
 
 ```text
-Candidate JSON
-      ↓
-CandidateProfile
-      ↓
-Job Ingestion
-      ↓
-Normalized Jobs
-      ↓
-Indexing
-      ↓
-Matching
-      ↓
-Ranking
-      ↓
-REST Response
+PostgreSQL + pgvector
+API
+Worker
 ```
 
-## 22. Observability
+Embedding model runs locally and is downloaded once into a persistent volume.
 
-Record:
+No paid LLM/embedding API, VPS, paid vector DB, or mandatory proprietary service.
 
-* execution of each source;
-* duration;
-* number of jobs found;
-* new jobs;
-* updated jobs;
-* expired jobs;
-* parsing errors;
-* HTTP errors;
-* indexing errors;
-* embedding failures;
-* matching duration.
+## Deployment
 
-Each source execution should have a record:
+Prefer free tiers, GitHub Actions, open-source infrastructure, and PostgreSQL providers supporting pgvector.
+
+Provider choice must be verified for actual:
+
+* persistent PostgreSQL
+* pgvector
+* scheduled ingestion
+* background processing
+* local/self-hosted embedding inference
+
+Verify free-tier resource/usage limits at deployment time. Docker Compose remains the reference environment and architecture stays provider-independent.
+
+## Testing
+
+Required:
+
+* unit
+* integration
+* API
+* end-to-end
+
+Unit tests cover normalization, taxonomy, identity, hashing, lifecycle, requirement extraction, filtering, scoring/ranking, and embedding invalidation/regeneration.
+
+Integration tests use deterministic source fixtures:
 
 ```text
-source_runs
-├── id
-├── source_id
-├── started_at
-├── finished_at
-├── status
-├── jobs_found
-├── jobs_created
-├── jobs_updated
-├── jobs_expired
-└── errors
+source → ingestion → normalization → DB → index
 ```
 
-## 23. Security and Privacy
+Live external-source tests are optional/non-blocking for CI.
 
-CVs may contain personal data.
+E2E tests cover:
 
-Minimum requirements:
+* source failures
+* incremental vs snapshot behavior
+* source identity
+* changed jobs
+* expiration/reactivation
+* missing requirements
+* similar jobs from different sources without merging
+* ranking determinism
+* embedding regeneration after content changes
+* embedding regeneration after model changes
 
-* never store credentials in source code;
-* use environment variables/secrets;
-* use HTTPS in deployment;
-* minimize stored personal information;
-* CV data is transient and must not be logged or persisted;
-* authenticate endpoints handling candidate data;
-* restrict database access;
-* consider LGPD principles.
+Maintain a small fixed ranking/matching regression dataset.
 
-## 24. Local Execution
+No test should expect deduplication or geographic eligibility filtering.
 
-The project must run entirely through Docker Compose:
+## Roadmap
+
+1. Core domain — Job, DB schema, migrations, lifecycle, hashing
+2. Candidate — validation, normalization, taxonomy
+3. Ingestion — source interface, polling modes, first source, normalization, source runs, upsert
+4. Lifecycle — timestamps, stale/expired, reactivation, failure protection, snapshots, explicit expiration
+5. Multiple sources — APIs, ATS, optional web adapters; no dedup
+6. Indexing — FTS, local embeddings, pgvector, regeneration
+7. Matching — filters, textual/semantic retrieval, structured scoring, ranking, normalization/versioning; no geo filtering
+8. API — matches, health, OpenAPI, errors, production auth
+9. Quality — complete test suite, regression dataset, model-version migration, no-dedup/no-geo regression tests
+10. Deployment — Docker, production configuration, secrets, backups, free-tier deployment, scheduling, monitoring
+
+## Definition of Done
+
+The complete pipeline works:
 
 ```text
-docker-compose
-├── PostgreSQL + pgvector
-├── API
-└── Worker
+Structured CV
+→ CandidateProfile
+→ Job Sources
+→ Normalized Jobs
+→ Lifecycle
+→ FTS + Vector Index
+→ Compatibility Filters
+→ Text + Semantic Matching
+→ Ranking
+→ REST Recommendations
 ```
 
-The embedding model must be executable locally.
+It must:
 
-Local execution must not require:
+* accept structured CV JSON;
+* implement ≥1 job source;
+* prioritize Brazilian sources without geographic eligibility filtering;
+* normalize jobs into the exact canonical `Job`;
+* maintain source-specific identity;
+* detect content changes;
+* regenerate embeddings after content/model changes;
+* correctly handle snapshot/incremental lifecycle semantics and polling failures;
+* expire and reactivate jobs correctly;
+* exclude expired jobs from active retrieval;
+* provide FTS + local semantic matching;
+* use a local PT/EN-capable embedding model;
+* produce deterministic `[0,100]` compatibility scores;
+* expose supporting match information;
+* version algorithm/model;
+* pass unit/integration/API/e2e tests;
+* provide OpenAPI documentation;
+* run locally without paid LLM/embedding/infrastructure dependencies or dedicated brokers;
+* perform no cross-source deduplication/merging;
+* perform no geographic eligibility classification/filtering.
 
-* paid LLM APIs;
-* paid embedding APIs;
-* VPS;
-* paid vector databases;
-* mandatory proprietary services.
+## MVP Boundaries
 
-## 25. Deployment
-
-If deployment is required for the MVP, prioritize:
-
-* free tiers;
-* serverless services;
-* GitHub Actions;
-* free PostgreSQL;
-* open-source infrastructure.
-
-The architecture must remain provider-independent.
-
-Free-tier limits must be verified at deployment time.
-
-## 26. Roadmap
-
-### Phase 1 — Core Domain
-
-* [ ] Job
-* [ ] PostgreSQL schema
-* [ ] migrations
-
-### Phase 2 — Candidate
-
-* [ ] JSON validation
-* [ ] CandidateNormalizer
-* [ ] Skill normalization
-
-### Phase 3 — Ingestion
-
-* [ ] JobSource interface
-* [ ] First public source
-* [ ] Job normalization
-* [ ] Source-run tracking
-* [ ] Polling
-
-### Phase 4 — Lifecycle
-
-* [ ] `first_seen_at`
-* [ ] `last_seen_at`
-* [ ] STALE
-* [ ] EXPIRED
-* [ ] Failure protection
-
-### Phase 5 — Multiple Sources
-
-* [ ] Additional public APIs
-* [ ] ATS sources
-* [ ] RSS
-* [ ] Generic web source
-
-### Phase 6 — Indexing
-
-* [ ] PostgreSQL Full-Text Search
-* [ ] Search indexes
-* [ ] Local embedding model
-* [ ] pgvector
-* [ ] Vector indexes
-
-### Phase 7 — Matching
-
-* [ ] Hard filters
-* [ ] Textual matching
-* [ ] Semantic matching
-* [ ] Combined ranking
-* [ ] Explainable score
-* [ ] Algorithm versioning
-
-### Phase 8 — API
-
-* [ ] Candidate endpoints
-* [ ] Job endpoints
-* [ ] Matching endpoints
-* [ ] OpenAPI documentation
-* [ ] Error handling
-
-### Phase 9 — Quality
-
-* [ ] Unit tests
-* [ ] Integration tests
-* [ ] End-to-end test
-* [ ] Source failure tests
-* [ ] Expiration tests
-* [ ] Matching/ranking test dataset
-
-### Phase 10 — Deployment
-
-* [ ] Docker
-* [ ] Production configuration
-* [ ] Secrets
-* [ ] Database backup
-* [ ] Free-tier deployment
-* [ ] Scheduled ingestion
-* [ ] Monitoring
-
-## 27. Definition of Done
-
-The MVP is complete when it can execute:
+Defer:
 
 ```text
-Structured CV JSON
-       ↓
-Candidate Profile
-       ↓
-Brazilian Job Sources
-       ↓
-Normalized Jobs
-      ↓
-Lifecycle Management
-       ↓
-Text Index + Vector Index
-       ↓
-Textual Matching
-       +
-Semantic Matching
-       ↓
-Ranking
-       ↓
-REST API
-       ↓
-Ordered Job Recommendations
+deduplication / opportunity merging
+geographic eligibility
+frontend / accounts
+automated applications / ATS submission
+CV generation/adaptation / cover letters
+sophisticated entity resolution
+agents
+mandatory LLM
+distributed infrastructure / complex queues
+indiscriminate crawling
+advanced recommendation personalization
 ```
 
-And satisfies the following criteria:
+## Core Goal
 
-* [ ] accepts a structured CV;
-* [ ] collects Brazilian jobs;
-* [ ] supports multiple sources;
-* [ ] normalizes job data;
-* [ ] detects/removes expired jobs;
-* [ ] provides textual search;
-* [ ] provides local semantic similarity;
-* [ ] ranks jobs by compatibility;
-* [ ] returns a score;
-* [ ] provides information supporting the score;
-* [ ] has unit tests;
-* [ ] has integration tests;
-* [ ] has an end-to-end test;
-* [ ] has REST/OpenAPI documentation;
-* [ ] runs locally;
-* [ ] does not depend on paid LLMs;
-* [ ] does not require paid infrastructure.
+**Collect → normalize → lifecycle-manage → index → compare → rank → expose jobs through REST.**
 
-## 28. MVP Boundaries
-
-The MVP should remain deliberately focused.
-
-Do not implement before validating the core:
-
-* frontend;
-* automated applications;
-* ATS application integration;
-* CV generation;
-* CV adaptation;
-* cover letters;
-* job deduplication;
-* agents;
-* mandatory LLM;
-* distributed infrastructure;
-* complex queues;
-* indiscriminate web crawling.
-
-The objective is exclusively to validate the ability to:
-
-**collect → normalize → index → compare → rank → expose Brazilian job opportunities through a REST API.**
-
-## 29. Central Principle
-
-The architecture should treat CV-Match as a **job-data and opportunity-retrieval pipeline**, rather than an interface or application agent.
-
-The priority is to build a clean, up-to-date, searchable database of Brazilian job opportunities on top of which textual and semantic matching can produce reproducible and measurable recommendations.
+CV-Match is a **job-data and opportunity-retrieval pipeline**, not an interface or application agent. The priority is a clean, current, searchable job database supporting reproducible and measurable matching.
