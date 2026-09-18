@@ -1,0 +1,38 @@
+# ============================================
+# CV-MATCH - CODEOWNERS
+# ============================================
+
+# --------------------------------------------
+# DATA
+# --------------------------------------------
+
+/src/ingestion/ @cv-match/data
+/src/normalization/ @cv-match/data
+/src/indexing/ @cv-match/data @cv-match/match
+
+/src/schemas/candidate/ @cv-match/data
+/src/schemas/job/ @cv-match/data
+/src/schemas/matching/ @cv-match/data @cv-match/match 
+
+
+# --------------------------------------------
+# MATCH
+# --------------------------------------------
+
+/src/matching/ @cv-match/match
+
+
+# --------------------------------------------
+# QA
+# --------------------------------------------
+
+/tests/ @cv-match/qa
+
+# --------------------------------------------
+# PROJECT / GOVERNANCE
+# --------------------------------------------
+
+/docs/ @cv-match/leads
+PLAN.md @cv-match/leads
+/.github/ @cv-match/leads
+/scripts/ @cv-match/leads
