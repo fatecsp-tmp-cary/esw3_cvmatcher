@@ -33,8 +33,12 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest
-          code=$?
+          # `run:` steps use `bash -e` by default, which would abort on
+          # pytest's non-zero exit before the check below runs. Routing the
+          # failure through `||` keeps -e from firing so the code can be
+          # inspected.
+          pytest || code=$?
+          code=${code:-0}
           # Exit code 5 = no tests collected yet; tests are added incrementally
           # by later issues, this workflow only validates the tooling itself.
           if [ "$code" -ne 0 ] && [ "$code" -ne 5 ]; then
