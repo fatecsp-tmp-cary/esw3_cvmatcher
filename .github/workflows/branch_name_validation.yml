@@ -1,0 +1,28 @@
+name: Validate branch name
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  validate-branch-name:
+    name: Validate branch name
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check branch name
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: |
+          PATTERN='^(feat|task|bug)_\d+_[A-Za-z0-9_-]+$'
+
+          if [[ "$BRANCH_NAME" =~ $PATTERN ]]; then
+            echo "Branch name '$BRANCH_NAME' is valid."
+          else
+            echo "::error::Invalid branch name: '$BRANCH_NAME'"
+            echo "::error::Expected pattern: $PATTERN"
+            exit 1
+          fi
