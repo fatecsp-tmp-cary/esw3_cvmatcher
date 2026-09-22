@@ -1,0 +1,65 @@
+name: Validate PR Workflow
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate:
+    name: Validate branch lifecycle workflow
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate source and target branches
+        shell: bash
+        env:
+          SOURCE: ${{ github.head_ref }}
+          TARGET: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+
+          PATTERN='^(feat|task|bug)_[0-9]+_[A-Za-z0-9_-]+$'
+
+          echo "Source: $SOURCE"
+          echo "Target: $TARGET"
+
+          case "$TARGET" in
+
+            dev)
+              if [[ ! "$SOURCE" =~ $PATTERN ]]; then
+                echo "::error::Invalid source branch '$SOURCE'."
+                echo "::error::Branches targeting 'dev' must match:"
+                echo "::error:: $PATTERN"
+                exit 1
+              fi
+              ;;
+
+            staging)
+              if [[ "$SOURCE" != "dev" ]]; then
+                echo "::error::Only 'dev' may create PRs targeting 'staging'."
+                exit 1
+              fi
+              ;;
+
+            main)
+              if [[ "$SOURCE" != "staging" ]]; then
+                echo "::error::Only 'staging' may create PRs targeting 'main'."
+                exit 1
+              fi
+              ;;
+
+            *)
+              echo "No branch-workflow restriction for target '$TARGET'."
+              ;;
+
+          esac
+
+          echo "Branch workflow validation passed."
