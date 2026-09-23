@@ -108,6 +108,7 @@ chroma_db/
 *.swo
 *~
 .project
+.project/
 .classpath
 .settings/
 
@@ -176,3 +177,9 @@ models/
 # ------------------------------------------------------------
 *.secret
 secrets/
+
+# ------------------------------------------------------------
+# AI assistants / local workspace notes
+# ------------------------------------------------------------
+.claude/
+CLAUDE.local.md
