@@ -24,6 +24,21 @@ pytest --no-cov -x                      # faster local loop: no coverage, stop a
 Passing `-m` replaces the default `not external` filter, so combine them when
 needed: `pytest -m "unit and not external"`.
 
+## CI
+
+`.github/workflows/ci.yml` runs on every push and pull request to `dev`,
+`staging` and `main`, in three parallel jobs:
+
+| Job | Runs | Local equivalent |
+|---|---|---|
+| Lint and format | `ruff check`, `ruff format --check` | `ruff check . && ruff format --check .` |
+| Unit and API tests | everything except `integration`, `e2e`, `external` | `pytest -m "not integration and not e2e and not external"` |
+| Integration tests (PostgreSQL) | `integration` and `e2e`, against a `pgvector/pgvector:pg17` service; `TEST_DATABASE_URL` points to it | `pytest -m "(integration or e2e) and not external"` |
+
+Failed tests appear as annotations on the PR diff, and each test job uploads a
+JUnit report (`junit-tests`, `junit-integration`) as a run artifact.
+`external` tests never run in CI.
+
 ## Layout and markers
 
 | Directory | Marker | What goes there |
