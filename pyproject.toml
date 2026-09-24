@@ -47,7 +47,21 @@ known-first-party = ["src"]
 testpaths = ["tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
-addopts = "--cov=src --cov-report=term-missing"
+addopts = [
+    "--import-mode=importlib",
+    "--strict-markers",
+    "-m", "not external",
+    "--cov=src",
+    "--cov-report=term-missing",
+]
+xfail_strict = true
+markers = [
+    "unit: fast, isolated tests with no I/O (auto-applied under tests/unit)",
+    "integration: tests that use PostgreSQL or other local services (auto-applied under tests/integration)",
+    "api: HTTP-level tests through the FastAPI TestClient (auto-applied under tests/api)",
+    "e2e: end-to-end pipeline tests (auto-applied under tests/e2e)",
+    "external: tests that reach live external sources; deselected by default, never required in CI",
+]
 
 [tool.coverage.run]
 source = ["src"]
