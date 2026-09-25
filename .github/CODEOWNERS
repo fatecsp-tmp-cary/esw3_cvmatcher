@@ -6,33 +6,33 @@
 # DATA
 # --------------------------------------------
 
-/src/ingestion/ @cv-match/data
-/src/normalization/ @cv-match/data
-/src/indexing/ @cv-match/data @cv-match/match
+/src/ingestion/ @fatecsp-tmp-cary/data
+/src/normalization/ @fatecsp-tmp-cary/data
+/src/indexing/ @fatecsp-tmp-cary/data @fatecsp-tmp-cary/match
 
-/src/schemas/candidate/ @cv-match/data
-/src/schemas/job/ @cv-match/data
-/src/schemas/matching/ @cv-match/data @cv-match/match 
+/src/schemas/candidate/ @fatecsp-tmp-cary/data
+/src/schemas/job/ @fatecsp-tmp-cary/data
+/src/schemas/matching/ @fatecsp-tmp-cary/data @fatecsp-tmp-cary/match 
 
 
 # --------------------------------------------
 # MATCH
 # --------------------------------------------
 
-/src/matching/ @cv-match/match
+/src/matching/ @fatecsp-tmp-cary/match
 
 
 # --------------------------------------------
 # QA
 # --------------------------------------------
 
-/tests/ @cv-match/qa
+/tests/ @fatecsp-tmp-cary/qa
 
 # --------------------------------------------
 # PROJECT / GOVERNANCE
 # --------------------------------------------
 
-/docs/ @cv-match/leads
-PLAN.md @cv-match/leads
-/.github/ @cv-match/leads
-/scripts/ @cv-match/leads
+/docs/ @fatecsp-tmp-cary/leads
+PLAN.md @fatecsp-tmp-cary/leads
+/.github/ @fatecsp-tmp-cary/leads
+/scripts/ @fatecsp-tmp-cary/leads
