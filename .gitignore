@@ -41,6 +41,7 @@ venv.bak/
 .coverage
 .coverage.*
 htmlcov/
+/reports/
 .tox/
 .nox/
 .pyre/
@@ -108,6 +109,7 @@ chroma_db/
 *.swo
 *~
 .project
+.project/
 .classpath
 .settings/
 
@@ -176,3 +178,9 @@ models/
 # ------------------------------------------------------------
 *.secret
 secrets/
+
+# ------------------------------------------------------------
+# AI assistants / local workspace notes
+# ------------------------------------------------------------
+.claude/
+CLAUDE.local.md
