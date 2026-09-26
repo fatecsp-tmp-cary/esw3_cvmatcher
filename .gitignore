@@ -41,6 +41,7 @@ venv.bak/
 .coverage
 .coverage.*
 htmlcov/
+/reports/
 .tox/
 .nox/
 .pyre/
