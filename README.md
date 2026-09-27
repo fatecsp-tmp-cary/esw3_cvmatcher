@@ -63,5 +63,3 @@ the app's startup/shutdown events when used as a context manager.
   with the failing fields in `detail[*].loc`.
 - For `async` tests that need to await the app directly, use
   `httpx2.AsyncClient(transport=httpx2.ASGITransport(app=app))`.
-
-Never use real CVs or personal data in payloads or fixtures.
