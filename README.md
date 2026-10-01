@@ -2,26 +2,6 @@
 
 REST API that receives an already structured CV as JSON and returns job openings ranked by compatibility.
 
-## Local PostgreSQL
-
-Integration and e2e tests, and eventually the application itself, need a local
-PostgreSQL with `pgvector`. Start it with:
-
-```bash
-cp .env.example .env   # first time only; adjust values if needed
-docker compose up -d
-```
-
-This starts `pgvector/pgvector:pg17` on `localhost:5432` with the credentials
-from `.env` (defaults: user/password/db `cvmatch`). Check it's ready with:
-
-```bash
-docker compose ps                       # STATUS should be "healthy"
-psql "$DATABASE_URL" -c "select 1;"     # or: docker compose exec postgres pg_isready
-```
-
-Stop it with `docker compose down` (add `-v` to also drop the data volume).
-
 ## Tests
 
 ### Setup
