@@ -9,9 +9,18 @@ This fixture represents a sample response payload from the external job source (
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | Integer | Unique identifier of the job post |
-| `title` | String | Job title including location/level if present |
-| `url` | String | Source URL of the job posting |
-| `labels` | Array[Object] | List of tags/skills associated with the job |
-| `created_at` | String (ISO 8601) | Timestamp when the job post was created |
-| `body` | String | Full markdown text containing job description and requirements |
+| `url` | String | API endpoint URL of the issue |
+| `repository_url` | String | API URL of the parent repository |
+| `html_url` | String | Web URL of the job posting |
+| `id` | Integer | Unique identifier of the issue |
+| `node_id` | String | GraphQL global node ID |
+| `number` | Integer | Issue number within the repository |
+| `title` | String | Job title and location summary |
+| `user` | Object | User profile details of the poster |
+| `labels` | Array[Object] | Associated tags/skills |
+| `state` | String | Status of the issue (`open`/`closed`) |
+| `locked` | Boolean | Lock status of the thread |
+| `created_at` | String (ISO 8601) | Timestamp when job post was created |
+| `updated_at` | String (ISO 8601) | Timestamp when job post was last updated |
+| `body` | String | Full markdown text of the job post |
+| `reactions` | Object | Reaction count metrics |

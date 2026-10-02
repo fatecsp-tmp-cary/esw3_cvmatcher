@@ -1,25 +1,71 @@
 [
   {
-    "id": 101,
-    "title": "[São Paulo/SP] Backend Developer (Python / FastAPI)",
-    "url": "https://github.com/backend-br/vagas/issues/101",
+    "url": "https://api.github.com/repos/backend-br/vagas/issues/100",
+    "repository_url": "https://api.github.com/repos/backend-br/vagas",
+    "labels_url": "https://api.github.com/repos/backend-br/vagas/issues/100/labels{/name}",
+    "comments_url": "https://api.github.com/repos/backend-br/vagas/issues/100/comments",
+    "events_url": "https://api.github.com/repos/backend-br/vagas/issues/100/events",
+    "html_url": "https://github.com/backend-br/vagas/issues/100",
+    "id": 123456789,
+    "node_id": "MDU6SXNzdWUxMjM0NTY3ODk=",
+    "number": 100,
+    "title": "[Remoto] Desenvolvedor Python / Data Analyst",
+    "user": {
+      "login": "recruiter",
+      "id": 987654,
+      "node_id": "MDQ6VXNlcjk4NzY1NA==",
+      "avatar_url": "https://avatars.githubusercontent.com/u/987654?v=4",
+      "url": "https://api.github.com/users/recruiter",
+      "html_url": "https://github.com/recruiter",
+      "type": "User",
+      "site_admin": false
+    },
     "labels": [
-      { "name": "Python" },
-      { "name": "FastAPI" },
-      { "name": "Remoto" }
+      {
+        "id": 11223344,
+        "node_id": "MDU6TGFiZWwxMTIyMzM0NA==",
+        "url": "https://api.github.com/repos/backend-br/vagas/labels/Remoto",
+        "name": "Remoto",
+        "color": "0e8a16",
+        "default": false,
+        "description": "Trabalho remoto"
+      },
+      {
+        "id": 55667788,
+        "node_id": "MDU6TGFiZWw1NTY2Nzc4OA==",
+        "url": "https://api.github.com/repos/backend-br/vagas/labels/Python",
+        "name": "Python",
+        "color": "fef2c0",
+        "default": false,
+        "description": "Linguagem Python"
+      }
     ],
-    "created_at": "2026-03-01T12:00:00Z",
-    "body": "## Job Description\nWe are looking for a Python Backend Developer.\n\n## Requirements\n- Python 3.10+\n- FastAPI\n- PostgreSQL\n\n## Location\nRemote / São Paulo"
-  },
-  {
-    "id": 102,
-    "title": "[Remoto] Data Engineer Pleno",
-    "url": "https://github.com/backend-br/vagas/issues/102",
-    "labels": [
-      { "name": "Data" },
-      { "name": "SQL" }
-    ],
-    "created_at": "2026-03-02T14:30:00Z",
-    "body": "## Job Description\nWe need a Data Engineer to build ETL pipelines.\n\n## Requirements\n- SQL\n- Python\n- ETL / Docker"
+    "state": "open",
+    "locked": false,
+    "assignee": null,
+    "assignees": [],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2026-01-15T10:00:00Z",
+    "updated_at": "2026-01-15T10:00:00Z",
+    "closed_at": null,
+    "author_association": "NONE",
+    "active_lock_reason": null,
+    "body": "## Descrição da vaga\nProcuramos pessoa desenvolvedora...",
+    "reactions": {
+      "url": "https://api.github.com/repos/backend-br/vagas/issues/100/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "timeline_url": "https://api.github.com/repos/backend-br/vagas/issues/100/timeline",
+    "performed_via_github_app": null,
+    "state_reason": null
   }
 ]
