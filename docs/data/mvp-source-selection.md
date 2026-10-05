@@ -3,8 +3,10 @@
 ## Status
 
 This document reflects the current state of source evaluation for the MVP job ingestion pipeline. The final decision between Gupy and Meu Padrinho is still pending confirmation from the project manager. This document will be updated once the decision is formally approved.
+The Definition of Done for this task (selected source, rejected alternatives, polling approach, and limitations) is addressed below, with the exception of the final source selection, which remains pending.
 
 Full endpoint specifications, request/response schemas, and the technical comparison matrix for all sources evaluated are documented in [`docs/data/APIs_normalization.md`](./APIs_normalization.md) and are not duplicated here.
+
 
 ## Candidate Sources
 
@@ -20,7 +22,7 @@ Testing against the live API revealed significant restrictions:
 
 - The `page` parameter is 0-indexed. `page=0` returns HTTP 200 with 10 jobs; any `page >= 1` returns HTTP 204 (no content).
 - The `offset`, `limit`, and `pagina` parameters are ignored.
-- The only functional filter is `niveis`, which returns up to 10 additional jobs per level.
+- The only functional filter is niveis, which returns up to 10 jobs per level.
 - Jobs are ordered from most recent to oldest.
 - Out of approximately 27,600 total jobs, only a small, fixed subset (the most recent ones) is accessible through the API.
 
