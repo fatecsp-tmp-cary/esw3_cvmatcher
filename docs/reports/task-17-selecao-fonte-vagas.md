@@ -1,21 +1,38 @@
 # MVP Source Selection
 
-## Selected Source
+## Status
 
-**Gupy** was selected as the primary data source for the MVP. It provides a stable, well-documented API, consistent job listing structure, and reliable pagination, making it the most suitable option for the initial integration.
+This document reflects the current state of source evaluation for the MVP job ingestion pipeline. The final decision between Gupy and Meu Padrinho is still pending confirmation from the project manager. This document will be updated once the decision is formally approved.
 
 Full endpoint specifications, request/response schemas, and the technical comparison matrix for all sources evaluated are documented in [`docs/data/APIs_normalization.md`](./APIs_normalization.md) and are not duplicated here.
 
-## Alternatives Evaluated
+## Candidate Sources
 
-The following sources were evaluated as part of the source selection process (see `docs/data/APIs_normalization.md` for full technical details):
+Two sources remain under consideration as the primary data source for the MVP: Gupy and Meu Padrinho.
 
-- **Meu Padrinho** — initially considered, but testing revealed a critical pagination limitation: the `page` parameter is 0-indexed, and any request with `page >= 1` returns HTTP 204 (no content). Parameters such as `offset`, `limit`, and `pagina` are ignored. The only functional filter is `niveis`, which returns an additional ~10 jobs per level. As a result, only a small fraction of the ~27,600 listed jobs is actually accessible through the API. Due to this limitation, Meu Padrinho was not selected as the primary source for the MVP.
-- **InHire**, **Solides**, **Trampos.co**, and **Quero Vagas Tech** — evaluated and documented in `docs/data/APIs_normalization.md`; not selected as the primary source for the MVP.
+### Gupy
 
-## Polling / Scanning Mode
+Gupy has a documented API and a consistent job listing structure. However, specific behaviors relevant to production use—such as pagination limits in practice, rate limits, and filter support—have not yet been fully validated against the live API and require further testing before a final decision can be made.
 
-The ingestion pipeline follows a periodic scan approach:
+### Meu Padrinho
+
+Testing against the live API revealed significant restrictions:
+
+- The `page` parameter is 0-indexed. `page=0` returns HTTP 200 with 10 jobs; any `page >= 1` returns HTTP 204 (no content).
+- The `offset`, `limit`, and `pagina` parameters are ignored.
+- The only functional filter is `niveis`, which returns up to 10 additional jobs per level.
+- Jobs are ordered from most recent to oldest.
+- Out of approximately 27,600 total jobs, only a small, fixed subset (the most recent ones) is accessible through the API.
+
+These constraints significantly limit both the volume and the time range of data that can be retrieved from Meu Padrinho as a standalone source.
+
+## Alternatives Ruled Out
+
+The following sources were evaluated and are not being considered as the primary MVP source (see `docs/data/APIs_normalization.md` for full technical details): **InHire**, **Solides**, **Trampos.co**, and **Quero Vagas Tech**.
+
+## Proposed Polling / Scanning Approach
+
+The following pipeline design is proposed for the selected source, pending approval together with the final source decision:
 
 1. Fetch the job listing endpoint for the selected source.
 2. For each job, fetch detail/skills information as needed.
@@ -31,4 +48,4 @@ This approach avoids relying on real-time webhooks and keeps the dataset up to d
 - No deduplication of jobs across multiple sources is performed, per `PLAN.md`.
 - No geographic eligibility filtering is applied, per `PLAN.md`.
 - All requests respect the source's rate limits, terms of use, and access restrictions, per `CONTRIBUTING.md`.
-- Meu Padrinho's pagination limitation (described above) restricts its usability as a complete data source; it may be revisited as a complementary/limited source in future iterations.
+- Meu Padrinho's pagination limitation (described above) significantly restricts its usability as a complete standalone source for the MVP.
