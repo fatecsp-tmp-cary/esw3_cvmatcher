@@ -1,0 +1,279 @@
+{
+    "resume": {
+        "title": "Desenvolvedor de Software",
+        "skills": [
+            "Python",
+            "Java",
+            "SQL",
+            "Git",
+            "APIs REST",
+            "Docker",
+            "Linux",
+            "PostgreSQL",
+            "FastAPI",
+            "Spring Boot"
+        ],
+        "experience": [
+            "Desenvolvimento de aplicações web",
+            "Desenvolvimento de APIs REST",
+            "Desenvolvimento backend",
+            "Integração com bancos de dados",
+            "Desenvolvimento de software utilizando Python e Java",
+            "Controle de versão utilizando Git",
+            "Implantação de aplicações utilizando Docker",
+            "Desenvolvimento de aplicações executadas em ambientes Linux"
+        ]
+    },
+    "jobs": [
+        {
+            "id": 1,
+            "title": "Desenvolvedor Backend Python",
+            "description": "Desenvolvimento de aplicações backend e APIs REST utilizando Python, FastAPI, PostgreSQL, Git e Docker."
+        },
+        {
+            "id": 2,
+            "title": "Desenvolvedor Backend Java",
+            "description": "Desenvolvimento de aplicações backend utilizando Java, Spring Boot, APIs REST, bancos de dados SQL e Git."
+        },
+        {
+            "id": 3,
+            "title": "Desenvolvedor Full Stack",
+            "description": "Desenvolvimento de aplicações web utilizando Python, JavaScript, APIs REST, bancos de dados SQL e Git."
+        },
+        {
+            "id": 4,
+            "title": "Engenheiro de Software",
+            "description": "Desenvolvimento e manutenção de sistemas de software. Experiência com linguagens de programação, APIs, bancos de dados e controle de versão."
+        },
+        {
+            "id": 5,
+            "title": "Engenheiro de Software Backend",
+            "description": "Desenvolvimento de serviços backend, APIs, integração com bancos de dados e arquitetura de aplicações utilizando ferramentas modernas."
+        },
+        {
+            "id": 6,
+            "title": "Desenvolvedor de APIs",
+            "description": "Desenvolvimento e manutenção de APIs REST, integração com bancos de dados e serviços externos, testes automatizados e controle de versão com Git."
+        },
+        {
+            "id": 7,
+            "title": "Engenheiro DevOps",
+            "description": "Automação de implantação de software, utilização de containers Docker, ambientes Linux, pipelines CI/CD e infraestrutura em nuvem."
+        },
+        {
+            "id": 8,
+            "title": "Desenvolvedor de Banco de Dados",
+            "description": "Desenvolvimento e manutenção de bancos de dados SQL, otimização de consultas, integração de sistemas e modelagem de dados utilizando PostgreSQL."
+        },
+        {
+            "id": 9,
+            "title": "Desenvolvedor Java Spring Boot",
+            "description": "Desenvolvimento backend utilizando Java e Spring Boot, com APIs REST, bancos de dados SQL, Git e conceitos de arquitetura de software."
+        },
+        {
+            "id": 10,
+            "title": "Engenheiro de Dados Python",
+            "description": "Desenvolvimento de pipelines para processamento de dados utilizando Python e SQL, com experiência em bancos de dados, automação e integração de dados."
+        },
+        {
+            "id": 11,
+            "title": "Engenheiro de Software em Nuvem",
+            "description": "Desenvolvimento e implantação de serviços backend em ambientes de nuvem, utilizando APIs, containers, Linux e ferramentas de desenvolvimento."
+        },
+        {
+            "id": 12,
+            "title": "Engenheiro de Automação de Testes",
+            "description": "Criação de testes automatizados para aplicações, testes de APIs, automação utilizando Python e integração com pipelines de desenvolvimento."
+        },
+        {
+            "id": 13,
+            "title": "Desenvolvedor de Aplicações Móveis",
+            "description": "Desenvolvimento de aplicações para Android e iOS, utilizando frameworks móveis, interfaces de aplicações e boas práticas de desenvolvimento."
+        },
+        {
+            "id": 14,
+            "title": "Desenvolvedor Frontend",
+            "description": "Desenvolvimento de interfaces web responsivas utilizando HTML, CSS, JavaScript, React e ferramentas modernas de desenvolvimento frontend."
+        },
+        {
+            "id": 15,
+            "title": "Analista de Dados",
+            "description": "Análise de dados empresariais, criação de relatórios e dashboards, análise estatística e visualização de informações utilizando ferramentas analíticas."
+        },
+        {
+            "id": 16,
+            "title": "Engenheiro de Machine Learning",
+            "description": "Desenvolvimento e implantação de modelos de aprendizado de máquina utilizando Python, bibliotecas de processamento de dados e técnicas de inteligência artificial."
+        },
+        {
+            "id": 17,
+            "title": "Analista de Cibersegurança",
+            "description": "Monitoramento de eventos de segurança, análise de vulnerabilidades, resposta a incidentes e implementação de controles de segurança da informação."
+        },
+        {
+            "id": 18,
+            "title": "Gerente de Projetos de Tecnologia",
+            "description": "Gerenciamento de projetos de software, planejamento de atividades, coordenação de equipes, controle de prazos, orçamento e comunicação com partes interessadas."
+        },
+        {
+            "id": 19,
+            "title": "Designer de UI e UX",
+            "description": "Criação de interfaces digitais, pesquisa de experiência do usuário, desenvolvimento de wireframes, protótipos e testes de usabilidade."
+        },
+        {
+            "id": 20,
+            "title": "Administrador de Redes",
+            "description": "Gerenciamento de redes de computadores, servidores, roteadores, switches, infraestrutura de rede e segurança de ambientes corporativos."
+        },
+        {
+            "id": 21,
+            "title": "Analista de Sistemas",
+            "description": "Análise de requisitos, documentação de sistemas, levantamento de necessidades dos usuários e comunicação entre equipes de desenvolvimento e áreas de negócio."
+        },
+        {
+            "id": 22,
+            "title": "Engenheiro de Cloud",
+            "description": "Configuração e manutenção de infraestrutura em nuvem, máquinas virtuais, containers, servidores Linux e ambientes de implantação automatizada."
+        },
+        {
+            "id": 23,
+            "title": "Analista de Qualidade de Software",
+            "description": "Realização de testes manuais e automatizados, identificação de falhas, criação de casos de teste e garantia da qualidade de aplicações."
+        },
+        {
+            "id": 24,
+            "title": "Analista de Suporte de TI",
+            "description": "Atendimento técnico aos usuários, solução de problemas em computadores, configuração de sistemas operacionais, instalação de softwares e manutenção de equipamentos."
+        },
+        {
+            "id": 25,
+            "title": "Administrador de Sistemas",
+            "description": "Administração de servidores Linux e Windows, monitoramento de sistemas, gerenciamento de usuários, backups e manutenção da infraestrutura."
+        },
+        {
+            "id": 26,
+            "title": "Engenheiro de Dados",
+            "description": "Desenvolvimento de pipelines de dados, integração com bancos de dados, consultas SQL, processamento de informações e automação de tarefas."
+        },
+        {
+            "id": 27,
+            "title": "Consultor de Sistemas ERP",
+            "description": "Implantação e configuração de sistemas ERP, análise de processos empresariais, suporte aos usuários e integração entre sistemas corporativos."
+        },
+        {
+            "id": 28,
+            "title": "Especialista em Suporte Técnico",
+            "description": "Atendimento técnico a clientes, solução de problemas relacionados a softwares, documentação de incidentes e suporte a produtos tecnológicos."
+        },
+        {
+            "id": 29,
+            "title": "Engenheiro de Segurança da Informação",
+            "description": "Implementação de soluções de segurança, gerenciamento de vulnerabilidades, controle de acesso, monitoramento e proteção de infraestrutura tecnológica."
+        },
+        {
+            "id": 30,
+            "title": "Coordenador de Projetos de TI",
+            "description": "Coordenação de projetos de tecnologia, acompanhamento de tarefas, reuniões, documentação, cronogramas e comunicação com equipes técnicas."
+        },
+        {
+            "id": 31,
+            "title": "Engenheiro Mecânico",
+            "description": "Projeto e análise de componentes mecânicos, equipamentos industriais, processos de fabricação e desenvolvimento de projetos de engenharia."
+        },
+        {
+            "id": 32,
+            "title": "Engenheiro Civil",
+            "description": "Planejamento e supervisão de obras, análise estrutural, materiais de construção e elaboração de documentação de projetos."
+        },
+        {
+            "id": 33,
+            "title": "Enfermeiro",
+            "description": "Atendimento e acompanhamento de pacientes, administração de medicamentos, monitoramento de condições clínicas e auxílio em procedimentos médicos."
+        },
+        {
+            "id": 34,
+            "title": "Analista de Marketing",
+            "description": "Desenvolvimento de estratégias de marketing, pesquisas de mercado, análise de campanhas, comportamento dos consumidores e marketing digital."
+        },
+        {
+            "id": 35,
+            "title": "Assistente de Recursos Humanos",
+            "description": "Auxílio em processos de recrutamento, cadastro de funcionários, agendamento de entrevistas, administração de benefícios e documentação de recursos humanos."
+        },
+        {
+            "id": 36,
+            "title": "Contador",
+            "description": "Elaboração de demonstrações financeiras, registros contábeis, cálculos tributários, análise financeira e cumprimento de normas contábeis."
+        },
+        {
+            "id": 37,
+            "title": "Advogado",
+            "description": "Pesquisa jurídica, elaboração de contratos, análise de processos, preparação de documentos legais e representação de clientes."
+        },
+        {
+            "id": 38,
+            "title": "Designer Gráfico",
+            "description": "Criação de identidades visuais, materiais publicitários, ilustrações, peças para redes sociais e projetos de comunicação visual."
+        },
+        {
+            "id": 39,
+            "title": "Chef de Cozinha",
+            "description": "Preparação de refeições, elaboração de cardápios, organização da cozinha, controle de qualidade dos alimentos e gestão da equipe."
+        },
+        {
+            "id": 40,
+            "title": "Garçom",
+            "description": "Atendimento aos clientes, registro de pedidos de alimentos e bebidas, serviço de refeições e organização do ambiente do restaurante."
+        },
+        {
+            "id": 41,
+            "title": "Eletricista",
+            "description": "Instalação e manutenção de sistemas elétricos, fiação, quadros de energia, sistemas de iluminação e equipamentos elétricos."
+        },
+        {
+            "id": 42,
+            "title": "Mecânico Automotivo",
+            "description": "Inspeção de veículos, manutenção de motores, reparos no sistema de freios, diagnóstico de problemas e substituição de componentes automotivos."
+        },
+        {
+            "id": 43,
+            "title": "Professor do Ensino Fundamental",
+            "description": "Planejamento e realização de atividades educacionais, administração de sala de aula, avaliação de alunos e comunicação com responsáveis."
+        },
+        {
+            "id": 44,
+            "title": "Corretor de Imóveis",
+            "description": "Venda e aluguel de imóveis, atendimento a clientes, visitas aos imóveis, negociação de contratos e análise do mercado imobiliário."
+        },
+        {
+            "id": 45,
+            "title": "Farmacêutico",
+            "description": "Controle de medicamentos, orientação farmacêutica, análise de prescrições, controle de estoque e atendimento aos pacientes."
+        },
+        {
+            "id": 46,
+            "title": "Pedreiro",
+            "description": "Execução de atividades de construção, utilização de ferramentas e materiais, organização do canteiro e auxílio em projetos de construção."
+        },
+        {
+            "id": 47,
+            "title": "Cabeleireiro",
+            "description": "Corte, modelagem e coloração de cabelos, atendimento aos clientes e organização de produtos e equipamentos do salão."
+        },
+        {
+            "id": 48,
+            "title": "Comissário de Bordo",
+            "description": "Atendimento aos passageiros, execução de procedimentos de segurança, resposta a emergências e prestação de serviços durante os voos."
+        },
+        {
+            "id": 49,
+            "title": "Personal Trainer",
+            "description": "Elaboração de programas de exercícios, realização de treinamentos físicos, acompanhamento do progresso dos clientes e orientação sobre atividades físicas."
+        },
+        {
+            "id": 50,
+            "title": "Técnico Agrícola",
+            "description": "Acompanhamento da produção agrícola, monitoramento de plantações, análise de solo, operação de equipamentos e atividades de gerenciamento rural."
+        }
+    ]
+}
