@@ -48,7 +48,7 @@ def test_invalid_payload_returns_422(client: TestClient, payload: dict, field: s
     response = client.post("/_test/echo", json=payload)
 
     assert response.status_code == 422
-    assert field in {error["loc"][-1] for error in response.json()["detail"]}
+    assert field in {error["loc"][-1] for error in response.json()["errors"]}
 
 
 def test_malformed_json_returns_422(client: TestClient) -> None:

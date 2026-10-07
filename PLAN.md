@@ -410,6 +410,25 @@ Candidate data must never be persisted or logged, including application/access/r
 
 FastAPI provides OpenAPI documentation.
 
+### Errors
+
+Every error follows RFC 9457 and is sent as `application/problem+json`:
+
+```text
+type     "about:blank"
+title    HTTP status phrase, e.g. "Unprocessable Content"
+status   HTTP status code
+detail   optional human-readable explanation
+errors   422 only: one item per invalid field, with loc, msg and type
+```
+
+* `422` — invalid field or malformed JSON.
+* `404` / `405` — unknown route or method; `405` also sends `Allow`.
+* `503` — a required dependency (database, embedding model) is unavailable.
+* `500` — any other failure, with a generic `detail`.
+
+Error bodies and logs never carry submitted values or exception messages. Logs record only the exception type and where it was raised. Request schemas use fixed fields instead of free-form `dict` keys, since `loc` would echo the keys the client sent.
+
 ## Processing & Scheduler
 
 Background worker handles:
