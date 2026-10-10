@@ -29,9 +29,9 @@ def client(app: FastAPI) -> Iterator[TestClient]:
     def accept_payload(payload: _Payload) -> dict[str, str]:
         return {"status": "ok"}
 
-    @app.get("/_test/missing-job")
-    def missing_job() -> None:
-        raise HTTPException(status_code=404, detail="Job not found")
+    @app.get("/_test/explicit-http-error")
+    def explicit_http_error() -> None:
+        raise HTTPException(status_code=409, detail="Explicit detail set by the route")
 
     @app.get("/_test/dependency-down")
     def dependency_down() -> None:
@@ -85,11 +85,13 @@ def test_unknown_route_returns_problem(client: TestClient) -> None:
     assert "detail" not in body
 
 
-def test_http_exception_keeps_its_detail(client: TestClient) -> None:
-    response = client.get("/_test/missing-job")
+def test_route_http_exception_keeps_its_detail(client: TestClient) -> None:
+    # A route that raises HTTPException with its own detail keeps it in the problem body,
+    # unlike the framework's default detail, which repeats the title and is dropped.
+    response = client.get("/_test/explicit-http-error")
 
-    body = assert_problem(response, 404, "Not Found")
-    assert body["detail"] == "Job not found"
+    body = assert_problem(response, 409, "Conflict")
+    assert body["detail"] == "Explicit detail set by the route"
 
 
 def test_wrong_method_returns_problem_with_allow_header(client: TestClient) -> None:
