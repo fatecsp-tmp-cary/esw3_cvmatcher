@@ -4,17 +4,34 @@ The external parser supplies this JSON. It is request-scoped: never persist or l
 
 Categorical values (seniority, proficiency, modes, employment types) arrive as free text;
 mapping them to canonical values belongs to candidate normalization, not to this schema.
+Their canonical values are defined once the job data is available (#83).
 """
 
+from datetime import date
 from typing import Annotated, Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 # Bounds keep a single request from carrying an unbounded amount of text.
 ShortText = Annotated[str, Field(min_length=1, max_length=200)]
 LongText = Annotated[str, Field(min_length=1, max_length=5000)]
-# Year ("2021") or year-month ("2021-03"): CVs rarely state the day.
-PartialDate = Annotated[str, Field(pattern=r"^\d{4}(-(0[1-9]|1[0-2]))?$", examples=["2021-03"])]
+
+
+def _is_calendar_day(value: str) -> str:
+    if len(value) == len("YYYY-MM-DD"):
+        try:
+            date.fromisoformat(value)
+        except ValueError:
+            raise ValueError("date is not a valid calendar day") from None
+    return value
+
+
+# ISO 8601 at the precision the CV states: "2021", "2021-03" or "2021-03-15".
+PartialDate = Annotated[
+    str,
+    Field(pattern=r"^\d{4}(-(0[1-9]|1[0-2])(-\d{2})?)?$", examples=["2021-03"]),
+    AfterValidator(_is_calendar_day),
+]
 
 
 class _Schema(BaseModel):
@@ -75,9 +92,9 @@ class Preferences(_Schema):
 
 
 class CandidateProfile(_Schema):
-    """Structured CV data. At least one of skills, job_titles, occupations or experience."""
+    """Structured CV data: skills, plus job_titles or experience for role context."""
 
-    skills: list[ShortText] = Field(default_factory=list, max_length=200)
+    skills: list[ShortText] = Field(min_length=1, max_length=200)
     job_titles: list[ShortText] = Field(default_factory=list, max_length=50)
     occupations: list[ShortText] = Field(default_factory=list, max_length=50)
     experience: list[Experience] = Field(default_factory=list, max_length=50)
@@ -120,9 +137,7 @@ class CandidateProfile(_Schema):
     )
 
     @model_validator(mode="after")
-    def _has_matchable_content(self) -> Self:
-        if not (self.skills or self.job_titles or self.occupations or self.experience):
-            raise ValueError(
-                "profile needs at least one of skills, job_titles, occupations or experience"
-            )
+    def _has_role_context(self) -> Self:
+        if not (self.job_titles or self.experience):
+            raise ValueError("profile needs job_titles or experience")
         return self
