@@ -150,8 +150,8 @@ Load time includes Hugging Face Hub network checks even when the model is cached
    94% to 96% of the relevant jobs on average, against 62% to 74% for a query with a single resume
    vector (`baseline` or `D`). For each model the pool is never smaller and is larger in 3 of the
    5 resumes (`devops_pleno`, `dados_misto` and one more).
-2. **`B` is the most stable aggregation.** `A` has the best mean for e5-small (0.719) but the worst
-   for L12 (0.490). A single generic chunk (documentation, incident handling) can lift an unrelated
+2. **`B` is the most stable aggregation.** `A` has the best mean for e5-small (0.719) but one of the
+   lowest for L12 (0.490; only `C` is lower). A single generic chunk (documentation, incident handling) can lift an unrelated
    job, which is the likely cause: with `devops_pleno`, `A` in L12 returns Coordenador de Projetos,
    Analista de Negócios and Gerente de Projetos. This was not checked chunk by chunk. `B` (0.634 and
    0.698) averages such chunks out.
