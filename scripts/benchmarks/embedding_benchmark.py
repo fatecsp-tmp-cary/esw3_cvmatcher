@@ -3,6 +3,9 @@
 Runs ONE model against ONE input file and writes a JSON result, so every candidate model is
 measured with the same procedure. Run it once per model (and once per input language).
 
+Credits: it builds on the benchmarks of #57 (@fabiola-girotti: structure, PT/EN pairs and chunking
+strategy) and #56 (@ricardosakugawa: JSON input with a resume and jobs).
+
 Setup:
     pip install sentence-transformers psutil numpy
 
