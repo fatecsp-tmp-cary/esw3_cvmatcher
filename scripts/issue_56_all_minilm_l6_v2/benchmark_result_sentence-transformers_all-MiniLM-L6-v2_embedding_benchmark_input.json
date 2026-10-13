@@ -1,0 +1,433 @@
+{
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "input_file": "C:\\Users\\ricardo\\Desktop\\CSV MATCH\\scripts\\benchmark\\embedding_benchmark_input.json",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "cpu_cores_logical": 12,
+    "ram_gb": 15.3,
+    "python": "3.14.7",
+    "torch": "2.14.0",
+    "sentence_transformers": "6.1.0",
+    "numpy": "2.5.3",
+    "device": "cpu",
+    "batch_size": 32
+  },
+  "model_info": {
+    "max_seq_length": 256,
+    "dimension": 384,
+    "cached_before_load": true
+  },
+  "load_seconds": 3.071,
+  "memory_mb": {
+    "before_load": 412.9,
+    "after_load": 522.9,
+    "model_delta": 110.0,
+    "peak": 586.6
+  },
+  "timing": {
+    "runs": 5,
+    "resume": {
+      "median_ms": 20.99,
+      "min_ms": 19.69,
+      "max_ms": 21.64
+    },
+    "jobs_batch": {
+      "median_ms": 287.64,
+      "min_ms": 272.11,
+      "max_ms": 317.63,
+      "per_job_median_ms": 5.75
+    },
+    "jobs_count": 50
+  },
+  "pt_en": {
+    "equivalent_pairs": [
+      0.1816,
+      0.0623,
+      0.3122,
+      0.6783,
+      0.0508
+    ],
+    "different_pairs": [
+      0.081,
+      0.0769,
+      0.1353
+    ],
+    "equivalent_mean": 0.257,
+    "different_mean": 0.0977,
+    "gap": 0.1593
+  },
+  "tokens": {
+    "max_seq_length": 256,
+    "resume_tokens": 145,
+    "resume_chunks": 1,
+    "jobs_chunked": 0,
+    "jobs_total": 50,
+    "max_job_tokens": 67
+  },
+  "ranking": {
+    "relevant_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "precision_at_5": 1.0,
+    "precision_at_10": 1.0,
+    "top10": [
+      {
+        "job_id": 1,
+        "title": "Desenvolvedor Backend Python",
+        "score": 0.7644
+      },
+      {
+        "job_id": 2,
+        "title": "Desenvolvedor Backend Java",
+        "score": 0.6651
+      },
+      {
+        "job_id": 11,
+        "title": "Engenheiro de Software em Nuvem",
+        "score": 0.6372
+      },
+      {
+        "job_id": 9,
+        "title": "Desenvolvedor Java Spring Boot",
+        "score": 0.6283
+      },
+      {
+        "job_id": 6,
+        "title": "Desenvolvedor de APIs",
+        "score": 0.623
+      },
+      {
+        "job_id": 7,
+        "title": "Engenheiro DevOps",
+        "score": 0.6083
+      },
+      {
+        "job_id": 5,
+        "title": "Engenheiro de Software Backend",
+        "score": 0.5938
+      },
+      {
+        "job_id": 3,
+        "title": "Desenvolvedor Full Stack",
+        "score": 0.5864
+      },
+      {
+        "job_id": 4,
+        "title": "Engenheiro de Software",
+        "score": 0.5676
+      },
+      {
+        "job_id": 10,
+        "title": "Engenheiro de Dados Python",
+        "score": 0.5398
+      }
+    ],
+    "full_ranking": [
+      {
+        "job_id": 1,
+        "title": "Desenvolvedor Backend Python",
+        "score": 0.7644
+      },
+      {
+        "job_id": 2,
+        "title": "Desenvolvedor Backend Java",
+        "score": 0.6651
+      },
+      {
+        "job_id": 11,
+        "title": "Engenheiro de Software em Nuvem",
+        "score": 0.6372
+      },
+      {
+        "job_id": 9,
+        "title": "Desenvolvedor Java Spring Boot",
+        "score": 0.6283
+      },
+      {
+        "job_id": 6,
+        "title": "Desenvolvedor de APIs",
+        "score": 0.623
+      },
+      {
+        "job_id": 7,
+        "title": "Engenheiro DevOps",
+        "score": 0.6083
+      },
+      {
+        "job_id": 5,
+        "title": "Engenheiro de Software Backend",
+        "score": 0.5938
+      },
+      {
+        "job_id": 3,
+        "title": "Desenvolvedor Full Stack",
+        "score": 0.5864
+      },
+      {
+        "job_id": 4,
+        "title": "Engenheiro de Software",
+        "score": 0.5676
+      },
+      {
+        "job_id": 10,
+        "title": "Engenheiro de Dados Python",
+        "score": 0.5398
+      },
+      {
+        "job_id": 22,
+        "title": "Engenheiro de Cloud",
+        "score": 0.539
+      },
+      {
+        "job_id": 24,
+        "title": "Analista de Suporte de TI",
+        "score": 0.4951
+      },
+      {
+        "job_id": 20,
+        "title": "Administrador de Redes",
+        "score": 0.4587
+      },
+      {
+        "job_id": 18,
+        "title": "Gerente de Projetos de Tecnologia",
+        "score": 0.4555
+      },
+      {
+        "job_id": 25,
+        "title": "Administrador de Sistemas",
+        "score": 0.4478
+      },
+      {
+        "job_id": 23,
+        "title": "Analista de Qualidade de Software",
+        "score": 0.432
+      },
+      {
+        "job_id": 12,
+        "title": "Engenheiro de Automação de Testes",
+        "score": 0.4259
+      },
+      {
+        "job_id": 28,
+        "title": "Especialista em Suporte Técnico",
+        "score": 0.4093
+      },
+      {
+        "job_id": 14,
+        "title": "Desenvolvedor Frontend",
+        "score": 0.407
+      },
+      {
+        "job_id": 21,
+        "title": "Analista de Sistemas",
+        "score": 0.4026
+      },
+      {
+        "job_id": 17,
+        "title": "Analista de Cibersegurança",
+        "score": 0.4006
+      },
+      {
+        "job_id": 8,
+        "title": "Desenvolvedor de Banco de Dados",
+        "score": 0.396
+      },
+      {
+        "job_id": 29,
+        "title": "Engenheiro de Segurança da Informação",
+        "score": 0.3843
+      },
+      {
+        "job_id": 48,
+        "title": "Comissário de Bordo",
+        "score": 0.3834
+      },
+      {
+        "job_id": 13,
+        "title": "Desenvolvedor de Aplicações Móveis",
+        "score": 0.3801
+      },
+      {
+        "job_id": 26,
+        "title": "Engenheiro de Dados",
+        "score": 0.3714
+      },
+      {
+        "job_id": 41,
+        "title": "Eletricista",
+        "score": 0.3274
+      },
+      {
+        "job_id": 40,
+        "title": "Garçom",
+        "score": 0.3225
+      },
+      {
+        "job_id": 35,
+        "title": "Assistente de Recursos Humanos",
+        "score": 0.321
+      },
+      {
+        "job_id": 27,
+        "title": "Consultor de Sistemas ERP",
+        "score": 0.3191
+      },
+      {
+        "job_id": 15,
+        "title": "Analista de Dados",
+        "score": 0.3084
+      },
+      {
+        "job_id": 37,
+        "title": "Advogado",
+        "score": 0.3061
+      },
+      {
+        "job_id": 16,
+        "title": "Engenheiro de Machine Learning",
+        "score": 0.3045
+      },
+      {
+        "job_id": 31,
+        "title": "Engenheiro Mecânico",
+        "score": 0.3003
+      },
+      {
+        "job_id": 34,
+        "title": "Analista de Marketing",
+        "score": 0.2896
+      },
+      {
+        "job_id": 44,
+        "title": "Corretor de Imóveis",
+        "score": 0.2867
+      },
+      {
+        "job_id": 19,
+        "title": "Designer de UI e UX",
+        "score": 0.2852
+      },
+      {
+        "job_id": 45,
+        "title": "Farmacêutico",
+        "score": 0.2842
+      },
+      {
+        "job_id": 50,
+        "title": "Técnico Agrícola",
+        "score": 0.2717
+      },
+      {
+        "job_id": 30,
+        "title": "Coordenador de Projetos de TI",
+        "score": 0.2532
+      },
+      {
+        "job_id": 39,
+        "title": "Chef de Cozinha",
+        "score": 0.2217
+      },
+      {
+        "job_id": 42,
+        "title": "Mecânico Automotivo",
+        "score": 0.21
+      },
+      {
+        "job_id": 32,
+        "title": "Engenheiro Civil",
+        "score": 0.2013
+      },
+      {
+        "job_id": 43,
+        "title": "Professor do Ensino Fundamental",
+        "score": 0.1919
+      },
+      {
+        "job_id": 47,
+        "title": "Cabeleireiro",
+        "score": 0.1877
+      },
+      {
+        "job_id": 46,
+        "title": "Pedreiro",
+        "score": 0.1775
+      },
+      {
+        "job_id": 38,
+        "title": "Designer Gráfico",
+        "score": 0.1731
+      },
+      {
+        "job_id": 33,
+        "title": "Enfermeiro",
+        "score": 0.1726
+      },
+      {
+        "job_id": 36,
+        "title": "Contador",
+        "score": 0.1483
+      },
+      {
+        "job_id": 49,
+        "title": "Personal Trainer",
+        "score": 0.0837
+      }
+    ],
+    "truncated_top10": [
+      {
+        "job_id": 1,
+        "score": 0.7644
+      },
+      {
+        "job_id": 2,
+        "score": 0.6651
+      },
+      {
+        "job_id": 11,
+        "score": 0.6372
+      },
+      {
+        "job_id": 9,
+        "score": 0.6283
+      },
+      {
+        "job_id": 6,
+        "score": 0.623
+      },
+      {
+        "job_id": 7,
+        "score": 0.6083
+      },
+      {
+        "job_id": 5,
+        "score": 0.5938
+      },
+      {
+        "job_id": 3,
+        "score": 0.5864
+      },
+      {
+        "job_id": 4,
+        "score": 0.5676
+      },
+      {
+        "job_id": 10,
+        "score": 0.5398
+      }
+    ]
+  }
+}
