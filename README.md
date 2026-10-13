@@ -80,6 +80,6 @@ the app's startup/shutdown events when used as a context manager.
 - Build the app through `src.api.app.create_app()`; the `app` and `client`
   fixtures in `tests/api/conftest.py` give each test a fresh instance.
 - Assert on status code and JSON body. Invalid request bodies return `422`
-  with the failing fields in `detail[*].loc`.
+  with the failing fields in `errors[*].loc` (error format: `PLAN.md`, REST API).
 - For `async` tests that need to await the app directly, use
   `httpx2.AsyncClient(transport=httpx2.ASGITransport(app=app))`.
