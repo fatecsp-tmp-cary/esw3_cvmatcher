@@ -35,602 +35,502 @@
         {
             "id": 1,
             "title": "Desenvolvedor Backend Python",
-            "description": "Desenvolvimento de serviços backend em Python com FastAPI e PostgreSQL, construção de APIs REST, testes automatizados e deploy com Docker.",
-            "fit": 2
+            "description": "Desenvolvimento de serviços backend em Python com FastAPI e PostgreSQL, construção de APIs REST, testes automatizados e deploy com Docker."
         },
         {
             "id": 2,
             "title": "Desenvolvedor Backend Java",
-            "description": "Atuação no desenvolvimento de APIs e serviços em Java com Spring Boot, persistência em bancos relacionais e versionamento de código com Git.",
-            "fit": 2
+            "description": "Atuação no desenvolvimento de APIs e serviços em Java com Spring Boot, persistência em bancos relacionais e versionamento de código com Git."
         },
         {
             "id": 3,
             "title": "Desenvolvedor de APIs REST",
-            "description": "Projetar, implementar e documentar APIs REST consumidas por aplicações web e mobile, com foco em desempenho, autenticação segura e integração com bancos SQL.",
-            "fit": 2
+            "description": "Projetar, implementar e documentar APIs REST consumidas por aplicações web e mobile, com foco em desempenho, autenticação segura e integração com bancos SQL."
         },
         {
             "id": 4,
             "title": "Engenheiro de Software Backend Pleno",
-            "description": "Você vai projetar e evoluir serviços backend de uma plataforma de pagamentos, escrevendo código limpo e testável em Python ou Java. Esperamos domínio de APIs REST, modelagem relacional, otimização de consultas SQL, mensageria e boas práticas de observabilidade. O time trabalha com revisão de código, integração contínua, contêineres Docker e implantações frequentes em ambiente Linux, sempre com atenção à confiabilidade e à segurança dos dados dos clientes.",
-            "fit": 2
+            "description": "Você vai projetar e evoluir serviços backend de uma plataforma de pagamentos, escrevendo código limpo e testável em Python ou Java. Esperamos domínio de APIs REST, modelagem relacional, otimização de consultas SQL, mensageria e boas práticas de observabilidade. O time trabalha com revisão de código, integração contínua, contêineres Docker e implantações frequentes em ambiente Linux, sempre com atenção à confiabilidade e à segurança dos dados dos clientes."
         },
         {
             "id": 5,
             "title": "Desenvolvedor Python Júnior",
-            "description": "Apoio ao desenvolvimento de funcionalidades backend em Python, correção de bugs, escrita de testes e aprendizado de boas práticas com a equipe.",
-            "fit": 2
+            "description": "Apoio ao desenvolvimento de funcionalidades backend em Python, correção de bugs, escrita de testes e aprendizado de boas práticas com a equipe."
         },
         {
             "id": 6,
             "title": "Desenvolvedor Java Júnior",
-            "description": "Desenvolvimento e manutenção de módulos em Java e Spring Boot, consultas SQL e participação em revisões de código sob orientação de profissionais sêniores.",
-            "fit": 2
+            "description": "Desenvolvimento e manutenção de módulos em Java e Spring Boot, consultas SQL e participação em revisões de código sob orientação de profissionais sêniores."
         },
         {
             "id": 7,
             "title": "Desenvolvedor de Microsserviços",
-            "description": "Criação de microsserviços independentes comunicando-se por APIs REST e filas de mensagens, empacotados em Docker e publicados por pipelines automatizados.",
-            "fit": 2
+            "description": "Criação de microsserviços independentes comunicando-se por APIs REST e filas de mensagens, empacotados em Docker e publicados por pipelines automatizados."
         },
         {
             "id": 8,
             "title": "Desenvolvedor Full Stack Python",
-            "description": "Desenvolvimento de aplicações web com Python e Django no backend e React no frontend, incluindo modelagem de dados em PostgreSQL e integração via APIs.",
-            "fit": 2
+            "description": "Desenvolvimento de aplicações web com Python e Django no backend e React no frontend, incluindo modelagem de dados em PostgreSQL e integração via APIs."
         },
         {
             "id": 9,
             "title": "Desenvolvedor Backend Fintech",
-            "description": "Implementação de regras de negócio financeiras, cálculo de saldos e conciliações em serviços Python, com forte preocupação com consistência transacional e testes.",
-            "fit": 2
+            "description": "Implementação de regras de negócio financeiras, cálculo de saldos e conciliações em serviços Python, com forte preocupação com consistência transacional e testes."
         },
         {
             "id": 10,
             "title": "Desenvolvedor de Integrações",
-            "description": "Construção de integrações entre sistemas internos e parceiros externos por meio de APIs REST e webhooks, tratamento de falhas, filas e monitoramento de chamadas.",
-            "fit": 2
+            "description": "Construção de integrações entre sistemas internos e parceiros externos por meio de APIs REST e webhooks, tratamento de falhas, filas e monitoramento de chamadas."
         },
         {
             "id": 11,
             "title": "Desenvolvedor Spring Boot Sênior",
-            "description": "Liderança técnica no desenvolvimento de serviços Java com Spring Boot em um ecossistema de microsserviços. Responsabilidades incluem definir padrões de arquitetura, revisar código, melhorar desempenho de consultas em PostgreSQL, apoiar profissionais menos experientes e garantir que os serviços estejam cobertos por testes automatizados e entregues por pipelines de CI/CD com Docker.",
-            "fit": 2
+            "description": "Liderança técnica no desenvolvimento de serviços Java com Spring Boot em um ecossistema de microsserviços. Responsabilidades incluem definir padrões de arquitetura, revisar código, melhorar desempenho de consultas em PostgreSQL, apoiar profissionais menos experientes e garantir que os serviços estejam cobertos por testes automatizados e entregues por pipelines de CI/CD com Docker."
         },
         {
             "id": 12,
             "title": "Desenvolvedor FastAPI",
-            "description": "Desenvolvimento de APIs assíncronas com FastAPI, validação de dados com Pydantic, acesso a PostgreSQL e documentação automática dos endpoints.",
-            "fit": 2
+            "description": "Desenvolvimento de APIs assíncronas com FastAPI, validação de dados com Pydantic, acesso a PostgreSQL e documentação automática dos endpoints."
         },
         {
             "id": 13,
             "title": "Engenheiro de Software (Python e Java)",
-            "description": "Desenvolvimento backend em Python e Java, manutenção de sistemas legados, migração gradual para serviços menores, uso de Git, Docker e bancos de dados SQL.",
-            "fit": 2
+            "description": "Desenvolvimento backend em Python e Java, manutenção de sistemas legados, migração gradual para serviços menores, uso de Git, Docker e bancos de dados SQL."
         },
         {
             "id": 14,
             "title": "Desenvolvedor de Sistemas com PostgreSQL",
-            "description": "Desenvolvimento de aplicações backend com forte uso de PostgreSQL: modelagem, procedures, otimização de consultas e integração com serviços em Python.",
-            "fit": 2
+            "description": "Desenvolvimento de aplicações backend com forte uso de PostgreSQL: modelagem, procedures, otimização de consultas e integração com serviços em Python."
         },
         {
             "id": 15,
             "title": "Desenvolvedor Backend de E-commerce",
-            "description": "Nossa plataforma de comércio eletrônico atende milhões de acessos por mês. Buscamos alguém para desenvolver APIs de catálogo, carrinho e pedidos, melhorar a performance com cache em Redis e manter a qualidade com testes automatizados. Stack: Python, PostgreSQL, Docker, Linux e GitHub Actions. Valorizamos comunicação clara, curiosidade técnica e vontade de resolver problemas de escala.",
-            "fit": 2
+            "description": "Nossa plataforma de comércio eletrônico atende milhões de acessos por mês. Buscamos alguém para desenvolver APIs de catálogo, carrinho e pedidos, melhorar a performance com cache em Redis e manter a qualidade com testes automatizados. Stack: Python, PostgreSQL, Docker, Linux e GitHub Actions. Valorizamos comunicação clara, curiosidade técnica e vontade de resolver problemas de escala."
         },
         {
             "id": 16,
             "title": "Engenheiro DevOps",
-            "description": "Automação de implantações, criação de pipelines CI/CD, administração de contêineres Docker e Kubernetes, ambientes Linux e infraestrutura como código.",
-            "fit": 1
+            "description": "Automação de implantações, criação de pipelines CI/CD, administração de contêineres Docker e Kubernetes, ambientes Linux e infraestrutura como código."
         },
         {
             "id": 17,
             "title": "Engenheiro de Confiabilidade (SRE)",
-            "description": "Garantir disponibilidade e desempenho de serviços em produção, definir indicadores e alertas, responder a incidentes e automatizar tarefas operacionais.",
-            "fit": 1
+            "description": "Garantir disponibilidade e desempenho de serviços em produção, definir indicadores e alertas, responder a incidentes e automatizar tarefas operacionais."
         },
         {
             "id": 18,
             "title": "Engenheiro de Dados",
-            "description": "Desenvolvimento de pipelines de dados em Python e SQL, integração entre fontes, orquestração de processos e manutenção de um data warehouse.",
-            "fit": 1
+            "description": "Desenvolvimento de pipelines de dados em Python e SQL, integração entre fontes, orquestração de processos e manutenção de um data warehouse."
         },
         {
             "id": 19,
             "title": "Cientista de Dados",
-            "description": "Construção de modelos estatísticos e de aprendizado de máquina em Python, análise exploratória, validação de hipóteses e comunicação de resultados ao negócio.",
-            "fit": 1
+            "description": "Construção de modelos estatísticos e de aprendizado de máquina em Python, análise exploratória, validação de hipóteses e comunicação de resultados ao negócio."
         },
         {
             "id": 20,
             "title": "Engenheiro de Machine Learning",
-            "description": "Colocar modelos de aprendizado de máquina em produção, criando APIs de inferência, pipelines de treinamento e monitoramento de desempenho dos modelos.",
-            "fit": 1
+            "description": "Colocar modelos de aprendizado de máquina em produção, criando APIs de inferência, pipelines de treinamento e monitoramento de desempenho dos modelos."
         },
         {
             "id": 21,
             "title": "Engenheiro de Automação de Testes",
-            "description": "Criação de testes automatizados de APIs e interfaces, integração dos testes aos pipelines de entrega e manutenção de frameworks de teste em Python.",
-            "fit": 1
+            "description": "Criação de testes automatizados de APIs e interfaces, integração dos testes aos pipelines de entrega e manutenção de frameworks de teste em Python."
         },
         {
             "id": 22,
             "title": "Desenvolvedor Frontend React",
-            "description": "Desenvolvimento de interfaces web responsivas com React, TypeScript e CSS moderno, consumindo APIs REST e cuidando de acessibilidade e desempenho.",
-            "fit": 1
+            "description": "Desenvolvimento de interfaces web responsivas com React, TypeScript e CSS moderno, consumindo APIs REST e cuidando de acessibilidade e desempenho."
         },
         {
             "id": 23,
             "title": "Desenvolvedor Mobile Android",
-            "description": "Desenvolvimento de aplicativos Android nativos em Kotlin, integração com APIs, publicação na Play Store e testes de interface.",
-            "fit": 1
+            "description": "Desenvolvimento de aplicativos Android nativos em Kotlin, integração com APIs, publicação na Play Store e testes de interface."
         },
         {
             "id": 24,
             "title": "Desenvolvedor Mobile Flutter",
-            "description": "Construção de aplicativos multiplataforma com Flutter e Dart, consumo de APIs, gerenciamento de estado e publicação nas lojas.",
-            "fit": 1
+            "description": "Construção de aplicativos multiplataforma com Flutter e Dart, consumo de APIs, gerenciamento de estado e publicação nas lojas."
         },
         {
             "id": 25,
             "title": "Administrador de Banco de Dados (DBA)",
-            "description": "Administração de bancos PostgreSQL e MySQL, rotinas de backup, replicação, ajuste de desempenho, segurança e apoio aos times de desenvolvimento.",
-            "fit": 1
+            "description": "Administração de bancos PostgreSQL e MySQL, rotinas de backup, replicação, ajuste de desempenho, segurança e apoio aos times de desenvolvimento."
         },
         {
             "id": 26,
             "title": "Arquiteto de Software",
-            "description": "Definir a arquitetura de sistemas distribuídos, avaliar tecnologias, documentar decisões técnicas e orientar equipes de desenvolvimento quanto a padrões e escalabilidade.",
-            "fit": 1
+            "description": "Definir a arquitetura de sistemas distribuídos, avaliar tecnologias, documentar decisões técnicas e orientar equipes de desenvolvimento quanto a padrões e escalabilidade."
         },
         {
             "id": 27,
             "title": "Tech Lead",
-            "description": "Liderar tecnicamente uma equipe de desenvolvimento, apoiar planejamento, revisar código, mentorar pessoas e alinhar entregas com as áreas de produto.",
-            "fit": 1
+            "description": "Liderar tecnicamente uma equipe de desenvolvimento, apoiar planejamento, revisar código, mentorar pessoas e alinhar entregas com as áreas de produto."
         },
         {
             "id": 28,
             "title": "Desenvolvedor Node.js",
-            "description": "Desenvolvimento de APIs e serviços com Node.js e TypeScript, integração com MongoDB e PostgreSQL, testes automatizados e deploy em contêineres.",
-            "fit": 1
+            "description": "Desenvolvimento de APIs e serviços com Node.js e TypeScript, integração com MongoDB e PostgreSQL, testes automatizados e deploy em contêineres."
         },
         {
             "id": 29,
             "title": "Desenvolvedor PHP Laravel",
-            "description": "Manutenção e evolução de sistemas web em PHP com Laravel, bancos MySQL, filas e integrações com serviços de pagamento.",
-            "fit": 1
+            "description": "Manutenção e evolução de sistemas web em PHP com Laravel, bancos MySQL, filas e integrações com serviços de pagamento."
         },
         {
             "id": 30,
             "title": "Desenvolvedor .NET",
-            "description": "Desenvolvimento de aplicações em C# e .NET, APIs ASP.NET Core, acesso a SQL Server e implantação em ambiente Azure.",
-            "fit": 1
+            "description": "Desenvolvimento de aplicações em C# e .NET, APIs ASP.NET Core, acesso a SQL Server e implantação em ambiente Azure."
         },
         {
             "id": 31,
             "title": "Desenvolvedor Go",
-            "description": "Criação de serviços de alto desempenho em Go, comunicação via gRPC, uso de filas e observabilidade em ambiente Kubernetes.",
-            "fit": 1
+            "description": "Criação de serviços de alto desempenho em Go, comunicação via gRPC, uso de filas e observabilidade em ambiente Kubernetes."
         },
         {
             "id": 32,
             "title": "Desenvolvedor Ruby on Rails",
-            "description": "Desenvolvimento de funcionalidades web em Ruby on Rails, modelagem de dados, testes com RSpec e integração com APIs de terceiros.",
-            "fit": 1
+            "description": "Desenvolvimento de funcionalidades web em Ruby on Rails, modelagem de dados, testes com RSpec e integração com APIs de terceiros."
         },
         {
             "id": 33,
             "title": "Engenheiro de Plataforma",
-            "description": "Construir plataformas internas de autoatendimento para times de desenvolvimento, padronizando infraestrutura, pipelines, observabilidade e segurança em nuvem.",
-            "fit": 1
+            "description": "Construir plataformas internas de autoatendimento para times de desenvolvimento, padronizando infraestrutura, pipelines, observabilidade e segurança em nuvem."
         },
         {
             "id": 34,
             "title": "Engenheiro de Cloud",
-            "description": "Configuração e manutenção de infraestrutura em nuvem, máquinas virtuais, redes virtuais, contêineres, servidores Linux e ambientes de implantação automatizada.",
-            "fit": 1
+            "description": "Configuração e manutenção de infraestrutura em nuvem, máquinas virtuais, redes virtuais, contêineres, servidores Linux e ambientes de implantação automatizada."
         },
         {
             "id": 35,
             "title": "Analista de BI",
-            "description": "Construção de dashboards e relatórios gerenciais, modelagem dimensional, consultas SQL e extração de indicadores para apoiar decisões de negócio.",
-            "fit": 1
+            "description": "Construção de dashboards e relatórios gerenciais, modelagem dimensional, consultas SQL e extração de indicadores para apoiar decisões de negócio."
         },
         {
             "id": 36,
             "title": "Desenvolvedor de Jogos",
-            "description": "Desenvolvimento de mecânicas de jogo em Unity e C#, otimização de desempenho, integração de recursos gráficos e testes de jogabilidade.",
-            "fit": 1
+            "description": "Desenvolvimento de mecânicas de jogo em Unity e C#, otimização de desempenho, integração de recursos gráficos e testes de jogabilidade."
         },
         {
             "id": 37,
             "title": "Desenvolvedor de Sistemas Embarcados",
-            "description": "Programação de firmware em C e C++ para microcontroladores, comunicação com sensores, depuração em hardware e documentação técnica.",
-            "fit": 1
+            "description": "Programação de firmware em C e C++ para microcontroladores, comunicação com sensores, depuração em hardware e documentação técnica."
         },
         {
             "id": 38,
             "title": "Desenvolvedor Low-code",
-            "description": "Criação de aplicações em plataformas low-code, automação de fluxos de trabalho, integração com APIs e treinamento de usuários da área de negócio.",
-            "fit": 1
+            "description": "Criação de aplicações em plataformas low-code, automação de fluxos de trabalho, integração com APIs e treinamento de usuários da área de negócio."
         },
         {
             "id": 39,
             "title": "Engenheiro de Release e CI/CD",
-            "description": "Manter e evoluir pipelines de integração e entrega contínua, gerenciar versões, automatizar builds e reduzir o tempo entre commit e produção.",
-            "fit": 1
+            "description": "Manter e evoluir pipelines de integração e entrega contínua, gerenciar versões, automatizar builds e reduzir o tempo entre commit e produção."
         },
         {
             "id": 40,
             "title": "Desenvolvedor Salesforce",
-            "description": "Customização da plataforma Salesforce com Apex e Lightning, integração com sistemas externos via APIs e apoio a usuários de vendas.",
-            "fit": 1
+            "description": "Customização da plataforma Salesforce com Apex e Lightning, integração com sistemas externos via APIs e apoio a usuários de vendas."
         },
         {
             "id": 41,
             "title": "Analista de Sistemas",
-            "description": "Análise de requisitos, documentação de sistemas, levantamento de necessidades dos usuários e comunicação entre equipes de desenvolvimento e áreas de negócio.",
-            "fit": 1
+            "description": "Análise de requisitos, documentação de sistemas, levantamento de necessidades dos usuários e comunicação entre equipes de desenvolvimento e áreas de negócio."
         },
         {
             "id": 42,
             "title": "Desenvolvedor RPA",
-            "description": "Desenvolvimento de robôs para automação de processos repetitivos, integração com sistemas legados, tratamento de exceções e monitoramento de execuções.",
-            "fit": 1
+            "description": "Desenvolvimento de robôs para automação de processos repetitivos, integração com sistemas legados, tratamento de exceções e monitoramento de execuções."
         },
         {
             "id": 43,
             "title": "Engenheiro de Observabilidade",
-            "description": "Implantação de métricas, logs e rastreamento distribuído, criação de painéis e alertas e apoio aos times na investigação de problemas de desempenho.",
-            "fit": 1
+            "description": "Implantação de métricas, logs e rastreamento distribuído, criação de painéis e alertas e apoio aos times na investigação de problemas de desempenho."
         },
         {
             "id": 44,
             "title": "Desenvolvedor de Chatbots",
-            "description": "Criação de assistentes conversacionais, integração com APIs de linguagem natural, desenho de fluxos de diálogo e conexão com sistemas de atendimento.",
-            "fit": 1
+            "description": "Criação de assistentes conversacionais, integração com APIs de linguagem natural, desenho de fluxos de diálogo e conexão com sistemas de atendimento."
         },
         {
             "id": 45,
             "title": "Engenheiro de Software de Segurança de Aplicações",
-            "description": "Integrar práticas de segurança ao ciclo de desenvolvimento, revisar código em busca de vulnerabilidades, automatizar varreduras em pipelines e orientar desenvolvedores.",
-            "fit": 1
+            "description": "Integrar práticas de segurança ao ciclo de desenvolvimento, revisar código em busca de vulnerabilidades, automatizar varreduras em pipelines e orientar desenvolvedores."
         },
         {
             "id": 46,
             "title": "Analista de Suporte de TI",
-            "description": "Atendimento técnico aos usuários, solução de problemas em computadores, configuração de sistemas operacionais, instalação de softwares e manutenção de equipamentos.",
-            "fit": 0
+            "description": "Atendimento técnico aos usuários, solução de problemas em computadores, configuração de sistemas operacionais, instalação de softwares e manutenção de equipamentos."
         },
         {
             "id": 47,
             "title": "Técnico de Help Desk",
-            "description": "Atendimento de chamados de primeiro nível, registro de incidentes em sistema de tickets, orientação remota a usuários e escalonamento de problemas.",
-            "fit": 0
+            "description": "Atendimento de chamados de primeiro nível, registro de incidentes em sistema de tickets, orientação remota a usuários e escalonamento de problemas."
         },
         {
             "id": 48,
             "title": "Administrador de Redes",
-            "description": "Gerenciamento de redes de computadores, servidores, roteadores, switches, infraestrutura de rede e segurança de ambientes corporativos.",
-            "fit": 0
+            "description": "Gerenciamento de redes de computadores, servidores, roteadores, switches, infraestrutura de rede e segurança de ambientes corporativos."
         },
         {
             "id": 49,
             "title": "Administrador de Sistemas",
-            "description": "Administração de servidores Linux e Windows, monitoramento de sistemas, gerenciamento de usuários, backups e manutenção da infraestrutura.",
-            "fit": 0
+            "description": "Administração de servidores Linux e Windows, monitoramento de sistemas, gerenciamento de usuários, backups e manutenção da infraestrutura."
         },
         {
             "id": 50,
             "title": "Analista de Cibersegurança",
-            "description": "Monitoramento de eventos de segurança, análise de vulnerabilidades, resposta a incidentes e implementação de controles de segurança da informação.",
-            "fit": 0
+            "description": "Monitoramento de eventos de segurança, análise de vulnerabilidades, resposta a incidentes e implementação de controles de segurança da informação."
         },
         {
             "id": 51,
             "title": "Analista de Segurança da Informação",
-            "description": "Elaboração de políticas de segurança, conscientização de colaboradores, gestão de acessos e acompanhamento de auditorias.",
-            "fit": 0
+            "description": "Elaboração de políticas de segurança, conscientização de colaboradores, gestão de acessos e acompanhamento de auditorias."
         },
         {
             "id": 52,
             "title": "Pentester",
-            "description": "Realização de testes de intrusão em redes e aplicações, elaboração de relatórios de vulnerabilidades e recomendação de correções.",
-            "fit": 0
+            "description": "Realização de testes de intrusão em redes e aplicações, elaboração de relatórios de vulnerabilidades e recomendação de correções."
         },
         {
             "id": 53,
             "title": "Gerente de Projetos de Tecnologia",
-            "description": "Gerenciamento de projetos de software, planejamento de atividades, coordenação de equipes, controle de prazos, orçamento e comunicação com partes interessadas.",
-            "fit": 0
+            "description": "Gerenciamento de projetos de software, planejamento de atividades, coordenação de equipes, controle de prazos, orçamento e comunicação com partes interessadas."
         },
         {
             "id": 54,
             "title": "Coordenador de Projetos de TI",
-            "description": "Coordenação de projetos de tecnologia, acompanhamento de tarefas, reuniões, documentação, cronogramas e comunicação com equipes técnicas.",
-            "fit": 0
+            "description": "Coordenação de projetos de tecnologia, acompanhamento de tarefas, reuniões, documentação, cronogramas e comunicação com equipes técnicas."
         },
         {
             "id": 55,
             "title": "Scrum Master",
-            "description": "Facilitar cerimônias ágeis, remover impedimentos do time, acompanhar métricas de fluxo e promover a melhoria contínua dos processos.",
-            "fit": 0
+            "description": "Facilitar cerimônias ágeis, remover impedimentos do time, acompanhar métricas de fluxo e promover a melhoria contínua dos processos."
         },
         {
             "id": 56,
             "title": "Product Owner",
-            "description": "Definir e priorizar o backlog de produto, escrever histórias de usuário, conversar com clientes e alinhar entregas com as metas do negócio.",
-            "fit": 0
+            "description": "Definir e priorizar o backlog de produto, escrever histórias de usuário, conversar com clientes e alinhar entregas com as metas do negócio."
         },
         {
             "id": 57,
             "title": "Analista de Negócios",
-            "description": "Mapeamento de processos, levantamento de requisitos junto às áreas, elaboração de documentos funcionais e acompanhamento de homologações.",
-            "fit": 0
+            "description": "Mapeamento de processos, levantamento de requisitos junto às áreas, elaboração de documentos funcionais e acompanhamento de homologações."
         },
         {
             "id": 58,
             "title": "Consultor de Sistemas ERP",
-            "description": "Implantação e configuração de sistemas ERP, análise de processos empresariais, suporte aos usuários e integração entre sistemas corporativos.",
-            "fit": 0
+            "description": "Implantação e configuração de sistemas ERP, análise de processos empresariais, suporte aos usuários e integração entre sistemas corporativos."
         },
         {
             "id": 59,
             "title": "Consultor SAP Financeiro",
-            "description": "Configuração dos módulos financeiros do SAP, parametrização de contas, suporte ao fechamento contábil e treinamento de usuários-chave.",
-            "fit": 0
+            "description": "Configuração dos módulos financeiros do SAP, parametrização de contas, suporte ao fechamento contábil e treinamento de usuários-chave."
         },
         {
             "id": 60,
             "title": "Designer de UI e UX",
-            "description": "Criação de interfaces digitais, pesquisa de experiência do usuário, desenvolvimento de wireframes, protótipos e testes de usabilidade.",
-            "fit": 0
+            "description": "Criação de interfaces digitais, pesquisa de experiência do usuário, desenvolvimento de wireframes, protótipos e testes de usabilidade."
         },
         {
             "id": 61,
             "title": "Pesquisador de UX",
-            "description": "Planejamento e condução de entrevistas e testes com usuários, síntese de descobertas e apresentação de recomendações para produto e design.",
-            "fit": 0
+            "description": "Planejamento e condução de entrevistas e testes com usuários, síntese de descobertas e apresentação de recomendações para produto e design."
         },
         {
             "id": 62,
             "title": "Analista de Qualidade de Software",
-            "description": "Realização de testes manuais e automatizados, identificação de falhas, criação de casos de teste e garantia da qualidade de aplicações.",
-            "fit": 0
+            "description": "Realização de testes manuais e automatizados, identificação de falhas, criação de casos de teste e garantia da qualidade de aplicações."
         },
         {
             "id": 63,
             "title": "Analista de Infraestrutura",
-            "description": "Acompanhamento de servidores, virtualização, rotinas de backup, atualização de equipamentos e atendimento de demandas da infraestrutura de TI.",
-            "fit": 0
+            "description": "Acompanhamento de servidores, virtualização, rotinas de backup, atualização de equipamentos e atendimento de demandas da infraestrutura de TI."
         },
         {
             "id": 64,
             "title": "Analista de Data Center",
-            "description": "Operação e monitoramento de equipamentos de data center, controle de energia e refrigeração, instalação de servidores e registro de ativos.",
-            "fit": 0
+            "description": "Operação e monitoramento de equipamentos de data center, controle de energia e refrigeração, instalação de servidores e registro de ativos."
         },
         {
             "id": 65,
             "title": "Analista de Telecomunicações",
-            "description": "Gestão de links de internet, telefonia corporativa, relacionamento com operadoras e acompanhamento de contratos de telecomunicação.",
-            "fit": 0
+            "description": "Gestão de links de internet, telefonia corporativa, relacionamento com operadoras e acompanhamento de contratos de telecomunicação."
         },
         {
             "id": 66,
             "title": "Técnico de Manutenção de Computadores",
-            "description": "Montagem e reparo de computadores, troca de componentes, formatação, instalação de programas e manutenção preventiva de equipamentos.",
-            "fit": 0
+            "description": "Montagem e reparo de computadores, troca de componentes, formatação, instalação de programas e manutenção preventiva de equipamentos."
         },
         {
             "id": 67,
             "title": "Gerente de TI",
-            "description": "Gestão da área de tecnologia da empresa, definição de orçamento, contratação de fornecedores, acompanhamento de indicadores e alinhamento com a diretoria.",
-            "fit": 0
+            "description": "Gestão da área de tecnologia da empresa, definição de orçamento, contratação de fornecedores, acompanhamento de indicadores e alinhamento com a diretoria."
         },
         {
             "id": 68,
             "title": "Analista de Governança de TI",
-            "description": "Implementação de frameworks de governança, gestão de riscos de tecnologia, políticas internas e apoio a auditorias de conformidade.",
-            "fit": 0
+            "description": "Implementação de frameworks de governança, gestão de riscos de tecnologia, políticas internas e apoio a auditorias de conformidade."
         },
         {
             "id": 69,
             "title": "Analista de Compliance de TI",
-            "description": "Verificação de conformidade de sistemas com normas e legislação, incluindo proteção de dados pessoais, e elaboração de relatórios para auditoria.",
-            "fit": 0
+            "description": "Verificação de conformidade de sistemas com normas e legislação, incluindo proteção de dados pessoais, e elaboração de relatórios para auditoria."
         },
         {
             "id": 70,
             "title": "Analista de Licenciamento de Software",
-            "description": "Controle de licenças e contratos de software, inventário de ativos, negociação com fornecedores e redução de custos.",
-            "fit": 0
+            "description": "Controle de licenças e contratos de software, inventário de ativos, negociação com fornecedores e redução de custos."
         },
         {
             "id": 71,
             "title": "Redator Técnico",
-            "description": "Produção de documentação técnica, manuais de usuário e guias de integração, em colaboração com times de desenvolvimento e suporte.",
-            "fit": 0
+            "description": "Produção de documentação técnica, manuais de usuário e guias de integração, em colaboração com times de desenvolvimento e suporte."
         },
         {
             "id": 72,
             "title": "Instrutor de Tecnologia da Informação",
-            "description": "Planejamento e ministração de treinamentos de informática e ferramentas corporativas, elaboração de material didático e avaliação de participantes.",
-            "fit": 0
+            "description": "Planejamento e ministração de treinamentos de informática e ferramentas corporativas, elaboração de material didático e avaliação de participantes."
         },
         {
             "id": 73,
             "title": "Customer Success de Software",
-            "description": "Acompanhamento de clientes de uma plataforma SaaS, onboarding, resolução de dúvidas, análise de uso e redução de cancelamentos.",
-            "fit": 0
+            "description": "Acompanhamento de clientes de uma plataforma SaaS, onboarding, resolução de dúvidas, análise de uso e redução de cancelamentos."
         },
         {
             "id": 74,
             "title": "Executivo de Vendas de Software",
-            "description": "Prospecção de clientes corporativos, demonstrações de produto, negociação de contratos e acompanhamento de metas comerciais.",
-            "fit": 0
+            "description": "Prospecção de clientes corporativos, demonstrações de produto, negociação de contratos e acompanhamento de metas comerciais."
         },
         {
             "id": 75,
             "title": "Analista de SEO",
-            "description": "Otimização de sites para mecanismos de busca, pesquisa de palavras-chave, análise de tráfego orgânico e recomendações de conteúdo.",
-            "fit": 0
+            "description": "Otimização de sites para mecanismos de busca, pesquisa de palavras-chave, análise de tráfego orgânico e recomendações de conteúdo."
         },
         {
             "id": 76,
             "title": "Analista de CRM",
-            "description": "Gestão de bases de clientes, segmentação, criação de réguas de relacionamento por e-mail e análise de resultados de campanhas.",
-            "fit": 0
+            "description": "Gestão de bases de clientes, segmentação, criação de réguas de relacionamento por e-mail e análise de resultados de campanhas."
         },
         {
             "id": 77,
             "title": "Analista de Produto Digital",
-            "description": "Análise de métricas de uso, pesquisa com clientes, apoio na definição de funcionalidades e acompanhamento de lançamentos.",
-            "fit": 0
+            "description": "Análise de métricas de uso, pesquisa com clientes, apoio na definição de funcionalidades e acompanhamento de lançamentos."
         },
         {
             "id": 78,
             "title": "Analista de Suporte a Sistemas",
-            "description": "Atendimento de dúvidas de usuários sobre sistemas internos, registro de incidentes, documentação de soluções e acompanhamento de correções com a equipe de desenvolvimento.",
-            "fit": 0
+            "description": "Atendimento de dúvidas de usuários sobre sistemas internos, registro de incidentes, documentação de soluções e acompanhamento de correções com a equipe de desenvolvimento."
         },
         {
             "id": 79,
             "title": "Especialista em Suporte Técnico",
-            "description": "Atendimento técnico a clientes, solução de problemas relacionados a softwares, documentação de incidentes e suporte a produtos tecnológicos.",
-            "fit": 0
+            "description": "Atendimento técnico a clientes, solução de problemas relacionados a softwares, documentação de incidentes e suporte a produtos tecnológicos."
         },
         {
             "id": 80,
             "title": "Analista de Dados Comerciais",
-            "description": "Análise de dados de vendas, criação de relatórios e planilhas, acompanhamento de indicadores e apoio à equipe comercial.",
-            "fit": 0
+            "description": "Análise de dados de vendas, criação de relatórios e planilhas, acompanhamento de indicadores e apoio à equipe comercial."
         },
         {
             "id": 81,
             "title": "Engenheiro Mecânico",
-            "description": "Projeto e análise de componentes mecânicos, equipamentos industriais, processos de fabricação e desenvolvimento de projetos de engenharia.",
-            "fit": -1
+            "description": "Projeto e análise de componentes mecânicos, equipamentos industriais, processos de fabricação e desenvolvimento de projetos de engenharia."
         },
         {
             "id": 82,
             "title": "Engenheiro Civil",
-            "description": "Planejamento e supervisão de obras, análise estrutural, materiais de construção e elaboração de documentação de projetos.",
-            "fit": -1
+            "description": "Planejamento e supervisão de obras, análise estrutural, materiais de construção e elaboração de documentação de projetos."
         },
         {
             "id": 83,
             "title": "Enfermeiro",
-            "description": "Atendimento e acompanhamento de pacientes, administração de medicamentos, monitoramento de condições clínicas e auxílio em procedimentos médicos.",
-            "fit": -1
+            "description": "Atendimento e acompanhamento de pacientes, administração de medicamentos, monitoramento de condições clínicas e auxílio em procedimentos médicos."
         },
         {
             "id": 84,
             "title": "Analista de Marketing",
-            "description": "Desenvolvimento de estratégias de marketing, pesquisas de mercado, análise de campanhas, comportamento dos consumidores e marketing digital.",
-            "fit": -1
+            "description": "Desenvolvimento de estratégias de marketing, pesquisas de mercado, análise de campanhas, comportamento dos consumidores e marketing digital."
         },
         {
             "id": 85,
             "title": "Assistente de Recursos Humanos",
-            "description": "Auxílio em processos de recrutamento, cadastro de funcionários, agendamento de entrevistas, administração de benefícios e documentação de recursos humanos.",
-            "fit": -1
+            "description": "Auxílio em processos de recrutamento, cadastro de funcionários, agendamento de entrevistas, administração de benefícios e documentação de recursos humanos."
         },
         {
             "id": 86,
             "title": "Contador",
-            "description": "Elaboração de demonstrações financeiras, registros contábeis, cálculos tributários, análise financeira e cumprimento de normas contábeis.",
-            "fit": -1
+            "description": "Elaboração de demonstrações financeiras, registros contábeis, cálculos tributários, análise financeira e cumprimento de normas contábeis."
         },
         {
             "id": 87,
             "title": "Advogado",
-            "description": "Pesquisa jurídica, elaboração de contratos, análise de processos, preparação de documentos legais e representação de clientes.",
-            "fit": -1
+            "description": "Pesquisa jurídica, elaboração de contratos, análise de processos, preparação de documentos legais e representação de clientes."
         },
         {
             "id": 88,
             "title": "Designer Gráfico",
-            "description": "Criação de identidades visuais, materiais publicitários, ilustrações, peças para redes sociais e projetos de comunicação visual.",
-            "fit": -1
+            "description": "Criação de identidades visuais, materiais publicitários, ilustrações, peças para redes sociais e projetos de comunicação visual."
         },
         {
             "id": 89,
             "title": "Chef de Cozinha",
-            "description": "Preparação de refeições, elaboração de cardápios, organização da cozinha, controle de qualidade dos alimentos e gestão da equipe.",
-            "fit": -1
+            "description": "Preparação de refeições, elaboração de cardápios, organização da cozinha, controle de qualidade dos alimentos e gestão da equipe."
         },
         {
             "id": 90,
             "title": "Garçom",
-            "description": "Atendimento aos clientes, registro de pedidos de alimentos e bebidas, serviço de refeições e organização do ambiente do restaurante.",
-            "fit": -1
+            "description": "Atendimento aos clientes, registro de pedidos de alimentos e bebidas, serviço de refeições e organização do ambiente do restaurante."
         },
         {
             "id": 91,
             "title": "Eletricista",
-            "description": "Instalação e manutenção de sistemas elétricos, fiação, quadros de energia, sistemas de iluminação e equipamentos elétricos.",
-            "fit": -1
+            "description": "Instalação e manutenção de sistemas elétricos, fiação, quadros de energia, sistemas de iluminação e equipamentos elétricos."
         },
         {
             "id": 92,
             "title": "Mecânico Automotivo",
-            "description": "Inspeção de veículos, manutenção de motores, reparos no sistema de freios, diagnóstico de problemas e substituição de componentes automotivos.",
-            "fit": -1
+            "description": "Inspeção de veículos, manutenção de motores, reparos no sistema de freios, diagnóstico de problemas e substituição de componentes automotivos."
         },
         {
             "id": 93,
             "title": "Professor do Ensino Fundamental",
-            "description": "Planejamento e realização de atividades educacionais, administração de sala de aula, avaliação de alunos e comunicação com responsáveis.",
-            "fit": -1
+            "description": "Planejamento e realização de atividades educacionais, administração de sala de aula, avaliação de alunos e comunicação com responsáveis."
         },
         {
             "id": 94,
             "title": "Corretor de Imóveis",
-            "description": "Venda e aluguel de imóveis, atendimento a clientes, visitas aos imóveis, negociação de contratos e análise do mercado imobiliário.",
-            "fit": -1
+            "description": "Venda e aluguel de imóveis, atendimento a clientes, visitas aos imóveis, negociação de contratos e análise do mercado imobiliário."
         },
         {
             "id": 95,
             "title": "Farmacêutico",
-            "description": "Controle de medicamentos, orientação farmacêutica, análise de prescrições, controle de estoque e atendimento aos pacientes.",
-            "fit": -1
+            "description": "Controle de medicamentos, orientação farmacêutica, análise de prescrições, controle de estoque e atendimento aos pacientes."
         },
         {
             "id": 96,
             "title": "Pedreiro",
-            "description": "Execução de atividades de construção, utilização de ferramentas e materiais, organização do canteiro e auxílio em projetos de construção.",
-            "fit": -1
+            "description": "Execução de atividades de construção, utilização de ferramentas e materiais, organização do canteiro e auxílio em projetos de construção."
         },
         {
             "id": 97,
             "title": "Comissário de Bordo",
-            "description": "Atendimento aos passageiros, execução de procedimentos de segurança, resposta a emergências e prestação de serviços durante os voos.",
-            "fit": -1
+            "description": "Atendimento aos passageiros, execução de procedimentos de segurança, resposta a emergências e prestação de serviços durante os voos."
         },
         {
             "id": 98,
             "title": "Personal Trainer",
-            "description": "Elaboração de programas de exercícios, realização de treinamentos físicos, acompanhamento do progresso dos clientes e orientação sobre atividades físicas.",
-            "fit": -1
+            "description": "Elaboração de programas de exercícios, realização de treinamentos físicos, acompanhamento do progresso dos clientes e orientação sobre atividades físicas."
         },
         {
             "id": 99,
             "title": "Técnico Agrícola",
-            "description": "Acompanhamento da produção agrícola, monitoramento de plantações, análise de solo, operação de equipamentos e atividades de gerenciamento rural.",
-            "fit": -1
+            "description": "Acompanhamento da produção agrícola, monitoramento de plantações, análise de solo, operação de equipamentos e atividades de gerenciamento rural."
         },
         {
             "id": 100,
             "title": "Motorista de Entregas",
-            "description": "Condução de veículos de entrega, organização de rotas, conferência de mercadorias, registro de entregas e cuidado com a manutenção do veículo.",
-            "fit": -1
+            "description": "Condução de veículos de entrega, organização de rotas, conferência de mercadorias, registro de entregas e cuidado com a manutenção do veículo."
         }
     ]
 }

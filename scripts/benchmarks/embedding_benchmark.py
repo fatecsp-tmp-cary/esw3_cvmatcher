@@ -24,8 +24,8 @@ What it measures:
     4. PT/EN support: cosine similarity of equivalent and unrelated PT<->EN sentence pairs.
     5. Token limit: texts longer than the model's max_seq_length are split into overlapping
        chunks; a resume/job score is the maximum cosine over chunk pairs.
-    6. Ranking of the jobs for the resume, with precision@k against --relevant-ids
-       (a heuristic: the default ids 1-15 are the jobs labeled fit 2 in the shared input).
+    6. Ranking of the jobs for the resume. The shared input has no relevance labels, so
+       precision@k is only computed when --relevant-ids is given (ids chosen by a person).
 
 Notes:
     - The first run downloads the model, which inflates the load time. The result records
@@ -46,7 +46,6 @@ import psutil
 from sentence_transformers import SentenceTransformer
 
 DEFAULT_INPUT = Path(__file__).parent / "embedding_benchmark_input.json"
-DEFAULT_RELEVANT_IDS = list(range(1, 16))
 BATCH_SIZE = 32
 CHUNK_OVERLAP = 20  # tokens shared between consecutive chunks
 SPECIAL_TOKENS = 2  # [CLS]/[SEP] (or <s>/</s>) added by the tokenizer around every text
@@ -294,16 +293,21 @@ def run_benchmark(args):
         {"job_id": jobs[i]["id"], "score": truncated_scores[i]}
         for i in sorted(range(len(jobs)), key=lambda i: -truncated_scores[i])[:10]
     ]
-    relevant = set(args.relevant_ids)
     quality = {
-        "relevant_ids": sorted(relevant),
-        "precision_at_5": precision_at(ranking, relevant, 5),
-        "precision_at_10": precision_at(ranking, relevant, 10),
         "top10": ranking[:10],
         "full_ranking": ranking,
         "truncated_top10": truncated_top10,
     }
-    print(f"Precision@5 {quality['precision_at_5']} | precision@10 {quality['precision_at_10']}")
+    if args.relevant_ids:
+        relevant = set(args.relevant_ids)
+        quality["relevant_ids"] = sorted(relevant)
+        quality["precision_at_5"] = precision_at(ranking, relevant, 5)
+        quality["precision_at_10"] = precision_at(ranking, relevant, 10)
+        print(
+            f"Precision@5 {quality['precision_at_5']} | precision@10 {quality['precision_at_10']}"
+        )
+    else:
+        print("Precision@k skipped: no --relevant-ids given")
     for position, entry in enumerate(ranking[:10], 1):
         print(f"  {position:>2}. {entry['score']:.4f}  [{entry['job_id']}] {entry['title']}")
 
@@ -344,8 +348,7 @@ def parse_args():
         "--relevant-ids",
         nargs="+",
         type=int,
-        default=DEFAULT_RELEVANT_IDS,
-        help="job ids considered relevant to the resume (for precision@k)",
+        help="job ids a person considers relevant to the resume (enables precision@k)",
     )
     parser.add_argument("--output", type=Path, help="result JSON path (default: auto-named)")
     return parser.parse_args()
