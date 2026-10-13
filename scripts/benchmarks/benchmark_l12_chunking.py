@@ -18,7 +18,9 @@ What it does:
          D         one cosine against the mean of the chunk vectors (single pgvector query)
     4. Retrieves through pgvector (per-chunk top-N queries, merged in Python) and checks that the
        ranking matches the same strategies computed with numpy over all jobs.
-    5. Evaluates precision@10, recall@10 and nDCG@10 against a gabarito (ground truth).
+    5. If a gabarito (ground truth made by a person) is given with --gabarito, also reports
+       precision@10, recall@10 and nDCG@10 for each strategy. Without it, only the rankings and
+       the pgvector-versus-numpy check are reported.
 
 Setup (CPU-only PyTorch first, then the optional dependency group):
     pip install torch --index-url https://download.pytorch.org/whl/cpu
@@ -29,9 +31,8 @@ Usage (run it from a directory outside the repo: the result JSON goes to the cur
     python <repo>/scripts/benchmarks/benchmark_l12_chunking.py --runs 5
     python <repo>/scripts/benchmarks/benchmark_l12_chunking.py --input other_input.json
 
-The gabarito is derived from the "fit" field of the input (relevant = fit 2, obvious irrelevant =
-fit -1) unless --gabarito points to a file such as gabarito_curriculo_vagas.json. Those labels
-were written by an AI and need human review.
+The repository has no gabarito. --gabarito takes a JSON file written by a person:
+    {"relevantes": [job ids that should be in the top 10], "irrelevantes_obvias": [job ids]}
 """
 
 import argparse
@@ -68,7 +69,6 @@ DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 DEFAULT_INPUT = Path(__file__).parent / "embedding_benchmark_input.json"
 TABLE = "vagas_pgvector_validation"
 TOP_CHUNKS_B = 3
-GAIN = {2: 3, 1: 1, 0: 0, -1: 0}  # nDCG gain per fit label
 STRATEGIES = ("baseline", "A", "B", "C", "D")
 
 
@@ -156,39 +156,38 @@ def rank(job_ids, scores):
 # --- Evaluation -------------------------------------------------------------------------------
 
 
-def ndcg_at(order, fit, k):
-    dcg = sum(GAIN[fit[j]] / math.log2(i + 2) for i, j in enumerate(order[:k]))
-    ideal = sorted((GAIN[f] for f in fit.values()), reverse=True)[:k]
-    idcg = sum(g / math.log2(i + 2) for i, g in enumerate(ideal))
+def ndcg_at(order, relevant, k):
+    """nDCG with binary relevance: a job is either in the gabarito or not."""
+    dcg = sum(1 / math.log2(i + 2) for i, j in enumerate(order[:k]) if j in relevant)
+    idcg = sum(1 / math.log2(i + 2) for i in range(min(k, len(relevant))))
     return dcg / idcg if idcg else 0.0
 
 
-def evaluate(order, relevant, obvious_irrelevant, fit, k=10):
-    top = order[:k]
-    hits = sum(1 for j in top if j in relevant)
-    result = {
-        f"precision_at_{k}": round(hits / k, 3),
-        f"recall_at_{k}": round(hits / len(relevant), 3),
-        f"obvious_irrelevant_in_top{k}": sum(1 for j in top if j in obvious_irrelevant),
-        "top10": top,
-    }
-    if fit:
-        result[f"ndcg_at_{k}"] = round(ndcg_at(order, fit, k), 3)
-        result["non_fit_in_top20"] = sum(1 for j in order[:20] if fit[j] <= 0)
+def evaluate(order, gabarito, k=10):
+    """Top-k of a ranking, plus precision, recall and nDCG when there is a gabarito."""
+    result = {"top10": order[:k]}
+    if gabarito:
+        relevant = gabarito["relevant"]
+        hits = sum(1 for j in order[:k] if j in relevant)
+        result[f"precision_at_{k}"] = round(hits / k, 3)
+        result[f"recall_at_{k}"] = round(hits / len(relevant), 3)
+        result[f"ndcg_at_{k}"] = round(ndcg_at(order, relevant, k), 3)
+        result[f"obvious_irrelevant_in_top{k}"] = sum(
+            1 for j in order[:k] if j in gabarito["obvious_irrelevant"]
+        )
     return result
 
 
-def load_gabarito(args, jobs):
-    """(relevant ids, obvious irrelevant ids, fit by job id or None, origin)."""
-    fit = {j["id"]: j["fit"] for j in jobs} if all("fit" in j for j in jobs) else None
-    if args.gabarito:
-        data = json.loads(Path(args.gabarito).read_text(encoding="utf-8"))
-        return set(data["relevantes"]), set(data["irrelevantes_obvias"]), fit, str(args.gabarito)
-    if fit is None:
-        raise SystemExit("input has no 'fit' labels: pass --gabarito")
-    relevant = {i for i, f in fit.items() if f == 2}
-    irrelevant = {i for i, f in fit.items() if f == -1}
-    return relevant, irrelevant, fit, "derived from the fit field of the input"
+def load_gabarito(path):
+    """Gabarito written by a person, or None when no file is given."""
+    if not path:
+        return None
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    return {
+        "origin": str(path),
+        "relevant": set(data["relevantes"]),
+        "obvious_irrelevant": set(data.get("irrelevantes_obvias", [])),
+    }
 
 
 # --- pgvector ---------------------------------------------------------------------------------
@@ -300,7 +299,7 @@ def run_benchmark(args):
     data = json.loads(Path(args.input).read_text(encoding="utf-8"))
     jobs = data["jobs"]
     job_ids = [j["id"] for j in jobs]
-    relevant, obvious_irrelevant, fit, gabarito_origin = load_gabarito(args, jobs)
+    gabarito = load_gabarito(args.gabarito)
     query_prefix, passage_prefix = prefixes_for(args.model)
     job_texts = [build_job_text(j) for j in jobs]
     chunks = build_resume_chunks(data["resume"])
@@ -386,9 +385,7 @@ def run_benchmark(args):
     # 5. Strategies with numpy over all jobs (reference ranking).
     reference = numpy_scores(chunk_vecs, plain_resume_vec, job_vecs, requirement_vecs)
     numpy_orders = {name: rank(job_ids, reference[name]) for name in STRATEGIES}
-    strategies = {
-        name: evaluate(numpy_orders[name], relevant, obvious_irrelevant, fit) for name in STRATEGIES
-    }
+    strategies = {name: evaluate(numpy_orders[name], gabarito) for name in STRATEGIES}
 
     # 6. pgvector: store the jobs, retrieve per chunk, compare with the numpy ranking.
     conn = connect()
@@ -435,26 +432,26 @@ def run_benchmark(args):
         f"\npgvector {pgvector_version} | pool of {len(pool_ids)} jobs | "
         f"max |cosine diff vs numpy| {max_diff:.2e}"
     )
-    print(
-        f"{'strategy':<9}{'P@10':>6}{'R@10':>7}{'nDCG@10':>9}{'fit<=0 in top20':>17}"
-        f"  pgvector top10"
-    )
+    header = f"{'strategy':<9}" + (f"{'P@10':>6}{'R@10':>7}{'nDCG@10':>9}" if gabarito else "")
+    print(f"{header}  {'pgvector top10':<22}top 10 job ids")
     for name in STRATEGIES:
-        s, m = strategies[name], match[name]
-        print(
-            f"{name:<9}{s['precision_at_10']:>6}{s['recall_at_10']:>7}{s.get('ndcg_at_10', '-'):>9}"
-            f"{s.get('non_fit_in_top20', '-'):>17}  "
-            f"{'identical' if m['top10_identical'] else str(m['top10_overlap']) + '/10 in common'}"
-        )
+        s_, m = strategies[name], match[name]
+        quality = ""
+        if gabarito:
+            quality = f"{s_['precision_at_10']:>6}{s_['recall_at_10']:>7}{s_['ndcg_at_10']:>9}"
+        same = "identical" if m["top10_identical"] else f"{m['top10_overlap']}/10 in common"
+        print(f"{name:<9}{quality}  {same:<22}{s_['top10']}")
+    if not gabarito:
+        print("Quality metrics skipped: no --gabarito given")
 
     return {
         "model": args.model,
         "input_file": str(args.input),
-        "gabarito": {
-            "origin": gabarito_origin,
-            "relevant": sorted(relevant),
-            "obvious_irrelevant": sorted(obvious_irrelevant),
-            "revisar_humano": True,
+        "gabarito": gabarito
+        and {
+            "origin": gabarito["origin"],
+            "relevant": sorted(gabarito["relevant"]),
+            "obvious_irrelevant": sorted(gabarito["obvious_irrelevant"]),
         },
         "runtime_requirements": {
             **environment(),
@@ -490,7 +487,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Structured chunking + pgvector benchmark.")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Hugging Face model name")
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="input JSON file")
-    parser.add_argument("--gabarito", type=Path, help="gabarito JSON (default: derive from fit)")
+    parser.add_argument(
+        "--gabarito", type=Path, help="gabarito JSON written by a person (optional)"
+    )
     parser.add_argument("--runs", type=int, default=5, help="timing repetitions (median)")
     parser.add_argument("--top-n", type=int, default=20, help="jobs per pgvector query")
     parser.add_argument("--output", type=Path, help="result JSON path (default: auto-named)")
