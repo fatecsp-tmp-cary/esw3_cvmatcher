@@ -6,9 +6,11 @@ no prefixes); other 384-dim models work through --model (e5 prefixes are handled
 
 What it does:
     1. Embeds each job ("title. description") and stores it in an isolated pgvector table
-       (vagas_pgvector_validation, HNSW index, dropped at the end).
-    2. Splits the resume by structure into chunks: chunk 0 = title + skills, then one chunk per
-       item of "experience" (a string, or a CandidateProfile Experience object).
+       (vagas_pgvector_validation, HNSW index, dropped at the end). The model, the jobs and the
+       table are loaded once and shared by every resume.
+    2. For each resume, splits it by structure into chunks: chunk 0 = title + skills (split into
+       several chunks if the skill list does not fit the model), then one chunk per item of
+       "experience" (a string, or a CandidateProfile Experience object).
     3. Scores every job against the resume with five strategies:
          baseline  the whole resume concatenated and truncated by the model (no chunking)
          A         maximum cosine over the resume chunks
@@ -19,8 +21,9 @@ What it does:
     4. Retrieves through pgvector (per-chunk top-N queries, merged in Python) and checks that the
        ranking matches the same strategies computed with numpy over all jobs.
     5. If a gabarito (ground truth made by a person) is given with --gabarito, also reports
-       precision@10, recall@10 and nDCG@10 for each strategy. Without it, only the rankings and
-       the pgvector-versus-numpy check are reported.
+       precision@10, recall@10, nDCG@10 and the recall of the retrieved pool for each strategy,
+       per resume and averaged. Without it, only the rankings and the pgvector-versus-numpy
+       check are reported.
 
 Setup (CPU-only PyTorch first, then the optional dependency group):
     pip install torch --index-url https://download.pytorch.org/whl/cpu
@@ -29,10 +32,21 @@ Setup (CPU-only PyTorch first, then the optional dependency group):
 
 Usage (run it from a directory outside the repo: the result JSON goes to the current directory):
     python <repo>/scripts/benchmarks/benchmark_l12_chunking.py --runs 5
-    python <repo>/scripts/benchmarks/benchmark_l12_chunking.py --input other_input.json
+    python <repo>/scripts/benchmarks/benchmark_l12_chunking.py \
+        --resumes <repo>/scripts/benchmarks/embedding_benchmark_resumes.json \
+        --gabarito <repo>/scripts/benchmarks/embedding_benchmark_gabarito.json
 
-The repository has no gabarito. --gabarito takes a JSON file written by a person:
-    {"relevantes": [job ids that should be in the top 10], "irrelevantes_obvias": [job ids]}
+Inputs:
+    --input     {"jobs": [...], "resume": {...}}; "resume" and "resumes" are both optional.
+                Each resume is {"id", "title", "skills": [...], "experience": [...]}.
+    --resumes   {"resumes": [...]}: more resumes, added to the ones in --input.
+    --gabarito  written by a person, one entry per resume id (the keys are exact; typos fail):
+                {"<resume id>": {"relevantes": [job ids], "irrelevantes_obvias": [job ids]}}
+                A file with only {"relevantes": ..., "irrelevantes_obvias": ...} is accepted when
+                there is a single resume.
+
+Privacy: the result JSON contains the text of the resume chunks. Use only fictitious resumes;
+candidate data must never be persisted or logged (PLAN.md).
 """
 
 import argparse
@@ -43,6 +57,7 @@ import re
 import statistics
 import time
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import psycopg
@@ -60,6 +75,7 @@ from embedding_benchmark import (
     pair_similarities,
     prefixes_for,
     rss_mb,
+    split_into_chunks,
     time_runs,
 )
 from pgvector.psycopg import register_vector
@@ -67,12 +83,74 @@ from sentence_transformers import SentenceTransformer
 
 DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 DEFAULT_INPUT = Path(__file__).parent / "embedding_benchmark_input.json"
+DEFAULT_RESUME_ID = "resume"
 TABLE = "vagas_pgvector_validation"
 TOP_CHUNKS_B = 3
 STRATEGIES = ("baseline", "A", "B", "C", "D")
+GABARITO_KEYS = {"relevantes", "irrelevantes_obvias"}
+QUALITY_METRICS = ("precision_at_10", "recall_at_10", "ndcg_at_10", "pool_recall")
 
 
-# --- Chunking -------------------------------------------------------------------------------
+# --- Inputs -----------------------------------------------------------------------------------
+
+
+def load_resumes(args, data):
+    """Resumes from the input's "resume"/"resumes" and from --resumes, with unique ids."""
+    resumes = []
+    if "resume" in data:
+        resumes.append({"id": DEFAULT_RESUME_ID, **data["resume"]})
+    resumes += data.get("resumes", [])
+    if args.resumes:
+        resumes += json.loads(Path(args.resumes).read_text(encoding="utf-8"))["resumes"]
+    ids = [r["id"] for r in resumes]
+    if not resumes:
+        raise SystemExit("no resume found: use a 'resume' in --input or pass --resumes")
+    if len(set(ids)) != len(ids):
+        raise SystemExit(f"duplicate resume ids: {sorted(i for i in set(ids) if ids.count(i) > 1)}")
+    return resumes
+
+
+def load_gabaritos(path, resume_ids, job_ids):
+    """{resume id: {"relevant": set, "obvious_irrelevant": set}} from a gabarito written by a
+    person. Stops on anything suspicious (unknown key, unknown id, overlap) instead of guessing.
+    """
+    if not path:
+        return {}
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if "relevantes" in data:  # flat file for a single resume
+        if len(resume_ids) != 1:
+            raise SystemExit("a flat gabarito needs exactly one resume; key it by resume id")
+        data = {resume_ids[0]: data}
+    unknown = sorted(set(data) - set(resume_ids))
+    if unknown:
+        raise SystemExit(
+            f"gabarito has ids that are not resumes: {unknown} (resumes: {resume_ids})"
+        )
+    known_jobs = set(job_ids)
+    gabaritos = {}
+    for rid, entry in data.items():
+        extra = sorted(set(entry) - GABARITO_KEYS)
+        if extra or "relevantes" not in entry:
+            raise SystemExit(
+                f"gabarito '{rid}': unexpected keys {extra}; expected {sorted(GABARITO_KEYS)}"
+            )
+        relevant, irrelevant = set(entry["relevantes"]), set(entry.get("irrelevantes_obvias", []))
+        unknown_jobs = (relevant | irrelevant) - known_jobs
+        if unknown_jobs:
+            raise SystemExit(f"gabarito '{rid}': job ids not in the input: {sorted(unknown_jobs)}")
+        if relevant & irrelevant:
+            raise SystemExit(
+                f"gabarito '{rid}': ids in both lists: {sorted(relevant & irrelevant)}"
+            )
+        if not irrelevant:
+            print(f"WARNING: gabarito '{rid}' has no irrelevantes_obvias")
+        gabaritos[rid] = {"relevant": relevant, "obvious_irrelevant": irrelevant}
+    for rid in sorted(set(resume_ids) - set(gabaritos)):
+        print(f"WARNING: no gabarito for resume '{rid}': its quality metrics are skipped")
+    return gabaritos
+
+
+# --- Chunking ---------------------------------------------------------------------------------
 
 
 def experience_text(item):
@@ -91,10 +169,48 @@ def whole_resume_text(resume):
     return ". ".join(p for p in parts if p)
 
 
-def build_resume_chunks(resume):
-    """Chunk 0 = title + skills; then one chunk per experience item."""
-    head = ". ".join(p for p in (resume.get("title"), ", ".join(resume.get("skills", []))) if p)
-    return [head, *(experience_text(item) for item in resume.get("experience", []))]
+def count_tokens(tokenizer, text):
+    return len(tokenizer.tokenize(text))
+
+
+def head_chunks(resume, tokenizer, budget, prefix):
+    """Title + skills. A skill list that does not fit in `budget` tokens is split into groups,
+    each one repeating the title.
+    """
+    title = resume.get("title", "")
+
+    def text(group):
+        return ". ".join(p for p in (title, ", ".join(group)) if p)
+
+    chunks, group = [], []
+    for skill in resume.get("skills", []):
+        candidate = [*group, skill]
+        if group and count_tokens(tokenizer, prefix + text(candidate)) > budget:
+            chunks.append(text(group))
+            group = [skill]
+        else:
+            group = candidate
+    chunks.append(text(group))
+    return chunks
+
+
+def build_resume_chunks(resume, tokenizer, limit, prefix):
+    """Chunk 0 = title + skills (split if too long); then one chunk per experience item.
+
+    A chunk that still exceeds the model limit (a very long experience item) is cut with the
+    overlapping token window of embedding_benchmark.py.
+    """
+    budget = limit - SPECIAL_TOKENS
+    chunks = head_chunks(resume, tokenizer, budget, prefix)
+    chunks += [experience_text(item) for item in resume.get("experience", [])]
+    fitted = []
+    for chunk in chunks:
+        if count_tokens(tokenizer, prefix + chunk) <= budget:
+            fitted.append(chunk)
+        else:
+            size = budget - count_tokens(tokenizer, prefix)
+            fitted += split_into_chunks(chunk, tokenizer, size)
+    return fitted
 
 
 def split_requirements(description):
@@ -105,7 +221,7 @@ def split_requirements(description):
 
 def token_counts(tokenizer, texts, prefix):
     """Tokens the model sees for each text, including the special tokens."""
-    return [len(tokenizer.tokenize(prefix + t)) + SPECIAL_TOKENS for t in texts]
+    return [count_tokens(tokenizer, prefix + t) + SPECIAL_TOKENS for t in texts]
 
 
 # --- Scoring (numpy reference) ----------------------------------------------------------------
@@ -163,8 +279,12 @@ def ndcg_at(order, relevant, k):
     return dcg / idcg if idcg else 0.0
 
 
-def evaluate(order, gabarito, k=10):
-    """Top-k of a ranking, plus precision, recall and nDCG when there is a gabarito."""
+def evaluate(order, gabarito, candidates, k=10):
+    """Top-k of a ranking, plus quality metrics when there is a gabarito.
+
+    `candidates` are the jobs the pgvector retrieval brought back for this strategy;
+    pool_recall is the share of relevant jobs among them (what the first phase must achieve).
+    """
     result = {"top10": order[:k]}
     if gabarito:
         relevant = gabarito["relevant"]
@@ -172,22 +292,24 @@ def evaluate(order, gabarito, k=10):
         result[f"precision_at_{k}"] = round(hits / k, 3)
         result[f"recall_at_{k}"] = round(hits / len(relevant), 3)
         result[f"ndcg_at_{k}"] = round(ndcg_at(order, relevant, k), 3)
+        result["pool_recall"] = round(len(candidates & relevant) / len(relevant), 3)
         result[f"obvious_irrelevant_in_top{k}"] = sum(
             1 for j in order[:k] if j in gabarito["obvious_irrelevant"]
         )
     return result
 
 
-def load_gabarito(path):
-    """Gabarito written by a person, or None when no file is given."""
-    if not path:
-        return None
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
-    return {
-        "origin": str(path),
-        "relevant": set(data["relevantes"]),
-        "obvious_irrelevant": set(data.get("irrelevantes_obvias", [])),
-    }
+def mean_over_resumes(per_resume):
+    """Mean of each quality metric over the resumes that have a gabarito."""
+    means = {}
+    for name in STRATEGIES:
+        rows = [s[name] for s in per_resume.values() if "ndcg_at_10" in s[name]]
+        if rows:
+            means[name] = {
+                m: round(statistics.mean(r[m] for r in rows), 3) for m in QUALITY_METRICS
+            }
+            means[name]["resumes"] = len(rows)
+    return means
 
 
 # --- pgvector ---------------------------------------------------------------------------------
@@ -256,7 +378,10 @@ def explain(conn, vec, n, force_index):
 
 
 def pgvector_retrieval(conn, chunk_vecs, plain_resume_vec, requirement_vecs, job_ids, top_n):
-    """Per-chunk top-n queries merged into a pool, then re-scored. Returns scores per strategy.
+    """Per-chunk top-n queries merged into a pool, then re-scored.
+
+    Returns (score by job id for each strategy, candidate job ids for each strategy, the
+    chunk x pool similarity matrix and the pool ids).
 
     Why per-chunk queries: a job's maximum chunk cosine (strategy A) is never worse ranked inside
     its best chunk's list than overall, so the union of the per-chunk top-n lists contains the
@@ -285,7 +410,8 @@ def pgvector_retrieval(conn, chunk_vecs, plain_resume_vec, requirement_vecs, job
         **pooled,
         "D": ann_top(conn, mean_vec, top_n),
     }
-    return scores, pool_ids, sims
+    candidates = {name: set(by_id) for name, by_id in scores.items()}
+    return scores, candidates, sims, pool_ids
 
 
 def order_of(score_by_id):
@@ -295,20 +421,109 @@ def order_of(score_by_id):
 # --- Benchmark --------------------------------------------------------------------------------
 
 
+def run_resume(ctx, resume, gabarito):
+    """Chunk one resume, score every job with the five strategies and check pgvector."""
+    args = ctx.args
+    limit = ctx.limit
+    chunks = build_resume_chunks(resume, ctx.tokenizer, limit, ctx.query_prefix)
+    whole_text = whole_resume_text(resume)
+    plain_text = ctx.query_prefix + whole_text
+    chunk_inputs = [ctx.query_prefix + c for c in chunks]
+
+    chunk_tokens = token_counts(ctx.tokenizer, chunks, ctx.query_prefix)
+    whole_tokens = token_counts(ctx.tokenizer, [whole_text], ctx.query_prefix)[0]
+    tokens = {
+        "whole_resume_tokens": whole_tokens,
+        "whole_resume_truncated": whole_tokens > limit,
+        "chunk_tokens": chunk_tokens,
+        "chunks_over_limit": sum(1 for t in chunk_tokens if t > limit),
+        "experience_items": len(resume.get("experience", [])),
+    }
+    print(
+        f"\n== Resume '{resume['id']}': {whole_tokens} tokens whole (limit {limit}), "
+        f"{len(chunks)} chunks {chunk_tokens}"
+    )
+    if tokens["chunks_over_limit"]:
+        print("WARNING: some chunks exceed the model limit and will be truncated")
+
+    timing = {
+        "resume_whole_truncated": time_runs(lambda: ctx.encode([plain_text]), args.runs),
+        "resume_chunks_batch": time_runs(lambda: ctx.encode(chunk_inputs), args.runs),
+    }
+    chunk_vecs = ctx.encode(chunk_inputs)
+    plain_vec = ctx.encode([plain_text])
+
+    reference = numpy_scores(chunk_vecs, plain_vec, ctx.job_vecs, ctx.requirement_vecs)
+    numpy_orders = {name: rank(ctx.job_ids, reference[name]) for name in STRATEGIES}
+
+    scores, candidates, pool_matrix, pool_ids = pgvector_retrieval(
+        ctx.conn, chunk_vecs, plain_vec, ctx.requirement_vecs, ctx.job_ids, args.top_n
+    )
+    pg_orders = {name: order_of(scores[name]) for name in STRATEGIES}
+    column = {j: i for i, j in enumerate(ctx.job_ids)}
+    numpy_pool = cosine_matrix(chunk_vecs, ctx.job_vecs)[:, [column[j] for j in pool_ids]]
+    match = {
+        name: {
+            "top10_identical": pg_orders[name][:10] == numpy_orders[name][:10],
+            "top10_overlap": len(set(pg_orders[name][:10]) & set(numpy_orders[name][:10])),
+        }
+        for name in STRATEGIES
+    }
+    strategies = {
+        name: evaluate(numpy_orders[name], gabarito, candidates[name]) for name in STRATEGIES
+    }
+    query_timing = {
+        "top_n": args.top_n,
+        "pool_size": len(pool_ids),
+        "per_chunk_ann_queries": time_runs(
+            lambda: [ann_top(ctx.conn, v, args.top_n) for v in chunk_vecs], args.runs
+        ),
+        "single_query_mean_vector": time_runs(
+            lambda: ann_top(ctx.conn, normalize(chunk_vecs).mean(axis=0), args.top_n), args.runs
+        ),
+    }
+
+    header = f"{'strategy':<9}" + (
+        f"{'P@10':>6}{'R@10':>7}{'nDCG@10':>9}{'poolR':>7}" if gabarito else ""
+    )
+    print(f"{header}  {'pgvector top10':<22}top 10 job ids")
+    for name in STRATEGIES:
+        s, m = strategies[name], match[name]
+        quality = ""
+        if gabarito:
+            quality = (
+                f"{s['precision_at_10']:>6}{s['recall_at_10']:>7}{s['ndcg_at_10']:>9}"
+                f"{s['pool_recall']:>7}"
+            )
+        same = "identical" if m["top10_identical"] else f"{m['top10_overlap']}/10 in common"
+        print(f"{name:<9}{quality}  {same:<22}{s['top10']}")
+
+    return {
+        "chunks": chunks,
+        "tokens": tokens,
+        "generation_time_test": timing,
+        "strategies": strategies,
+        "pgvector_test": {
+            "query_timing": query_timing,
+            "max_abs_cosine_diff_vs_numpy": float(np.abs(numpy_pool - pool_matrix).max()),
+            "match_with_numpy": match,
+        },
+        "first_chunk_vec": chunk_vecs[0],
+    }
+
+
 def run_benchmark(args):
     data = json.loads(Path(args.input).read_text(encoding="utf-8"))
     jobs = data["jobs"]
     job_ids = [j["id"] for j in jobs]
-    gabarito = load_gabarito(args.gabarito)
+    resumes = load_resumes(args, data)
+    gabaritos = load_gabaritos(args.gabarito, [r["id"] for r in resumes], job_ids)
     query_prefix, passage_prefix = prefixes_for(args.model)
     job_texts = [build_job_text(j) for j in jobs]
-    chunks = build_resume_chunks(data["resume"])
-    whole_text = whole_resume_text(data["resume"])
-    plain_resume_text = query_prefix + whole_text
     requirements = [split_requirements(j["description"]) for j in jobs]
     flat_requirements = [passage_prefix + r for reqs in requirements for r in reqs]
 
-    print(f"Model: {args.model}\nInput: {args.input} ({len(jobs)} jobs, {len(chunks)} chunks)")
+    print(f"Model: {args.model}\nInput: {args.input} ({len(jobs)} jobs, {len(resumes)} resumes)")
 
     # 1. Load: time and memory.
     cached = model_in_cache(args.model)
@@ -319,61 +534,36 @@ def run_benchmark(args):
     memory_after_load = rss_mb()
     model.encode(["warm-up"], convert_to_numpy=True)  # first call is slower; excluded
     limit = int(model.max_seq_length)
-    tokenizer = model.tokenizer
     print(f"Load: {load_seconds:.2f}s (cached: {cached}), max_seq_length {limit}")
 
-    # 2. Tokens: does every chunk and job fit the model?
-    chunk_tokens = token_counts(tokenizer, chunks, query_prefix)
-    job_tokens = token_counts(tokenizer, job_texts, passage_prefix)
-    plain_tokens = token_counts(tokenizer, [whole_text], query_prefix)[0]
-    tokens = {
-        "max_seq_length": limit,
-        "whole_resume_tokens": plain_tokens,
-        "whole_resume_truncated": plain_tokens > limit,
-        "chunk_tokens": chunk_tokens,
-        "chunks_over_limit": sum(1 for t in chunk_tokens if t > limit),
-        "max_job_tokens": max(job_tokens),
-        "jobs_over_limit": sum(1 for t in job_tokens if t > limit),
-        "requirements_total": len(flat_requirements),
-    }
-    print(
-        f"Tokens: whole resume {plain_tokens} (limit {limit}), chunks {chunk_tokens}, "
-        f"longest job {tokens['max_job_tokens']}, over limit: "
-        f"{tokens['chunks_over_limit']} chunks, {tokens['jobs_over_limit']} jobs"
-    )
-    if tokens["chunks_over_limit"] or tokens["jobs_over_limit"]:
-        print("WARNING: some texts exceed the model limit and will be truncated")
-
-    # 3. Embeddings and generation time (chunks and jobs in one batch each).
     def encode(texts):
         return model.encode(texts, batch_size=BATCH_SIZE, convert_to_numpy=True)
 
-    chunk_inputs = [query_prefix + c for c in chunks]
+    # 2. Jobs and job requirements: tokens, generation time and embeddings (shared by resumes).
     job_inputs = [passage_prefix + t for t in job_texts]
-    timing = {
+    job_tokens = token_counts(model.tokenizer, job_texts, passage_prefix)
+    jobs_timing = {
         "runs": args.runs,
-        "resume_whole_truncated": time_runs(lambda: encode([plain_resume_text]), args.runs),
-        "resume_chunks_batch": time_runs(lambda: encode(chunk_inputs), args.runs),
         "jobs_batch": time_runs(lambda: encode(job_inputs), args.runs),
         "requirements_batch": time_runs(lambda: encode(flat_requirements), args.runs),
     }
-    chunk_vecs = encode(chunk_inputs)
-    plain_resume_vec = encode([plain_resume_text])
     job_vecs = encode(job_inputs)
     flat_vecs = encode(flat_requirements)
     requirement_vecs, cursor = [], 0
     for reqs in requirements:
         requirement_vecs.append(flat_vecs[cursor : cursor + len(reqs)])
         cursor += len(reqs)
-    peak = rss_mb()
+    jobs_info = {
+        "max_job_tokens": max(job_tokens),
+        "jobs_over_limit": sum(1 for t in job_tokens if t > limit),
+        "requirements_total": len(flat_requirements),
+    }
     print(
-        f"Generation (median of {args.runs}): whole resume "
-        f"{timing['resume_whole_truncated']['median_ms']} ms | {len(chunks)} chunks "
-        f"{timing['resume_chunks_batch']['median_ms']} ms | {len(jobs)} jobs "
-        f"{timing['jobs_batch']['median_ms']} ms"
+        f"Jobs: longest {jobs_info['max_job_tokens']} tokens, {jobs_info['jobs_over_limit']} over "
+        f"the limit | {len(jobs)} jobs in batch {jobs_timing['jobs_batch']['median_ms']} ms"
     )
 
-    # 4. PT/EN support (same pairs as embedding_benchmark.py).
+    # 3. PT/EN support (same pairs as embedding_benchmark.py).
     equivalent = pair_similarities(model, PAIRS_EQUIVALENT, query_prefix)
     different = pair_similarities(model, PAIRS_DIFFERENT, query_prefix)
     pt_en = {
@@ -382,77 +572,59 @@ def run_benchmark(args):
         "gap": round(statistics.mean(equivalent) - statistics.mean(different), 4),
     }
 
-    # 5. Strategies with numpy over all jobs (reference ranking).
-    reference = numpy_scores(chunk_vecs, plain_resume_vec, job_vecs, requirement_vecs)
-    numpy_orders = {name: rank(job_ids, reference[name]) for name in STRATEGIES}
-    strategies = {name: evaluate(numpy_orders[name], gabarito) for name in STRATEGIES}
-
-    # 6. pgvector: store the jobs, retrieve per chunk, compare with the numpy ranking.
+    # 4. pgvector: store the jobs once, then run each resume against them.
     conn = connect()
+    results, peak = {}, rss_mb()
     try:
         server = conn.execute("SELECT version()").fetchone()[0]
         pgvector_version = conn.execute(
             "SELECT extversion FROM pg_extension WHERE extname = 'vector'"
         ).fetchone()[0]
         load_jobs_table(conn, jobs, job_vecs)
-        scores, pool_ids, chunk_pool_sims = pgvector_retrieval(
-            conn, chunk_vecs, plain_resume_vec, requirement_vecs, job_ids, args.top_n
+        ctx = SimpleNamespace(
+            args=args,
+            model=model,
+            tokenizer=model.tokenizer,
+            limit=limit,
+            encode=encode,
+            query_prefix=query_prefix,
+            job_ids=job_ids,
+            job_vecs=job_vecs,
+            requirement_vecs=requirement_vecs,
+            conn=conn,
         )
-        pg_orders = {name: order_of(scores[name]) for name in STRATEGIES}
-        # Largest gap between a pgvector similarity and the numpy cosine for the same pair.
-        column = {j: i for i, j in enumerate(job_ids)}
-        numpy_pool = cosine_matrix(chunk_vecs, job_vecs)[:, [column[j] for j in pool_ids]]
-        max_diff = float(np.abs(numpy_pool - chunk_pool_sims).max())
-        match = {
-            name: {
-                "top10_identical": pg_orders[name][:10] == numpy_orders[name][:10],
-                "top10_overlap": len(set(pg_orders[name][:10]) & set(numpy_orders[name][:10])),
-            }
-            for name in STRATEGIES
-        }
-        query_timing = {
-            "top_n": args.top_n,
-            "pool_size": len(pool_ids),
-            "per_chunk_ann_queries": time_runs(
-                lambda: [ann_top(conn, v, args.top_n) for v in chunk_vecs], args.runs
-            ),
-            "single_query_mean_vector": time_runs(
-                lambda: ann_top(conn, normalize(chunk_vecs).mean(axis=0), args.top_n), args.runs
-            ),
-        }
+        for resume in resumes:
+            results[resume["id"]] = run_resume(ctx, resume, gabaritos.get(resume["id"]))
+            peak = max(peak, rss_mb())
+        first_vec = results[resumes[0]["id"]]["first_chunk_vec"]
         plan = {
-            "default": explain(conn, chunk_vecs[0], args.top_n, force_index=False),
-            "seqscan_off": explain(conn, chunk_vecs[0], args.top_n, force_index=True),
+            "default": explain(conn, first_vec, args.top_n, force_index=False),
+            "seqscan_off": explain(conn, first_vec, args.top_n, force_index=True),
         }
     finally:
         conn.execute(f"DROP TABLE IF EXISTS {TABLE}")
         conn.close()
+    for result in results.values():
+        del result["first_chunk_vec"]
 
-    print(
-        f"\npgvector {pgvector_version} | pool of {len(pool_ids)} jobs | "
-        f"max |cosine diff vs numpy| {max_diff:.2e}"
-    )
-    header = f"{'strategy':<9}" + (f"{'P@10':>6}{'R@10':>7}{'nDCG@10':>9}" if gabarito else "")
-    print(f"{header}  {'pgvector top10':<22}top 10 job ids")
-    for name in STRATEGIES:
-        s_, m = strategies[name], match[name]
-        quality = ""
-        if gabarito:
-            quality = f"{s_['precision_at_10']:>6}{s_['recall_at_10']:>7}{s_['ndcg_at_10']:>9}"
-        same = "identical" if m["top10_identical"] else f"{m['top10_overlap']}/10 in common"
-        print(f"{name:<9}{quality}  {same:<22}{s_['top10']}")
-    if not gabarito:
-        print("Quality metrics skipped: no --gabarito given")
+    per_resume = {rid: r["strategies"] for rid, r in results.items()}
+    means = mean_over_resumes(per_resume)
+    if means:
+        print(f"\n== Mean over {next(iter(means.values()))['resumes']} resumes with a gabarito")
+        print(f"{'strategy':<9}{'P@10':>6}{'R@10':>7}{'nDCG@10':>9}{'poolR':>7}")
+        for name, m in means.items():
+            print(
+                f"{name:<9}{m['precision_at_10']:>6}{m['recall_at_10']:>7}"
+                f"{m['ndcg_at_10']:>9}{m['pool_recall']:>7}"
+            )
+    else:
+        print("\nQuality metrics skipped: no --gabarito given")
 
     return {
         "model": args.model,
         "input_file": str(args.input),
-        "gabarito": gabarito
-        and {
-            "origin": gabarito["origin"],
-            "relevant": sorted(gabarito["relevant"]),
-            "obvious_irrelevant": sorted(gabarito["obvious_irrelevant"]),
-        },
+        "resumes_file": str(args.resumes) if args.resumes else None,
+        "gabarito_file": str(args.gabarito) if args.gabarito else None,
         "runtime_requirements": {
             **environment(),
             "postgres": server.split(",")[0],
@@ -471,15 +643,23 @@ def run_benchmark(args):
             "model_delta_mb": round(memory_after_load - memory_before, 1),
             "peak_mb": round(peak, 1),
         },
-        "generation_time_test": timing,
-        "similarity_test": {"pt_en": pt_en, "strategies": strategies},
-        "chunking": {"chunks": chunks, "tokens": tokens},
-        "pgvector_test": {
-            "query_timing": query_timing,
-            "plan": plan,
-            "max_abs_cosine_diff_vs_numpy": max_diff,
-            "match_with_numpy": match,
+        "generation_time_test": jobs_timing,
+        "similarity_test": {
+            "pt_en": pt_en,
+            "per_resume": per_resume,
+            "mean_over_resumes": means,
         },
+        "jobs": jobs_info,
+        "resumes": {
+            rid: {
+                "chunks": r["chunks"],
+                "tokens": r["tokens"],
+                "generation_time_test": r["generation_time_test"],
+                "pgvector_test": r["pgvector_test"],
+            }
+            for rid, r in results.items()
+        },
+        "pgvector_plan": plan,
     }
 
 
@@ -487,6 +667,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Structured chunking + pgvector benchmark.")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Hugging Face model name")
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="input JSON file")
+    parser.add_argument("--resumes", type=Path, help='more resumes: {"resumes": [...]} (optional)')
     parser.add_argument(
         "--gabarito", type=Path, help="gabarito JSON written by a person (optional)"
     )
