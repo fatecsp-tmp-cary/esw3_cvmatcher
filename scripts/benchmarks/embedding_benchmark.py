@@ -25,7 +25,7 @@ What it measures:
     5. Token limit: texts longer than the model's max_seq_length are split into overlapping
        chunks; a resume/job score is the maximum cosine over chunk pairs.
     6. Ranking of the jobs for the resume, with precision@k against --relevant-ids
-       (a heuristic: the default ids 1-12 are the software/engineering jobs of the shared input).
+       (a heuristic: the default ids 1-15 are the jobs labeled fit 2 in the shared input).
 
 Notes:
     - The first run downloads the model, which inflates the load time. The result records
@@ -46,7 +46,7 @@ import psutil
 from sentence_transformers import SentenceTransformer
 
 DEFAULT_INPUT = Path(__file__).parent / "embedding_benchmark_input.json"
-DEFAULT_RELEVANT_IDS = list(range(1, 13))
+DEFAULT_RELEVANT_IDS = list(range(1, 16))
 BATCH_SIZE = 32
 CHUNK_OVERLAP = 20  # tokens shared between consecutive chunks
 SPECIAL_TOKENS = 2  # [CLS]/[SEP] (or <s>/</s>) added by the tokenizer around every text
