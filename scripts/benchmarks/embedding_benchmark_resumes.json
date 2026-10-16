@@ -1,0 +1,118 @@
+{
+    "resumes": [
+        {
+            "id": "devops_pleno",
+            "title": "Engenheiro DevOps / Cloud Pleno",
+            "skills": [
+                "Linux (Ubuntu Server, Debian)",
+                "AWS (EC2, S3, IAM, VPC, CloudWatch)",
+                "Docker e Docker Compose",
+                "Kubernetes",
+                "Terraform",
+                "Ansible",
+                "CI/CD (GitLab CI, GitHub Actions)",
+                "Bash scripting",
+                "Python para automação",
+                "Git",
+                "Nginx",
+                "Prometheus e Grafana",
+                "ELK Stack",
+                "Redes TCP/IP, DNS e HTTP",
+                "PostgreSQL",
+                "Conceitos de alta disponibilidade e recuperação de desastres",
+                "Monitoramento, troubleshooting e gestão de incidentes"
+            ],
+            "experience": [
+                "Engenheiro DevOps em uma empresa de software para gestão empresarial. Responsável pela manutenção de ambientes Linux, administração de recursos na AWS e automação de tarefas operacionais recorrentes.",
+                "Implementei pipelines de CI/CD com GitLab CI para automatizar testes, criação de imagens Docker e publicação de aplicações em ambientes de homologação e produção.",
+                "Desenvolvi módulos Terraform para provisionamento padronizado de redes, instâncias e permissões na AWS, reduzindo diferenças de configuração entre ambientes.",
+                "Configurei dashboards no Grafana com métricas coletadas pelo Prometheus, permitindo acompanhar consumo de recursos, disponibilidade dos serviços e comportamento das aplicações.",
+                "Automatizei rotinas de configuração de servidores utilizando Ansible e scripts Bash, incluindo instalação de pacotes, criação de usuários, aplicação de configurações e verificações de saúde.",
+                "Participei da administração de clusters Kubernetes, realizando atualização de deployments, configuração de probes, gerenciamento de secrets e análise de falhas em pods.",
+                "Atuei na investigação de incidentes relacionados a indisponibilidade de serviços, falhas de conectividade e consumo elevado de CPU ou memória, documentando causas e ações corretivas.",
+                "Configurei políticas de acesso com IAM e organizei permissões por função, seguindo o princípio do menor privilégio e revisando credenciais utilizadas por aplicações.",
+                "Colaborei com equipes de desenvolvimento para padronizar imagens de containers, variáveis de ambiente e procedimentos de publicação, diminuindo problemas causados por diferenças entre ambientes.",
+                "Implementei rotinas de backup para bancos PostgreSQL e arquivos armazenados em serviços de objetos, com verificações periódicas de integridade e testes de restauração.",
+                "Mantive documentação técnica de infraestrutura, procedimentos de deploy, inventário de serviços e orientações para resposta a incidentes, facilitando o trabalho de outros integrantes da equipe.",
+                "Tenho experiência em ambientes de produção e homologação, com foco em confiabilidade, automação e melhoria contínua. Participo de revisões técnicas e proponho ajustes conforme as necessidades da operação."
+            ]
+        },
+        {
+            "id": "suporte_junior",
+            "title": "Suporte de TI Júnior",
+            "skills": [
+                "Windows",
+                "Linux básico",
+                "Microsoft 365",
+                "Redes básicas",
+                "Hardware",
+                "Suporte remoto"
+            ],
+            "experience": [
+                "Mexo com computador, instalação de programas e configuração de impressoras numa empresa de serviços.",
+                "Ajudo o pessoal com problemas de rede, senha, e-mail e outras coisas do dia a dia. Também dou uma força na organização dos equipamentos."
+            ]
+        },
+        {
+            "id": "fullstack_medio",
+            "title": "Desenvolvedor Full Stack Pleno",
+            "skills": [
+                "JavaScript e TypeScript",
+                "React",
+                "Next.js",
+                "Node.js",
+                "Express",
+                "HTML5 e CSS3",
+                "Tailwind CSS",
+                "Java e Spring Boot",
+                "PostgreSQL",
+                "MongoDB",
+                "REST APIs",
+                "Jest e testes automatizados",
+                "Git e GitHub",
+                "Docker",
+                "Metodologias ágeis"
+            ],
+            "experience": [
+                "Desenvolvedor em uma empresa de soluções digitais, atuando na criação e evolução de aplicações web utilizadas por clientes corporativos. Trabalho tanto no front-end quanto no desenvolvimento de serviços de back-end.",
+                "Desenvolvi interfaces responsivas em React e Next.js, organizando componentes reutilizáveis e melhorando a consistência visual entre páginas e funcionalidades.",
+                "Implementei APIs REST com Node.js e Express, incluindo validação de dados, autenticação, tratamento de erros e integração com bancos de dados relacionais.",
+                "Participei da migração de telas antigas para uma arquitetura baseada em componentes, reduzindo em aproximadamente 30% o tempo médio de implementação de páginas semelhantes.",
+                "Criei consultas e ajustes de índices no PostgreSQL para melhorar o desempenho de operações frequentes, além de revisar estruturas de tabelas conforme novas regras de negócio.",
+                "Implementei testes automatizados para componentes e endpoints críticos, ajudando a identificar regressões antes das publicações e tornando as alterações mais seguras.",
+                "Trabalhei em conjunto com design, produto e outros desenvolvedores no refinamento de requisitos, estimativa de tarefas, revisão de código e resolução de problemas reportados pelos usuários.",
+                "Também mantenho serviços existentes em Java com Spring Boot, realizo correções de bugs e contribuo para a documentação técnica. Tenho familiaridade com Docker e com fluxos de integração contínua."
+            ]
+        },
+        {
+            "id": "dados_misto",
+            "title": "Analista de Dados / Engenharia de Dados",
+            "skills": [
+                "SQL (JOINs, CTEs, window functions)",
+                "Python e Pandas",
+                "PySpark",
+                "Databricks",
+                "Power BI e DAX",
+                "ETL/ELT",
+                "SQL Server e PostgreSQL",
+                "dbt e Airflow",
+                "Git",
+                "APIs REST",
+                "Modelagem dimensional",
+                "Excel avançado"
+            ],
+            "experience": [
+                "Automatizei o relatório semanal com Python e SQL, reduzindo o tempo de execução de 6h para 40min.",
+                "Criei dashboard no Power BI usado por 3 áreas para acompanhar volume operacional, produtividade e indicadores financeiros.",
+                "Desenvolvi queries SQL com JOINs, CTEs e window functions para consolidar dados de diferentes sistemas.",
+                "Mantive pipelines ETL com Python e PySpark no Databricks, tratando dados inconsistentes antes da carga nas tabelas analíticas.",
+                "Implementei checks de qualidade para detectar duplicidades e campos vazios, reduzindo ajustes manuais antes da publicação dos relatórios.",
+                "Organizei tabelas com modelagem dimensional e defini métricas compartilhadas para evitar diferenças nos números apresentados pelas equipes.",
+                "Fiz integrações com APIs REST e scripts Python para extrair dados e alimentar análises internas.",
+                "Utilizei SQL Server e PostgreSQL nas consultas e validações. Também tenho contato com dbt, Airflow e versionamento de código com Git.",
+                "Documentei regras de negócio e alinhei KPIs com usuários de diferentes áreas, transformando pedidos de análise em entregas técnicas.",
+                "Atuei em demandas de BI, data engineering e pequenas melhorias em aplicações internas, buscando automatizar tarefas repetitivas e melhorar a confiabilidade dos dados."
+            ]
+        }
+    ]
+}
