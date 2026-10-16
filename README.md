@@ -118,3 +118,53 @@ the app's startup/shutdown events when used as a context manager.
   with the failing fields in `errors[*].loc` (error format: `PLAN.md`, REST API).
 - For `async` tests that need to await the app directly, use
   `httpx2.AsyncClient(transport=httpx2.ASGITransport(app=app))`.
+
+### Database-backed tests
+
+Integration and e2e tests run against a real PostgreSQL. The fixtures live in
+`tests/conftest.py`, so any test under `tests/` can use them.
+
+Setup:
+
+1. Start PostgreSQL (see [Local PostgreSQL](#local-postgresql)).
+2. Export `TEST_DATABASE_URL`, pointing at a database whose name ends in `_test`
+   (see `.env.example`). The database is created automatically if it does not exist.
+
+```bash
+export TEST_DATABASE_URL=postgresql://cvmatch:cvmatch@localhost:5432/cvmatch_test   # bash
+```
+
+```powershell
+$env:TEST_DATABASE_URL = "postgresql://cvmatch:cvmatch@localhost:5432/cvmatch_test"   # PowerShell
+```
+
+Without `TEST_DATABASE_URL` the database tests are skipped. A database name that does not
+end in `_test` is refused, so the tests can never touch your development data.
+
+| Fixture | Scope | What it gives you |
+|---|---|---|
+| `db_engine` | session | Engine for the test database with all migrations applied (`alembic upgrade head` before the run, `downgrade base` after). |
+| `db_connection` | test | A connection inside a transaction that is rolled back after the test. |
+| `db_session` | test | An ORM `Session` on that connection. Everything a test writes, even after `commit()`, is discarded when it ends. |
+
+Most tests only need `db_session`:
+
+```python
+def test_inserts_a_row(db_session):
+    db_session.execute(text("INSERT INTO ..."))
+    assert db_session.scalar(text("SELECT count(*) FROM ...")) == 1
+```
+
+See `tests/integration/persistence/test_database_fixtures.py` for a full example. Run only
+these tests with `pytest -m integration`.
+
+Notes:
+
+- Put database tests in `tests/integration/` (or `tests/e2e/`) so they get the right marker.
+- Because each test runs inside one transaction, they cannot check behavior between two
+  separate connections (for example concurrent inserts). For that, use `db_engine`
+  directly and clean up what you create.
+- Run the tests serially (no `pytest-xdist`): they share one test database.
+- If a PostgreSQL installed on your machine already uses port 5432, set `POSTGRES_PORT`
+  (for example `5433`) before `docker compose up -d`, and use the same port in
+  `TEST_DATABASE_URL`.
