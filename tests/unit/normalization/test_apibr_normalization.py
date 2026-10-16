@@ -1,13 +1,14 @@
 import json
 from pathlib import Path
-from src.normalization.jobs.apibr import normalize_apibr_job, normalize_text, normalize_keywords
+
+from src.normalization.jobs.apibr import normalize_apibr_job, normalize_keywords, normalize_text
 
 
 def test_normalize_apibr_job():
     fixture_path = Path("tests/resources/jobs_fixture.json")
     with open(fixture_path, encoding="utf-8") as f:
         raw_data = json.load(f)
-    
+
     raw_job = raw_data[0] if isinstance(raw_data, list) else raw_data
     normalized = normalize_apibr_job(raw_job)
 

@@ -9,7 +9,7 @@ def normalize_keywords(labels) -> list[str]:
     """Extrai os nomes das labels/keywords da APIBR de forma segura."""
     if not labels or not isinstance(labels, list):
         return []
-    
+
     keywords = []
     for label in labels:
         if isinstance(label, dict) and "name" in label:
