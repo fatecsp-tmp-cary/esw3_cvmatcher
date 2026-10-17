@@ -38,16 +38,10 @@ class JobSource(Base):
 
     polling_interval: Mapped[int | None] = mapped_column(Integer)
 
-    last_run_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
+    last_run_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    last_success_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
+    last_success_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    next_run_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
+    next_run_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     last_error: Mapped[str | None] = mapped_column(Text)

@@ -1,4 +1,3 @@
-
 from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
@@ -26,6 +25,7 @@ class JobStatus(StrEnum):
     STALE = "STALE"
     EXPIRED = "EXPIRED"
 
+
 ALLOWED_STATUS_TRANSITIONS = {
     JobStatus.DISCOVERED: {JobStatus.ACTIVE, JobStatus.EXPIRED},
     JobStatus.ACTIVE: {JobStatus.STALE, JobStatus.EXPIRED},
@@ -37,12 +37,11 @@ ALLOWED_STATUS_TRANSITIONS = {
 def can_transition_to(current_status: JobStatus, new_status: JobStatus) -> bool:
     return new_status in ALLOWED_STATUS_TRANSITIONS[current_status]
 
+
 class Job(Base):
     __tablename__ = "jobs"
 
-    __table_args__ = (
-        UniqueConstraint("source", "source_job_id"),
-    )
+    __table_args__ = (UniqueConstraint("source", "source_job_id"),)
 
     id: Mapped[int] = mapped_column(
         Integer,
@@ -67,9 +66,9 @@ class Job(Base):
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     source_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     first_seen_at: Mapped[datetime] = mapped_column(
-    DateTime(timezone=True),
-    nullable=False,
-    default=lambda: datetime.now(UTC),
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
     )
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -84,4 +83,3 @@ class Job(Base):
     raw: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     embedding: Mapped[list[float] | None] = mapped_column(Vector())
     content_hash: Mapped[str | None] = mapped_column(String(64))
-

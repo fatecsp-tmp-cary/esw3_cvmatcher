@@ -49,8 +49,7 @@ def test_job_has_unique_source_identity():
     ]
 
     assert any(
-        {column.name for column in constraint.columns}
-        == {"source", "source_job_id"}
+        {column.name for column in constraint.columns} == {"source", "source_job_id"}
         for constraint in unique_constraints
     )
 
@@ -111,10 +110,7 @@ def test_source_run_has_expected_fields():
 def test_source_run_references_job_source():
     foreign_keys = SourceRun.__table__.c.source_id.foreign_keys
 
-    assert any(
-        foreign_key.target_fullname == "job_sources.id"
-        for foreign_key in foreign_keys
-    )
+    assert any(foreign_key.target_fullname == "job_sources.id" for foreign_key in foreign_keys)
 
 
 def test_job_embedding_uses_vector():
