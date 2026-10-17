@@ -4,6 +4,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -15,6 +16,10 @@ from src.persistence.base import Base
 
 class SourceRun(Base):
     __tablename__ = "source_runs"
+
+    __table_args__ = (
+        Index("ix_source_runs_source_id", "source_id"),
+    )
 
     id: Mapped[int] = mapped_column(
         Integer,

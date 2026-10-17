@@ -9,6 +9,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    Index,
     UniqueConstraint,
 )
 from sqlalchemy import (
@@ -41,7 +42,11 @@ def can_transition_to(current_status: JobStatus, new_status: JobStatus) -> bool:
 class Job(Base):
     __tablename__ = "jobs"
 
-    __table_args__ = (UniqueConstraint("source", "source_job_id"),)
+
+    __table_args__ = (
+    UniqueConstraint("source", "source_job_id"),
+    Index("ix_jobs_status", "status"),
+    Index("ix_jobs_published_at", "published_at"),)
 
     id: Mapped[int] = mapped_column(
         Integer,
