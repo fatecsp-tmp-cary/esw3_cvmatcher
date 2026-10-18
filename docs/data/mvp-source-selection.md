@@ -17,7 +17,7 @@ APiBR (https://apibr.com) was selected as the single primary job data source for
 - `per_page`: max 100 results per request
 - `term`: keyword search (matches job title and description)
 - `includeBody`: includes full job description in the response
-- `page`: tested from 1 to 31; page 32 and beyond return no results
+- `page`: doesnt't seem to have a page limit
 - Additional queryable resources: `authors`, `labels`, `organizations`
 - No seniority-level filter available
 

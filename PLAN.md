@@ -111,10 +111,7 @@ esw3_cvmatcher/
 Exactly:
 
 ```text
-id, source, source_job_id, company, title, description, location, mode,
-salary, currency, employment_type, requirements, published_at,
-source_expires_at, first_seen_at, last_seen_at, last_verified_at,
-status, canonical_url, raw, embedding, content_hash
+id, source, source_job_id, company, title, description, location, work_arrangement, salary, currency, published_date, first_seen_at, last_seen_at, last_verified_at, status, job_url, raw, embedding, content_hash
 ```
 
 `source + source_job_id` is uniquely constrained and represents **source identity, not deduplication**.

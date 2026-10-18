@@ -13,6 +13,7 @@ Since each job API returns different JSON structures, all data collected by the 
 | `title` | String | Cleaned and formatted job title | `"Mid-Level Data Analyst"` |
 | `company` | String | Name of the hiring company or career page | `"Globo"`, `"Archer Daniels"` |
 | `description` | Text | Full descriptive text or job requirements | `"Responsible for data modeling..."` |
+| `keywords` | Array[String] | List of keywords related to the job, such as skill, location and seniority requirements | `{"Python", "Pleno", "Django", "Remoto"}` |
 | `location` | JSON / Obj | Standardized object containing city, state, and country | `{"city": "SP", "state": "SP"}` |
 | `work_arrangement` | Enum | Work arrangement (REMOTE, HYBRID, ON_SITE) | `HYBRID` |
 | `seniority_level` | Enum | Seniority level (INTERN, JUNIOR, MID, SENIOR, SPECIALIST, COORDINATOR) | `MID` |
@@ -168,12 +169,10 @@ APiBR was selected because it provides publicly accessible job data in JSON form
 
 Live testing showed the following pagination behavior:
 
-- Pages 1 through 31 returned results.
-- Page 32 onward returned no results.
 - The `limit` parameter did not change the number of results returned.
 - No confirmed keyword-search parameter was identified.
 
-Although the API has pagination and coverage limitations, it was selected as the official primary source for the MVP. Its structured issue metadata and labels can support the normalization process and CV-to-job matching.
+This was selected as the official primary source for the MVP since its structured issue metadata and labels can support the normalization process and CV-to-job matching.
 
 ### 5.2 Complementary and Alternative Sources
 

@@ -38,24 +38,31 @@ O sistema, entretanto, utiliza estruturas auxiliares de persistência e infraest
 | `company`             | Nome textual da empresa                                      |
 | `title`               | Título do cargo                                              |
 | `description`         | Descrição normalizada                                        |
+| `keywords`            | Lista de palavras chave da vaga                              |
 | `location`            | País, estado, cidade e declaração de localização             |
-| `mode`                | Remoto, presencial ou híbrido                                |
-| `salary`              | Faixa salarial, quando divulgada                              |
+| `work_arrangement`    | Remoto, presencial ou híbrido                                |
+| `salary`              | Faixa salarial, quando divulgada                             |
 | `currency`            | Moeda da remuneração                                         |
-| `employment_type`     | Tipo de contratação                                          |
-| `requirements`        | Requisitos estruturados e classificados                      |
-| `published_at`        | Data de publicação na fonte                                   |
-| `source_expires_at`   | Data de expiração explícita informada pela fonte              |
-| `first_seen_at`       | Primeira identificação pelo sistema                           |
-| `last_seen_at`        | Última identificação em uma coleta                            |
-| `last_verified_at`    | Última verificação de disponibilidade                         |
-| `status`              | Estado do ciclo de vida da vaga                               |
-| `canonical_url`       | URL canônica da vaga                                          |
-| `raw`                 | Payload original da fonte                                     |
-| `content_hash`        | Hash do conteúdo normalizado para detectar alterações          |
-| `embedding`           | Vetor semântico da vaga                                       |
+| `publication_date`      | Data de publicação na fonte                                  |
+| `source status`       | Estado da vaga reportado pela fonte entre ativo, inativo e indisponível | 
+| `job_url`       | URL canônica da vaga                                         |
 
-A ausência de `source_expires_at` não deve ser interpretada como uma data de expiração; ela apenas indica que a fonte não forneceu esse dado explicitamente.
+Atributos da coleta e processamento da vaga, persistidos na entidade vaga.
+
+| Atributo | Descrição |
+| --- | --- |
+| ~~`employment_type`~~    | ~~Tipo de contratação~~                                          |
+| ~~`requirements`~~        | ~~Requisitos estruturados e classificados~~                      |
+| ~~`source_expires_at`~~   | ~~Data de expiração explícita informada pela fonte~~             |
+| `first_seen_at`       | Primeira identificação pelo sistema                          |
+| `last_seen_at`        | Última identificação em uma coleta                           |
+| `last_verified_at`    | Última verificação de disponibilidade                        |
+| `status`              | Estado do ciclo de vida da vaga                              |
+| `raw`                 | Payload original da fonte                                    |
+| `content_hash`        | Hash do conteúdo normalizado para detectar alterações        |
+| `embedding`           | Vetor semântico da vaga                                      |
+
+~~A ausência de `source_expires_at` não deve ser interpretada como uma data de expiração; ela apenas indica que a fonte não forneceu esse dado explicitamente.~~
 
 O atributo `embedding` é persistido utilizando `pgvector`. O embedding do candidato nunca é persistido.
 
@@ -322,9 +329,9 @@ Somente vagas `ACTIVE` podem ser avaliadas. A ordem do processamento é:
 
 1. validar o JSON do candidato;
 2. normalizar o `CandidateProfile` em memória;
-3. aplicar filtros de tipo de contratação, senioridade, idioma e requisitos  obrigatórios;
-4. executar a busca textual;
-5. calcular a similaridade semântica;
+3. calcular a similaridade semântica;
+4. aplicar filtros de tipo de contratação, senioridade, idioma e requisitos  obrigatórios;
+5. executar a busca textual;
 6. calcular o score estruturado;
 7. combinar os scores de forma determinística;
 8. retornar os resultados limitados e ordenados.
