@@ -67,7 +67,7 @@ Mean of equivalent pairs: **0.9259**. Mean of unrelated pairs: **0.1033**. Diffe
 
 **Note:** the single encode of the resume truncates the text at the model limit, so the cost of chunking is not included in this time.
 
-**Variation between runs:** between the first and second run, the resume varied by about 10% (70.48 ms to 77.58 ms) and the 100 jobs by about 6% (2253.74 ms to 2396.48 ms). The PR reports variation below 2% on the author's machine.
+**Variation between runs:** between the first and second run, the resume varied by about 10% (70.48 ms to 77.58 ms) and the 100 jobs by about 6% (2253.74 ms to 2396.48 ms). The earlier individual benchmark (same model, another machine) reported variation below 2%, so these timings are indicative only.
 
 ### Comparison with the previous benchmark (individual script)
 
@@ -152,9 +152,9 @@ The two e5 models have a 512-token limit; the mpnet keeps 128 and does not avoid
 | `intfloat/multilingual-e5-base` | 512 | Medium weight |
 | `sentence-transformers/paraphrase-multilingual-mpnet-base-v2` | 128 | Heavier than MiniLM |
 
-**On quality (not only token limit):** `multilingual-e5-small` has the same size (118M parameters, 384 dimensions) and a 512-token limit, and requires prefixing texts with `"query: "` / `"passage: "`, a particularity of its training. Based on public results, its quality appears comparable to `paraphrase-multilingual-MiniLM-L12-v2`, but this was **not measured in this benchmark** and varies by language and task type. In other words, more context does not necessarily mean lower quality, but only a test with our own data can confirm it.
+**On quality (not only token limit):** `multilingual-e5-small` has the same size (118M parameters, 384 dimensions) and a 512-token limit, and requires prefixing texts with `"query: "` / `"passage: "`, a particularity of its training. It was **not measured in this report**, but it was measured in the multi-resume benchmark of PR #87 (`docs/reports/benchmark-l12-chunking.md`: 5 fictional resumes, 100 jobs, human gabarito, chunking and pgvector). There, the mean nDCG@10 with the mean of the top 3 chunks was 0.698 for `multilingual-e5-small` against 0.634 for L12, and the whole resume without chunking scored 0.621 against 0.629 (truncated). With only 5 resumes, differences below about 0.05 are not reliable, so the two models are close and e5-small does not lose quality here.
 
-**Recommendation:** consider opening a separate task to benchmark `multilingual-e5-small`, which would reduce the need for chunking (resumes of up to 512 tokens would fit whole). The shared script already applies the prefixes automatically for `intfloat/` models, so it is enough to run with `--model intfloat/multilingual-e5-small`.
+**Recommendation:** the comparison with `multilingual-e5-small` suggested here was done in #87; the final model decision belongs to #26. For L12 alone, chunking is mandatory for real resumes (see the finding above).
 
 ## Preliminary conclusion
 
@@ -165,7 +165,7 @@ The model `paraphrase-multilingual-MiniLM-L12-v2`:
 - ⚠️ Uses ~434 MB of additional RAM (peak of ~926 MB) on this machine — about half of what was measured in the previous benchmark (~825-939 MB), a difference whose cause has not been investigated; a point of attention for deployment on a low-memory free tier
 - ⚠️ The 128-token limit requires chunking for real resumes, and chunking changed half of the top 10 in this test — it is not an optional detail
 - ⚠️ Only 1 resume and no ground truth: the ranking results are indicative, not conclusive
-- It is recommended to compare `intfloat/multilingual-e5-small` before the final decision, given its larger token limit (512) without a significant increase in weight or an evident loss of quality
+- `intfloat/multilingual-e5-small` was compared in PR #87 (512-token limit, same weight, mean nDCG@10 0.698 against 0.634 for L12 with chunking); the final decision is up to #26
 
 **Reference with the model from #56 (data from PR #81, measured by the author on another machine, Linux, not redone here):**
 
