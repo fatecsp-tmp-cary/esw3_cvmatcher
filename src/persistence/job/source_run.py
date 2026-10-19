@@ -8,6 +8,8 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    false,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -47,24 +49,28 @@ class SourceRun(Base):
         Boolean,
         nullable=False,
         default=False,
+        server_default=false(),
     )
 
     jobs_found: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
         default=0,
+        server_default=text("0"),
     )
 
     jobs_created: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
         default=0,
+        server_default=text("0"),
     )
 
     jobs_updated: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
         default=0,
+        server_default=text("0"),
     )
 
     errors: Mapped[str | None] = mapped_column(Text)

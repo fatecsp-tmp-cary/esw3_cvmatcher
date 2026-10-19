@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Integer, String, Text, true
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.persistence.base import Base
@@ -34,6 +34,7 @@ class JobSource(Base):
         Boolean,
         nullable=False,
         default=True,
+        server_default=true(),
     )
 
     polling_interval: Mapped[int | None] = mapped_column(Integer)

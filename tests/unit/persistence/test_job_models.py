@@ -132,6 +132,13 @@ def test_job_references_job_source():
     )
 
 
+def test_columns_with_python_defaults_also_have_database_defaults():
+    for model in (Job, JobSource, SourceRun):
+        for column in model.__table__.columns:
+            if column.default is not None:
+                assert column.server_default is not None, f"{model.__name__}.{column.name}"
+
+
 def test_source_run_references_job_source():
     foreign_keys = SourceRun.__table__.c.source_id.foreign_keys
 
