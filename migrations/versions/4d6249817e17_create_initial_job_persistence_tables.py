@@ -9,7 +9,6 @@ from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
-from pgvector.sqlalchemy import VECTOR
 
 # revision identifiers, used by Alembic.
 revision: str = "4d6249817e17"
@@ -20,9 +19,6 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Create the initial job persistence tables."""
-
-    # Enable pgvector before creating the embedding column.
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
     # Create job sources.
     op.create_table(
@@ -45,49 +41,47 @@ def upgrade() -> None:
     op.create_table(
         "jobs",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("source", sa.String(length=100), nullable=False),
+        sa.Column("platform", sa.String(length=100), nullable=False),
         sa.Column("source_job_id", sa.String(length=255), nullable=False),
         sa.Column("company", sa.String(length=255), nullable=True),
         sa.Column("title", sa.String(length=255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
-        sa.Column("location", sa.String(length=255), nullable=True),
-        sa.Column("mode", sa.String(length=50), nullable=True),
-        sa.Column("salary", sa.String(length=100), nullable=True),
-        sa.Column("currency", sa.String(length=10), nullable=True),
-        sa.Column("employment_type", sa.String(length=100), nullable=True),
-        sa.Column("requirements", sa.JSON(), nullable=True),
-        sa.Column("keywords", sa.JSON(), nullable=True),
-        sa.Column("published_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("source_expires_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("first_seen_at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("last_seen_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("last_verified_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("location", sa.JSON(), nullable=True),
         sa.Column(
-            "status",
-            sa.Enum(
-                "DISCOVERED",
-                "ACTIVE",
-                "STALE",
-                "EXPIRED",
-                name="jobstatus",
-            ),
-            nullable=False,
+            "work_arrangement",
+            sa.Enum("REMOTE", "HYBRID", "ON_SITE", name="workarrangement"),
+            nullable=True,
         ),
-        sa.Column("canonical_url", sa.Text(), nullable=True),
-        sa.Column("raw", sa.JSON(), nullable=True),
-        sa.Column("embedding", VECTOR(), nullable=True),
-        sa.Column("content_hash", sa.String(length=64), nullable=True),
+        sa.Column(
+            "seniority_level",
+            sa.Enum(
+                "INTERN",
+                "JUNIOR",
+                "MID",
+                "SENIOR",
+                "SPECIALIST",
+                "COORDINATOR",
+                name="senioritylevel",
+            ),
+            nullable=True,
+        ),
+        sa.Column("skills", sa.JSON(), nullable=True),
+        sa.Column("keywords", sa.JSON(), nullable=True),
+        sa.Column("salary", sa.JSON(), nullable=True),
+        sa.Column("job_url", sa.Text(), nullable=True),
+        sa.Column("publication_date", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("first_seen_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("last_seen_at", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_jobs")),
         sa.UniqueConstraint(
-            "source",
+            "platform",
             "source_job_id",
-            name=op.f("uq_jobs_source"),
+            name=op.f("uq_jobs_platform"),
         ),
     )
 
     # Create indexes only after the jobs table exists.
-    op.create_index("ix_jobs_status", "jobs", ["status"])
-    op.create_index("ix_jobs_published_at", "jobs", ["published_at"])
+    op.create_index("ix_jobs_publication_date", "jobs", ["publication_date"])
 
     # Create source execution history.
     op.create_table(
@@ -101,7 +95,6 @@ def upgrade() -> None:
         sa.Column("jobs_found", sa.Integer(), nullable=False),
         sa.Column("jobs_created", sa.Integer(), nullable=False),
         sa.Column("jobs_updated", sa.Integer(), nullable=False),
-        sa.Column("lifecycle_changes", sa.Integer(), nullable=False),
         sa.Column("errors", sa.Text(), nullable=True),
         sa.ForeignKeyConstraint(
             ["source_id"],
@@ -137,14 +130,12 @@ def downgrade() -> None:
     op.drop_table("source_runs")
 
     # Remove jobs and their indexes.
-    op.drop_index("ix_jobs_published_at", table_name="jobs")
-    op.drop_index("ix_jobs_status", table_name="jobs")
+    op.drop_index("ix_jobs_publication_date", table_name="jobs")
     op.drop_table("jobs")
 
-    # Remove the PostgreSQL enum created for job status.
-    sa.Enum(name="jobstatus").drop(op.get_bind(), checkfirst=True)
+    # Remove PostgreSQL enums created for normalization fields.
+    sa.Enum(name="senioritylevel").drop(op.get_bind(), checkfirst=True)
+    sa.Enum(name="workarrangement").drop(op.get_bind(), checkfirst=True)
 
     # Remove job sources.
     op.drop_table("job_sources")
-
-    # Keep the vector extension installed because other objects may use it.
