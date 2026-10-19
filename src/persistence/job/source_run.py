@@ -69,10 +69,4 @@ class SourceRun(Base):
         default=0,
     )
 
-    lifecycle_changes: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        default=0,
-    )
-
     errors: Mapped[str | None] = mapped_column(Text)
