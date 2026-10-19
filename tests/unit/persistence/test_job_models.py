@@ -3,6 +3,7 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 from src.persistence.job.job import (
     Job,
+    JobStatus,
     SeniorityLevel,
     WorkArrangement,
 )
@@ -13,6 +14,7 @@ from src.persistence.job.source_run import SourceRun
 def test_job_has_expected_fields():
     expected_fields = {
         "id",
+        "source_id",
         "platform",
         "source_job_id",
         "company",
@@ -26,6 +28,7 @@ def test_job_has_expected_fields():
         "salary",
         "job_url",
         "publication_date",
+        "status",
         "first_seen_at",
         "last_seen_at",
     }
@@ -64,6 +67,15 @@ def test_normalized_enum_values():
     }
 
 
+def test_job_status_is_a_required_enum_defaulting_to_active():
+    status = Job.__table__.c.status
+
+    assert {job_status.value for job_status in JobStatus} == {"ACTIVE", "EXPIRED"}
+    assert isinstance(status.type, SQLAlchemyEnum)
+    assert not status.nullable
+    assert status.server_default.arg == JobStatus.ACTIVE.value
+
+
 def test_normalized_fields_use_documented_storage_types():
     assert isinstance(Job.__table__.c.location.type, JSON)
     assert isinstance(Job.__table__.c.work_arrangement.type, SQLAlchemyEnum)
@@ -75,7 +87,6 @@ def test_normalized_fields_use_documented_storage_types():
     assert isinstance(Job.__table__.c.publication_date.type, DateTime)
     assert isinstance(Job.__table__.c.first_seen_at.type, DateTime)
     assert isinstance(Job.__table__.c.last_seen_at.type, DateTime)
-    assert "status" not in Job.__table__.columns
 
 
 def test_job_source_has_expected_fields():
@@ -110,6 +121,15 @@ def test_source_run_has_expected_fields():
     }
 
     assert set(SourceRun.__table__.columns.keys()) == expected_fields
+
+
+def test_job_references_job_source():
+    source_id = Job.__table__.c.source_id
+
+    assert not source_id.nullable
+    assert any(
+        foreign_key.target_fullname == "job_sources.id" for foreign_key in source_id.foreign_keys
+    )
 
 
 def test_source_run_references_job_source():

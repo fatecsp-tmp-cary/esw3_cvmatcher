@@ -41,6 +41,7 @@ def upgrade() -> None:
     op.create_table(
         "jobs",
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("source_id", sa.Integer(), nullable=False),
         sa.Column("platform", sa.String(length=100), nullable=False),
         sa.Column("source_job_id", sa.String(length=255), nullable=False),
         sa.Column("company", sa.String(length=255), nullable=True),
@@ -70,8 +71,19 @@ def upgrade() -> None:
         sa.Column("salary", sa.JSON(), nullable=True),
         sa.Column("job_url", sa.Text(), nullable=True),
         sa.Column("publication_date", sa.DateTime(timezone=True), nullable=True),
+        sa.Column(
+            "status",
+            sa.Enum("ACTIVE", "EXPIRED", name="jobstatus"),
+            server_default="ACTIVE",
+            nullable=False,
+        ),
         sa.Column("first_seen_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("last_seen_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["source_id"],
+            ["job_sources.id"],
+            name=op.f("fk_jobs_source_id_job_sources"),
+        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_jobs")),
         sa.UniqueConstraint(
             "platform",
@@ -82,6 +94,7 @@ def upgrade() -> None:
 
     # Create indexes only after the jobs table exists.
     op.create_index("ix_jobs_publication_date", "jobs", ["publication_date"])
+    op.create_index("ix_jobs_source_id", "jobs", ["source_id"])
 
     # Create source execution history.
     op.create_table(
@@ -130,10 +143,12 @@ def downgrade() -> None:
     op.drop_table("source_runs")
 
     # Remove jobs and their indexes.
+    op.drop_index("ix_jobs_source_id", table_name="jobs")
     op.drop_index("ix_jobs_publication_date", table_name="jobs")
     op.drop_table("jobs")
 
     # Remove PostgreSQL enums created for normalization fields.
+    sa.Enum(name="jobstatus").drop(op.get_bind(), checkfirst=True)
     sa.Enum(name="senioritylevel").drop(op.get_bind(), checkfirst=True)
     sa.Enum(name="workarrangement").drop(op.get_bind(), checkfirst=True)
 
