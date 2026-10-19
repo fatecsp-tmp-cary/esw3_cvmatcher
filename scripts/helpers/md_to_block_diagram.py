@@ -61,26 +61,26 @@ import argparse
 import re
 import sys
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Union
-
 
 # ---------------------------------------------------------------------------
 # 1. Modelo de dados / parsing do markdown
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class Node:
     """Um nó interno (criado por um header markdown)."""
+
     label: str
     level: int
     # filhos, na ordem em que apareceram no arquivo. Cada item é:
     #   ('node', Node)               -> um sub-nó (header)
     #   ('leafgroup', List[str])     -> um grupo contíguo de itens de lista
-    children: List[Tuple[str, Union["Node", List[str]]]] = field(default_factory=list)
+    children: list[tuple[str, Node | list[str]]] = field(default_factory=list)
 
 
-HEADER_RE = re.compile(r'^(#{1,6})\s+(.*\S)\s*$')
-LIST_ITEM_RE = re.compile(r'^\s*-\s+(.*\S)\s*$')
+HEADER_RE = re.compile(r"^(#{1,6})\s+(.*\S)\s*$")
+LIST_ITEM_RE = re.compile(r"^\s*-\s+(.*\S)\s*$")
 
 
 def parse_markdown(text: str) -> Node:
@@ -94,8 +94,8 @@ def parse_markdown(text: str) -> Node:
     folhas é iniciado quando novos itens de lista voltarem a aparecer sob o
     mesmo pai.
     """
-    stack: List[Node] = []
-    top_level_nodes: List[Node] = []
+    stack: list[Node] = []
+    top_level_nodes: list[Node] = []
 
     for raw_line in text.splitlines():
         line = raw_line.rstrip()
@@ -110,7 +110,7 @@ def parse_markdown(text: str) -> Node:
             while stack and stack[-1].level >= level:
                 stack.pop()
             if stack:
-                stack[-1].children.append(('node', node))
+                stack[-1].children.append(("node", node))
             else:
                 top_level_nodes.append(node)
             stack.append(node)
@@ -120,14 +120,12 @@ def parse_markdown(text: str) -> Node:
         if m2:
             label = m2.group(1).strip()
             if not stack:
-                raise ValueError(
-                    f"Item de lista encontrado antes de qualquer header: {line!r}"
-                )
+                raise ValueError(f"Item de lista encontrado antes de qualquer header: {line!r}")
             parent = stack[-1]
-            if parent.children and parent.children[-1][0] == 'leafgroup':
+            if parent.children and parent.children[-1][0] == "leafgroup":
                 parent.children[-1][1].append(label)
             else:
-                parent.children.append(('leafgroup', [label]))
+                parent.children.append(("leafgroup", [label]))
             continue
 
         # linha ignorada (texto solto, comentários, etc.)
@@ -140,7 +138,7 @@ def parse_markdown(text: str) -> Node:
     # Mais de um header de nível mínimo: cria uma raiz sintética para
     # manter o diagrama com uma única raiz.
     synthetic_root = Node(label="", level=0)
-    synthetic_root.children = [('node', n) for n in top_level_nodes]
+    synthetic_root.children = [("node", n) for n in top_level_nodes]
     return synthetic_root
 
 
@@ -148,18 +146,18 @@ def parse_markdown(text: str) -> Node:
 # 2. Construção do diagrama (layout + geração de ids/arestas)
 # ---------------------------------------------------------------------------
 
-Cell = Tuple[int, Optional[Tuple[str, str]]]   # (span, (id, label) | None)
-RowMap = Dict[int, List[Cell]]
+Cell = tuple[int, tuple[str, str] | None]  # (span, (id, label) | None)
+RowMap = dict[int, list[Cell]]
 
-GAP = 1            # colunas de espaçamento entre irmãos
+GAP = 1  # colunas de espaçamento entre irmãos
 LEAF_GROUP_WIDTH = 2  # âncora + rótulo
 
 
 class DiagramBuilder:
     def __init__(self) -> None:
         self._counter = 0
-        self.edges: List[Tuple[str, str]] = []
-        self.invisible_ids: List[str] = []
+        self.edges: list[tuple[str, str]] = []
+        self.invisible_ids: list[str] = []
 
     def new_id(self, prefix: str) -> str:
         self._counter += 1
@@ -167,7 +165,7 @@ class DiagramBuilder:
 
 
 def _merge_rows_side_by_side(
-    slots_rows: List[RowMap], slots_widths: List[int], start_row: int
+    slots_rows: list[RowMap], slots_widths: list[int], start_row: int
 ) -> RowMap:
     """Combina as linhas de vários filhos lado a lado (com GAP entre eles),
     alinhando por índice relativo de linha, preenchendo com espaço em branco
@@ -177,8 +175,8 @@ def _merge_rows_side_by_side(
     max_rel = max((max(r.keys()) + 1 if r else 0) for r in slots_rows)
     merged: RowMap = {}
     for rel in range(max_rel):
-        cells: List[Cell] = []
-        for i, (rows, width) in enumerate(zip(slots_rows, slots_widths)):
+        cells: list[Cell] = []
+        for i, (rows, width) in enumerate(zip(slots_rows, slots_widths, strict=True)):
             if rel in rows:
                 cells.extend(rows[rel])
             else:
@@ -189,7 +187,7 @@ def _merge_rows_side_by_side(
     return merged
 
 
-def render_leafgroup(labels: List[str], b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
+def render_leafgroup(labels: list[str], b: DiagramBuilder) -> tuple[int, RowMap, str, int]:
     """Renderiza um grupo de folhas de um mesmo pai como uma pilha vertical.
 
     Layout (largura fixa = 2 colunas, coluna-conectora = coluna 0):
@@ -206,19 +204,19 @@ def render_leafgroup(labels: List[str], b: DiagramBuilder) -> Tuple[int, RowMap,
     """
     width = LEAF_GROUP_WIDTH
     rows: RowMap = {}
-    anchor_ids: List[str] = []
+    anchor_ids: list[str] = []
 
     for i, label in enumerate(labels):
-        aid = b.new_id('a')
-        lid = b.new_id('l')
+        aid = b.new_id("a")
+        lid = b.new_id("l")
         b.invisible_ids.append(aid)
-        rows[i + 1] = [(1, (aid, ' ')), (1, (lid, label))]
+        rows[i + 1] = [(1, (aid, " ")), (1, (lid, label))]
         anchor_ids.append(aid)
         b.edges.append((aid, lid))
 
-    hop_id = b.new_id('a')
+    hop_id = b.new_id("a")
     b.invisible_ids.append(hop_id)
-    rows[0] = [(1, (hop_id, ' ')), (1, None)]
+    rows[0] = [(1, (hop_id, " ")), (1, None)]
     if anchor_ids:
         b.edges.append((hop_id, anchor_ids[-1]))
 
@@ -226,7 +224,7 @@ def render_leafgroup(labels: List[str], b: DiagramBuilder) -> Tuple[int, RowMap,
     return width, rows, hop_id, connector_col
 
 
-def render_node(node: Node, b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
+def render_node(node: Node, b: DiagramBuilder) -> tuple[int, RowMap, str, int]:
     """Renderiza um nó interno (e recursivamente seus filhos).
 
     Retorna (largura_total, linhas, id_do_nó, coluna_conectora):
@@ -239,7 +237,7 @@ def render_node(node: Node, b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
         nessa mesma coluna, nunca numa coluna "aproximada"/centralizada
         por conta própria.
     """
-    own_id = b.new_id('n')
+    own_id = b.new_id("n")
 
     # --- caso base: nó sem nenhum filho (nem sub-nó, nem folha) ---
     if not node.children:
@@ -247,16 +245,17 @@ def render_node(node: Node, b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
         return 1, rows, own_id, 0
 
     # renderiza cada filho (sub-nó ou grupo de folhas), na ordem original
-    slots: List[Tuple[int, RowMap, str, int]] = []
+    slots: list[tuple[int, RowMap, str, int]] = []
     for kind, payload in node.children:
-        if kind == 'node':
-            slots.append(render_node(payload, b))       # type: ignore[arg-type]
+        if kind == "node":
+            slots.append(render_node(payload, b))  # type: ignore[arg-type]
         else:
             slots.append(render_leafgroup(payload, b))  # type: ignore[arg-type]
 
     widths = [w for w, _, _, _ in slots]
     conn_ids = [cid for _, _, cid, _ in slots]
-    conn_cols = [cc for _, _, _, cc in slots]  # coluna-conectora de cada filho, DENTRO da sua própria largura
+    conn_cols = [cc for _, _, _, cc in slots]  # coluna-conectora de cada filho,
+    # DENTRO da sua própria largura
 
     # --- caso 1 filho: conecta direto, sem linha de barramento.
     # own_id fica posicionado EXATAMENTE na mesma coluna que a coluna-
@@ -265,7 +264,7 @@ def render_node(node: Node, b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
     if len(slots) == 1:
         width, child_rows, child_id, child_conn_col = slots[0]
         left, right = child_conn_col, width - 1 - child_conn_col
-        row0: List[Cell] = []
+        row0: list[Cell] = []
         if left:
             row0.append((left, None))
         row0.append((1, (own_id, node.label)))
@@ -287,23 +286,21 @@ def render_node(node: Node, b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
     # sempre vertical (mesma coluna acima e abaixo).
     total_width = sum(widths) + GAP * (len(widths) - 1)
 
-    anchor_ids: List[str] = []
-    row1: List[Cell] = []
-    offset = 0
-    for i, (w, cc) in enumerate(zip(widths, conn_cols)):
-        aid = b.new_id('a')
+    anchor_ids: list[str] = []
+    row1: list[Cell] = []
+    for i, (w, cc) in enumerate(zip(widths, conn_cols, strict=True)):
+        aid = b.new_id("a")
         b.invisible_ids.append(aid)
         anchor_ids.append(aid)
 
         pad_before, pad_after = cc, w - 1 - cc
         if pad_before:
             row1.append((pad_before, None))
-        row1.append((1, (aid, ' ')))
+        row1.append((1, (aid, " ")))
         if pad_after:
             row1.append((pad_after, None))
         if i < len(widths) - 1:
             row1.append((GAP, None))
-        offset += w + GAP
 
     # O nó pai deve ficar centralizado na coluna aritmética exata de
     # `total_width` (não em uma âncora de filho escolhida "à sorte"),
@@ -315,7 +312,7 @@ def render_node(node: Node, b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
     # reta; a barra horizontal continua sendo desenhada pela aresta entre
     # as âncoras das pontas, que passa visualmente por essa coluna.
     hub_col = (total_width - 1) // 2
-    hub_id: Optional[str] = None
+    hub_id: str | None = None
     col = 0
     for idx, (span, content) in enumerate(row1):
         if col <= hub_col < col + span:
@@ -324,15 +321,15 @@ def render_node(node: Node, b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
             else:
                 before = hub_col - col
                 after = span - before - 1
-                hub_id = b.new_id('a')
+                hub_id = b.new_id("a")
                 b.invisible_ids.append(hub_id)
-                replacement: List[Cell] = []
+                replacement: list[Cell] = []
                 if before:
                     replacement.append((before, None))
-                replacement.append((1, (hub_id, ' ')))
+                replacement.append((1, (hub_id, " ")))
                 if after:
                     replacement.append((after, None))
-                row1[idx:idx + 1] = replacement
+                row1[idx : idx + 1] = replacement
             break
         col += span
 
@@ -341,12 +338,12 @@ def render_node(node: Node, b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
     # aresta ligando as âncoras das pontas (forma a barra horizontal)
     b.edges.append((anchor_ids[0], anchor_ids[-1]))
     # cada âncora-de-filho desce até o filho correspondente (mesma coluna)
-    for aid, cid in zip(anchor_ids, conn_ids):
+    for aid, cid in zip(anchor_ids, conn_ids, strict=True):
         b.edges.append((aid, cid))
 
     # linha 0: rótulo do próprio nó, centralizado na mesma coluna do hub.
     left, right = hub_col, total_width - 1 - hub_col
-    row0: List[Cell] = []
+    row0: list[Cell] = []
     if left:
         row0.append((left, None))
     row0.append((1, (own_id, node.label)))
@@ -364,11 +361,12 @@ def render_node(node: Node, b: DiagramBuilder) -> Tuple[int, RowMap, str, int]:
 # 3. Geração do texto mermaid
 # ---------------------------------------------------------------------------
 
+
 def _escape(label: str) -> str:
-    return label.replace('"', '#quot;')
+    return label.replace('"', "#quot;")
 
 
-def _cell_to_str(span: int, content: Optional[Tuple[str, str]]) -> str:
+def _cell_to_str(span: int, content: tuple[str, str] | None) -> str:
     if content is None:
         return f"space:{span}" if span > 1 else "space"
     node_id, label = content
@@ -378,11 +376,11 @@ def _cell_to_str(span: int, content: Optional[Tuple[str, str]]) -> str:
     return box
 
 
-def _merge_adjacent_spaces(cells: List[Cell]) -> List[Cell]:
+def _merge_adjacent_spaces(cells: list[Cell]) -> list[Cell]:
     """Combina células de espaço consecutivas (ex.: dois `space` seguidos,
     um vindo do padding final de um grupo e outro do gap entre irmãos) em
     uma única célula `space:N`, apenas para deixar a saída mais limpa."""
-    merged: List[Cell] = []
+    merged: list[Cell] = []
     for span, content in cells:
         if content is None and merged and merged[-1][1] is None:
             prev_span, _ = merged[-1]
@@ -406,7 +404,7 @@ def generate_mermaid(root: Node) -> str:
     columns, rows, _root_id, _root_conn_col = render_node(root, b)
     validate_rows(rows, columns)
 
-    lines: List[str] = ["block", f"    columns {columns}", ""]
+    lines: list[str] = ["block", f"    columns {columns}", ""]
 
     for row_idx in sorted(rows.keys()):
         cells = _merge_adjacent_spaces(rows[row_idx])
@@ -434,23 +432,22 @@ def markdown_to_block_diagram(markdown_text: str) -> str:
 # 4. CLI
 # ---------------------------------------------------------------------------
 
-def main(argv: Optional[List[str]] = None) -> int:
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Converte uma estrutura hierárquica em Markdown para um "
-                    "diagrama mermaid do tipo 'block'."
+        "diagrama mermaid do tipo 'block'."
     )
     parser.add_argument(
-        "input", nargs="?", default=None,
-        help="Arquivo markdown de entrada (padrão: stdin)"
+        "input", nargs="?", default=None, help="Arquivo markdown de entrada (padrão: stdin)"
     )
     parser.add_argument(
-        "-o", "--output", default=None,
-        help="Arquivo de saída .mmd (padrão: stdout)"
+        "-o", "--output", default=None, help="Arquivo de saída .mmd (padrão: stdout)"
     )
     args = parser.parse_args(argv)
 
     if args.input:
-        with open(args.input, "r", encoding="utf-8") as f:
+        with open(args.input, encoding="utf-8") as f:
             text = f.read()
     else:
         text = sys.stdin.read()
