@@ -192,7 +192,7 @@ Load time includes Hugging Face Hub network checks even when the model is cached
 This benchmark builds on the work of @fabiola-girotti (#57), who found the 128-token truncation and
 tested chunking, and @ricardosakugawa (#56), whose input format and all-MiniLM-L6-v2 results were
 the starting point. Their own benchmarks are meant to be added under `scripts/benchmarks/` (one
-folder per issue) and `docs/reports/`; this report links to them once they are merged.
+folder per issue) and `docs/match/benchmarks/`; this report links to them once they are merged.
 
 ## Recommendation
 
