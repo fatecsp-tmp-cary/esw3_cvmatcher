@@ -111,10 +111,10 @@ esw3_cvmatcher/
 Exactly:
 
 ```text
-id, source, source_job_id, company, title, description, location, work_arrangement, salary, currency, published_date, first_seen_at, last_seen_at, last_verified_at, status, job_url, raw, embedding, content_hash
+id, platform, source_job_id, source_expires_at, company, title, description, keywords, skills, location, work_arrangement, seniority_level, salary, currency, publication_date, first_seen_at, last_seen_at, last_verified_at, status, job_url, raw, embedding, content_hash
 ```
 
-`source + source_job_id` is uniquely constrained and represents **source identity, not deduplication**.
+`platform + source_job_id` is uniquely constrained and represents **source identity, not deduplication**.
 
 * `source_expires_at` = explicit source-provided expiration; absence is not expiration.
 * `raw` = retained source payload, subject to source terms/storage constraints.
@@ -193,7 +193,7 @@ If changed:
 update Job → re-index text → embedding = NULL → background regeneration
 ```
 
-Rediscovery updates the existing `source + source_job_id` record.
+Rediscovery updates the existing `platform + source_job_id` record.
 
 * `last_seen_at` = successful observation.
 * `last_verified_at` = successful fetch/validation according to source semantics.
@@ -371,10 +371,7 @@ The final score is a **compatibility score, not an employment probability**.
 ## MatchResult
 
 ```text
-job_id, score, eligibility,
-textual_score, semantic_score, structured_score,
-matched_skills[], missing_requirements[],
-embedding_model, algorithm_version
+id, title, rank, company, description, keywords, location, work_arrangement, job_url, score, eligibility, textual_score, semantic_score, structured_score, matched_skills[], missing_requirements[], embedding_model, algorithm_version
 ```
 
 `eligibility` means matching eligibility, **not geographic eligibility**.
@@ -387,21 +384,30 @@ Component scores may remain internal unless exposed by the API.
 POST /matches
 GET  /health   # optional
 ```
+According to [Grupo 1 docs](https://github.com/code-alchemists-br/sistema-curriculo/blob/dev/docs/contratos_integracao_grupo2.md):
 
-`POST /matches` receives structured CV JSON and returns ranked recommendations.
+The CV-Match route is `POST /matches`; using it as the Group 1 integration endpoint is proposed and pending agreement. Its proposed request envelope is:
 
-Response includes at minimum:
-
-```text
-job_id, score, eligibility, matched_skills, missing_requirements
+```json
+{
+  "curriculo_id": "<stable Group 1 curriculum ID>",
+  "curriculo": { "<authorized structured curriculum data>": "..." }
+}
 ```
 
-and system metadata:
+Map the actual Group 1 serialization into `CandidateProfile`; the example fields in `docs/contratos_integracao_grupo2.md` are illustrative and need confirmation. Treat `curriculo_id` as an opaque correlation value: do not persist or log it or the submitted curriculum data.
+
+Return suggestions, not persisted curriculum–job associations. The proposed integration
+response is:
 
 ```text
-algorithm_version
-embedding_model
+associacoes[]: { curriculo_id, vaga: {
+  id, titulo, empresa, descricao, requisitos[], localizacao?, modalidade?, url_candidatura?
+} }
 ```
+
+Map these fields from the internal job representation. Preserve ranking through array order;
+include compatibility scores or explanations only if both teams agree. The final curriculum serialization, and optional vacancy fields remain subject to agreement between the teams.
 
 Candidate data must never be persisted or logged, including application/access/request bodies, exceptions, tracing, or telemetry.
 

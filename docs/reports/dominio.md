@@ -33,18 +33,19 @@ O sistema, entretanto, utiliza estruturas auxiliares de persistência e infraest
 | Atributo             | Descrição                                                  |
 | --------------------- | ----------------------------------------------------------- |
 | `id`                  | Identificador interno da vaga                                |
-| `source`              | Fonte que publicou a vaga                                    |
+| `platform`            | Identificador da fonte que publicou a vaga                   |
 | `source_job_id`       | Identificador da vaga na fonte                               |
 | `company`             | Nome textual da empresa                                      |
 | `title`               | Título do cargo                                              |
 | `description`         | Descrição normalizada                                        |
-| `keywords`            | Lista de palavras chave da vaga                              |
+| `keywords`            | Palavras-chave normalizadas para busca e matching             |
+| `skills`              | Skills canônicas associadas à vaga                            |
+| `seniority_level`     | Senioridade normalizada, quando disponível                    |
 | `location`            | País, estado, cidade e declaração de localização             |
 | `work_arrangement`    | Remoto, presencial ou híbrido                                |
 | `salary`              | Faixa salarial, quando divulgada                             |
 | `currency`            | Moeda da remuneração                                         |
 | `publication_date`      | Data de publicação na fonte                                  |
-| `source status`       | Estado da vaga reportado pela fonte entre ativo, inativo e indisponível | 
 | `job_url`       | URL canônica da vaga                                         |
 
 Atributos da coleta e processamento da vaga, persistidos na entidade vaga.
@@ -53,7 +54,7 @@ Atributos da coleta e processamento da vaga, persistidos na entidade vaga.
 | --- | --- |
 | ~~`employment_type`~~    | ~~Tipo de contratação~~                                          |
 | ~~`requirements`~~        | ~~Requisitos estruturados e classificados~~                      |
-| ~~`source_expires_at`~~   | ~~Data de expiração explícita informada pela fonte~~             |
+| `source_expires_at`   | Data de expiração explícita informada pela fonte; ausência não significa expiração |
 | `first_seen_at`       | Primeira identificação pelo sistema                          |
 | `last_seen_at`        | Última identificação em uma coleta                           |
 | `last_verified_at`    | Última verificação de disponibilidade                        |
@@ -61,8 +62,6 @@ Atributos da coleta e processamento da vaga, persistidos na entidade vaga.
 | `raw`                 | Payload original da fonte                                    |
 | `content_hash`        | Hash do conteúdo normalizado para detectar alterações        |
 | `embedding`           | Vetor semântico da vaga                                      |
-
-~~A ausência de `source_expires_at` não deve ser interpretada como uma data de expiração; ela apenas indica que a fonte não forneceu esse dado explicitamente.~~
 
 O atributo `embedding` é persistido utilizando `pgvector`. O embedding do candidato nunca é persistido.
 
@@ -93,7 +92,15 @@ O `MatchResult` é produzido em memória para cada vaga avaliada e pode conter:
 
 | Campo                  | Descrição                                                     |
 | ---------------------- | -------------------------------------------------------------- |
-| `job_id`               | Identificador da vaga                                           |
+| `id`                   | Identificador da vaga                                           |
+| `title`                | Título da vaga                                                  |
+| `rank`                 | Posição no resultado ordenado                                   |
+| `company`              | Empresa contratante                                             |
+| `description`          | Descrição da vaga                                               |
+| `keywords`             | Palavras-chave da vaga                                          |
+| `location`             | Localização, sem filtro de elegibilidade geográfica             |
+| `work_arrangement`     | Modalidade de trabalho                                          |
+| `job_url`              | Link para a vaga                                                |
 | `score`                | Score final de compatibilidade                                  |
 | `eligibility`          | Resultado dos filtros de elegibilidade                           |
 | `textual_score`        | Score da busca textual                                           |
@@ -163,17 +170,13 @@ Cada fonte é isolada por uma interface comum:
 
 ```python
 class JobSource:
-    async def discover(self):
-        ...
+    async def discover(self): ...
 
-    async def fetch_jobs(self, discovered_jobs):
-        ...
+    async def fetch_jobs(self, discovered_jobs): ...
 
-    async def fetch_job(self, source_job_id):
-        ...
+    async def fetch_job(self, source_job_id): ...
 
-    def normalize(self, raw_job):
-        ...
+    def normalize(self, raw_job): ...
 ```
 
 `JobSource.normalize` realiza apenas o mapeamento específico da fonte (do payload bruto para uma representação intermediária no formato esperado). O pipeline de normalização mais amplo — limpeza de texto, extração de skills, classificação de requisitos e cálculo de `content_hash` — é responsabilidade do `JobNormalizer`, aplicado de forma independente da fonte de origem.
@@ -351,7 +354,7 @@ final_score =
 
 Os pesos devem ser configuráveis.
 
-Cada resposta deve informar a versão do algoritmo e a versão do modelo de embedding utilizados.
+O `MatchResult` registra a versão do algoritmo e do modelo de embedding utilizados.
 
 O score final representa compatibilidade, não probabilidade de contratação.
 
@@ -363,11 +366,11 @@ O endpoint inicial é:
 POST /matches
 ```
 
-O corpo recebe `candidate`. A resposta contém resultados de matching ordenados por score, `algorithm_version` e `embedding_model`.
+O corpo proposto recebe `curriculo_id` e `curriculo`; os campos reais do currículo devem ser mapeados para `CandidateProfile`. A resposta proposta contém `associacoes[]`, cada uma com `curriculo_id` e `vaga`.
 
-Cada resultado inclui no mínimo: `job_id`, `score`, `eligibility`, `matched_skills`, `missing_requirements`. A resposta inclui ainda os metadados `algorithm_version` e `embedding_model`.
+Cada `vaga` contém `id`, `titulo`, `empresa`, `descricao`, `requisitos`, e opcionalmente `localizacao`, `modalidade` e `url_candidatura`. A ordem preserva o ranking; pontuação ou explicação só é incluída mediante acordo entre as equipes. Endpoint de integração, autenticação e serialização final seguem pendentes de acordo.
 
-O currículo, o `CandidateProfile`, o embedding do candidato, os `MatchResult` gerados durante o processamento não são persistidos nem escritos em logs.
+O currículo, `curriculo_id`, `CandidateProfile`, embedding do candidato e `MatchResult` não são persistidos nem escritos em logs. As sugestões não criam associações persistidas automaticamente.
 
 O banco armazena apenas dados das vagas, configurações das fontes, registros operacionais das execuções de coleta e estruturas necessárias para indexação.
 

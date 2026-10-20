@@ -33,7 +33,7 @@ Considered due to a higher reported job volume (~27,600 total postings), but rej
 - Risk of data inconsistency under combined filters: a theoretical combination of filters was estimated to yield up to ~32,000 records (assuming disjoint categories), against a real benchmark of ~2,700, indicating unreliable or overlapping data
 - Risk of future endpoint instability analogous to the one observed with Gupy
 
-Per project manager's request, the MVP uses a single primary source rather than combining primary and complementary sources. For this reason, Meu Padrinho is not used in the pipeline, despite its higher reported volume.
+Only APiBR is selected for the initial integration. Additional adapters may be selected later.
 
 ### Other sources ruled out
 InHire, Solides, Trampos.co, and Quero Vagas Tech were also evaluated and are not being considered for the MVP.
@@ -54,7 +54,7 @@ This approach avoids relying on real-time webhooks and keeps the dataset up to d
 - Job body format is not standardized across sources aggregated by APiBR.
 - Coverage depends entirely on the repositories/accounts currently aggregated by APiBR.
 - Authentication requirements, if any, have not been independently confirmed.
-- No candidate profile data or match results are persisted or logged, per `PLAN.md`.
-- No deduplication of jobs across multiple sources is performed, per `PLAN.md`.
-- No geographic eligibility filtering is applied, per `PLAN.md`.
+- Candidate profiles, candidate embeddings, and match results are request-scoped and never persisted or logged.
+- Jobs from different sources are not merged or deduplicated.
+- Location and work arrangement are not used for geographic eligibility filtering.
 - All requests respect the source's rate limits, terms of use, and access restrictions, per `CONTRIBUTING.md`.
