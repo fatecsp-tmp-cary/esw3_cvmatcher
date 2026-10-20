@@ -1,6 +1,6 @@
 # pgvector local validation
 
-Issue: #24 (parent #4). Script: [`scripts/validate_pgvector.sql`](../../scripts/validate_pgvector.sql).
+Issue: #24 (parent #4). Script: [`scripts/helpers/validate_pgvector.sql`](../../scripts/helpers/validate_pgvector.sql).
 
 ## How to reproduce
 

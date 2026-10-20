@@ -53,6 +53,8 @@ No dedicated queue/broker is required.
 ```text
 esw3_cvmatcher/
 ├── docs/
+│   ├── data/
+│   ├── match/
 │   └── reports/
 │
 ├── src/

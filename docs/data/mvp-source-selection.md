@@ -17,7 +17,7 @@ APiBR (https://apibr.com) was selected as the single primary job data source for
 - `per_page`: max 100 results per request
 - `term`: keyword search (matches job title and description)
 - `includeBody`: includes full job description in the response
-- `page`: doesnt't seem to have a page limit
+- `page`: doesn't seem to have a page limit
 - Additional queryable resources: `authors`, `labels`, `organizations`
 - No seniority-level filter available
 
@@ -40,12 +40,12 @@ InHire, Solides, Trampos.co, and Quero Vagas Tech were also evaluated and are no
 
 ## Polling / Scanning Approach
 
-1. Sequential requests to APiBR using `per_page=100`, incrementing `page` after each request, until an empty page is returned (observed to occur at page 32).
+1. Sequential requests to APiBR using `per_page=100`, incrementing `page` after each request, until an empty page is returned
 2. For each job, apply `includeBody` to retrieve the full job description when needed.
 3. Use `term` for keyword-based filtering when applicable.
 4. Normalize the data according to the shared schema.
 5. Upsert each job record using a surrogate primary key; `source_job_id` is stored as an attribute, not as the primary key, since identifiers may collide across sources.
-6. Jobs no longer present in a subsequent scan are marked as INACTIVE.
+6. Jobs no longer present in a subsequent scan are marked as `STALE`.
 
 This approach avoids relying on real-time webhooks and keeps the dataset up to date through scheduled polling.
 

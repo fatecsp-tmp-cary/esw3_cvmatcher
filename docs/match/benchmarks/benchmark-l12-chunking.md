@@ -1,8 +1,8 @@
 # Resume chunking and pgvector retrieval benchmark
 
 Issue: #25 (subtask #57; also covers the `multilingual-e5-small` question raised there).
-Script: [`scripts/benchmarks/benchmark_l12_chunking.py`](../../scripts/benchmarks/benchmark_l12_chunking.py),
-built on [`embedding_benchmark.py`](../../scripts/benchmarks/embedding_benchmark.py).
+Script: [`scripts/benchmarks/benchmark_l12_chunking.py`](../../../scripts/benchmarks/benchmark_l12_chunking.py),
+built on [`embedding_benchmark.py`](../../../scripts/benchmarks/embedding_benchmark.py).
 Inputs: `embedding_benchmark_input.json` (100 jobs and the `backend` resume),
 `embedding_benchmark_resumes.json` (4 more resumes) and `embedding_benchmark_gabarito.json`
 (relevant and obviously irrelevant jobs for each of the 5 resumes, written by a person).

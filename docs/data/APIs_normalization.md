@@ -125,7 +125,7 @@ Repositories Endpoint: GET `/vagas/repositories`
 | Method / Format / Authentication | GET / JSON / No authentication identified |
 | Main Resource | Job opportunities represented as GitHub issues |
 | Additional Resources | Authors, labels, and repositories |
-| Pagination Behavior | The page parameter was tested and returned different sets of jobs for different page values. Pages from 1 through 31 returned results during testing; from page=32 onward, no results were returned. |
+| Pagination Behavior | The page parameter was tested and returned different sets of jobs for different page values. Pages from 1 through 31 returned results during testing; |
 | Limit Parameter | The limit parameter was tested with different values but did not change the number of results returned. |
 | Keyword Search | Not identified as a confirmed query parameter in the available API documentation. |
 | Returned Data | Job information associated with GitHub issues and source metadata, including issue ID, title, URL, keywords, labels, author, comments, and repository information. |
@@ -150,7 +150,7 @@ Repositories Endpoint: GET `/vagas/repositories`
 
 ## 4. ⚙️ Data Collection and Data Engineering Pipeline
 
-**List Ingestion (APiBR):** The collector makes sequential requests to the primary source (APiBR), using the `page` parameter starting at page=1 and incrementing it until no more results are returned. During testing, pages 1 through 31 returned results, while page=32 onward returned no results.
+**List Ingestion (APiBR):** The collector makes sequential requests to the primary source (APiBR), using the `page` parameter starting at page=1 and incrementing it until no more results are returned.
 
 **Other-source evaluation:** Meu Padrinho was evaluated using page=0 and `niveis`; page>=1 returned HTTP 204 during testing. It is not part of the selected initial integration.
 
