@@ -23,6 +23,17 @@ dev = [
     "httpx2>=2.13",
     "pytest-github-actions-annotate-failures>=0.4",
 ]
+# Only for scripts/benchmarks; CI installs just `dev`. Install the CPU-only PyTorch first:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -e . --group benchmark
+benchmark = [
+    "sentence-transformers>=3",
+    "psutil>=5.9",
+    "numpy>=1.26",
+    "psycopg[binary]>=3.1",
+    "pgvector>=0.3",
+    "python-dotenv>=1.0",
+]
 
 [tool.setuptools.packages.find]
 include = ["src", "src.*"]
