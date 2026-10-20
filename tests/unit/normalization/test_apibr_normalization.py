@@ -12,7 +12,7 @@ def test_normalize_apibr_job():
     raw_job = raw_data[0] if isinstance(raw_data, list) else raw_data
     normalized = normalize_apibr_job(raw_job)
 
-    # Garante que todos os campos da Task 19 estão presentes no dicionário normalizado
+    # Ensure all required fields from Task 19 schema are present
     expected_keys = {
         "platform",
         "source_job_id",
@@ -42,7 +42,7 @@ def test_normalize_text_empty():
     assert normalize_text(None) is None
     assert normalize_text("") is None
     assert normalize_text("   ") is None
-    assert normalize_text("  Desenvolvedor   Python  ") == "Desenvolvedor Python"
+    assert normalize_text("  Developer   Python  ") == "Developer Python"
 
 
 def test_normalize_keywords():
