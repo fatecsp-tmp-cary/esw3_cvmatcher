@@ -17,7 +17,7 @@ APiBR (https://apibr.com) was selected as the single primary job data source for
 - `per_page`: max 100 results per request
 - `term`: keyword search (matches job title and description)
 - `includeBody`: includes full job description in the response
-- `page`: tested from 1 to 31; page 32 and beyond return no results
+- `page`: doesn't seem to have a page limit
 - Additional queryable resources: `authors`, `labels`, `organizations`
 - No seniority-level filter available
 
@@ -33,19 +33,19 @@ Considered due to a higher reported job volume (~27,600 total postings), but rej
 - Risk of data inconsistency under combined filters: a theoretical combination of filters was estimated to yield up to ~32,000 records (assuming disjoint categories), against a real benchmark of ~2,700, indicating unreliable or overlapping data
 - Risk of future endpoint instability analogous to the one observed with Gupy
 
-Per project manager's request, the MVP uses a single primary source rather than combining primary and complementary sources. For this reason, Meu Padrinho is not used in the pipeline, despite its higher reported volume.
+Only APiBR is selected for the initial integration. Additional adapters may be selected later.
 
 ### Other sources ruled out
 InHire, Solides, Trampos.co, and Quero Vagas Tech were also evaluated and are not being considered for the MVP.
 
 ## Polling / Scanning Approach
 
-1. Sequential requests to APiBR using `per_page=100`, incrementing `page` after each request, until an empty page is returned (observed to occur at page 32).
+1. Sequential requests to APiBR using `per_page=100`, incrementing `page` after each request, until an empty page is returned
 2. For each job, apply `includeBody` to retrieve the full job description when needed.
 3. Use `term` for keyword-based filtering when applicable.
 4. Normalize the data according to the shared schema.
 5. Upsert each job record using a surrogate primary key; `source_job_id` is stored as an attribute, not as the primary key, since identifiers may collide across sources.
-6. Jobs no longer present in a subsequent scan are marked as INACTIVE.
+6. Jobs no longer present in a subsequent scan are marked as `STALE`.
 
 This approach avoids relying on real-time webhooks and keeps the dataset up to date through scheduled polling.
 
@@ -54,7 +54,7 @@ This approach avoids relying on real-time webhooks and keeps the dataset up to d
 - Job body format is not standardized across sources aggregated by APiBR.
 - Coverage depends entirely on the repositories/accounts currently aggregated by APiBR.
 - Authentication requirements, if any, have not been independently confirmed.
-- No candidate profile data or match results are persisted or logged, per `PLAN.md`.
-- No deduplication of jobs across multiple sources is performed, per `PLAN.md`.
-- No geographic eligibility filtering is applied, per `PLAN.md`.
+- Candidate profiles, candidate embeddings, and match results are request-scoped and never persisted or logged.
+- Jobs from different sources are not merged or deduplicated.
+- Location and work arrangement are not used for geographic eligibility filtering.
 - All requests respect the source's rate limits, terms of use, and access restrictions, per `CONTRIBUTING.md`.

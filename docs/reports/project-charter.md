@@ -16,21 +16,6 @@
 
 ## 2. Integrantes
 
-| Integrante                            | R.A.          |
-|:------------------------------------- | :------------ |
-| 1. Aline de Souza Barbosa             | 1110482323053 |
-| 2. Carybé Gonçalves Silva             | 0020482523039 |
-| 3. Davi Campaner Fernandes            | 0020482512029 |
-| 4. Esthefano Esteves                  | 0020482413100 |
-| 5. Fabíola Girotti Garcia             | 0020482423055 |
-| 6. Gustavo Conceição Lacerda          | 1110482322010 |
-| 7. Henrique Yamaguchi                 | 0020482413102 |
-| 8. Kauan Baptiston Gassi              | 0020482521044 |
-| 9. Ricardo Massanobu Sakugawa         | 0020482323095 |
-| 10. Roger Hokama Paixão               | 0020482413079 |
-| 11. Vitória Cristina Vicente da Silva | 0020482423091 |
-| 12. Yuri Guedes Umeda                 | 0020482413023 |
-
 ---
 
 ## 3. Justificativa do Projeto

@@ -14,12 +14,14 @@
 /src/schemas/job/ @fatecsp-tmp-cary/data
 /src/schemas/matching/ @fatecsp-tmp-cary/data @fatecsp-tmp-cary/match 
 
+/docs/data @fatecsp-tmp-cary/data
 
 # --------------------------------------------
 # MATCH
 # --------------------------------------------
 
 /src/matching/ @fatecsp-tmp-cary/match
+/docs/match @fatecsp-tmp-cary/match
 
 
 # --------------------------------------------

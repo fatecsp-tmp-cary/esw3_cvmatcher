@@ -1,6 +1,6 @@
 -- pgvector validation (issue #24, parent #4).
 --
--- Usage:   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/validate_pgvector.sql
+-- Usage:   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/helpers/validate_pgvector.sql
 -- Effects: creates and drops its own table (pgvector_validation); touches nothing else.
 -- Data:    deterministic synthetic 384-d vectors (384 = dimension of MiniLM-class models),
 --          grouped in three clusters, so the expected neighbours are known in advance.

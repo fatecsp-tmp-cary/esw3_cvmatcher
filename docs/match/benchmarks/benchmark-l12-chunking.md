@@ -1,8 +1,8 @@
 # Resume chunking and pgvector retrieval benchmark
 
 Issue: #25 (subtask #57; also covers the `multilingual-e5-small` question raised there).
-Script: [`scripts/benchmarks/benchmark_l12_chunking.py`](../../scripts/benchmarks/benchmark_l12_chunking.py),
-built on [`embedding_benchmark.py`](../../scripts/benchmarks/embedding_benchmark.py).
+Script: [`scripts/benchmarks/benchmark_l12_chunking.py`](../../../scripts/benchmarks/benchmark_l12_chunking.py),
+built on [`embedding_benchmark.py`](../../../scripts/benchmarks/embedding_benchmark.py).
 Inputs: `embedding_benchmark_input.json` (100 jobs and the `backend` resume),
 `embedding_benchmark_resumes.json` (4 more resumes) and `embedding_benchmark_gabarito.json`
 (relevant and obviously irrelevant jobs for each of the 5 resumes, written by a person).
@@ -192,7 +192,7 @@ Load time includes Hugging Face Hub network checks even when the model is cached
 This benchmark builds on the work of @fabiola-girotti (#57), who found the 128-token truncation and
 tested chunking, and @ricardosakugawa (#56), whose input format and all-MiniLM-L6-v2 results were
 the starting point. Their own benchmarks are meant to be added under `scripts/benchmarks/` (one
-folder per issue) and `docs/reports/`; this report links to them once they are merged.
+folder per issue) and `docs/match/benchmarks/`; this report links to them once they are merged.
 
 ## Recommendation
 
