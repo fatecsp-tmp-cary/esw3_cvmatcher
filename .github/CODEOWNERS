@@ -23,7 +23,6 @@
 /src/matching/ @fatecsp-tmp-cary/match
 /docs/match @fatecsp-tmp-cary/match
 
-
 # --------------------------------------------
 # QA
 # --------------------------------------------
@@ -34,7 +33,6 @@
 # PROJECT / GOVERNANCE
 # --------------------------------------------
 
-/docs/ @fatecsp-tmp-cary/leads
-PLAN.md @fatecsp-tmp-cary/leads
+/docs/ @fatecsp-tmp-cary/leads @fatecsp-tmp-cary/docs
 /.github/ @fatecsp-tmp-cary/leads
 /scripts/ @fatecsp-tmp-cary/leads
