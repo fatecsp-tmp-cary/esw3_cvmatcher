@@ -23,11 +23,13 @@ completion.
 ## Pending implementation
 
 - [ ] Resolve the three remaining questions in [acceptance](acceptance.md) before dependent implementation.
-- [ ] Complete persisted job/source/run structures, including skills and
-      requirements tables and all run evidence required by the spec.
+- [x] Persist the shared skill taxonomy and per-job skill/requirement tables.
+- [ ] Complete source-run evidence required by the spec, including parsing,
+      HTTP, indexing, and embedding failure details.
 - [ ] Prove APiBR snapshot completeness before applying absence-based stale
       transitions; add scheduling and operational retry policy.
-- [ ] Implement normalization, requirement extraction, and shared skill taxonomy.
+- [ ] Implement skill normalization, requirement extraction, and taxonomy
+      population.
 - [x] Define initial PostgreSQL FTS fields and uniform weighting: title, company,
       description, keywords, skills, normalized requirements, and location.
 - [ ] Implement PostgreSQL FTS, local embedding generation, pgvector, and
