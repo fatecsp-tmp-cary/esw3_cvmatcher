@@ -1,6 +1,7 @@
-"""CandidateProfile: the structured CV data received by POST /matches.
+"""Internal, request-scoped candidate representation used by matching.
 
-The external parser supplies this JSON. It is request-scoped: never persist or log it.
+The API accepts :class:`CurriculumRequest` from Sistema Currículo and adapts it
+to this matching representation. Never persist or log candidate data.
 
 Categorical values (seniority, proficiency, modes, employment types) arrive as free text;
 mapping them to canonical values belongs to candidate normalization, not to this schema.
@@ -63,8 +64,10 @@ class Education(_Schema):
     institution: ShortText | None = None
     degree: ShortText | None = Field(default=None, examples=["Bachelor"])
     field_of_study: ShortText | None = Field(default=None, examples=["Computer Science"])
+    status: ShortText | None = None
     start_date: PartialDate | None = None
     end_date: PartialDate | None = None
+    expected_completion: PartialDate | None = None
 
     @model_validator(mode="after")
     def _has_content_and_ordered_period(self) -> Self:
@@ -84,6 +87,22 @@ class Language(_Schema):
     proficiency: ShortText | None = Field(default=None, examples=["advanced"])
 
 
+class CandidateCompetency(_Schema):
+    name: ShortText
+    level: ShortText
+
+
+class CandidateProject(_Schema):
+    title: ShortText
+    technologies: list[ShortText] = Field(default_factory=list)
+    description: LongText | None = None
+
+
+class CandidateLocation(_Schema):
+    city: ShortText | None = None
+    state: ShortText | None = None
+
+
 class Preferences(_Schema):
     employment_types: list[ShortText] = Field(
         default_factory=list, max_length=10, examples=[["full-time"]]
@@ -92,20 +111,22 @@ class Preferences(_Schema):
 
 
 class CandidateProfile(_Schema):
-    """Structured CV data: skills, plus job_titles or experience for role context."""
+    """Transient matching fields adapted from a complete curriculum request."""
 
-    skills: list[ShortText] = Field(min_length=1, max_length=200)
-    job_titles: list[ShortText] = Field(default_factory=list, max_length=50)
-    occupations: list[ShortText] = Field(default_factory=list, max_length=50)
-    experience: list[Experience] = Field(default_factory=list, max_length=50)
-    education: list[Education] = Field(default_factory=list, max_length=20)
-    certifications: list[Certification] = Field(default_factory=list, max_length=50)
-    languages: list[Language] = Field(default_factory=list, max_length=20)
+    skills: list[ShortText] = Field(min_length=1)
+    competencies: list[CandidateCompetency] = Field(default_factory=list)
+    job_titles: list[ShortText] = Field(default_factory=list)
+    occupations: list[ShortText] = Field(default_factory=list)
+    experience: list[Experience] = Field(default_factory=list)
+    education: list[Education] = Field(default_factory=list)
+    certifications: list[Certification] = Field(default_factory=list)
+    academic_projects: list[CandidateProject] = Field(default_factory=list)
+    languages: list[Language] = Field(default_factory=list)
     locations: list[ShortText] = Field(
         default_factory=list,
-        max_length=20,
         description="Kept as matching data; never used for geographic eligibility.",
     )
+    personal_location: CandidateLocation | None = None
     seniority: ShortText | None = Field(default=None, examples=["senior"])
     years_experience: float | None = Field(default=None, ge=0, le=70)
     preferences: Preferences = Field(default_factory=Preferences)
@@ -138,6 +159,6 @@ class CandidateProfile(_Schema):
 
     @model_validator(mode="after")
     def _has_role_context(self) -> Self:
-        if not (self.job_titles or self.experience):
-            raise ValueError("profile needs job_titles or experience")
+        if not (self.job_titles or self.experience or self.education or self.academic_projects):
+            raise ValueError("profile needs role, education or project context")
         return self
