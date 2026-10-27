@@ -8,6 +8,7 @@ from src.persistence.job.job import (
     WorkArrangement,
 )
 from src.persistence.job.job_source import JobSource
+from src.persistence.job.skill import JobRequirement, JobSkill, RequirementClass, Skill
 from src.persistence.job.source_run import SourceRun
 
 
@@ -139,6 +140,29 @@ def test_source_run_has_expected_fields():
     }
 
     assert set(SourceRun.__table__.columns.keys()) == expected_fields
+
+
+def test_skill_taxonomy_and_job_requirement_fields():
+    assert set(Skill.__table__.columns.keys()) == {
+        "id",
+        "canonical_name",
+        "category",
+        "parent_skill_id",
+        "aliases",
+    }
+    assert set(JobSkill.__table__.columns.keys()) == {"job_id", "skill_id"}
+    assert set(JobRequirement.__table__.columns.keys()) == {
+        "id",
+        "job_id",
+        "text",
+        "requirement_class",
+        "skill_id",
+    }
+    assert {item.value for item in RequirementClass} == {
+        "REQUIRED",
+        "PREFERRED",
+        "NICE_TO_HAVE",
+    }
 
 
 def test_job_references_job_source():
