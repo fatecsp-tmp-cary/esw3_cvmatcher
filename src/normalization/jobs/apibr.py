@@ -1,4 +1,5 @@
 import unicodedata
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -22,6 +23,22 @@ def normalize_keywords(labels: Any) -> list[str]:
         if normalized_name:
             keywords.append(normalized_name)
     return keywords
+
+
+def _normalize_publication_date(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ValueError("APiBR issue has an invalid created_at timestamp")
+
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        raise ValueError("APiBR issue has an invalid created_at timestamp") from None
+
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
 
 
 def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
@@ -49,7 +66,7 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         "salary": None,
         "currency": None,
         "job_url": raw_job.get("html_url") or raw_job.get("url"),
-        "publication_date": raw_job.get("created_at"),
+        "publication_date": _normalize_publication_date(raw_job.get("created_at")),
         "status": "DISCOVERED",
         "last_verified_at": None,
         # The source payload is retained only when its terms permit it.
