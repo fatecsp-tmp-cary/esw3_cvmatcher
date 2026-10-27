@@ -2,6 +2,8 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from src.normalization.jobs.apibr import normalize_apibr_job, normalize_keywords, normalize_text
 
 
@@ -60,3 +62,14 @@ def test_normalize_keywords():
     assert normalize_keywords(None) == []
     assert normalize_keywords(["Python", {"name": "Backend"}]) == ["Python", "Backend"]
     assert normalize_keywords("not-a-list") == []
+
+
+@pytest.mark.parametrize("source_id", [None, "", "   ", {}, True])
+def test_normalize_apibr_job_rejects_missing_or_invalid_source_ids(source_id):
+    with pytest.raises(ValueError, match="required id"):
+        normalize_apibr_job({"id": source_id, "title": "Developer"})
+
+
+def test_normalize_apibr_job_rejects_invalid_publication_date():
+    with pytest.raises(ValueError, match="invalid created_at"):
+        normalize_apibr_job({"id": 123, "title": "Developer", "created_at": "yesterday"})

@@ -25,7 +25,7 @@ class _HTMLTextParser(HTMLParser):
 
 def normalize_text(text: str | None) -> str | None:
     """Normalize Unicode composition and whitespace while preserving display text."""
-    if not text or not text.strip():
+    if not isinstance(text, str) or not text.strip():
         return None
     parser = _HTMLTextParser()
     parser.feed(text)
@@ -67,7 +67,10 @@ def _normalize_publication_date(value: Any) -> datetime | None:
 def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
     """Map a raw APiBR issue to the source-supplied canonical job fields."""
     source_id = raw_job.get("id")
-    if source_id is None or not str(source_id).strip():
+    if isinstance(source_id, bool) or not isinstance(source_id, (int, str)):
+        raise ValueError("APiBR issue is missing its required id")
+    normalized_source_id = str(source_id).strip()
+    if not normalized_source_id:
         raise ValueError("APiBR issue is missing its required id")
 
     title = normalize_text(raw_job.get("title"))
@@ -76,7 +79,7 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "platform": "apibr",
-        "source_job_id": str(source_id),
+        "source_job_id": normalized_source_id,
         "source_expires_at": None,
         "company": None,
         "title": title,
