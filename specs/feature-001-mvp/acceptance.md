@@ -37,10 +37,14 @@ These are the remaining clarifications for dependent implementation:
    vacancy fields, and whether scores/explanations may be returned. Ranking
    order was to be preserved by array order. Treat `curriculo_id` as an opaque
    transient correlation value.
-3. **Categorical canonical values:** candidate schema currently accepts free
-   text for seniority, proficiency, mode, and employment type; canonical mapping
-   is pending job-data decisions (tracked in code as #83). Define values and
-   mapping once job data is available.
+3. **Remaining categorical values:** candidate language proficiency and
+    employment type are free text, with no corresponding canonical job fields or
+    enums. Decide whether to add canonical values/mapping or retain them as
+    descriptive text before implementing dependent matching behavior.
+
+Candidate seniority and preference mode mappings are resolved in the
+[feature spec](spec.md) and use the existing `SeniorityLevel` and
+`WorkArrangement` enums.
 
 The source identity decision is resolved: enforce unique `(platform,
 source_job_id)` and reject missing or blank IDs. Source identity is per platform
