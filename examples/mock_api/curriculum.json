@@ -1,0 +1,34 @@
+{
+  "curriculo_id": "cur_12345678",
+  "dados_pessoais": {
+    "cidade": "São Paulo",
+    "estado": "SP",
+    "modalidade_preferencial": "remoto"
+  },
+  "formacao_academica": [
+    {
+      "curso": "Análise e Desenvolvimento de Sistemas",
+      "status": "em_andamento"
+    }
+  ],
+  "competencias": [
+    {
+      "nome": "Python",
+      "nivel": "intermediario"
+    }
+  ],
+  "idiomas": [
+    {
+      "idioma": "Inglês",
+      "nivel": "avancado"
+    }
+  ],
+  "experiencias_profissionais": [],
+  "projetos_academicos": [
+    {
+      "titulo": "Projeto de exemplo",
+      "tecnologias": ["FastAPI"],
+      "descricao": "Exemplo fictício para integração com a API."
+    }
+  ]
+}
