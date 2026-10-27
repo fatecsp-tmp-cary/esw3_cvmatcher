@@ -58,3 +58,13 @@ This approach avoids relying on real-time webhooks and keeps the dataset up to d
 - Jobs from different sources are not merged or deduplicated.
 - Location and work arrangement are not used for geographic eligibility filtering.
 - All requests respect the source's rate limits, terms of use, and access restrictions, per `CONTRIBUTING.md`.
+
+
+## Implementation clarification status
+
+The scan and identity details above are the historical source-selection proposal.
+Before implementation, resolve whether a full APiBR scan is provably complete
+enough for absence-based `STALE` transitions, and whether the schema also needs
+the planned unique `(platform, source_job_id)` constraint. These questions are
+open; do not infer the answer from this record. Track them in the
+[MVP acceptance clarifications](../../specs/feature-001-mvp/acceptance.md).

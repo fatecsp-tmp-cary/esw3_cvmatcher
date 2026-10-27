@@ -46,7 +46,7 @@ Inputs:
                 there is a single resume.
 
 Privacy: the result JSON contains the text of the resume chunks. Use only fictitious resumes;
-candidate data must never be persisted or logged (PLAN.md).
+candidate data must never be persisted or logged (specs/feature-001-mvp/spec.md).
 """
 
 import argparse
