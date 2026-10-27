@@ -44,8 +44,9 @@ InHire, Solides, Trampos.co, and Quero Vagas Tech were also evaluated and are no
 2. For each job, apply `includeBody` to retrieve the full job description when needed.
 3. Use `term` for keyword-based filtering when applicable.
 4. Normalize the data according to the shared schema.
-5. Upsert each job record using a surrogate primary key; `source_job_id` is stored as an attribute, not as the primary key, since identifiers may collide across sources.
-6. Jobs no longer present in a subsequent scan are marked as `STALE`.
+5. Upsert each job record using its surrogate primary key and enforce unique source identity with `(platform, source_job_id)`. Reject source records with missing or blank identifiers; identifiers from different platforms remain independent.
+6. Jobs absent from a successful complete snapshot may be marked `STALE`; the
+   APiBR scan must be shown to be complete before this rule is applied there.
 
 This approach avoids relying on real-time webhooks and keeps the dataset up to date through scheduled polling.
 
@@ -62,9 +63,10 @@ This approach avoids relying on real-time webhooks and keeps the dataset up to d
 
 ## Implementation clarification status
 
-The scan and identity details above are the historical source-selection proposal.
-Before implementation, resolve whether a full APiBR scan is provably complete
-enough for absence-based `STALE` transitions, and whether the schema also needs
-the planned unique `(platform, source_job_id)` constraint. These questions are
-open; do not infer the answer from this record. Track them in the
+The APiBR scan proposal above does not establish snapshot completeness; whether
+absence can safely mark jobs `STALE` remains unresolved. The source identity
+decision is settled: enforce unique `(platform, source_job_id)` and reject
+missing or blank source identifiers. See the
 [MVP acceptance clarifications](../../specs/feature-001-mvp/acceptance.md).
+APiBR aggregates GitHub issues: `state=open` normalizes to `ACTIVE`, and
+`state=closed` normalizes to `EXPIRED`.

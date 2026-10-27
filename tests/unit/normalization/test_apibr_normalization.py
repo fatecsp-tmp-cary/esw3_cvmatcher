@@ -1,5 +1,8 @@
 import json
+from datetime import UTC, datetime
 from pathlib import Path
+
+import pytest
 
 from src.normalization.jobs.apibr import normalize_apibr_job, normalize_keywords, normalize_text
 
@@ -12,10 +15,11 @@ def test_normalize_apibr_job():
     raw_job = raw_data[0] if isinstance(raw_data, list) else raw_data
     normalized = normalize_apibr_job(raw_job)
 
-    # Ensure all required fields from Task 19 schema are present
+    # Ensure source-supplied fields match the canonical schema.
     expected_keys = {
         "platform",
         "source_job_id",
+        "source_expires_at",
         "company",
         "title",
         "description",
@@ -25,8 +29,14 @@ def test_normalize_apibr_job():
         "skills",
         "keywords",
         "salary",
+        "currency",
         "job_url",
         "publication_date",
+        "status",
+        "last_verified_at",
+        "raw",
+        "embedding",
+        "content_hash",
     }
     assert set(normalized.keys()) == expected_keys
 
@@ -34,6 +44,11 @@ def test_normalize_apibr_job():
     assert normalized["source_job_id"] == str(raw_job["id"])
     assert normalized["title"] is not None
     assert normalized["job_url"] is not None
+    assert normalized["status"] == "ACTIVE"
+    assert normalized["company"] is None
+    assert normalized["location"] is None
+    assert isinstance(normalized["publication_date"], datetime)
+    assert normalized["publication_date"].tzinfo == UTC
     assert isinstance(normalized["keywords"], list)
     assert isinstance(normalized["skills"], list)
 
@@ -42,10 +57,38 @@ def test_normalize_text_empty():
     assert normalize_text(None) is None
     assert normalize_text("") is None
     assert normalize_text("   ") is None
-    assert normalize_text("  Developer   Python  ") == "Developer Python"
+    assert normalize_text("  SÃO   Developer  ") == "SÃO Developer"
+    assert normalize_text(" <p>SÃO&nbsp;</p><div>Developer</div> ") == "SÃO Developer"
 
 
 def test_normalize_keywords():
     assert normalize_keywords(None) == []
     assert normalize_keywords(["Python", {"name": "Backend"}]) == ["Python", "Backend"]
     assert normalize_keywords("not-a-list") == []
+
+
+@pytest.mark.parametrize("source_id", [None, "", "   ", {}, True])
+def test_normalize_apibr_job_rejects_missing_or_invalid_source_ids(source_id):
+    with pytest.raises(ValueError, match="required id"):
+        normalize_apibr_job({"id": source_id, "title": "Developer"})
+
+
+def test_normalize_apibr_job_rejects_invalid_publication_date():
+    with pytest.raises(ValueError, match="invalid created_at"):
+        normalize_apibr_job({"id": 123, "title": "Developer", "created_at": "yesterday"})
+
+
+@pytest.mark.parametrize("payload", [None, [], "issue", 123])
+def test_normalize_apibr_job_rejects_non_object_payload(payload):
+    with pytest.raises(ValueError, match="payload must be an object"):
+        normalize_apibr_job(payload)
+
+
+@pytest.mark.parametrize(
+    ("state", "expected_status"),
+    [("open", "ACTIVE"), ("closed", "EXPIRED"), (None, "DISCOVERED")],
+)
+def test_normalize_apibr_job_maps_github_issue_state(state, expected_status):
+    normalized = normalize_apibr_job({"id": 123, "title": "Developer", "state": state})
+
+    assert normalized["status"] == expected_status

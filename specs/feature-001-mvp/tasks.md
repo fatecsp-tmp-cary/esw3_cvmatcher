@@ -1,19 +1,25 @@
 # MVP task status
 
-Status reflects the repository inspected during this documentation migration.
+Status reflects the implementation in this branch; it does not imply MVP
+completion.
 
 ## Implemented scaffold
 
 - FastAPI app factory, health endpoint, and RFC-style error handlers.
 - Candidate profile schema and validation.
-- APiBR payload normalization function (partial mapping only).
-- SQLAlchemy/Alembic setup and a tooling-check migration; no real job schema.
+- APiBR payload normalization with required ID/title validation and partial
+  source-field mapping.
+- SQLAlchemy models and Alembic migrations for initial `job_sources`, `jobs`,
+  and `source_runs` persistence, with a follow-up revision aligning canonical
+  job fields and the unique `(platform, source_job_id)` identity constraint.
+  Lifecycle operations and complete run evidence remain pending.
 - README documents local PostgreSQL and current test setup.
 
 ## Pending implementation
 
-- [ ] Resolve the four questions in [acceptance](acceptance.md) in future PRs.
-- [ ] Implement canonical Job and persisted job/source/skill structures.
+- [ ] Resolve the three remaining questions in [acceptance](acceptance.md) before dependent implementation.
+- [ ] Complete persisted job/source/run structures, including skills and
+      requirements tables and all run evidence required by the spec.
 - [ ] Implement source interface, APiBR polling, run tracking, safe upsert,
       snapshot evidence, source-specific identity, and lifecycle.
 - [ ] Implement normalization, requirement extraction, and shared skill taxonomy.

@@ -29,5 +29,8 @@ job_url, raw, embedding, content_hash
 ```
 
 `platform + source_job_id` is intended as source identity. Additional persisted
-data belongs in separate structures. See [invariants](invariants.md), [ADR
-index](decisions/README.md), and [MVP spec](../../specs/feature-001-mvp/spec.md).
+data belongs in separate structures. The SQL persistence model may also carry
+`source_id` as a foreign-key implementation detail linking a job to
+`job_sources`; it is not part of the canonical `Job` representation. See
+[invariants](invariants.md), [ADR index](decisions/README.md), and [MVP
+spec](../../specs/feature-001-mvp/spec.md).

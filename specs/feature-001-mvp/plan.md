@@ -7,8 +7,8 @@ with an explicit rationale and synchronized task/document updates.
    scan proves a complete covered set. Until established, do not use absence to
    mark jobs `STALE`; implement only lifecycle behavior supported by explicit
    source evidence.
-2. Core domain: Job, DB schema/migrations, lifecycle, hashing. Resolve the
-   source identity constraint and null/duplicate ID handling first.
+2. Core domain: Job, DB schema/migrations, lifecycle, hashing. Enforce unique
+   `(platform, source_job_id)` identity and reject missing or blank IDs.
 3. Candidate validation, normalization, and taxonomy.
 4. Ingestion interface, polling modes, APiBR source, normalization, source runs,
    and upsert.
