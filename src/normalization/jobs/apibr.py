@@ -93,7 +93,9 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         "currency": None,
         "job_url": raw_job.get("html_url") or raw_job.get("url"),
         "publication_date": _normalize_publication_date(raw_job.get("created_at")),
-        "status": "DISCOVERED",
+        # APiBR aggregates GitHub issues; a closed issue is no longer an
+        # available job even if it remains present in the scan.
+        "status": "EXPIRED" if raw_job.get("state") == "closed" else "DISCOVERED",
         "last_verified_at": None,
         # The source payload is retained only when its terms permit it.
         "raw": None,
