@@ -49,7 +49,7 @@ def _check_period(start: str | None, end: str | None) -> None:
 class Experience(_Schema):
     title: ShortText
     company: ShortText | None = None
-    description: LongText | None = None
+    description: str | None = Field(default=None, max_length=1000)
     skills: list[ShortText] = Field(default_factory=list, max_length=100)
     start_date: PartialDate | None = None
     end_date: PartialDate | None = Field(default=None, description="Omitted for a current role.")
@@ -94,8 +94,8 @@ class CandidateCompetency(_Schema):
 
 class CandidateProject(_Schema):
     title: ShortText
-    technologies: list[ShortText] = Field(default_factory=list)
-    description: LongText | None = None
+    technologies: list[str] = Field(default_factory=list)
+    description: str | None = Field(default=None, max_length=1000)
 
 
 class CandidateLocation(_Schema):
