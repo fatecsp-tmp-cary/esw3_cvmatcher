@@ -64,8 +64,10 @@ hash updates the job, reindexes text, nulls its embedding, and schedules
 regeneration. Unchanged content is not updated. Model/version changes
 independently invalidate and regenerate embeddings.
 
-Only active jobs are in active retrieval. FTS covers title, company, description,
-skills, requirements, and location. Semantic job representation is title,
+Only active jobs are in active retrieval. The initial FTS document covers title,
+company, description, keywords, skills, normalized requirement text, and location.
+These fields use uniform initial weighting; location contributes only to textual
+retrieval and never to geographic eligibility. Semantic job representation is title,
 normalized skills, requirements, relevant description, location, and mode.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job

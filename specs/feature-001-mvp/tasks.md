@@ -28,6 +28,8 @@ completion.
 - [ ] Prove APiBR snapshot completeness before applying absence-based stale
       transitions; add scheduling and operational retry policy.
 - [ ] Implement normalization, requirement extraction, and shared skill taxonomy.
+- [x] Define initial PostgreSQL FTS fields and uniform weighting: title, company,
+      description, keywords, skills, normalized requirements, and location.
 - [ ] Implement PostgreSQL FTS, local embedding generation, pgvector, and
       invalidation/reprocessing.
 - [ ] Implement filters, textual/semantic retrieval, scoring, deterministic
