@@ -53,6 +53,7 @@ def test_normalize_text_empty():
     assert normalize_text("") is None
     assert normalize_text("   ") is None
     assert normalize_text("  SÃO   Developer  ") == "SÃO Developer"
+    assert normalize_text(" <p>SÃO&nbsp;</p><div>Developer</div> ") == "SÃO Developer"
 
 
 def test_normalize_keywords():
