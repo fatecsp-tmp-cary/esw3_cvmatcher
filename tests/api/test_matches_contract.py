@@ -61,6 +61,7 @@ def test_matches_unavailable_returns_problem_details(client: TestClient) -> None
 def test_openapi_documents_matches_contract_and_problem_responses(client: TestClient) -> None:
     schema = client.get("/openapi.json").json()
     operation = schema["paths"]["/matches"]["post"]
+    payload_example = operation["requestBody"]["content"]["application/json"]["examples"]
 
     assert operation["parameters"] == [
         {
@@ -77,6 +78,10 @@ def test_openapi_documents_matches_contract_and_problem_responses(client: TestCl
         }
     ]
     assert "CurriculumRequest" in str(operation["requestBody"])
+    assert payload_example["sistema_curriculo"]["value"]["curriculo_id"] == "cur_987654321"
+    assert payload_example["sistema_curriculo"]["value"]["projetos_academicos"][0]["titulo"] == (
+        "Sistema de Apoio Profissional"
+    )
     assert "MatchesResponse" in str(operation["responses"]["200"])
     assert "application/problem+json" in operation["responses"]["422"]["content"]
     assert "application/problem+json" in operation["responses"]["503"]["content"]
