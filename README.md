@@ -54,6 +54,17 @@ curl --include http://127.0.0.1:8001/matches \
   --data @examples/mock_api/curriculum.json
 ```
 
+To run it in an isolated Docker Compose stack instead, build and start the
+mock service with:
+
+```bash
+docker compose -f docker-compose.mock.yml up --build
+```
+
+The mock is available at `http://localhost:8001`. Set `MOCK_API_PORT` to use a
+different host port. Stop the service with
+`docker compose -f docker-compose.mock.yml down`.
+
 The mock also provides `GET /health`, the OpenAPI schema at `/openapi.json`,
 and Swagger UI at `/docs`. Use `--host` and `--port` to change the bind address.
 Request values, including `curriculo_id`, are not stored, logged, or echoed in errors.
