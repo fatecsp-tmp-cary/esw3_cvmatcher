@@ -36,8 +36,11 @@ section detection, skill/keyword extraction, alias normalization, requirement
 classification, then canonical Job. Requirement classes are `REQUIRED`,
 `PREFERRED`, and `NICE_TO_HAVE`; detected skills must not automatically be
 assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
-matching, and section detection are proposed. PostgreSQL FTS handles DB-level
-tokenization, stemming, and ranking.
+matching, and section detection are proposed. PostgreSQL FTS uses the Portuguese
+text-search configuration for indexing and query parsing, as recorded in
+[ADR-004](../../docs/architecture/decisions/ADR-004-portuguese-full-text-search.md).
+Portuguese stemming is stronger than English stemming under this configuration;
+English searches may rank less well.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
 `parent_skill_id`, `aliases`); candidate-side taxonomy processing is transient.
@@ -68,6 +71,8 @@ Only active jobs are in active retrieval. The initial FTS document covers title,
 company, description, keywords, skills, normalized requirement text, and location.
 These fields use uniform initial weighting; location contributes only to textual
 retrieval and never to geographic eligibility. Semantic job representation is title,
+The PostgreSQL FTS query and GIN indexes are implemented; semantic job
+representation is title,
 normalized skills, requirements, relevant description, location, and mode.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job

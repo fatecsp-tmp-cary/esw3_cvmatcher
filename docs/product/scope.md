@@ -24,5 +24,6 @@ crawling; sophisticated entity resolution or personalization.
 The current code includes `/health`, candidate profile validation, API error
 handling, APiBR normalization, sequential APiBR polling, source-run tracking,
 source-specific upserts, and APiBR issue availability checks. Text indexing,
-matching, and recommendation endpoints remain planned. See
+Portuguese PostgreSQL FTS retrieval, and GIN indexes. Semantic indexing,
+ranking, and API matching remain planned. See
 [MVP tasks](../../specs/feature-001-mvp/tasks.md) for status.
