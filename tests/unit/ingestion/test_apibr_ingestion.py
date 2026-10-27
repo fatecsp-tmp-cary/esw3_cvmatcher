@@ -1,5 +1,6 @@
 import json
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 import pytest
 from sqlalchemy import create_engine, select
@@ -112,6 +113,27 @@ def test_ingest_records_source_run_and_source_specific_statuses(session: Session
     assert run.snapshot_complete is False
 
 
+def test_ingest_persists_the_captured_apibr_fixture(session: Session) -> None:
+    fixture_path = Path("tests/resources/jobs_fixture.json")
+    fixture_issues = json.loads(fixture_path.read_text(encoding="utf-8"))
+
+    result = ingest_apibr(session, 1, _Pages(fixture_issues, []))
+
+    issue = fixture_issues[0]
+    job = session.scalar(
+        select(Job).where(
+            Job.platform == "apibr",
+            Job.source_job_id == str(issue["id"]),
+        )
+    )
+    assert result.jobs_found == len(fixture_issues)
+    assert result.jobs_created == len(fixture_issues)
+    assert job is not None
+    assert job.title == issue["title"]
+    assert job.job_url == issue["html_url"]
+    assert job.status == JobStatus.ACTIVE
+
+
 def test_ingest_updates_changed_content_and_preserves_unchanged_content_hash(
     session: Session,
 ) -> None:
@@ -214,6 +236,22 @@ def test_ingest_does_not_verify_or_transition_on_an_unavailable_url_check(
 
     assert job.status == JobStatus.DISCOVERED
     assert job.last_verified_at is None
+
+
+def test_unavailable_url_check_preserves_existing_job_state_and_verification(
+    session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ingest_apibr(session, 1, _Pages([_issue(1)], []))
+    job = session.scalar(select(Job).where(Job.source_job_id == "1"))
+    previous_verification = job.last_verified_at
+    monkeypatch.setattr(apibr_ingestion, "check_apibr_job_status", lambda _url: None)
+    issue = _issue(1)
+    issue.pop("state")
+
+    ingest_apibr(session, 1, _Pages([issue], []))
+
+    assert job.status == JobStatus.ACTIVE
+    assert job.last_verified_at == previous_verification
 
 
 def test_failed_poll_rolls_back_jobs_and_records_failure_without_error_text(
