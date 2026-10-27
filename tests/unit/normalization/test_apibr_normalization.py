@@ -44,6 +44,9 @@ def test_normalize_apibr_job():
     assert normalized["source_job_id"] == str(raw_job["id"])
     assert normalized["title"] is not None
     assert normalized["job_url"] is not None
+    assert normalized["status"] == "ACTIVE"
+    assert normalized["company"] is None
+    assert normalized["location"] is None
     assert isinstance(normalized["publication_date"], datetime)
     assert normalized["publication_date"].tzinfo == UTC
     assert isinstance(normalized["keywords"], list)
