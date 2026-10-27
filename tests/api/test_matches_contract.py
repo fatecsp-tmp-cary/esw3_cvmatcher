@@ -81,11 +81,3 @@ def test_openapi_documents_matches_contract_and_problem_responses(client: TestCl
     assert "application/problem+json" in operation["responses"]["422"]["content"]
     assert "application/problem+json" in operation["responses"]["503"]["content"]
     assert "curriculo_id" not in schema["components"]["schemas"]["MatchesResponse"]
-
-
-def test_swagger_page_is_available(client: TestClient) -> None:
-    response = client.get("/swagger")
-
-    assert response.status_code == 200
-    assert "swagger-ui" in response.text
-    assert "/openapi.json" in response.text

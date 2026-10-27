@@ -100,7 +100,7 @@ job contains `company`, `title`, `description`, `keywords`, `location`,
 `job_url`, and `publication_date`. The public contract omits persisted job IDs
 and internal eligibility/component details. Ranking order is represented by
 array order and `rank`. `GET /health` returns `{"status":"ok"}`. FastAPI
-publishes the OpenAPI schema at `/openapi.json` and Swagger UI at `/swagger`.
+publishes the OpenAPI schema and Swagger UI.
 
 Errors use RFC 9457 `application/problem+json`: `type` is `about:blank`, `title`
 is the HTTP phrase, `status` is numeric, `detail` is optional; 422 adds one

@@ -36,7 +36,6 @@
   the public descriptive fields listed in the feature spec. The API response
   omits both the persisted job ID and `curriculo_id`.
 - `GET /health` returns `{"status":"ok"}`.
-- Swagger UI is available at `/swagger`; its schema is served at `/openapi.json`.
 
 ## Unresolved; address before dependent implementation
 

@@ -12,7 +12,7 @@ MatchExecutor = Callable[[CurriculumRequest, int], MatchesResponse]
 
 def create_app(match_executor: MatchExecutor | None = None) -> FastAPI:
     """Build the CV-Match API application."""
-    app = FastAPI(title="CV-Match", version="0.1.0", docs_url="/swagger", redoc_url=None)
+    app = FastAPI(title="CV-Match", version="0.1.0")
     register_error_handlers(app)
 
     @app.get("/health", tags=["system"])
