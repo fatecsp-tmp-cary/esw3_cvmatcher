@@ -9,7 +9,6 @@ from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
-from pgvector.sqlalchemy import Vector
 
 # revision identifiers, used by Alembic.
 revision: str = "4d6249817e17"
@@ -20,8 +19,6 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Create the initial job persistence tables."""
-
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
     # Create job sources.
     op.create_table(
@@ -52,7 +49,6 @@ def upgrade() -> None:
         sa.Column("source_id", sa.Integer(), nullable=False),
         sa.Column("platform", sa.String(length=100), nullable=False),
         sa.Column("source_job_id", sa.String(length=255), nullable=False),
-        sa.Column("source_expires_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("company", sa.String(length=255), nullable=True),
         sa.Column("title", sa.String(length=255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
@@ -78,13 +74,12 @@ def upgrade() -> None:
         sa.Column("skills", sa.JSON(), nullable=True),
         sa.Column("keywords", sa.JSON(), nullable=True),
         sa.Column("salary", sa.JSON(), nullable=True),
-        sa.Column("currency", sa.String(length=10), nullable=True),
         sa.Column("job_url", sa.Text(), nullable=True),
         sa.Column("publication_date", sa.DateTime(timezone=True), nullable=True),
         sa.Column(
             "status",
-            sa.Enum("DISCOVERED", "ACTIVE", "STALE", "EXPIRED", name="jobstatus"),
-            server_default="DISCOVERED",
+            sa.Enum("ACTIVE", "EXPIRED", name="jobstatus"),
+            server_default="ACTIVE",
             nullable=False,
         ),
         sa.Column(
@@ -99,26 +94,6 @@ def upgrade() -> None:
             server_default=sa.func.now(),
             nullable=False,
         ),
-        sa.Column(
-            "last_verified_at",
-            sa.DateTime(timezone=True),
-            nullable=True,
-        ),
-        sa.Column(
-            "raw",
-            sa.JSON(),
-            nullable=True,
-        ),
-        sa.Column(
-            "embedding",
-            Vector(),
-            nullable=True,
-        ),
-        sa.Column(
-            "content_hash",
-            sa.String(length=255),
-            nullable=True,
-        ),
         sa.ForeignKeyConstraint(
             ["source_id"],
             ["job_sources.id"],
@@ -128,7 +103,7 @@ def upgrade() -> None:
         sa.UniqueConstraint(
             "platform",
             "source_job_id",
-            name=op.f("uq_jobs_platform_source_job_id"),
+            name=op.f("uq_jobs_platform"),
         ),
     )
 
