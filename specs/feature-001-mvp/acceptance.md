@@ -20,9 +20,24 @@
 - Pass relevant unit, integration, API, and end-to-end coverage, including
   ranking regression and no-dedup/no-geographic-filtering cases.
 
-## Unresolved; address before dependent implementation
+## Resolved API contract
 
-These are future-PR clarification tasks, not decisions:
+- `POST /matches` accepts the flat Sistema Currículo payload: `curriculo_id`,
+  `dados_pessoais`, `formacao_academica`, `competencias`, optional `idiomas`,
+  optional `experiencias_profissionais`, and optional `projetos_academicos`.
+- At least one academic formation and competency are required. An omitted
+  `formacao_academica[].instituicao` defaults to `FATEC-SP`.
+- `curriculo_id` is opaque, request-only correlation data. It is never persisted,
+  logged, or returned in the response.
+- `limit` is the only query parameter. It defaults to 10 and accepts integers
+  from 1 through 100. There is no `offset` parameter.
+- The response follows #40: `matches[]` entries contain `rank`, nested `job`,
+  `score`, `embedding_model`, and `algorithm_version`. The nested job contains
+  the public descriptive fields listed in the feature spec. The API response
+  omits both the persisted job ID and `curriculo_id`.
+- `GET /health` returns `{"status":"ok"}`.
+
+## Unresolved; address before dependent implementation
 
 1. **APiBR snapshot completeness:** establish whether pagination/scan behavior
    proves a complete covered set before absence can mark jobs stale. The source
@@ -32,19 +47,10 @@ These are future-PR clarification tasks, not decisions:
    surrogate primary key and `source_job_id` attribute with the planned unique
    `(platform, source_job_id)` constraint. Confirm expected null/duplicate ID
    handling before schema implementation.
-3. **Group 1 API contract:** confirm whether `POST /matches` is the integration
-   route and actual CV serialization/mapping. The proposal was a request
-   envelope `{curriculo_id, curriculo}` and response
-   `associacoes[]: {curriculo_id, vaga: {id, titulo, empresa, descricao,
-   requisitos[], localizacao?, modalidade?, url_candidatura?}}`; the example CV
-   fields were illustrative. Confirm response envelope and fields, optional
-   vacancy fields, and whether scores/explanations may be returned. Ranking
-   order was to be preserved by array order. Treat `curriculo_id` as an opaque
-   transient correlation value.
-4. **Categorical canonical values:** candidate schema currently accepts free
+3. **Categorical canonical values:** candidate schema currently accepts free
    text for seniority, proficiency, mode, and employment type; canonical mapping
    is pending job-data decisions (tracked in code as #83). Define values and
    mapping once job data is available.
 
-Do not resolve these by inference. Record the agreed outcome in a future PR and
-update this spec, architecture/ADR if applicable, acceptance, plan, and tasks.
+Do not resolve remaining questions by inference. Record future outcomes in the
+relevant specification, architecture/ADR if applicable, plan, and tasks.
