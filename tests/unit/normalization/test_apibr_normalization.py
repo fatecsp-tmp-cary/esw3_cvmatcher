@@ -12,10 +12,11 @@ def test_normalize_apibr_job():
     raw_job = raw_data[0] if isinstance(raw_data, list) else raw_data
     normalized = normalize_apibr_job(raw_job)
 
-    # Ensure all required fields from Task 19 schema are present
+    # Ensure source-supplied fields match the canonical schema.
     expected_keys = {
         "platform",
         "source_job_id",
+        "source_expires_at",
         "company",
         "title",
         "description",
@@ -25,8 +26,14 @@ def test_normalize_apibr_job():
         "skills",
         "keywords",
         "salary",
+        "currency",
         "job_url",
         "publication_date",
+        "status",
+        "last_verified_at",
+        "raw",
+        "embedding",
+        "content_hash",
     }
     assert set(normalized.keys()) == expected_keys
 
@@ -42,7 +49,7 @@ def test_normalize_text_empty():
     assert normalize_text(None) is None
     assert normalize_text("") is None
     assert normalize_text("   ") is None
-    assert normalize_text("  Developer   Python  ") == "Developer Python"
+    assert normalize_text("  SÃO   Developer  ") == "SÃO Developer"
 
 
 def test_normalize_keywords():
