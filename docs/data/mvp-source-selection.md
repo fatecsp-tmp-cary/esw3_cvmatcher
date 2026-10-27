@@ -72,5 +72,6 @@ APiBR aggregates GitHub issues: `state=open` normalizes to `ACTIVE`, and
 `state=closed` normalizes to `EXPIRED`.
 When the issue payload omits a recognized state, the ingestion layer checks
 its related GitHub issue URL. A confirmed open issue is active; a closed issue
-or HTTP 404/410 is expired. Timeouts, HTTP 429, and server errors leave the job
-state and verification timestamp unchanged.
+or HTTP 404/410 is expired. If that check is inconclusive, a new job is saved
+as `DISCOVERED`; an existing job keeps its lifecycle state. Timeouts, HTTP 429,
+and server errors do not update `last_verified_at`.
