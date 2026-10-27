@@ -7,11 +7,13 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 
 def _valid_completion_month(value: str) -> str:
-    if len(value) == 7:
-        try:
+    try:
+        if len(value) == 4:
+            date.fromisoformat(f"{value}-01-01")
+        else:
             date.fromisoformat(f"{value}-01")
-        except ValueError:
-            raise ValueError("previsao_conclusao must be a valid year and month") from None
+    except ValueError:
+        raise ValueError("previsao_conclusao must be a valid year and month") from None
     return value
 
 

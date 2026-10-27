@@ -13,8 +13,8 @@ completion.
 - `POST /matches` validates that payload, adapts it before invoking the match
   executor, and accepts the documented `limit` and `offset` query parameters.
 - Internal request-scoped candidate category normalization maps available
-  seniority and work-arrangement values to canonical enums; the Sistema
-  Currículo adapter still needs to map its scalar modality preference.
+  seniority and work-arrangement values to canonical enums; the curriculum
+  adapter maps its scalar preference into that normalization input.
 - APiBR payload normalization with required ID/title validation and partial
   source-field mapping.
 - SQLAlchemy models and Alembic migrations for initial `job_sources`, `jobs`,
@@ -36,8 +36,10 @@ completion.
       invalidation/reprocessing.
 - [ ] Implement filters, textual/semantic retrieval, scoring, deterministic
       ranking, and regression dataset.
-- [ ] Implement agreed matches API, OpenAPI, privacy-safe errors/logging, and
-      production authentication.
+- [ ] Integrate the matching executor with retrieval and ranking; the API
+      request/response schemas and route are implemented, but no production
+      matching executor is configured.
+- [ ] Complete privacy-safe operational logging and production authentication.
 - [ ] Complete unit/integration/API/e2e coverage, local Compose services,
       deployment configuration, scheduling, and monitoring.
 

@@ -62,10 +62,10 @@ Keep project and education details available to matching rather than
 discarding fields that do not fit the former `CandidateProfile` model. The
 internal representation is not the API contract.
 
-Map `modalidade_preferencial` case- and accent-insensitively:
+Map the validated `modalidade_preferencial` values:
 `presencial` → `ON_SITE`, `remoto` → `REMOTE`, `hibrido` → `HYBRID`, and
-`indiferente` → no work-arrangement preference. Missing or unknown categories
-must not cause hard exclusion. The payload has no explicit candidate seniority,
+`indiferente` → no work-arrangement preference. Reject values outside this
+contract enum. The payload has no explicit candidate seniority,
 employment type, or years-of-experience field; do not require or invent those
 values. Do not infer a hard seniority exclusion from education or job titles.
 Competency levels and language levels are validated source values, but have no
