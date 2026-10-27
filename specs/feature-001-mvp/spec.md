@@ -25,7 +25,9 @@ Candidate `seniority` text maps to the existing `SeniorityLevel` values:
 `ON_SITE`. Matching is case- and accent-insensitive for these aliases. Missing
 or unknown values normalize to no category and must not cause hard exclusion.
 Language proficiency and employment type have no canonical job fields or enums
-yet; their mapping remains unresolved.
+yet; keep them as schema-validated free text. They may contribute descriptive
+matching evidence, but cannot drive hard exclusion until a canonical mapping is
+defined.
 
 The `Job` fields are defined in the [architecture overview](../../docs/architecture/overview.md).
 `platform + source_job_id` is intended to be unique source identity, not

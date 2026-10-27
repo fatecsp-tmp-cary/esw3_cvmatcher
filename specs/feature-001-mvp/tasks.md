@@ -17,7 +17,7 @@ completion.
 
 ## Pending implementation
 
-- [ ] Resolve the three remaining questions in [acceptance](acceptance.md) before dependent implementation.
+- [ ] Resolve the two remaining questions in [acceptance](acceptance.md) before dependent implementation.
 - [ ] Complete persisted job/source/run structures, including skills and
       requirements tables and all run evidence required by the spec.
 - [ ] Implement source interface, APiBR polling, run tracking, safe upsert,
