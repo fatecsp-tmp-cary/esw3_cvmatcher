@@ -2,6 +2,13 @@
 
 REST API that receives an already structured CV as JSON and returns job openings ranked by compatibility.
 
+Project documentation starts at [AGENTS.md](AGENTS.md). Product boundaries are in
+[scope](docs/product/scope.md), architecture rules in
+[architecture invariants](docs/architecture/invariants.md), and the MVP specification,
+acceptance criteria, plan, and task status are in
+[specs/feature-001-mvp](specs/feature-001-mvp/spec.md). See
+[CONTRIBUTING.md](CONTRIBUTING.md) for contributor workflow.
+
 ## Local PostgreSQL
 
 Integration and e2e tests, and eventually the application itself, need a local
@@ -115,7 +122,7 @@ the app's startup/shutdown events when used as a context manager.
 - Build the app through `src.api.app.create_app()`; the `app` and `client`
   fixtures in `tests/api/conftest.py` give each test a fresh instance.
 - Assert on status code and JSON body. Invalid request bodies return `422`
-  with the failing fields in `errors[*].loc` (error format: `PLAN.md`, REST API).
+  with the failing fields in `errors[*].loc` (error format: [MVP spec](specs/feature-001-mvp/spec.md), REST API).
 - For `async` tests that need to await the app directly, use
   `httpx2.AsyncClient(transport=httpx2.ASGITransport(app=app))`.
 

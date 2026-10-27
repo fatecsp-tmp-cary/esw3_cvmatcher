@@ -2,8 +2,8 @@
 
 Thank you for contributing to CV-Match. The project is building an open-source,
 local-first API that matches structured CV data with jobs from multiple sources.
-Please read this guide and the project [implementation plan](PLAN.md) before
-opening an issue or pull request.
+Please read the project [documentation guide](AGENTS.md), [MVP spec](specs/feature-001-mvp/spec.md),
+and [Definition of Done](docs/quality/definition-of-done.md) before opening an issue or pull request.
 
 ## Before you start
 
@@ -38,7 +38,7 @@ avoid spaces and shell-special characters.
 
 ## Project conventions
 
-Please preserve these architectural boundaries:
+Please preserve the [documented architectural invariants](docs/architecture/invariants.md) and these boundaries:
 
 - Keep ingestion, normalization, indexing, matching/ranking, persistence, and
   API responsibilities separate.
@@ -91,6 +91,10 @@ A good pull request:
 - documents API, schema, migration, configuration, or behavioral changes;
 - calls out risks, limitations, and follow-up work; and
 - contains no unrelated formatting or generated-file changes.
+
+Do not implement a major architectural change without explicit user approval;
+present the proposal, rationale, alternatives, and impact first. Record accepted
+decisions as ADRs and update affected documentation.
 
 Reviewers may request changes to preserve the project’s architecture,
 privacy requirements, deterministic behavior, or source-usage constraints.

@@ -18,7 +18,7 @@ assertion fails.
 |---|---|
 | Extension | `CREATE EXTENSION IF NOT EXISTS vector;` (needs a role allowed to create extensions; the compose superuser is) |
 | Column | `embedding vector(384)`; the dimension must equal the embedding model's output (384 for all-MiniLM-L6-v2, paraphrase-multilingual-MiniLM-L12-v2 and multilingual-e5-small) |
-| Nullable | `NULL` is accepted, matching PLAN.md (`embedding = NULL` means missing/invalid for the configured model) |
+| Nullable | `NULL` is accepted, matching [MVP specification](../../specs/feature-001-mvp/spec.md) (`embedding = NULL` means missing/invalid for the configured model) |
 | Operators | `<=>` cosine distance (similarity = `1 - distance`), `<->` L2, `<#>` negative inner product |
 | Indexes | `hnsw (embedding vector_cosine_ops)` and `ivfflat (embedding vector_cosine_ops) WITH (lists = N)` both build and are chosen by the planner |
 | Dimension check | inserting a vector with the wrong dimension fails (`expected 384 dimensions, not 3`) |

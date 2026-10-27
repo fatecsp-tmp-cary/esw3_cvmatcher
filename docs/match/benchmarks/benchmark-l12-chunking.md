@@ -23,7 +23,7 @@ python $B/benchmark_l12_chunking.py --model intfloat/multilingual-e5-small \
 
 The script stores the jobs in its own table (`vagas_pgvector_validation`) and drops it at the end.
 Resume vectors are never stored; the result JSON contains the text of the resume chunks, so use it
-only with fictitious resumes (PLAN.md: candidate data is never persisted or logged).
+only with fictitious resumes ([MVP specification](../../../specs/feature-001-mvp/spec.md): candidate data is never persisted or logged).
 
 ## Environment
 
@@ -175,10 +175,10 @@ Load time includes Hugging Face Hub network checks even when the model is cached
   prompted in part by jobs that both models had placed in the top 10.
 - The jobs are fictitious and their areas have different depth (about 15 backend jobs, 2 for QA).
   Compare strategies and models within a resume, not resumes with each other.
-- The jobs are embedded as `title. description`; PLAN.md also puts normalized skills, requirements,
+- The jobs are embedded as `title. description`; [MVP specification](../../../specs/feature-001-mvp/spec.md) also puts normalized skills, requirements,
   location and mode in the job representation. The candidate representation here uses title,
   skills and experience only.
-- The semantic score was not normalized to the `[0, 100]` range that PLAN.md requires for the final
+- The semantic score was not normalized to the `[0, 100]` range that [MVP specification](../../../specs/feature-001-mvp/spec.md) requires for the final
   score; only the ranking was evaluated.
 - The inputs use `experience` as plain strings. The `CandidateProfile` schema (#84) uses objects;
   the script builds their text from `title`, `company`, `description` and `skills`, but this path
@@ -197,7 +197,7 @@ folder per issue) and `docs/match/benchmarks/`; this report links to them once t
 ## Recommendation
 
 - **Retrieval:** per-chunk top-N queries (N = 20) merged in Python, then re-score the pool. It is
-  the retrieval phase that fits the PLAN.md pipeline, where the semantic stage runs next to the
+  the retrieval phase that fits the [MVP specification](../../../specs/feature-001-mvp/spec.md) pipeline, where the semantic stage runs next to the
   textual one.
 - **Aggregation:** `B` (mean of the 3 highest chunk cosines) as the semantic score. It is the only
   one that is competitive in both models. Do not use `C`.
