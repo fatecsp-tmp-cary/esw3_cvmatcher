@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, pool
 
 from src.persistence.base import Base
 from src.persistence.database import database_url
-from src.persistence.job import job, job_source, source_run  # noqa: F401
+from src.persistence.job import job, job_source, skill, source_run  # noqa: F401
 
 config = context.config
 
