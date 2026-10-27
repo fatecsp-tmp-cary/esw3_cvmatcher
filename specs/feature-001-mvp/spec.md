@@ -80,18 +80,27 @@ scoring rather than exclusion.
 
 Default final score is `0.45 * textual + 0.35 * semantic + 0.20 * structured`;
 weights are configurable and component/final scores are `[0,100]`. Score means
-compatibility, not employment probability. Match result fields are `id`,
-`title`, `rank`, `company`, `description`, `keywords`, `location`,
-`work_arrangement`, `job_url`, `score`, `eligibility`, component scores,
-`matched_skills[]`, `missing_requirements[]`, `embedding_model`, and
-`algorithm_version`. Eligibility means matching eligibility, never geography;
-component scores may remain internal.
+compatibility, not employment probability. Internal match results may carry
+`id`, `eligibility`, component scores, `matched_skills[]`, and
+`missing_requirements[]`; eligibility means matching eligibility, never
+geography. Component scores may remain internal.
 
-The proposed Group 1 contract is unresolved in
-[acceptance and clarifications](acceptance.md): route agreement, request and
-response serialization, optional fields, and score/explanation exposure require
-confirmation. Candidate data and `curriculo_id` are opaque/transient and never
-persisted or logged. FastAPI provides OpenAPI.
+The resolved public API contract is documented in
+[acceptance](acceptance.md). `POST /matches` accepts the flat Sistema Currículo
+payload with `curriculo_id`, the required personal-data, academic-formation, and
+competency fields, and optional languages, professional experiences, and
+academic projects. The only query parameter is `limit`, defaulting to 10 and
+bounded from 1 through 100. `curriculo_id` is request-only: do not persist, log,
+or return it.
+
+The response is `MatchesResponse {matches: MatchResult[]}`. Each result contains
+`rank`, `job`, `score`, `embedding_model`, and `algorithm_version`. The nested
+job contains `company`, `title`, `description`, `keywords`, `location`,
+`work_arrangement`, `seniority_level`, `skills`, `salary`, `currency`,
+`job_url`, and `publication_date`. The public contract omits persisted job IDs
+and internal eligibility/component details. Ranking order is represented by
+array order and `rank`. `GET /health` returns `{"status":"ok"}`. FastAPI
+publishes the OpenAPI schema and Swagger UI.
 
 Errors use RFC 9457 `application/problem+json`: `type` is `about:blank`, `title`
 is the HTTP phrase, `status` is numeric, `detail` is optional; 422 adds one
