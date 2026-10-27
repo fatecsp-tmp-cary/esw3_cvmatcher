@@ -77,7 +77,7 @@ def test_normalize_apibr_job_rejects_invalid_publication_date():
 
 @pytest.mark.parametrize(
     ("state", "expected_status"),
-    [("open", "DISCOVERED"), ("closed", "EXPIRED"), (None, "DISCOVERED")],
+    [("open", "ACTIVE"), ("closed", "EXPIRED"), (None, "DISCOVERED")],
 )
 def test_normalize_apibr_job_maps_github_issue_state(state, expected_status):
     normalized = normalize_apibr_job({"id": 123, "title": "Developer", "state": state})
