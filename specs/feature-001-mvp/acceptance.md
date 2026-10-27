@@ -44,5 +44,5 @@ These are the remaining clarifications for dependent implementation:
 
 The source identity decision is resolved: enforce unique `(platform,
 source_job_id)` and reject missing or blank IDs. Source identity is per platform
-and does not imply cross-source deduplication. Record remaining outcomes and
-update this spec, architecture/ADR if applicable, plan, and tasks.
+and does not imply cross-source deduplication. APiBR issue state maps `open` to
+`ACTIVE` and `closed` to `EXPIRED`.

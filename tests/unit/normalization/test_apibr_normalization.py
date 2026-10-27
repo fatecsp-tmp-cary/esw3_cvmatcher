@@ -73,3 +73,13 @@ def test_normalize_apibr_job_rejects_missing_or_invalid_source_ids(source_id):
 def test_normalize_apibr_job_rejects_invalid_publication_date():
     with pytest.raises(ValueError, match="invalid created_at"):
         normalize_apibr_job({"id": 123, "title": "Developer", "created_at": "yesterday"})
+
+
+@pytest.mark.parametrize(
+    ("state", "expected_status"),
+    [("open", "DISCOVERED"), ("closed", "EXPIRED"), (None, "DISCOVERED")],
+)
+def test_normalize_apibr_job_maps_github_issue_state(state, expected_status):
+    normalized = normalize_apibr_job({"id": 123, "title": "Developer", "state": state})
+
+    assert normalized["status"] == expected_status

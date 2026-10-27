@@ -68,3 +68,5 @@ absence can safely mark jobs `STALE` remains unresolved. The source identity
 decision is settled: enforce unique `(platform, source_job_id)` and reject
 missing or blank source identifiers. See the
 [MVP acceptance clarifications](../../specs/feature-001-mvp/acceptance.md).
+APiBR aggregates GitHub issues: `state=open` normalizes to `ACTIVE`, and
+`state=closed` normalizes to `EXPIRED`.
