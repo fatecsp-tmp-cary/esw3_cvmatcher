@@ -1,12 +1,12 @@
 # pgvector local validation
 
-Issue: #24 (parent #4). Script: [`scripts/validate_pgvector.sql`](../../scripts/validate_pgvector.sql).
+Issue: #24 (parent #4). Script: [`scripts/helpers/validate_pgvector.sql`](../../scripts/helpers/validate_pgvector.sql).
 
 ## How to reproduce
 
 ```bash
 cp .env.example .env && docker compose up -d     # pgvector/pgvector:pg17
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/validate_pgvector.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/helpers/validate_pgvector.sql
 ```
 
 The script creates and drops its own table (`pgvector_validation`) and exits non-zero if any

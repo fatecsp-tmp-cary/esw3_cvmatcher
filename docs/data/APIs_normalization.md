@@ -1,30 +1,42 @@
 # API, Endpoint, and Job Normalization Documentation (MVP)
 
-This document specifies the data architecture, endpoint mapping for all 6 evaluated public sources retained in the project, the definition of the platform selected for the MVP, and the normalization and standardization schema for the unified database.
+This document records endpoint research for evaluated sources. APiBR is selected for the initial integration; the remaining sources are candidates, not selected integrations.
 
-## 1. Schema Normalization Strategy (Unified Model)
+## 1. Canonical Schema
 
 Since each job API returns different JSON structures, all data collected by the integrators is transformed and mapped to the following standardized schema before being persisted:
 
 | Normalized Field | Data Type | Description / Transformation Rule | Example Value |
 |---|---|---|---|
-| `source_job_id` | String (PK) | Unique identifier originally provided by the platform | `"MOaYsJOw"` or `"12577603"` |
-| `platform` | String | Name of the platform/API from which the data was collected | `"Meu Padrinho"`, `"APiBR"` |
+| `id` | Internal identifier | Stable identifier assigned by CV-Match. | `0012345` |
+| `source_job_id` | String | Unique identifier originally provided by the platform | `"MOaYsJOw"` or `"12577603"` |
+| `platform` | String | Name of the platform/API from which the data was collected | `"apibr"` |
+| `source_expires_at` | Timestamp or null | Explicit expiration supplied by the source. Missing value does not mean expired. | `"2026-12-31T23:59:59Z"` |
 | `title` | String | Cleaned and formatted job title | `"Mid-Level Data Analyst"` |
 | `company` | String | Name of the hiring company or career page | `"Globo"`, `"Archer Daniels"` |
 | `description` | Text | Full descriptive text or job requirements | `"Responsible for data modeling..."` |
+| `keywords` | Array[String] | List of keywords related to the job, such as skill, location and seniority requirements | `{"Python", "Pleno", "Django", "Remoto"}` |
 | `location` | JSON / Obj | Standardized object containing city, state, and country | `{"city": "SP", "state": "SP"}` |
 | `work_arrangement` | Enum | Work arrangement (REMOTE, HYBRID, ON_SITE) | `HYBRID` |
 | `seniority_level` | Enum | Seniority level (INTERN, JUNIOR, MID, SENIOR, SPECIALIST, COORDINATOR) | `MID` |
 | `skills` | Array[String] | List of skills, programming languages, frameworks, tools, or other relevant requirements | `["Python", "SQL", "Docker"]` |
 | `salary` | JSON / Obj | Salary range when available | `{"min": 5000, "max": 7000}` |
-| `job_url` | String | Direct link to the job opening in that specific platform | `"https://..."` |
+| `currency` | String | Currency associated with salary, when supplied. | `"BRL"` |
+| `job_url` | String | Direct link to the job opening in that specific platform | `"https://example.com/jobs/12577603"` |
 | `publication_date` | Timestamp | Publication date/time standardized in ISO 8601 format | `"2026-09-23T07:04:10Z"` |
-| `source_status` | Enum | Job status reported by the source/platform (ACTIVE, INACTIVE, UNAVAILABLE) | `ACTIVE` |
+| `status` | Enum | `DISCOVERED`, `ACTIVE`, `STALE`, or `EXPIRED`; availability follows the lifecycle rules below. | `"ACTIVE"` |
+| `first_seen_at` | Timestamp | First successful observation by the collector. | `"2026-10-20T12:05:00Z"` |
+| `last_seen_at` | Timestamp | Most recent successful observation. | `"2026-10-20T12:05:00Z"` |
+| `last_verified_at` | Timestamp or null | Most recent successful availability check. | `"2026-10-20T12:05:00Z"` |
+| `raw` | JSON | Original source payload, only when retention is permitted. | `{ "id": 12577603 }` |
+| `embedding` | pgvector value | Job embedding; null means missing or invalid for the configured model. | `vector([...])` |
+| `content_hash` | String | Hash of normalized job content, used to detect changes. | `"sha256:…"` |
+
+`skills` and structured requirements may also use the supporting `skills`, `job_skills`, and `job_requirements` tables. Candidate profiles, candidate embeddings, and match results are request-scoped and are not part of this persisted schema.
 
 ## 2. Technical Specification and Endpoints for All Sources
 
-### 2.1 Meu Padrinho / API Vagas Tech (Complementary Source)
+### 2.1 Meu Padrinho / API Vagas Tech (Evaluated; not selected for initial integration)
 
 Main Endpoint: GET [https://meupadrinho.com.br/api/vagas](https://meupadrinho.com.br/api/vagas)
 
@@ -96,7 +108,7 @@ Example Request: GET [https://querovagastech.com.br/api/jobs?page=1&pageSize=100
 | Returned Fields | id, title, company, postedAt, work arrangement, location |
 | Pagination Behavior | Uses page + pageSize. To obtain the complete description and additional data, a secondary call to /api/jobs/{id} is performed. |
 
-### 2.6 APiBR / Vagas Aggregator (MVP Main Source)
+### 2.6 APiBR / Vagas Aggregator (Selected initial source)
 
 **Official API Documentation (Swagger):** [https://apibr.com/vagas/swagger/](https://apibr.com/vagas/swagger/)
 
@@ -113,7 +125,7 @@ Repositories Endpoint: GET `/vagas/repositories`
 | Method / Format / Authentication | GET / JSON / No authentication identified |
 | Main Resource | Job opportunities represented as GitHub issues |
 | Additional Resources | Authors, labels, and repositories |
-| Pagination Behavior | The page parameter was tested and returned different sets of jobs for different page values. Pages from 1 through 31 returned results during testing; from page=32 onward, no results were returned. |
+| Pagination Behavior | The page parameter was tested and returned different sets of jobs for different page values. Pages from 1 through 31 returned results during testing; |
 | Limit Parameter | The limit parameter was tested with different values but did not change the number of results returned. |
 | Keyword Search | Not identified as a confirmed query parameter in the available API documentation. |
 | Returned Data | Job information associated with GitHub issues and source metadata, including issue ID, title, URL, keywords, labels, author, comments, and repository information. |
@@ -124,7 +136,7 @@ Repositories Endpoint: GET `/vagas/repositories`
 
 | Criterion / API | APiBR | Meu Padrinho | InHire | Solides | Trampos.co | Quero Vagas Tech |
 |---|---|---|---|---|---|---|
-| MVP Role | Main Source | Complementary | Potential | Potential | Potential | Potential |
+| Selection status | Selected initial source | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected |
 | HTTP Method | GET | GET | GET | GET | GET | GET |
 | JSON Response | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Authentication Required | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
@@ -138,23 +150,25 @@ Repositories Endpoint: GET `/vagas/repositories`
 
 ## 4. ⚙️ Data Collection and Data Engineering Pipeline
 
-**List Ingestion (APiBR):** The collector makes sequential requests to the primary source (APiBR), using the `page` parameter starting at page=1 and incrementing it until no more results are returned. During testing, pages 1 through 31 returned results, while page=32 onward returned no results.
+**List Ingestion (APiBR):** The collector makes sequential requests to the primary source (APiBR), using the `page` parameter starting at page=1 and incrementing it until no more results are returned.
 
-**Complementary Source Collection:** The collector may query Meu Padrinho using page=0 and the available niveis filters to collect additional recent jobs. Requests to page>=1 should not be used because pagination was found to return HTTP 204 No Content during testing. Other evaluated sources may be integrated in future iterations, depending on project priorities and further API testing.
+**Other-source evaluation:** Meu Padrinho was evaluated using page=0 and `niveis`; page>=1 returned HTTP 204 during testing. It is not part of the selected initial integration.
 
-**Details and Skills Collection:** For each Meu Padrinho job, the system extracts the nano_id and makes parallel requests to `/api/vagas/{nano_id}` (description, location, salary) and `/api/vagas/{nano_id}/tecnologias`.
+**Evaluated details and skills collection:** During Meu Padrinho testing, the `nano_id` was used to request `/api/vagas/{nano_id}` (description, location, salary) and `/api/vagas/{nano_id}/tecnologias`.
 
 **Data Normalization:** All returned attributes are converted to the Normalized Schema defined in Section 1.
 
 **Incremental Deduplication (Upsert):**
 
-The system checks the source_job_id together with the platform in the database.
+The system checks the `source_job_id` together with the `platform` in the database.
 
 If the job already exists, the job data is updated.
 
 If it is new, the record is inserted.
 
-**Source Status:** The source_status field represents the status provided by the source/platform (ACTIVE, INACTIVE, UNAVAILABLE).
+Only successful complete snapshots may mark absent jobs `STALE`; failed polls and incremental absence leave lifecycle state unchanged.
+
+
 
 ## 5. MVP Source Selection
 
@@ -168,14 +182,12 @@ APiBR was selected because it provides publicly accessible job data in JSON form
 
 Live testing showed the following pagination behavior:
 
-- Pages 1 through 31 returned results.
-- Page 32 onward returned no results.
 - The `limit` parameter did not change the number of results returned.
 - No confirmed keyword-search parameter was identified.
 
-Although the API has pagination and coverage limitations, it was selected as the official primary source for the MVP. Its structured issue metadata and labels can support the normalization process and CV-to-job matching.
+This was selected as the official primary source for the MVP since its structured issue metadata and labels can support the normalization process and CV-to-job matching.
 
-### 5.2 Complementary and Alternative Sources
+### 5.2 Other Evaluated Sources
 
 **Meu Padrinho / API Vagas Tech** was initially considered as the main source because it provides structured job data and additional endpoints for job details and technologies. However, live testing showed that its pagination is not functional:
 
@@ -185,11 +197,11 @@ Although the API has pagination and coverage limitations, it was selected as the
 - The niveis parameter can expose additional jobs by seniority.
 - Only a small fraction of the available job universe can therefore be collected.
 
-For this reason, Meu Padrinho will be kept as a complementary source, mainly for collecting additional recent jobs through the available filters.
+For this reason, Meu Padrinho was not selected for the initial integration; it remains an evaluated candidate.
 
 **InHire** may be considered in the future when the project has a defined list of companies whose vacancies should be collected.
 
-**Solides, Trampos.co, and Quero Vagas Tech** remain documented as potential complementary sources for future iterations of the project.
+**Solides, Trampos.co, and Quero Vagas Tech** remain evaluated candidates for possible future selection.
 
 ### 5.3 Gupy Exclusion
 
@@ -197,6 +209,6 @@ Gupy was removed from the MVP source selection because its API became unavailabl
 
 ### 5.4 Selection Summary
 
-The MVP will prioritize APiBR as its official primary source. The other evaluated APIs retained in this document remain potential complementary sources to expand vacancy coverage in future development cycles.
+The initial integration will use APiBR. The other evaluated APIs are candidates for future selection, not selected integrations.
 
-This approach establishes a single primary source for the initial integration while preserving the technical evaluation needed to add other sources later.
+This approach selects APiBR for the initial integration while preserving the evaluation needed to consider other sources later.
