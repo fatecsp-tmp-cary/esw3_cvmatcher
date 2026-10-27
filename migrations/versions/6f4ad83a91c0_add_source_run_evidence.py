@@ -28,7 +28,12 @@ def upgrade() -> None:
         WHERE runs.source_id = sources.id
         """
     )
-    op.alter_column("source_runs", "polling_mode", existing_type=sa.String(length=50), nullable=False)
+    op.alter_column(
+        "source_runs",
+        "polling_mode",
+        existing_type=sa.String(length=50),
+        nullable=False,
+    )
     op.add_column("source_runs", sa.Column("duration_ms", sa.Integer(), nullable=True))
     op.add_column(
         "source_runs",
