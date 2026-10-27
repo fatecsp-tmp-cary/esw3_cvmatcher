@@ -2,8 +2,8 @@
 
 from enum import StrEnum
 
+from sqlalchemy import JSON, ForeignKey, Index, Integer, String, Text, text
 from sqlalchemy import Enum as SQLAlchemyEnum
-from sqlalchemy import ForeignKey, Index, Integer, JSON, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.persistence.base import Base
