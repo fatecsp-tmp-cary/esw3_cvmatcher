@@ -53,6 +53,9 @@ complete snapshot; incremental absence and failed polls do not change status.
 `STALE→EXPIRED` uses configured consecutive missing snapshots and/or maximum
 stale duration; either configured condition may expire a job. Reliable explicit
 `source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.
+APiBR aggregates GitHub issues: an issue returned with `state=open` is `ACTIVE`,
+and one returned with `state=closed` is `EXPIRED`. Other sources must map their
+own availability signals according to their source semantics.
 Retain expired records; physical deletion is out of MVP.
 
 `last_seen_at` tracks successful observation; `last_verified_at` tracks
