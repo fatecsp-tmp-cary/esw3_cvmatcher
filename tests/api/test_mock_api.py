@@ -50,15 +50,15 @@ def test_mock_matches_returns_deterministic_ranked_sample() -> None:
     }
 
 
-def test_mock_matches_supports_contract_pagination_parameters() -> None:
+def test_mock_matches_uses_only_the_limited_contract_parameter() -> None:
     with TestClient(create_app()) as client:
-        first_page = client.post("/matches?limit=1&offset=0", json=_SAMPLE_REQUEST)
-        later_page = client.post("/matches?limit=1&offset=1", json=_SAMPLE_REQUEST)
+        response = client.post("/matches?limit=1", json=_SAMPLE_REQUEST)
+        operation = client.get("/openapi.json").json()["paths"]["/matches"]["post"]
 
-    assert first_page.status_code == 200
-    assert len(first_page.json()["matches"]) == 1
-    assert later_page.status_code == 200
-    assert later_page.json() == {"matches": []}
+    assert response.status_code == 200
+    assert len(response.json()["matches"]) == 1
+    assert [parameter["name"] for parameter in operation["parameters"]] == ["limit"]
+    assert operation["parameters"][0]["schema"]["default"] == 10
 
 
 def test_mock_validation_errors_do_not_echo_candidate_values() -> None:

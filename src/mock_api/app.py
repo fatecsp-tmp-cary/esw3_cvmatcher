@@ -48,11 +48,10 @@ def create_app() -> FastAPI:
     @app.post("/matches", response_model=MatchesResponse, tags=["matching"])
     def matches(
         _request: CurriculumRequest,
-        limit: int = Query(default=20, ge=1, le=100),
-        offset: int = Query(default=0, ge=0),
+        limit: int = Query(default=10, ge=1, le=100),
     ) -> MatchesResponse:
         # The request, including curriculo_id, is deliberately not retained or echoed.
-        return MatchesResponse(matches=_SAMPLE_RESPONSE.matches[offset : offset + limit])
+        return MatchesResponse(matches=_SAMPLE_RESPONSE.matches[:limit])
 
     return app
 
