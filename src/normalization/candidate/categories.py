@@ -40,6 +40,7 @@ _SENIORITY_ALIASES = {
     "specialist": SeniorityLevel.SPECIALIST,
     "especialista": SeniorityLevel.SPECIALIST,
     "coordinator": SeniorityLevel.COORDINATOR,
+    "coordenador(a)": SeniorityLevel.COORDINATOR,
     "coordenador": SeniorityLevel.COORDINATOR,
     "coordenadora": SeniorityLevel.COORDINATOR,
 }
