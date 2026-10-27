@@ -47,13 +47,32 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Remove added columns and restore the original unique constraint/default."""
+    """Restore the original schema and its two-value job status enum.
+
+    DISCOVERED and STALE have no representation in the original enum, so
+    downgrade maps those stored states to ACTIVE before replacing the type.
+    """
     op.drop_constraint("uq_jobs_platform_source_job_id", "jobs", type_="unique")
     op.create_unique_constraint("uq_jobs_platform", "jobs", ["platform", "source_job_id"])
     op.alter_column(
         "jobs",
         "status",
         existing_type=sa.Enum("ACTIVE", "EXPIRED", "DISCOVERED", "STALE", name="jobstatus"),
+        server_default=None,
+    )
+    op.execute("ALTER TABLE jobs ALTER COLUMN status TYPE text USING status::text")
+    op.execute("ALTER TYPE jobstatus RENAME TO jobstatus_new")
+    op.execute("CREATE TYPE jobstatus AS ENUM ('ACTIVE', 'EXPIRED')")
+    op.execute(
+        "ALTER TABLE jobs ALTER COLUMN status TYPE jobstatus USING "
+        "(CASE status WHEN 'DISCOVERED' THEN 'ACTIVE' "
+        "WHEN 'STALE' THEN 'ACTIVE' ELSE status END)::jobstatus"
+    )
+    op.execute("DROP TYPE jobstatus_new")
+    op.alter_column(
+        "jobs",
+        "status",
+        existing_type=sa.Enum("ACTIVE", "EXPIRED", name="jobstatus"),
         server_default="ACTIVE",
     )
     op.drop_column("jobs", "content_hash")
