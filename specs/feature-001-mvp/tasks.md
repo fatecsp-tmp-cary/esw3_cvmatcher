@@ -9,10 +9,15 @@ completion.
 - Candidate profile schema and validation.
 - APiBR payload normalization with required ID/title validation and partial
   source-field mapping.
+- Sequential APiBR polling, source-run tracking, safe source-specific upserts,
+  deterministic content hashes, and per-issue availability checks. Runs are
+  recorded with `snapshot_complete=false`; no absence-based stale transition is
+  applied.
 - SQLAlchemy models and Alembic migrations for initial `job_sources`, `jobs`,
   and `source_runs` persistence, with a follow-up revision aligning canonical
   job fields and the unique `(platform, source_job_id)` identity constraint.
-  Lifecycle operations and complete run evidence remain pending.
+  Explicit APiBR state and URL signals update lifecycle; snapshot-based
+  lifecycle remains pending.
 - README documents local PostgreSQL and current test setup.
 
 ## Pending implementation
@@ -20,8 +25,8 @@ completion.
 - [ ] Resolve the three remaining questions in [acceptance](acceptance.md) before dependent implementation.
 - [ ] Complete persisted job/source/run structures, including skills and
       requirements tables and all run evidence required by the spec.
-- [ ] Implement source interface, APiBR polling, run tracking, safe upsert,
-      snapshot evidence, source-specific identity, and lifecycle.
+- [ ] Prove APiBR snapshot completeness before applying absence-based stale
+      transitions; add scheduling and operational retry policy.
 - [ ] Implement normalization, requirement extraction, and shared skill taxonomy.
 - [ ] Implement PostgreSQL FTS, local embedding generation, pgvector, and
       invalidation/reprocessing.
