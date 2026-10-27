@@ -12,8 +12,10 @@
 - Ranking is deterministic for identical normalized inputs, jobs, model/version,
   configuration, and algorithm version.
 - Respect source terms, rate limits, robots/access and storage restrictions.
-- `Job` has exactly the fields in [architecture overview](overview.md); put
-  additional persisted data in separate structures.
+- Canonical `Job` has exactly the fields in [architecture overview](overview.md).
+  The persistence row may additionally carry `source_id` solely as a foreign
+  key to `job_sources`; keep it out of canonical job data and API payloads.
+  Put other additional persisted data in separate structures.
 - Lifecycle status represents availability. Expired jobs remain historical and
   are excluded from active retrieval. Polling failure never changes lifecycle.
 - Source-specific jobs remain independent: no cross-source deduplication,
