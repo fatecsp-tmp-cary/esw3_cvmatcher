@@ -4,6 +4,13 @@ This document records endpoint research for evaluated sources. APiBR is selected
 
 ## 1. Canonical Schema
 
+The normative canonical `Job` field set is maintained in the
+[architecture overview](../architecture/overview.md). The table below describes
+those same fields for source-normalization work. `platform` identifies the
+upstream job platform; the separate `job_sources` persistence record configures
+the adapter and polling. The persistence-only `source_id` is not a canonical
+job field.
+
 Since each job API returns different JSON structures, all data collected by the integrators is transformed and mapped to the following standardized schema before being persisted:
 
 | Normalized Field | Data Type | Description / Transformation Rule | Example Value |
@@ -14,12 +21,12 @@ Since each job API returns different JSON structures, all data collected by the 
 | `source_expires_at` | Timestamp or null | Explicit expiration supplied by the source. Missing value does not mean expired. | `"2026-12-31T23:59:59Z"` |
 | `title` | String | Cleaned and formatted job title | `"Mid-Level Data Analyst"` |
 | `company` | String | Name of the hiring company or career page | `"Globo"`, `"Archer Daniels"` |
-| `description` | Text | Full descriptive text or job requirements | `"Responsible for data modeling..."` |
+| `description` | Text | Cleaned descriptive text from the posting | `"Responsible for data modeling..."` |
 | `keywords` | Array[String] | List of keywords related to the job, such as skill, location and seniority requirements | `{"Python", "Pleno", "Django", "Remoto"}` |
 | `location` | JSON / Obj | Standardized object containing city, state, and country | `{"city": "SP", "state": "SP"}` |
 | `work_arrangement` | Enum | Work arrangement (REMOTE, HYBRID, ON_SITE) | `HYBRID` |
 | `seniority_level` | Enum | Seniority level (INTERN, JUNIOR, MID, SENIOR, SPECIALIST, COORDINATOR) | `MID` |
-| `skills` | Array[String] | List of skills, programming languages, frameworks, tools, or other relevant requirements | `["Python", "SQL", "Docker"]` |
+| `skills` | Array[String] | Normalized skill names: programming languages, frameworks, tools, and other skills | `["Python", "SQL", "Docker"]` |
 | `salary` | JSON / Obj | Salary range when available | `{"min": 5000, "max": 7000}` |
 | `currency` | String | Currency associated with salary, when supplied. | `"BRL"` |
 | `job_url` | String | Direct link to the job opening in that specific platform | `"https://example.com/jobs/12577603"` |
@@ -32,7 +39,12 @@ Since each job API returns different JSON structures, all data collected by the 
 | `embedding` | pgvector value | Job embedding; null means missing or invalid for the configured model. | `vector([...])` |
 | `content_hash` | String | Hash of normalized job content, used to detect changes. | `"sha256:…"` |
 
-`skills` and structured requirements may also use the supporting `skills`, `job_skills`, and `job_requirements` tables. Candidate profiles, candidate embeddings, and match results are request-scoped and are not part of this persisted schema.
+`skills` are canonical job data; structured/classified requirements are separate
+data in `job_requirements` and are not a `requirements` field on `Job`.
+Candidate preferences use `modes[]` as input text, normalized to the canonical
+job field `work_arrangement`; `mode` is not a canonical job field. Candidate
+profiles, candidate embeddings, and match results are request-scoped and are
+not part of this persisted schema.
 
 ## 2. Technical Specification and Endpoints for All Sources
 

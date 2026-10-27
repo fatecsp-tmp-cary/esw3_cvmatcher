@@ -6,9 +6,15 @@ completion.
 ## Implemented scaffold
 
 - FastAPI app factory, health endpoint, and RFC-style error handlers.
-- Candidate profile schema and validation.
-- Request-scoped candidate category normalization maps seniority and work modes
-  to canonical enums while retaining validated language and employment text.
+- Internal candidate profile schema and validation (not yet the Sistema
+  Currículo API request schema).
+- Pydantic schema for the complete Sistema Currículo request object and a
+  transient profile adapter preserving matching-relevant sections.
+- `POST /matches` validates that payload, adapts it before invoking the match
+  executor, and accepts the documented `limit` and `offset` query parameters.
+- Internal request-scoped candidate category normalization maps available
+  seniority and work-arrangement values to canonical enums; the curriculum
+  adapter maps its scalar preference into that normalization input.
 - APiBR payload normalization with required ID/title validation and partial
   source-field mapping.
 - SQLAlchemy models and Alembic migrations for initial `job_sources`, `jobs`,
@@ -19,7 +25,8 @@ completion.
 
 ## Pending implementation
 
-- [ ] Resolve the two remaining questions in [acceptance](acceptance.md) before dependent implementation.
+- [ ] Resolve the remaining questions in [acceptance](acceptance.md) before
+      dependent implementation.
 - [ ] Complete persisted job/source/run structures, including skills and
       requirements tables and all run evidence required by the spec.
 - [ ] Implement source interface, APiBR polling, run tracking, safe upsert,
@@ -29,8 +36,10 @@ completion.
       invalidation/reprocessing.
 - [ ] Implement filters, textual/semantic retrieval, scoring, deterministic
       ranking, and regression dataset.
-- [ ] Implement agreed matches API, OpenAPI, privacy-safe errors/logging, and
-      production authentication.
+- [ ] Integrate the matching executor with retrieval and ranking; the API
+      request/response schemas and route are implemented, but no production
+      matching executor is configured.
+- [ ] Complete privacy-safe operational logging and production authentication.
 - [ ] Complete unit/integration/API/e2e coverage, local Compose services,
       deployment configuration, scheduling, and monitoring.
 

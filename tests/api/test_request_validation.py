@@ -1,7 +1,7 @@
-"""Validates the request-validation testing approach.
+"""Exercises the shared API validation harness with an isolated test payload.
 
-The real POST /matches contract is defined in #39/#40. Until then, a test-only
-route with a Pydantic body shows how valid and invalid payloads are exercised.
+The actual Sistema Currículo request contract for POST /matches is covered in
+``test_matches.py``.
 """
 
 from collections.abc import Iterator

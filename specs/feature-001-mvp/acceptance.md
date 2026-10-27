@@ -2,8 +2,11 @@
 
 ## Acceptance criteria
 
-- Accept structured CV JSON and validate it into the defined request-scoped
-  profile; never persist or log submitted candidate data.
+- Accept and validate the complete flat Sistema Currículo request object
+  (`curriculo_id`, `dados_pessoais`, `formacao_academica`, `competencias`, and
+  optional `idiomas`, `experiencias_profissionais`, `projetos_academicos`),
+  adapting it to transient matching data without discarding relevant sections;
+  never persist or log the submitted curriculum.
 - Ingest at least one selected source through a source adapter and normalize to
   the exact canonical Job fields.
 - Preserve `(platform, source_job_id)` source identity and detect content
@@ -15,7 +18,9 @@
 - Provide PostgreSQL FTS and local PT/EN-capable semantic search, staged matching,
   deterministic versioned scores in `[0,100]`, and ranked REST recommendations.
 - Never use location/mode for geographic eligibility filtering.
-- Match agreed API/error contracts, OpenAPI documentation, and operational
+- Return `matches[]` ranked by array order; each item contains only `rank`,
+  descriptive `job`, `score`, `embedding_model`, and `algorithm_version`.
+  Match the API/error contract, OpenAPI documentation, and operational
   security/privacy constraints.
 - Pass relevant unit, integration, API, and end-to-end coverage, including
   ranking regression and no-dedup/no-geographic-filtering cases.
@@ -28,20 +33,10 @@ These are the remaining clarifications for dependent implementation:
    proves a complete covered set before absence can mark jobs stale. The source
    selection record describes absent jobs as stale, while the architecture
    requires a successful complete snapshot. See [ADR-002](../../docs/architecture/decisions/ADR-002-apibr-mvp-source.md).
-2. **Group 1 API contract:** confirm whether `POST /matches` is the integration
-   route and actual CV serialization/mapping. The proposal was a request
-   envelope `{curriculo_id, curriculo}` and response
-   `associacoes[]: {curriculo_id, vaga: {id, titulo, empresa, descricao,
-   requisitos[], localizacao?, modalidade?, url_candidatura?}}`; the example CV
-   fields were illustrative. Confirm response envelope and fields, optional
-   vacancy fields, and whether scores/explanations may be returned. Ranking
-   order was to be preserved by array order. Treat `curriculo_id` as an opaque
-   transient correlation value.
-Candidate seniority and preference mode mappings are resolved in the
-[feature spec](spec.md) and use the existing `SeniorityLevel` and
-`WorkArrangement` enums. Language proficiency and employment type remain
-schema-validated free text and must not cause hard exclusion without a future
-canonical mapping.
+The incoming request supplies `modalidade_preferencial`, mapped to the existing
+`WorkArrangement` enum. It has no explicit seniority, years-of-experience, or
+employment-type field. Its competency and language levels remain descriptive
+evidence and must not cause hard exclusion.
 
 The source identity decision is resolved: enforce unique `(platform,
 source_job_id)` and reject missing or blank IDs. Source identity is per platform
