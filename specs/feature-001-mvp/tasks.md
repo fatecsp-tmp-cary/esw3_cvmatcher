@@ -12,7 +12,7 @@ Status reflects the repository inspected during this documentation migration.
 
 ## Pending implementation
 
-- [ ] Resolve the four questions in [acceptance](acceptance.md) in future PRs.
+- [ ] Resolve the three remaining questions in [acceptance](acceptance.md) before dependent implementation.
 - [ ] Implement canonical Job and persisted job/source/skill structures.
 - [ ] Implement source interface, APiBR polling, run tracking, safe upsert,
       snapshot evidence, source-specific identity, and lifecycle.

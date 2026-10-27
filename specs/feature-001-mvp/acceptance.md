@@ -22,17 +22,13 @@
 
 ## Unresolved; address before dependent implementation
 
-These are future-PR clarification tasks, not decisions:
+These are the remaining clarifications for dependent implementation:
 
 1. **APiBR snapshot completeness:** establish whether pagination/scan behavior
    proves a complete covered set before absence can mark jobs stale. The source
    selection record describes absent jobs as stale, while the architecture
    requires a successful complete snapshot. See [ADR-002](../../docs/architecture/decisions/ADR-002-apibr-mvp-source.md).
-2. **Source identity constraint:** reconcile the source-selection record's
-   surrogate primary key and `source_job_id` attribute with the planned unique
-   `(platform, source_job_id)` constraint. Confirm expected null/duplicate ID
-   handling before schema implementation.
-3. **Group 1 API contract:** confirm whether `POST /matches` is the integration
+2. **Group 1 API contract:** confirm whether `POST /matches` is the integration
    route and actual CV serialization/mapping. The proposal was a request
    envelope `{curriculo_id, curriculo}` and response
    `associacoes[]: {curriculo_id, vaga: {id, titulo, empresa, descricao,
@@ -41,10 +37,12 @@ These are future-PR clarification tasks, not decisions:
    vacancy fields, and whether scores/explanations may be returned. Ranking
    order was to be preserved by array order. Treat `curriculo_id` as an opaque
    transient correlation value.
-4. **Categorical canonical values:** candidate schema currently accepts free
+3. **Categorical canonical values:** candidate schema currently accepts free
    text for seniority, proficiency, mode, and employment type; canonical mapping
    is pending job-data decisions (tracked in code as #83). Define values and
    mapping once job data is available.
 
-Do not resolve these by inference. Record the agreed outcome in a future PR and
-update this spec, architecture/ADR if applicable, acceptance, plan, and tasks.
+The source identity decision is resolved: enforce unique `(platform,
+source_job_id)` and reject missing or blank IDs. Source identity is per platform
+and does not imply cross-source deduplication. Record remaining outcomes and
+update this spec, architecture/ADR if applicable, plan, and tasks.
