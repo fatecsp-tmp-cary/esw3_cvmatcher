@@ -52,6 +52,10 @@ class SourceRun(Base):
         server_default=false(),
     )
 
+    polling_mode: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    duration_ms: Mapped[int | None] = mapped_column(Integer)
+
     jobs_found: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
@@ -67,6 +71,41 @@ class SourceRun(Base):
     )
 
     jobs_updated: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default=text("0"),
+    )
+
+    jobs_unchanged: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default=text("0"),
+    )
+
+    jobs_absent: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default=text("0"),
+    )
+
+    jobs_marked_stale: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default=text("0"),
+    )
+
+    jobs_expired: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default=text("0"),
+    )
+
+    jobs_reactivated: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
         default=0,
