@@ -17,6 +17,7 @@ def test_job_has_expected_fields():
         "source_id",
         "platform",
         "source_job_id",
+        "source_expires_at",
         "company",
         "title",
         "description",
@@ -26,11 +27,16 @@ def test_job_has_expected_fields():
         "skills",
         "keywords",
         "salary",
+        "currency",
         "job_url",
         "publication_date",
         "status",
         "first_seen_at",
         "last_seen_at",
+        "last_verified_at",
+        "raw",
+        "embedding",
+        "content_hash",
     }
 
     actual_fields = set(Job.__table__.columns.keys())
@@ -67,13 +73,18 @@ def test_normalized_enum_values():
     }
 
 
-def test_job_status_is_a_required_enum_defaulting_to_active():
+def test_job_status_is_a_required_enum_defaulting_to_discovered():
     status = Job.__table__.c.status
 
-    assert {job_status.value for job_status in JobStatus} == {"ACTIVE", "EXPIRED"}
+    assert {job_status.value for job_status in JobStatus} == {
+        "DISCOVERED",
+        "ACTIVE",
+        "STALE",
+        "EXPIRED",
+    }
     assert isinstance(status.type, SQLAlchemyEnum)
     assert not status.nullable
-    assert status.server_default.arg == JobStatus.ACTIVE.value
+    assert status.server_default.arg == JobStatus.DISCOVERED.value
 
 
 def test_normalized_fields_use_documented_storage_types():

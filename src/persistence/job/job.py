@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from enum import StrEnum
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     JSON,
     DateTime,
@@ -36,8 +37,9 @@ class SeniorityLevel(StrEnum):
 
 
 class JobStatus(StrEnum):
-    # Simplified lifecycle; DISCOVERED and STALE (see PLAN.md) come in a later change.
+    DISCOVERED = "DISCOVERED"
     ACTIVE = "ACTIVE"
+    STALE = "STALE"
     EXPIRED = "EXPIRED"
 
 
@@ -45,7 +47,11 @@ class Job(Base):
     __tablename__ = "jobs"
 
     __table_args__ = (
-        UniqueConstraint("platform", "source_job_id"),
+        UniqueConstraint(
+            "platform",
+            "source_job_id",
+            name="uq_jobs_platform_source_job_id",
+        ),
         Index("ix_jobs_publication_date", "publication_date"),
         Index("ix_jobs_source_id", "source_id"),
     )
@@ -62,6 +68,7 @@ class Job(Base):
 
     platform: Mapped[str] = mapped_column(String(100), nullable=False)
     source_job_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    source_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     company: Mapped[str | None] = mapped_column(String(255))
     title: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -76,14 +83,15 @@ class Job(Base):
     skills: Mapped[list[str] | None] = mapped_column(JSON)
     keywords: Mapped[list[str] | None] = mapped_column(JSON)
     salary: Mapped[dict[str, int | float | str | None] | None] = mapped_column(JSON)
+    currency: Mapped[str | None] = mapped_column(String(10))
     job_url: Mapped[str | None] = mapped_column(Text)
     publication_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     status: Mapped[JobStatus] = mapped_column(
         SQLAlchemyEnum(JobStatus, name="jobstatus"),
         nullable=False,
-        default=JobStatus.ACTIVE,
-        server_default=JobStatus.ACTIVE.value,
+        default=JobStatus.DISCOVERED,
+        server_default=JobStatus.DISCOVERED.value,
     )
 
     first_seen_at: Mapped[datetime] = mapped_column(
@@ -98,3 +106,7 @@ class Job(Base):
         default=lambda: datetime.now(UTC),
         server_default=func.now(),
     )
+    last_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    raw: Mapped[dict[str, object] | None] = mapped_column(JSON)
+    embedding: Mapped[list[float] | None] = mapped_column(Vector())
+    content_hash: Mapped[str | None] = mapped_column(String(255))
