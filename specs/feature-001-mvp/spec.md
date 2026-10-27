@@ -15,6 +15,20 @@ certifications[], languages[], locations[], seniority, years_experience,
 preferences
 ```
 
+Candidate `seniority` text maps to the existing `SeniorityLevel` values:
+`intern`/`internship`/`estágio` → `INTERN`; `junior`/`jr`/`júnior` →
+`JUNIOR`; `mid`/`middle`/`mid-level`/`pleno` → `MID`; `senior`/`sr`/`sênior`
+→ `SENIOR`; `specialist`/`especialista` → `SPECIALIST`; and
+`coordinator`/`coordenador(a)` → `COORDINATOR`. Candidate preference modes map
+`remote`/`remoto`/`home office`/`teletrabalho` → `REMOTE`;
+`hybrid`/`híbrido` → `HYBRID`; and `on-site`/`onsite`/`presencial` →
+`ON_SITE`. Matching is case- and accent-insensitive for these aliases. Missing
+or unknown values normalize to no category and must not cause hard exclusion.
+Language proficiency and employment type have no canonical job fields or enums
+yet; keep them as schema-validated free text. They may contribute descriptive
+matching evidence, but cannot drive hard exclusion until a canonical mapping is
+defined.
+
 The `Job` fields are defined in the [architecture overview](../../docs/architecture/overview.md).
 `platform + source_job_id` is intended to be unique source identity, not
 deduplication. Embedding model/version and ranking algorithm version are

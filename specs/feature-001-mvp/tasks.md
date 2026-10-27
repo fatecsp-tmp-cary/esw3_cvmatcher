@@ -7,6 +7,8 @@ completion.
 
 - FastAPI app factory, health endpoint, and RFC-style error handlers.
 - Candidate profile schema and validation.
+- Request-scoped candidate category normalization maps seniority and work modes
+  to canonical enums while retaining validated language and employment text.
 - APiBR payload normalization with required ID/title validation and partial
   source-field mapping.
 - SQLAlchemy models and Alembic migrations for initial `job_sources`, `jobs`,
@@ -17,7 +19,7 @@ completion.
 
 ## Pending implementation
 
-- [ ] Resolve the three remaining questions in [acceptance](acceptance.md) before dependent implementation.
+- [ ] Resolve the two remaining questions in [acceptance](acceptance.md) before dependent implementation.
 - [ ] Complete persisted job/source/run structures, including skills and
       requirements tables and all run evidence required by the spec.
 - [ ] Implement source interface, APiBR polling, run tracking, safe upsert,

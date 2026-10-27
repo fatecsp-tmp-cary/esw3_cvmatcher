@@ -1,0 +1,94 @@
+"""Map request-side category text onto canonical job enums."""
+
+from dataclasses import dataclass
+import unicodedata
+
+from src.persistence.job.job import SeniorityLevel, WorkArrangement
+from src.schemas.candidate.profile import CandidateProfile, Language
+
+
+@dataclass(frozen=True, slots=True)
+class NormalizedCandidateCategories:
+    """Canonical enum categories plus validated free-text candidate values."""
+
+    seniority: SeniorityLevel | None
+    modes: tuple[WorkArrangement, ...]
+    languages: tuple[Language, ...]
+    employment_types: tuple[str, ...]
+
+
+def _key(value: str | None) -> str | None:
+    if value is None:
+        return None
+    decomposed = unicodedata.normalize("NFKD", value.casefold().strip().rstrip("."))
+    unaccented = "".join(char for char in decomposed if not unicodedata.combining(char))
+    return " ".join(unaccented.replace("-", " ").replace("_", " ").split()) or None
+
+
+_SENIORITY_ALIASES = {
+    "intern": SeniorityLevel.INTERN,
+    "internship": SeniorityLevel.INTERN,
+    "estagio": SeniorityLevel.INTERN,
+    "junior": SeniorityLevel.JUNIOR,
+    "jr": SeniorityLevel.JUNIOR,
+    "mid": SeniorityLevel.MID,
+    "middle": SeniorityLevel.MID,
+    "mid level": SeniorityLevel.MID,
+    "pleno": SeniorityLevel.MID,
+    "senior": SeniorityLevel.SENIOR,
+    "sr": SeniorityLevel.SENIOR,
+    "specialist": SeniorityLevel.SPECIALIST,
+    "especialista": SeniorityLevel.SPECIALIST,
+    "coordinator": SeniorityLevel.COORDINATOR,
+    "coordenador(a)": SeniorityLevel.COORDINATOR,
+    "coordenador": SeniorityLevel.COORDINATOR,
+    "coordenadora": SeniorityLevel.COORDINATOR,
+}
+
+_WORK_ARRANGEMENT_ALIASES = {
+    "remote": WorkArrangement.REMOTE,
+    "remoto": WorkArrangement.REMOTE,
+    "home office": WorkArrangement.REMOTE,
+    "teletrabalho": WorkArrangement.REMOTE,
+    "hybrid": WorkArrangement.HYBRID,
+    "hibrido": WorkArrangement.HYBRID,
+    "on site": WorkArrangement.ON_SITE,
+    "onsite": WorkArrangement.ON_SITE,
+    "presencial": WorkArrangement.ON_SITE,
+}
+
+
+def normalize_seniority(value: str | None) -> SeniorityLevel | None:
+    """Return the canonical seniority or ``None`` for missing/unknown text."""
+    key = _key(value)
+    return _SENIORITY_ALIASES.get(key) if key is not None else None
+
+
+def normalize_work_arrangement(value: str | None) -> WorkArrangement | None:
+    """Return the canonical work arrangement or ``None`` if unknown."""
+    key = _key(value)
+    return _WORK_ARRANGEMENT_ALIASES.get(key) if key is not None else None
+
+
+def normalize_candidate_categories(
+    candidate: CandidateProfile,
+) -> NormalizedCandidateCategories:
+    """Normalize enum-backed categories and preserve other validated values.
+
+    Unknown seniority and work-mode values produce no category. Language
+    proficiency and employment type remain schema-validated free text until
+    the job domain defines matching canonical values for them.
+    """
+    modes = tuple(
+        dict.fromkeys(
+            normalized
+            for mode in candidate.preferences.modes
+            if (normalized := normalize_work_arrangement(mode)) is not None
+        )
+    )
+    return NormalizedCandidateCategories(
+        seniority=normalize_seniority(candidate.seniority),
+        modes=modes,
+        languages=tuple(candidate.languages),
+        employment_types=tuple(candidate.preferences.employment_types),
+    )
