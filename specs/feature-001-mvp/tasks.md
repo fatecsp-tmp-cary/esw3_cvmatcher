@@ -8,8 +8,9 @@ completion.
 - FastAPI app factory, health endpoint, and RFC-style error handlers.
 - Internal candidate profile schema and validation (not yet the Sistema
   Currículo API request schema).
-- Pydantic schema for the complete Sistema Currículo request object. Its
-  internal profile adapter and API route wiring remain pending.
+- Pydantic schema for the complete Sistema Currículo request object and a
+  transient profile adapter preserving matching-relevant sections. API route
+  wiring remains pending.
 - Internal request-scoped candidate category normalization maps available
   seniority and work-arrangement values to canonical enums; the Sistema
   Currículo adapter still needs to map its scalar modality preference.
@@ -23,9 +24,6 @@ completion.
 
 ## Pending implementation
 
-- [ ] Adapt the complete request to transient matching data, preserving
-      education, competency levels, languages, work history, and academic
-      projects.
 - [ ] Wire `POST /matches` to validate the Sistema Currículo request schema and
       pass adapted transient candidate data to the matching executor.
 - [ ] Resolve the remaining questions in [acceptance](acceptance.md) before
