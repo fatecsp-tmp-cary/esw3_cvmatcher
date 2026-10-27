@@ -9,10 +9,10 @@ completion.
 - Candidate profile schema and validation.
 - APiBR payload normalization with required ID/title validation and partial
   source-field mapping.
-- SQLAlchemy models and an Alembic migration for initial `job_sources`, `jobs`,
-  and `source_runs` persistence, including canonical job fields and the unique
-  `(platform, source_job_id)` identity constraint. Lifecycle operations and
-  complete run evidence remain pending.
+- SQLAlchemy models and Alembic migrations for initial `job_sources`, `jobs`,
+  and `source_runs` persistence, with a follow-up revision aligning canonical
+  job fields and the unique `(platform, source_job_id)` identity constraint.
+  Lifecycle operations and complete run evidence remain pending.
 - README documents local PostgreSQL and current test setup.
 
 ## Pending implementation
