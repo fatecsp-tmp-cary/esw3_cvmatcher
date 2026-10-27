@@ -66,6 +66,9 @@ def _normalize_publication_date(value: Any) -> datetime | None:
 
 def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
     """Map a raw APiBR issue to the source-supplied canonical job fields."""
+    if not isinstance(raw_job, dict):
+        raise ValueError("APiBR issue payload must be an object")
+
     source_id = raw_job.get("id")
     if isinstance(source_id, bool) or not isinstance(source_id, (int, str)):
         raise ValueError("APiBR issue is missing its required id")
