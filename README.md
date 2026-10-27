@@ -32,6 +32,32 @@ Stop it with `docker compose down` (add `-v` to also drop the data volume).
 If port 5432 is already taken (for example by a PostgreSQL installed on your machine),
 change `POSTGRES_PORT` in `.env` and use the same port in `DATABASE_URL`.
 
+## Runnable API mock
+
+The deterministic mock server lets API consumers try the current curriculum
+request and ranked `matches` response without PostgreSQL, a matching model, or
+external job sources. It returns the same synthetic result for every valid
+request; its score is an example and is not a real compatibility result.
+
+Install the project and run the mock from the repository root:
+
+```bash
+pip install -e .
+python -m src.mock_api --host 127.0.0.1 --port 8001
+```
+
+Send the synthetic example request in another terminal:
+
+```bash
+curl --include http://127.0.0.1:8001/matches \
+  --header 'Content-Type: application/json' \
+  --data @examples/mock_api/curriculum.json
+```
+
+The mock also provides `GET /health`, the OpenAPI schema at `/openapi.json`,
+and Swagger UI at `/docs`. Use `--host` and `--port` to change the bind address.
+Request values, including `curriculo_id`, are not stored, logged, or echoed in errors.
+
 ## Database migrations
 
 SQLAlchemy lives in `src/persistence/` and schema changes are versioned with
