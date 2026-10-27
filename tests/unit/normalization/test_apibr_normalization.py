@@ -78,6 +78,12 @@ def test_normalize_apibr_job_rejects_invalid_publication_date():
         normalize_apibr_job({"id": 123, "title": "Developer", "created_at": "yesterday"})
 
 
+@pytest.mark.parametrize("payload", [None, [], "issue", 123])
+def test_normalize_apibr_job_rejects_non_object_payload(payload):
+    with pytest.raises(ValueError, match="payload must be an object"):
+        normalize_apibr_job(payload)
+
+
 @pytest.mark.parametrize(
     ("state", "expected_status"),
     [("open", "ACTIVE"), ("closed", "EXPIRED"), (None, "DISCOVERED")],
