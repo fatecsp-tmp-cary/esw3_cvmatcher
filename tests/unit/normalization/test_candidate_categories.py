@@ -19,6 +19,7 @@ from src.schemas.candidate.profile import CandidateProfile
         ("mid-level", SeniorityLevel.MID),
         ("SÊNIOR", SeniorityLevel.SENIOR),
         ("especialista", SeniorityLevel.SPECIALIST),
+        ("coordenador(a)", SeniorityLevel.COORDINATOR),
         ("coordenadora", SeniorityLevel.COORDINATOR),
         ("executive", None),
         (None, None),
