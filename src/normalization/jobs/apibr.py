@@ -1,13 +1,36 @@
 import unicodedata
 from datetime import UTC, datetime
+from html.parser import HTMLParser
 from typing import Any
+
+
+class _HTMLTextParser(HTMLParser):
+    _BLOCK_TAGS = {"br", "div", "li", "p", "section", "tr"}
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in self._BLOCK_TAGS:
+            self.parts.append(" ")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in self._BLOCK_TAGS:
+            self.parts.append(" ")
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(data)
 
 
 def normalize_text(text: str | None) -> str | None:
     """Normalize Unicode composition and whitespace while preserving display text."""
     if not text or not text.strip():
         return None
-    normalized = unicodedata.normalize("NFC", text)
+    parser = _HTMLTextParser()
+    parser.feed(text)
+    parser.close()
+    normalized = unicodedata.normalize("NFC", "".join(parser.parts))
     return " ".join(normalized.split())
 
 
