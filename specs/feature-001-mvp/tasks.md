@@ -32,9 +32,10 @@ completion.
       population.
 - [x] Define initial PostgreSQL FTS fields and uniform weighting: title, company,
       description, keywords, skills, normalized requirements, and location.
-- [ ] Implement PostgreSQL FTS, local embedding generation, pgvector, and
-      invalidation/reprocessing.
-- [ ] Implement filters, textual/semantic retrieval, scoring, deterministic
+- [x] Implement Portuguese PostgreSQL FTS retrieval and GIN indexes under
+      [ADR-004](../../docs/architecture/decisions/ADR-004-portuguese-full-text-search.md).
+- [ ] Implement local embedding generation, pgvector, and invalidation/reprocessing.
+- [ ] Implement filters, semantic retrieval, scoring, deterministic
       ranking, and regression dataset.
 - [ ] Implement agreed matches API, OpenAPI, privacy-safe errors/logging, and
       production authentication.

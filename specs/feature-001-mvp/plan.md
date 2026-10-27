@@ -18,7 +18,10 @@ with an explicit rationale and synchronized task/document updates.
    confirmed URL checks are implemented; absence-based `STALE` transitions
    remain disabled until step 1 proves snapshot completeness.
 6. Additional API/ATS adapters and optional web adapters; retain no-dedup rule.
-7. PostgreSQL FTS, local embeddings, pgvector, and regeneration.
+7. Portuguese PostgreSQL FTS retrieval and GIN indexes are implemented under
+   [ADR-004](../../docs/architecture/decisions/ADR-004-portuguese-full-text-search.md).
+   Local embeddings, pgvector, and regeneration wait for the model decision in
+   [acceptance](acceptance.md).
 8. Filters, textual/semantic retrieval, structured scoring, ranking,
    normalization, and versioning; no geographic filtering.
 9. Matches API, health, OpenAPI, errors, production authentication.
