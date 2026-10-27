@@ -19,44 +19,33 @@ def test_mock_health_matches_public_health_shape() -> None:
     assert response.json() == {"status": "ok"}
 
 
-def test_mock_matches_returns_deterministic_ranked_sample() -> None:
+def test_mock_matches_returns_ten_deterministic_sample_jobs_by_default() -> None:
     with TestClient(create_app()) as client:
         response = client.post("/matches", json=_SAMPLE_REQUEST)
 
     assert response.status_code == 200
-    assert response.json() == {
-        "matches": [
-            {
-                "rank": 1,
-                "job": {
-                    "company": "Example Company",
-                    "title": "Backend Developer",
-                    "description": "Synthetic example role for API integration testing.",
-                    "keywords": ["Python", "APIs", "PostgreSQL"],
-                    "location": {"city": "São Paulo", "state": "SP"},
-                    "work_arrangement": "REMOTE",
-                    "seniority_level": "JUNIOR",
-                    "skills": ["Python", "FastAPI"],
-                    "salary": None,
-                    "currency": None,
-                    "job_url": "https://example.invalid/jobs/backend-developer",
-                    "publication_date": None,
-                },
-                "score": 87.5,
-                "embedding_model": "mock-model",
-                "algorithm_version": "mock-v1",
-            }
-        ]
-    }
+    matches = response.json()["matches"]
+    assert len(matches) == 10
+    assert [match["rank"] for match in matches] == list(range(1, 11))
+    assert matches[0]["job"]["title"] == "Backend Developer 001"
+    assert matches[0]["score"] == 100
 
 
-def test_mock_matches_uses_only_the_limited_contract_parameter() -> None:
+def test_mock_matches_limit_controls_response_sample_size() -> None:
     with TestClient(create_app()) as client:
-        response = client.post("/matches?limit=1", json=_SAMPLE_REQUEST)
+        one_result = client.post("/matches?limit=1", json=_SAMPLE_REQUEST)
+        all_results = client.post("/matches?limit=100", json=_SAMPLE_REQUEST)
+        invalid_limit = client.post("/matches?limit=101", json=_SAMPLE_REQUEST)
         operation = client.get("/openapi.json").json()["paths"]["/matches"]["post"]
 
-    assert response.status_code == 200
-    assert len(response.json()["matches"]) == 1
+    assert one_result.status_code == 200
+    assert len(one_result.json()["matches"]) == 1
+    assert all_results.status_code == 200
+    matches = all_results.json()["matches"]
+    assert len(matches) == 100
+    assert [match["rank"] for match in matches] == list(range(1, 101))
+    assert len({match["job"]["job_url"] for match in matches}) == 100
+    assert invalid_limit.status_code == 422
     assert [parameter["name"] for parameter in operation["parameters"]] == ["limit"]
     assert operation["parameters"][0]["schema"]["default"] == 10
 

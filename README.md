@@ -65,8 +65,10 @@ The mock is available at `http://localhost:8001`. Set `MOCK_API_PORT` to use a
 different host port. Stop the service with
 `docker compose -f docker-compose.mock.yml down`.
 
-The mock also provides `GET /health`, the OpenAPI schema at `/openapi.json`,
-and Swagger UI at `/docs`. Use `--host` and `--port` to change the bind address.
+The mock returns up to 100 deterministic synthetic jobs, controlled by `limit`
+(default 10). It also provides `GET /health`, the OpenAPI schema at
+`/openapi.json`, and Swagger UI at `/docs`. Use `--host` and `--port` to change
+the bind address.
 Request values, including `curriculo_id`, are not stored, logged, or echoed in errors.
 
 ## Database migrations

@@ -8,31 +8,33 @@ from fastapi import FastAPI, Query
 from src.api.errors import register_error_handlers
 from src.mock_api.contracts import CurriculumRequest, MatchesResponse
 
-_SAMPLE_RESPONSE = MatchesResponse.model_validate(
-    {
-        "matches": [
-            {
-                "rank": 1,
-                "job": {
-                    "company": "Example Company",
-                    "title": "Backend Developer",
-                    "description": "Synthetic example role for API integration testing.",
-                    "keywords": ["Python", "APIs", "PostgreSQL"],
-                    "location": {"city": "São Paulo", "state": "SP"},
-                    "work_arrangement": "REMOTE",
-                    "seniority_level": "JUNIOR",
-                    "skills": ["Python", "FastAPI"],
-                    "salary": None,
-                    "currency": None,
-                    "job_url": "https://example.invalid/jobs/backend-developer",
-                    "publication_date": None,
-                },
-                "score": 87.5,
-                "embedding_model": "mock-model",
-                "algorithm_version": "mock-v1",
-            }
-        ]
+
+def _sample_match(rank: int) -> dict:
+    """Build a deterministic synthetic result with a unique sample job."""
+    return {
+        "rank": rank,
+        "job": {
+            "company": f"Example Company {rank:03}",
+            "title": f"Backend Developer {rank:03}",
+            "description": f"Synthetic example role {rank:03} for API integration testing.",
+            "keywords": ["Python", "APIs", f"Sample {rank:03}"],
+            "location": {"city": "São Paulo", "state": "SP"},
+            "work_arrangement": "REMOTE",
+            "seniority_level": "JUNIOR",
+            "skills": ["Python", "FastAPI", f"Sample Skill {rank:03}"],
+            "salary": None,
+            "currency": None,
+            "job_url": f"https://example.invalid/jobs/backend-developer-{rank:03}",
+            "publication_date": None,
+        },
+        "score": round(100 - (rank - 1) * 0.5, 1),
+        "embedding_model": "mock-model",
+        "algorithm_version": "mock-v1",
     }
+
+
+_SAMPLE_RESPONSE = MatchesResponse.model_validate(
+    {"matches": [_sample_match(rank) for rank in range(1, 101)]}
 )
 
 
