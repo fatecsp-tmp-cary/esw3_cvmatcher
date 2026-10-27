@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from src.normalization.jobs.apibr import normalize_apibr_job, normalize_keywords, normalize_text
+from src.persistence.job.job import WorkArrangement
 
 
 def test_normalize_apibr_job():
@@ -49,6 +50,7 @@ def test_normalize_apibr_job():
     assert normalized["location"] is None
     assert isinstance(normalized["publication_date"], datetime)
     assert normalized["publication_date"].tzinfo == UTC
+    assert normalized["work_arrangement"] == WorkArrangement.REMOTE
     assert isinstance(normalized["keywords"], list)
     assert isinstance(normalized["skills"], list)
 
