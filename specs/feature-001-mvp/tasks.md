@@ -7,6 +7,8 @@ completion.
 
 - FastAPI app factory, health endpoint, and RFC-style error handlers.
 - Candidate profile schema and validation.
+- Request-scoped candidate category normalization maps seniority and work modes
+  to canonical enums while retaining validated language and employment text.
 - APiBR payload normalization with required ID/title validation and partial
   source-field mapping.
 - SQLAlchemy models and Alembic migrations for initial `job_sources`, `jobs`,
