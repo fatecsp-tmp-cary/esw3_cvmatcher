@@ -175,8 +175,8 @@ Load time includes Hugging Face Hub network checks even when the model is cached
   prompted in part by jobs that both models had placed in the top 10.
 - The jobs are fictitious and their areas have different depth (about 15 backend jobs, 2 for QA).
   Compare strategies and models within a resume, not resumes with each other.
-- The jobs are embedded as `title. description`; [MVP specification](../../../specs/feature-001-mvp/spec.md) also puts normalized skills, requirements,
-  location and mode in the job representation. The candidate representation here uses title,
+- The jobs are embedded as `title. description`; [MVP specification](../../../specs/feature-001-mvp/spec.md) also puts normalized skills, classified job requirements,
+  location and `work_arrangement` in the job representation. The candidate representation here uses title,
   skills and experience only.
 - The semantic score was not normalized to the `[0, 100]` range that [MVP specification](../../../specs/feature-001-mvp/spec.md) requires for the final
   score; only the ranking was evaluated.

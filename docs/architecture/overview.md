@@ -28,9 +28,12 @@ publication_date, first_seen_at, last_seen_at, last_verified_at, status,
 job_url, raw, embedding, content_hash
 ```
 
-`platform + source_job_id` is intended as source identity. Additional persisted
-data belongs in separate structures. The SQL persistence model may also carry
-`source_id` as a foreign-key implementation detail linking a job to
-`job_sources`; it is not part of the canonical `Job` representation. See
+`platform + source_job_id` is source identity: `platform` names the upstream
+job platform represented by the record. It is not the polling-configuration
+record. `job_sources` stores source-adapter/polling configuration, and its
+`source_id` foreign key on the SQL `jobs` row is persistence metadata only; it
+is not part of the canonical `Job` representation. These values are related by
+the persistence layer but are not interchangeable. Additional persisted data
+belongs in separate structures. See
 [invariants](invariants.md), [ADR index](decisions/README.md), and [MVP
 spec](../../specs/feature-001-mvp/spec.md).
