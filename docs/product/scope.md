@@ -21,7 +21,8 @@ applications/ATS submission; CV generation/adaptation; cover letters; mandatory
 LLMs; paid or distributed infrastructure; dedicated brokers; indiscriminate
 crawling; sophisticated entity resolution or personalization.
 
-The current code is a scaffold: `/health`, candidate profile validation, API
-error handling, and an APiBR normalization function exist. Job persistence,
-ingestion, indexing, matching, and recommendation endpoints remain planned.
-See [MVP tasks](../../specs/feature-001-mvp/tasks.md) for status.
+The current code includes `/health`, candidate profile validation, API error
+handling, APiBR normalization, sequential APiBR polling, source-run tracking,
+source-specific upserts, and APiBR issue availability checks. Text indexing,
+matching, and recommendation endpoints remain planned. See
+[MVP tasks](../../specs/feature-001-mvp/tasks.md) for status.

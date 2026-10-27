@@ -27,7 +27,10 @@ These are the remaining clarifications for dependent implementation:
 1. **APiBR snapshot completeness:** establish whether pagination/scan behavior
    proves a complete covered set before absence can mark jobs stale. The source
    selection record describes absent jobs as stale, while the architecture
-   requires a successful complete snapshot. See [ADR-002](../../docs/architecture/decisions/ADR-002-apibr-mvp-source.md).
+   requires a successful complete snapshot. The current ingestion marks every
+   run incomplete and does not use absence to transition jobs. Per-job checks
+   treat open as `ACTIVE`, closed or HTTP 404/410 as `EXPIRED`, and transient
+   failures as no transition. See [ADR-002](../../docs/architecture/decisions/ADR-002-apibr-mvp-source.md).
 2. **Group 1 API contract:** confirm whether `POST /matches` is the integration
    route and actual CV serialization/mapping. The proposal was a request
    envelope `{curriculo_id, curriculo}` and response

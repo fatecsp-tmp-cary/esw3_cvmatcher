@@ -70,3 +70,7 @@ missing or blank source identifiers. See the
 [MVP acceptance clarifications](../../specs/feature-001-mvp/acceptance.md).
 APiBR aggregates GitHub issues: `state=open` normalizes to `ACTIVE`, and
 `state=closed` normalizes to `EXPIRED`.
+When the issue payload omits a recognized state, the ingestion layer checks
+its related GitHub issue URL. A confirmed open issue is active; a closed issue
+or HTTP 404/410 is expired. Timeouts, HTTP 429, and server errors leave the job
+state and verification timestamp unchanged.
