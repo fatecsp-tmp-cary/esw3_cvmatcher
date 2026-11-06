@@ -23,6 +23,11 @@ Status reflects the implementation in this branch.
 
 - [ ] Resolve the remaining questions in [acceptance](acceptance.md)
       before dependent implementation.
+- [ ] Resolve curriculum source-model mapping (acceptance clarification 5):
+      professional/academic periods, education level/status, competency
+      description/category, free-text proficiency, project technology format,
+      and text bounds. Preserve the agreed API until a mapping or contract
+      extension is explicitly decided.
 - [ ] Align existing job/source structures with the canonical Job and lifecycle
       requirements; implement persisted skill structures. Track the existing
       field mismatch as unresolved clarification 4 in [acceptance](acceptance.md).
@@ -60,3 +65,9 @@ Detailed feature requirements are in [spec](spec.md); completion gates are in
 - Consolidated validation: 113 unit/API tests passed; source/test lint and format
   checks, documentation links, and `git diff --check` passed. Database integration
   tests were not run for these contract and validation changes.
+- Curriculum inspection: compared source domain, CRUD DTOs, preview serializer,
+  and integration document at `sistema-curriculo` commit `66af300`. Six synthetic
+  requests confirmed 422 rejection of CRUD/preview experience dates, source
+  education fields/status, competency field names, string project technologies,
+  and a free-text language level outside the API enum. Recorded discrepancies
+  without changing runtime schemas or executing the source application's code.

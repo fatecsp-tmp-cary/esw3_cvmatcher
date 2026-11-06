@@ -96,6 +96,10 @@ or return it.
 Curriculum arrays and project technology tags have the validation limits in
 [acceptance](acceptance.md#resolved-api-contract). These apply equally to the
 production and mock APIs; omitted optional arrays still default to empty lists.
+The payload follows Grupo 1's integration document rather than its full domain
+or preview model. Missing dates and other source-model differences are tracked
+as unresolved clarification 5 in [acceptance](acceptance.md); no lossless source
+adaptation is implemented or implied by the current schema.
 
 The response is `MatchesResponse {matches: MatchResult[]}`. Each result contains
 `rank`, `job`, `score`, `eligibility`, `matched_skills`,
