@@ -43,3 +43,6 @@ Detailed feature requirements are in [spec](spec.md); completion gates are in
   tests/api/test_mock_api.py --no-cov -q`; lint/format and diff checks passed.
 - Matching computation and candidate normalization remain pending; contract
   tests use injected executors and deterministic mock data.
+- Validation privacy: `pytest tests/api --no-cov -q` passed, including root and
+  nested extra-field canaries in error bodies and captured logs for both apps.
+  Extra-field error locations retain only the containing object path.

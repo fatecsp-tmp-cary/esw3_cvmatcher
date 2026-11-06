@@ -108,8 +108,9 @@ is the HTTP phrase, `status` is numeric, `detail` is optional; 422 adds one
 `errors` item per invalid field (`loc`, `msg`, `type`). 422 invalid field/JSON;
 404/405 unknown route/method (405 includes `Allow`); 503 unavailable required
 database/model; 500 generic failure. Bodies/logs omit submitted values and
-exception messages; logs include exception type and origin only. Fixed request
-schema fields prevent client keys from being echoed in error locations.
+exception messages; logs include exception type and origin only. Request schemas
+use fixed fields. Rejected extra-field errors point to the containing object
+(including schema field names and list indexes), omitting the submitted key.
 
 ## Persistence, processing, operations
 

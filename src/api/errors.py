@@ -24,8 +24,9 @@ PROBLEM_JSON = "application/problem+json"
 class ValidationIssue(BaseModel):
     """One invalid request field. Carries no submitted value.
 
-    ``loc`` holds field names and list indexes. A free-form ``dict`` field would put the
-    keys the client sent in it, so request schemas use fixed fields instead.
+    ``loc`` holds schema field names and list indexes. Rejected extra fields point
+    to their containing object so arbitrary client keys are never returned.
+    Request schemas must still avoid free-form dictionary fields.
     """
 
     loc: list[str | int]
@@ -73,9 +74,14 @@ def problem_response(
 
 
 async def _handle_validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
-    # Copy only loc/msg/type: Pydantic's "input" and "ctx" echo the submitted values.
+    # Copy only loc/msg/type: Pydantic's "input" and "ctx" echo submitted values.
+    # Extra-field locations also contain an arbitrary submitted key as the last item.
     errors = [
-        ValidationIssue(loc=list(error["loc"]), msg=error["msg"], type=error["type"])
+        ValidationIssue(
+            loc=list(error["loc"][:-1] if error["type"] == "extra_forbidden" else error["loc"]),
+            msg=error["msg"],
+            type=error["type"],
+        )
         for error in exc.errors()
     ]
     # RFC 9457: with type "about:blank", the title is the status phrase from RFC 9110.

@@ -38,6 +38,10 @@
   feature spec. Eligibility never represents geographic eligibility; detail
   arrays are required and may be empty. The API response omits `curriculo_id`.
 - `GET /health` returns `{"status":"ok"}`.
+- Validation errors never echo submitted keys or values. Each rejected extra
+  field produces an `extra_forbidden` error whose `loc` points to the containing
+  object, with the arbitrary extra key removed. Known-field errors retain their
+  schema field names and list indexes.
 
 ### Consolidation decision (2026-11-06)
 
