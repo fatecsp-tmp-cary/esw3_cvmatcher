@@ -80,10 +80,10 @@ scoring rather than exclusion.
 
 Default final score is `0.45 * textual + 0.35 * semantic + 0.20 * structured`;
 weights are configurable and component/final scores are `[0,100]`. Score means
-compatibility, not employment probability. Internal match results may carry
-`id`, `eligibility`, component scores, `matched_skills[]`, and
-`missing_requirements[]`; eligibility means matching eligibility, never
-geography. Component scores may remain internal.
+compatibility, not employment probability. Public match results include boolean
+`eligibility`, `matched_skills[]`, and `missing_requirements[]`; eligibility
+means matching eligibility, never geography. Detail arrays are required and may
+be empty. Component scores may remain internal.
 
 The resolved public API contract is documented in
 [acceptance](acceptance.md). `POST /matches` accepts the flat Sistema Currículo
@@ -94,11 +94,12 @@ bounded from 1 through 100. `curriculo_id` is request-only: do not persist, log,
 or return it.
 
 The response is `MatchesResponse {matches: MatchResult[]}`. Each result contains
-`rank`, `job`, `score`, `embedding_model`, and `algorithm_version`. The nested
-job contains `company`, `title`, `description`, `keywords`, `location`,
+`rank`, `job`, `score`, `eligibility`, `matched_skills`,
+`missing_requirements`, `embedding_model`, and `algorithm_version`. The nested
+job contains `id` (the stable positive integer persisted job ID), `company`, `title`, `description`, `keywords`, `location`,
 `work_arrangement`, `seniority_level`, `skills`, `salary`, `currency`,
-`job_url`, and `publication_date`. The public contract omits persisted job IDs
-and internal eligibility/component details. Ranking order is represented by
+`job_url`, and `publication_date`. The public contract omits `curriculo_id`
+and internal component scores. Ranking order is represented by
 array order and `rank`. `GET /health` returns `{"status":"ok"}`. FastAPI
 publishes the OpenAPI schema and Swagger UI.
 

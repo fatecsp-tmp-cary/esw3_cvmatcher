@@ -29,6 +29,10 @@ def test_mock_matches_returns_ten_deterministic_sample_jobs_by_default() -> None
     assert [match["rank"] for match in matches] == list(range(1, 11))
     assert matches[0]["job"]["title"] == "Backend Developer 001"
     assert matches[0]["score"] == 100
+    assert [match["job"]["id"] for match in matches] == list(range(1, 11))
+    assert matches[0]["eligibility"] is True
+    assert matches[0]["matched_skills"] == ["Python", "FastAPI"]
+    assert matches[0]["missing_requirements"] == []
 
 
 def test_mock_matches_limit_controls_response_sample_size() -> None:

@@ -19,7 +19,10 @@ with an explicit rationale and synchronized task/document updates.
 7. PostgreSQL FTS, local embeddings, pgvector, and regeneration.
 8. Filters, textual/semantic retrieval, structured scoring, ranking,
    normalization, and versioning; no geographic filtering.
-9. Matches API, health, OpenAPI, errors, production authentication.
+9. Matches API, health, OpenAPI, errors, production authentication. Preserve
+   the [confirmed public contract](acceptance.md#resolved-api-contract) when
+   consolidating API branches: flat curriculum input, `limit`, and the #40
+   job identity, eligibility, detail arrays, score, and version metadata.
 10. Quality suite, regression dataset, model-version migration, no-dedup and
    no-geographic-filtering regressions.
 11. Docker/production configuration, secrets, backups, deployment, scheduling,

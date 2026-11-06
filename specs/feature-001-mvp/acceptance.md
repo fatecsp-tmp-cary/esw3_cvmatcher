@@ -32,10 +32,26 @@
 - `limit` is the only query parameter. It defaults to 10 and accepts integers
   from 1 through 100. There is no `offset` parameter.
 - The response follows #40: `matches[]` entries contain `rank`, nested `job`,
-  `score`, `embedding_model`, and `algorithm_version`. The nested job contains
-  the public descriptive fields listed in the feature spec. The API response
-  omits both the persisted job ID and `curriculo_id`.
+  `score`, boolean `eligibility`, `matched_skills[]`, `missing_requirements[]`,
+  `embedding_model`, and `algorithm_version`. The nested job contains a required
+  stable positive integer `id` and the public descriptive fields listed in the
+  feature spec. Eligibility never represents geographic eligibility; detail
+  arrays are required and may be empty. The API response omits `curriculo_id`.
 - `GET /health` returns `{"status":"ok"}`.
+
+### Consolidation decision (2026-11-06)
+
+The user confirmed the flat `POST /matches` contract in PR #130 as the agreed
+Grupo 1 integration target, retaining its `limit` parameter and RFC 9457 errors.
+The response must also satisfy issue #40 by exposing job identity, eligibility,
+and match details as specified above. This supersedes the earlier omission of
+those public fields. Differing routes and envelopes in Grupo 1 documents are
+not adopted by this service; consumer alignment remains external work.
+
+PR #111 must consolidate onto this request and response contract rather than
+restore its `CandidateProfile` request body. The current executor accepts
+`CurriculumRequest` and `limit`; transient candidate normalization and pipeline
+integration remain pending.
 
 ## Unresolved; address before dependent implementation
 

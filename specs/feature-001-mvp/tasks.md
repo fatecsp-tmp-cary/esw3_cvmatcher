@@ -8,7 +8,10 @@ Status reflects the implementation in this branch.
   `POST /matches` request/response contract. Matching remains unavailable when
   no executor is configured.
 - Candidate profile and flat curriculum request schemas with validation.
-- Generated OpenAPI documentation for `/health` and `/matches`.
+- Generated OpenAPI documentation for `/health` and `/matches`, including
+  required job identity, eligibility, matched skills, and missing requirements
+  in populated response contract tests. Mock results include synthetic IDs and
+  compatibility details; these are not calculated matching results.
 - APiBR payload normalization function (partial mapping only).
 - SQLAlchemy/Alembic setup and a tooling-check migration; no real job schema.
 - README documents local PostgreSQL and current test setup.
@@ -33,3 +36,10 @@ Status reflects the implementation in this branch.
 
 Detailed feature requirements are in [spec](spec.md); completion gates are in
 [Definition of Done](../../docs/quality/definition-of-done.md).
+
+## Consolidation verification
+
+- Response consolidation: `pytest tests/api/test_matches_contract.py
+  tests/api/test_mock_api.py --no-cov -q`; lint/format and diff checks passed.
+- Matching computation and candidate normalization remain pending; contract
+  tests use injected executors and deterministic mock data.

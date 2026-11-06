@@ -85,4 +85,43 @@ def test_openapi_documents_matches_contract_and_problem_responses(client: TestCl
     assert "MatchesResponse" in str(operation["responses"]["200"])
     assert "application/problem+json" in operation["responses"]["422"]["content"]
     assert "application/problem+json" in operation["responses"]["503"]["content"]
-    assert "curriculo_id" not in schema["components"]["schemas"]["MatchesResponse"]
+    schemas = schema["components"]["schemas"]
+    for name in ("MatchesResponse", "MatchResult", "MatchedJob"):
+        assert "curriculo_id" not in schemas[name]["properties"]
+    assert {"eligibility", "matched_skills", "missing_requirements"} <= set(
+        schemas["MatchResult"]["required"]
+    )
+    assert "id" in schemas["MatchedJob"]["required"]
+
+
+def test_matches_returns_job_identity_and_compatibility_details() -> None:
+    from src.api.app import create_app
+
+    result = {
+        "rank": 1,
+        "job": {"id": 42, "title": "Backend Developer"},
+        "score": 85.5,
+        "eligibility": True,
+        "matched_skills": ["Python"],
+        "missing_requirements": ["PostgreSQL"],
+        "embedding_model": "test-model-v1",
+        "algorithm_version": "test-v1",
+    }
+    with TestClient(create_app(lambda curriculum, limit: {"matches": [result]})) as client:
+        response = client.post("/matches", json=valid_curriculum())
+
+    assert response.status_code == 200
+    match = response.json()["matches"][0]
+    assert match["job"]["id"] == 42
+    for field in (
+        "rank",
+        "score",
+        "eligibility",
+        "matched_skills",
+        "missing_requirements",
+        "embedding_model",
+        "algorithm_version",
+    ):
+        assert match[field] == result[field]
+    assert "curriculo_id" not in response.text
+    assert valid_curriculum()["curriculo_id"] not in response.text

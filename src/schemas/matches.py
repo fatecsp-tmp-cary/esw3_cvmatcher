@@ -1,4 +1,4 @@
-"""Public ranked match response without persistence or lifecycle metadata."""
+"""Public ranked match response with job identity and compatibility details."""
 
 from datetime import datetime
 
@@ -12,6 +12,7 @@ class MatchedJob(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    id: int = Field(ge=1, description="Stable persisted job identifier.")
     company: str | None = None
     title: str
     description: str | None = None
@@ -34,6 +35,9 @@ class MatchResult(BaseModel):
     rank: int = Field(ge=1)
     job: MatchedJob
     score: float = Field(ge=0, le=100)
+    eligibility: bool = Field(description="Matching eligibility; never geographic eligibility.")
+    matched_skills: list[str]
+    missing_requirements: list[str]
     embedding_model: str
     algorithm_version: str
 
