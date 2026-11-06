@@ -8,6 +8,8 @@ Status reflects the implementation in this branch.
   `POST /matches` request/response contract. Matching remains unavailable when
   no executor is configured.
 - Candidate profile and flat curriculum request schemas with validation.
+- Production and mock APIs share curriculum and match response schemas;
+  canonical job enums are shared without importing persistence into API schemas.
 - Generated OpenAPI documentation for `/health` and `/matches`, including
   required job identity, eligibility, matched skills, and missing requirements
   in populated response contract tests. Mock results include synthetic IDs and
@@ -46,3 +48,5 @@ Detailed feature requirements are in [spec](spec.md); completion gates are in
 - Validation privacy: `pytest tests/api --no-cov -q` passed, including root and
   nested extra-field canaries in error bodies and captured logs for both apps.
   Extra-field error locations retain only the containing object path.
+- Schema consolidation: unit/API tests and lint/format checks passed. OpenAPI
+  component parity and a mock startup with database imports blocked are covered.

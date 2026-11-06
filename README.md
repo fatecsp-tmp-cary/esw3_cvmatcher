@@ -69,6 +69,8 @@ The mock returns up to 100 deterministic synthetic jobs, controlled by `limit`
 (default 10). It also provides `GET /health`, the OpenAPI schema at
 `/openapi.json`, and Swagger UI at `/docs`. Use `--host` and `--port` to change
 the bind address.
+The mock shares the [public request and response contract](specs/feature-001-mvp/acceptance.md#resolved-api-contract)
+with the production API, including synthetic job IDs, eligibility, and match details.
 Request values, including `curriculo_id`, are not stored, logged, or echoed in errors.
 
 ## Database migrations

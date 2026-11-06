@@ -19,6 +19,11 @@ embeddings and match results are request-scoped. The local embedding model is a
 deployment/cache artifact. Docker Compose with PostgreSQL + pgvector is the
 reference local environment.
 
+The production and mock APIs share public request/response models in
+`src/schemas/`. Canonical work-arrangement and seniority enums live in
+`src/domain/job.py` and are reused by schemas and persistence, allowing the mock
+to run without importing database libraries.
+
 The intended canonical `Job` has exactly these fields:
 
 ```text

@@ -17,22 +17,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
+from src.domain.job import SeniorityLevel, WorkArrangement
 from src.persistence.base import Base
-
-
-class WorkArrangement(StrEnum):
-    REMOTE = "REMOTE"
-    HYBRID = "HYBRID"
-    ON_SITE = "ON_SITE"
-
-
-class SeniorityLevel(StrEnum):
-    INTERN = "INTERN"
-    JUNIOR = "JUNIOR"
-    MID = "MID"
-    SENIOR = "SENIOR"
-    SPECIALIST = "SPECIALIST"
-    COORDINATOR = "COORDINATOR"
 
 
 class JobStatus(StrEnum):

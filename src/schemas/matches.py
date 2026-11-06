@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.persistence.job.job import SeniorityLevel, WorkArrangement
+from src.domain.job import SeniorityLevel, WorkArrangement
 
 
 class MatchedJob(BaseModel):
