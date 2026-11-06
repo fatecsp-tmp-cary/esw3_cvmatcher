@@ -27,6 +27,10 @@
   optional `experiencias_profissionais`, and optional `projetos_academicos`.
 - At least one academic formation and competency are required. An omitted
   `formacao_academica[].instituicao` defaults to `FATEC-SP`.
+- Curriculum collection maxima are 20 academic formations, 200 competencies,
+  20 languages, 50 professional experiences, and 50 academic projects. Each
+  project accepts up to 100 technology tags, each 1–200 characters after
+  trimming whitespace. Exceeding a limit returns a privacy-safe 422 response.
 - `curriculo_id` is opaque, request-only correlation data. It is never persisted,
   logged, or returned in the response.
 - `limit` is the only query parameter. It defaults to 10 and accepts integers

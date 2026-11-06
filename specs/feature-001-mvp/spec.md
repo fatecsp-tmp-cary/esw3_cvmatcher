@@ -93,6 +93,10 @@ academic projects. The only query parameter is `limit`, defaulting to 10 and
 bounded from 1 through 100. `curriculo_id` is request-only: do not persist, log,
 or return it.
 
+Curriculum arrays and project technology tags have the validation limits in
+[acceptance](acceptance.md#resolved-api-contract). These apply equally to the
+production and mock APIs; omitted optional arrays still default to empty lists.
+
 The response is `MatchesResponse {matches: MatchResult[]}`. Each result contains
 `rank`, `job`, `score`, `eligibility`, `matched_skills`,
 `missing_requirements`, `embedding_model`, and `algorithm_version`. The nested

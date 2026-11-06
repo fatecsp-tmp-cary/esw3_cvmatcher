@@ -19,6 +19,7 @@ CompletionDate = Annotated[
     Field(pattern=r"^\d{4}(-(0[1-9]|1[0-2]))?$"),
     AfterValidator(_valid_completion_month),
 ]
+TechnologyName = Annotated[str, Field(min_length=1, max_length=200)]
 CurriculumId = Annotated[
     str,
     Field(
@@ -67,7 +68,7 @@ class ProfessionalExperience(_CurriculumModel):
 
 class AcademicProject(_CurriculumModel):
     titulo: str = Field(min_length=3, max_length=100)
-    tecnologias: list[str] = Field(default_factory=list)
+    tecnologias: list[TechnologyName] = Field(default_factory=list, max_length=100)
     descricao: str | None = Field(default=None, max_length=1000)
 
 
@@ -76,8 +77,10 @@ class CurriculumRequest(_CurriculumModel):
 
     curriculo_id: CurriculumId
     dados_pessoais: PersonalData
-    formacao_academica: list[AcademicFormation] = Field(min_length=1)
-    competencias: list[Competency] = Field(min_length=1)
-    idiomas: list[CurriculumLanguage] = Field(default_factory=list)
-    experiencias_profissionais: list[ProfessionalExperience] = Field(default_factory=list)
-    projetos_academicos: list[AcademicProject] = Field(default_factory=list)
+    formacao_academica: list[AcademicFormation] = Field(min_length=1, max_length=20)
+    competencias: list[Competency] = Field(min_length=1, max_length=200)
+    idiomas: list[CurriculumLanguage] = Field(default_factory=list, max_length=20)
+    experiencias_profissionais: list[ProfessionalExperience] = Field(
+        default_factory=list, max_length=50
+    )
+    projetos_academicos: list[AcademicProject] = Field(default_factory=list, max_length=50)

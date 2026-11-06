@@ -50,3 +50,7 @@ Detailed feature requirements are in [spec](spec.md); completion gates are in
   Extra-field error locations retain only the containing object path.
 - Schema consolidation: unit/API tests and lint/format checks passed. OpenAPI
   component parity and a mock startup with database imports blocked are covered.
+- Input bounds: unit/API tests passed, including at-limit and over-limit cases
+  for all curriculum arrays and project technology tags in both applications.
+  Collection limits follow existing candidate-profile limits where applicable;
+  projects allow 50 entries, with up to 100 tags of 1–200 characters each.
