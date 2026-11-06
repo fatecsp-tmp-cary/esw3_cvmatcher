@@ -75,6 +75,13 @@ integration remain pending.
    text for seniority, proficiency, mode, and employment type; canonical mapping
    is pending job-data decisions (tracked in code as #83). Define values and
    mapping once job data is available.
+4. **Existing persistence alignment:** the initial job migration/model already
+   exists, but the model adds `source_id` and lacks canonical fields including
+   `source_expires_at`, `currency`, `last_verified_at`, `raw`, `embedding`, and
+   `content_hash`; its status enum only has `ACTIVE` and `EXPIRED`. This conflicts
+   with the exact canonical fields and lifecycle in the architecture and feature
+   spec. Resolve before dependent persistence/lifecycle work; this consolidation
+   does not change or approve those existing differences.
 
 Do not resolve remaining questions by inference. Record future outcomes in the
 relevant specification, architecture/ADR if applicable, plan, and tasks.
