@@ -82,25 +82,6 @@ integration remain pending.
    with the exact canonical fields and lifecycle in the architecture and feature
    spec. Resolve before dependent persistence/lifecycle work; this consolidation
    does not change or approve those existing differences.
-5. **Curriculum model versus integration payload:** inspection of the local
-   `sistema-curriculo` checkout at commit `66af300` found that the agreed payload
-   follows `docs/contrato-campos-obrigatorios-grupo2.md`, but is not a lossless
-   representation of the implemented curriculum. Its experience CRUD DTOs
-   expose required `data_inicio` and nullable `data_fim`; preview DTOs expose
-   `inicio` and `fim`. Its domain stores both in `Periodo` and rejects reversed
-   periods. Our experience schema accepts neither pair. Education also exposes
-   `nivel` and a period, and uses `interrompido` instead of `trancado`.
-   Competencies use `descricao` and `categoria` instead of `nome` alone; their
-   levels and language levels are free text. Project `tecnologias` is a string,
-   rather than our list, and source text limits differ (for example, project
-   titles allow 200 characters and descriptions 2000). The preview uses
-   `formacoes`, `experiencias`, and `projetos`, rather than the integration
-   array names, and includes personal data and item IDs that must not be copied
-   wholesale into matching requests. Decide whether Grupo 1 maps to the agreed
-   payload or the payload is extended to preserve matching-relevant fields,
-   including date naming, precision, nullability, chronology, and status/level
-   mapping, before implementing dependent request adaptation. The existing
-   contract remains unchanged pending that decision.
 
 Do not resolve remaining questions by inference. Record future outcomes in the
 relevant specification, architecture/ADR if applicable, plan, and tasks.
