@@ -10,10 +10,10 @@ Requirements and completion gates are in [spec](spec.md),
 - Canonical job correction, source identity and four lifecycle states; section-preserving HTML cleanup. Raw remains null.
 - Deterministic normalized content hashing.
 - Source-specific upsert, content/vector invalidation and stale rediscovery; PostgreSQL persistence tests. Concurrent safety is pending.
+- Sequential incomplete APiBR scans, unknown availability without GitHub requests, isolated malformed records, PARTIAL/FAILED run evidence and PostgreSQL regressions.
 
 ## Pending components
 
-- [ ] Sequential incomplete APiBR scans, unknown availability without GitHub requests, isolated malformed records, PARTIAL/FAILED run evidence and PostgreSQL regressions.
 - [ ] Portuguese weighted any-term FTS field/query/normalization decisions.
 - [ ] Skill taxonomy, job-skill and classified requirement persistence; population/extraction remain pending.
 - [ ] Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.

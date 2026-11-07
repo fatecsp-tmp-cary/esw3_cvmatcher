@@ -73,3 +73,14 @@ missing or blank source identifiers. See the
 [MVP acceptance clarifications](../../specs/feature-001-mvp/acceptance.md).
 APiBR aggregates GitHub issues: `state=open` normalizes to `ACTIVE`, and
 `state=closed` normalizes to `EXPIRED`.
+Missing state leaves new jobs `DISCOVERED`; ingestion performs no GitHub
+availability requests. Existing availability and verification timestamps are
+retained when evidence is absent. Malformed records are rejected individually
+and valid records commit as `PARTIAL`; network/pagination failure rolls back
+job changes and records `FAILED`. The scan remains incomplete. See
+[ADR-003](../architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md).
+
+The captured fixture is a GitHub issue, not a confirmed APiBR
+response. A separate synthetic state-free fixture prevents hidden network
+access in tests. Live response shape, rate limits, authentication and retention rights remain
+unverified source-evidence follow-ups, including #113.

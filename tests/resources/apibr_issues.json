@@ -1,0 +1,10 @@
+[
+  {
+    "id": 900001,
+    "title": "Synthetic Python developer",
+    "body": "<h3>Requisitos</h3><p>Python</p><h3>Diferenciais</h3>PostgreSQL",
+    "url": "https://github.com/example/jobs/issues/1",
+    "labels": ["Remoto", "Python"],
+    "created_at": "2026-10-01T12:00:00Z"
+  }
+]
