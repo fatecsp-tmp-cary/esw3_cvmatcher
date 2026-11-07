@@ -14,6 +14,7 @@ def _sample_match(rank: int) -> dict:
     return {
         "rank": rank,
         "job": {
+            "id": rank,
             "company": f"Example Company {rank:03}",
             "title": f"Backend Developer {rank:03}",
             "description": f"Synthetic example role {rank:03} for API integration testing.",
@@ -28,6 +29,9 @@ def _sample_match(rank: int) -> dict:
             "publication_date": None,
         },
         "score": round(100 - (rank - 1) * 0.5, 1),
+        "eligibility": True,
+        "matched_skills": ["Python", "FastAPI"],
+        "missing_requirements": [],
         "embedding_model": "mock-model",
         "algorithm_version": "mock-v1",
     }

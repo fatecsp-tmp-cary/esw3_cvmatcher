@@ -80,26 +80,44 @@ scoring rather than exclusion.
 
 Default final score is `0.45 * textual + 0.35 * semantic + 0.20 * structured`;
 weights are configurable and component/final scores are `[0,100]`. Score means
-compatibility, not employment probability. Match result fields are `id`,
-`title`, `rank`, `company`, `description`, `keywords`, `location`,
-`work_arrangement`, `job_url`, `score`, `eligibility`, component scores,
-`matched_skills[]`, `missing_requirements[]`, `embedding_model`, and
-`algorithm_version`. Eligibility means matching eligibility, never geography;
-component scores may remain internal.
+compatibility, not employment probability. Public match results include boolean
+`eligibility`, `matched_skills[]`, and `missing_requirements[]`; eligibility
+means matching eligibility, never geography. Detail arrays are required and may
+be empty. Component scores may remain internal.
 
-The proposed Group 1 contract is unresolved in
-[acceptance and clarifications](acceptance.md): route agreement, request and
-response serialization, optional fields, and score/explanation exposure require
-confirmation. Candidate data and `curriculo_id` are opaque/transient and never
-persisted or logged. FastAPI provides OpenAPI.
+The public API contract is documented in [acceptance](acceptance.md).
+`POST /matches` accepts the matching sections of the implemented Sistema
+Currículo preview: `curriculo_id`, `formacoes`, `experiencias`, `projetos`,
+`competencias`, and `idiomas`. All arrays are required and may be empty. Items
+have no IDs; only `curriculo_id` is a UUID. Education and experience use
+required `inicio` and nullable `fim` calendar dates. Education has a level and source status vocabulary;
+competency descriptions and language/competency levels are text. Project
+technologies are a string. Validation follows the source domain as specified
+in acceptance. The outdated integration document does not govern the schema.
+
+The request excludes identity/contact, presentation, and document fields.
+Submitted curriculum ID and data are request-scoped: do not persist,
+log, or return them. The only query parameter is `limit`, defaulting to 10
+and bounded from 1 through 100. Production and mock share the same schema.
+
+The response is `MatchesResponse {matches: MatchResult[]}`. Each result contains
+`rank`, `job`, `score`, `eligibility`, `matched_skills`,
+`missing_requirements`, `embedding_model`, and `algorithm_version`. The nested
+job contains `id` (the stable positive integer persisted job ID), `company`, `title`, `description`, `keywords`, `location`,
+`work_arrangement`, `seniority_level`, `skills`, `salary`, `currency`,
+`job_url`, and `publication_date`. The public contract omits `curriculo_id`
+and internal component scores. Ranking order is represented by
+array order and `rank`. `GET /health` returns `{"status":"ok"}`. FastAPI
+publishes the OpenAPI schema and Swagger UI.
 
 Errors use RFC 9457 `application/problem+json`: `type` is `about:blank`, `title`
 is the HTTP phrase, `status` is numeric, `detail` is optional; 422 adds one
 `errors` item per invalid field (`loc`, `msg`, `type`). 422 invalid field/JSON;
 404/405 unknown route/method (405 includes `Allow`); 503 unavailable required
 database/model; 500 generic failure. Bodies/logs omit submitted values and
-exception messages; logs include exception type and origin only. Fixed request
-schema fields prevent client keys from being echoed in error locations.
+exception messages; logs include exception type and origin only. Request schemas
+use fixed fields. Rejected extra-field errors point to the containing object
+(including schema field names and list indexes), omitting the submitted key.
 
 ## Persistence, processing, operations
 
