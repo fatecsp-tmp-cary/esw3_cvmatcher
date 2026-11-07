@@ -63,13 +63,41 @@ status is [tasks](../../specs/feature-001-mvp/tasks.md).
 
 ## Verification by layer
 
-- PR #101: 172 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
-- PR #104: 175 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
-- PR #105: 175 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
-- PR #106: 175 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
+- PR #101: 172 unit/API tests passed; repository lint/format passed. PostgreSQL is covered by the separate validation evidence below.
+- PR #104: 175 unit/API tests passed; repository lint/format passed. PostgreSQL is covered by the separate validation evidence below.
+- PR #105: 175 unit/API tests passed; repository lint/format passed. PostgreSQL is covered by the separate validation evidence below.
+- PR #106: 175 unit/API tests passed; repository lint/format passed. PostgreSQL is covered by the separate validation evidence below.
 - PR #107: Documentation-only FTS decision/field changes; inherits #106 source verification (175 unit/API tests). No CI workflow change.
-- PR #108: 176 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
-- PR #109: 184 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
-- PR #110: 204 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
-- PR #111: 212 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
-- PR #112: Full local suite: 232 passed, 28 PostgreSQL tests skipped (229 unit/API tests included). Repository lint/format passed; full PostgreSQL verification is pending the approved temporary draft PR.
+- PR #108: 176 unit/API tests passed; repository lint/format passed. PostgreSQL is covered by the separate validation evidence below.
+- PR #109: 184 unit/API tests passed; repository lint/format passed. PostgreSQL is covered by the separate validation evidence below.
+- PR #110: 204 unit/API tests passed; repository lint/format passed. PostgreSQL is covered by the separate validation evidence below.
+- PR #111: 212 unit/API tests passed; repository lint/format passed. PostgreSQL is covered by the separate validation evidence below.
+- PR #112: Full local suite: 232 passed, 28 PostgreSQL tests skipped (229 unit/API tests included). Repository lint/format passed; full PostgreSQL verification passed through the approved temporary draft PR.
+
+## Verified published graph and cumulative validation
+
+GitHub PR bases and heads match the user-confirmed linear graph. PR #130 is
+exactly `d30597589091525ba9b1c01ace069fe1be0477b0`; no child changes are
+committed there. Each child is a descendant of its immediate predecessor, and
+its diff contains only its layer and associated fixes/documentation. Original
+compatible commits were preserved rather than squashing the stack into #130.
+
+At source head `11d89e8`, [CI run 42345643778](https://github.com/fatecsp-tmp-cary/esw3_cvmatcher/actions/runs/42345643778)
+passed **229 unit/API tests and 31 PostgreSQL/pgvector integration tests**, plus
+lint, formatting and branch checks. This validates the revised migration
+sequence, including rejected counts in the ingestion-owned migration, without
+a dependency on a later FTS migration. Per-layer ancestry, feature boundaries,
+one migration head, unchanged workflow and 585 documentation references were
+checked across all ten branches. Earlier per-layer entries record local checks
+at the time each layer was built; this cumulative result is the current evidence.
+
+The CI workflow is byte-for-byte unchanged. The user approved temporary draft
+[PR #154](https://github.com/fatecsp-tmp-cary/esw3_cvmatcher/pull/154) from the
+same head branch as #112 to main solely to run the existing workflow. It must
+be closed without merging or deleting the head branch after its final checks.
+The real stack PR bases remain as agreed; main is not merged or rewritten.
+
+The 22 follow-up issues remain open and valid. References were corrected in
+37 issues to identify the responsible layers rather than describe #130 as the
+combined implementation. #99 remains open. No additional backlog issue was
+created for the delivery correction.
