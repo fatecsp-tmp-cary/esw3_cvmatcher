@@ -44,8 +44,15 @@ to NFC and whitespace within each line; other display text collapses whitespace.
 Keep `raw` null until retention rights are established. Requirement classes are `REQUIRED`,
 `PREFERRED`, and `NICE_TO_HAVE`; detected skills must not automatically be
 assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
-matching, and section detection are proposed. PostgreSQL FTS handles DB-level
-tokenization, stemming, and ranking.
+matching, and section detection are proposed. PostgreSQL FTS uses Portuguese tokenization/stemming for documents and plain-text
+queries. [ADR-005](../../docs/architecture/decisions/ADR-005-weighted-any-term-fts.md)
+selects any-term queries and PostgreSQL weights A (1.0) for title/skills,
+B (0.4) for company/keywords/requirements, and D (0.1) for description/location.
+JSON fields use PostgreSQL text rendering. Index/runtime expressions must match
+and use immutable functions. Treat query quotes/operators as data; preserve
+already parsed lexemes when forming the OR query. English stemming and accent-
+insensitive matching are not guaranteed. Location remains descriptive retrieval
+text, never a separate geographic compatibility score or eligibility filter.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
 `parent_skill_id`, `aliases`); candidate-side taxonomy processing is transient.
@@ -70,10 +77,8 @@ hash updates the job, reindexes text, nulls its embedding, and schedules
 regeneration. Unchanged content is not updated. Model/version changes
 independently invalidate and regenerate embeddings.
 
-Only active jobs are in active retrieval. The initial FTS document covers title,
-company, description, keywords, skills, normalized requirement text, and location.
-These fields use uniform initial weighting; location contributes only to textual
-retrieval and never to geographic eligibility. Semantic job representation is title,
+Only active jobs are in active retrieval. FTS covers title, company, description, keywords,
+skills, normalized requirements, and location. Semantic job representation is title,
 normalized skills, requirements, relevant description, location, and mode.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job
