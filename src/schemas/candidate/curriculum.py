@@ -5,6 +5,7 @@ its domain models. Contact, identity and presentation data are outside matching.
 """
 
 from datetime import date
+from re import fullmatch
 from typing import Annotated, Literal, Self
 from unicodedata import category
 from uuid import UUID
@@ -49,11 +50,22 @@ class _CurriculumModel(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
 
+def _calendar_date(value: object) -> object:
+    if type(value) is date:
+        return value
+    if not isinstance(value, str) or fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", value) is None:
+        raise ValueError("date must use YYYY-MM-DD")
+    return value
+
+
+CalendarDate = Annotated[date, BeforeValidator(_calendar_date)]
+
+
 class _Period(_CurriculumModel):
     """A chronological period; null end means ongoing."""
 
-    inicio: date
-    fim: date | None
+    inicio: CalendarDate
+    fim: CalendarDate | None
 
     @model_validator(mode="after")
     def _ordered_period(self) -> Self:

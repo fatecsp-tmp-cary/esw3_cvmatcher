@@ -8,7 +8,8 @@ Status reflects the implementation in this branch.
   `POST /matches` request/response contract. Matching remains unavailable when
   no executor is configured.
 - Candidate profile and implemented-preview curriculum schemas with a curriculum UUID,
-  periods, source education vocabulary, project text bounds, and free-text levels.
+  calendar-only periods (rejecting timestamps and datetime strings), source education
+  vocabulary, project text bounds, and free-text levels.
 - Production and mock APIs share curriculum and match response schemas;
   canonical job enums are shared without importing persistence into API schemas.
 - Generated OpenAPI documentation for `/health` and `/matches`, including

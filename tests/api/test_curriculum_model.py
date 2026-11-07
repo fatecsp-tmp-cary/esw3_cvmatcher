@@ -150,3 +150,14 @@ def test_section_item_ids_are_not_part_of_the_cv_contract(client, section) -> No
     response = client.post("/matches", json=payload)
     assert response.status_code == 422
     assert response.json()["errors"][0]["type"] == "extra_forbidden"
+
+
+@pytest.mark.parametrize("section", ["formacoes", "experiencias"])
+@pytest.mark.parametrize("field", ["inicio", "fim"])
+@pytest.mark.parametrize("invalid", [1735689600, "1735689600", "2025-01-01T00:00:00"])
+def test_period_rejects_non_calendar_date_inputs(client, section, field, invalid) -> None:
+    payload = deepcopy(SOURCE_PREVIEW)
+    payload[section][0][field] = invalid
+    response = client.post("/matches", json=payload)
+    assert response.status_code == 422
+    assert response.json()["errors"][0]["loc"] == ["body", section, 0, field]
