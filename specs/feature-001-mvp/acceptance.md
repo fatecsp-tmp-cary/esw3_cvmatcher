@@ -91,17 +91,20 @@ pending.
 - [ADR-005](../../docs/architecture/decisions/ADR-005-weighted-any-term-fts.md)
   records Portuguese weighted any-term search and its English/accent limitations.
 - Category aliases map seniority/mode to shared domain enums; unknown values
-  yield no category. Language and employment types remain validated free text.
+  yield no category. For each APiBR category independently, the first recognized
+  label in source order wins when labels disagree. Keep all normalized labels
+  as keywords so alternative source evidence remains available. Language and
+  employment types remain validated free text.
 
 ## Unresolved; address before dependent implementation
 
 1. Verify actual APiBR payload, scan completeness and source usage/retention
-   evidence (#113/#132/#134). A synthetic state-free fixture is not proof of
+   evidence. A synthetic state-free fixture is not proof of
    the endpoint shape. No unproven scan may mark absent jobs stale.
 2. Select and record the CPU-feasible PT/EN embedding model/version and metadata
-   before semantic work (#26/#118/#140); preserve the fixed canonical Job fields.
+   before semantic work; preserve the fixed canonical Job fields.
 3. Define canonical language/employment requirement mappings and confidence
-   before hard exclusion (#139). Arbitrary free text is insufficient evidence.
+   before hard exclusion. Arbitrary free text is insufficient evidence.
 
 Implementation status is in [tasks](tasks.md). Unimplemented worker, lifecycle,
 matching and operational requirements remain pending.

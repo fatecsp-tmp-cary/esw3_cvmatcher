@@ -24,6 +24,9 @@ Candidate `seniority` text maps to the existing `SeniorityLevel` values:
 `hybrid`/`híbrido` → `HYBRID`; and `on-site`/`onsite`/`presencial` →
 `ON_SITE`. Matching is case- and accent-insensitive for these aliases. Missing
 or unknown values normalize to no category and must not cause hard exclusion.
+For APiBR jobs with multiple recognized seniority or work-arrangement labels,
+select the first recognized value in source order for each category independently.
+Retain every normalized label in keywords, including conflicting alternatives.
 Language proficiency and employment type have no canonical job fields or enums
 yet; keep them as schema-validated free text. They may contribute descriptive
 matching evidence, but cannot drive hard exclusion until a canonical mapping is

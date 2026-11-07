@@ -138,3 +138,18 @@ def test_html_without_text_cannot_supply_a_required_title(empty_html):
 def test_malformed_fields_raise_record_validation_errors(invalid_fields):
     with pytest.raises(ValueError, match="APiBR issue has an invalid"):
         normalize_apibr_job({"id": 2, "title": "Developer", **invalid_fields})
+
+
+@pytest.mark.parametrize(
+    ("labels", "seniority", "arrangement"),
+    [
+        (["junior", "senior", "remoto", "presencial"], "JUNIOR", "REMOTE"),
+        (["presencial", "remoto", "senior", "junior"], "SENIOR", "ON_SITE"),
+        (["unknown", "híbrido", "pleno", "senior", "remoto"], "MID", "HYBRID"),
+    ],
+)
+def test_first_recognized_source_label_wins_for_each_category(labels, seniority, arrangement):
+    job = normalize_apibr_job({"id": 123, "title": "Developer", "labels": labels})
+    assert job["seniority_level"] == seniority
+    assert job["work_arrangement"] == arrangement
+    assert job["keywords"] == labels
