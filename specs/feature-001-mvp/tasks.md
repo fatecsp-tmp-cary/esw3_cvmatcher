@@ -38,13 +38,19 @@ on this branch. Requirements and completion gates are in [spec](spec.md),
 
 ## Restack verification
 
-The original branches were rebased separately; each layer keeps only its own
-changes and review fixes. Tests and documentation links are checked per layer.
-The CI workflow remains unchanged by the user's decision. Full PostgreSQL CI
-will run through an approved temporary draft validation PR from #112 to main,
-then that PR will be closed without merging. The source stack bases remain
-unchanged by that validation route.
+The original branches were rebased separately, with #130 exactly at `d305975`.
+Each layer retains its own scope and fixes. Per-layer unit/API checks passed;
+linearity, feature boundaries, one migration head and documentation references
+were checked across all ten branches. The CI workflow is unchanged.
 
-Current layer validation results are recorded in the restack audit. The previous
-combined #130 CI result is historical evidence, not verification of these new
-branch heads.
+At source head `11d89e8`,
+[CI run 42345643778](https://github.com/fatecsp-tmp-cary/esw3_cvmatcher/actions/runs/42345643778)
+passed 229 unit/API tests and 31 PostgreSQL/pgvector integration tests, plus
+lint/format and branch validation. The approved temporary draft #154 supplies
+this cumulative CI route; closing it without merging or deleting #112's head
+branch is required after final checks. Source PR bases remain unchanged.
+
+[The restack audit](../../docs/reports/pr-stack-integration-review.md) records
+review evaluations, the interview, per-layer checks, issue corrections and
+validation evidence. The rejected combined #130 head is historical recovery
+material only, not the implementation or verification target.
