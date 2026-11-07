@@ -53,8 +53,11 @@ def normalize_text(text: str | None, *, preserve_sections: bool = False) -> str 
     parser.close()
     normalized = unicodedata.normalize("NFC", "".join(parser.parts))
     if preserve_sections:
-        return "\n".join(" ".join(line.split()) for line in normalized.splitlines() if line.strip())
-    return " ".join(normalized.split())
+        return (
+            "\n".join(" ".join(line.split()) for line in normalized.splitlines() if line.strip())
+            or None
+        )
+    return " ".join(normalized.split()) or None
 
 
 def normalize_keywords(labels: Any) -> list[str]:

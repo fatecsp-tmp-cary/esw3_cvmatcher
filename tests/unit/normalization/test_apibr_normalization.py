@@ -115,3 +115,11 @@ def test_state_free_payload_stays_discovered():
     job = normalize_apibr_job({"id": 123, "title": "Developer", "body": "Python"})
     assert job["status"] == "DISCOVERED"
     assert job["last_verified_at"] is None
+
+
+@pytest.mark.parametrize("empty_html", ["<p> </p>", "<!--hidden-->", "<br>&nbsp;"])
+def test_html_without_text_cannot_supply_a_required_title(empty_html):
+    assert normalize_text(empty_html) is None
+    assert normalize_text(empty_html, preserve_sections=True) is None
+    with pytest.raises(ValueError, match="required title"):
+        normalize_apibr_job({"id": 123, "title": empty_html})
