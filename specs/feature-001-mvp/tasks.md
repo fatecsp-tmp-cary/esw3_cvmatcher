@@ -7,7 +7,8 @@ Status reflects the implementation in this branch.
 - FastAPI app factory, health endpoint, RFC-style errors, and the documented
   `POST /matches` request/response contract. Matching remains unavailable when
   no executor is configured.
-- Candidate profile and flat curriculum request schemas with validation.
+- Candidate profile and implemented-preview curriculum schemas with UUIDs,
+  periods, source education vocabulary, project text bounds, and free-text levels.
 - Production and mock APIs share curriculum and match response schemas;
   canonical job enums are shared without importing persistence into API schemas.
 - Generated OpenAPI documentation for `/health` and `/matches`, including
@@ -53,10 +54,18 @@ Detailed feature requirements are in [spec](spec.md); completion gates are in
   Extra-field error locations retain only the containing object path.
 - Schema consolidation: unit/API tests and lint/format checks passed. OpenAPI
   component parity and a mock startup with database imports blocked are covered.
-- Input bounds: unit/API tests passed, including at-limit and over-limit cases
-  for all curriculum arrays and project technology tags in both applications.
-  Collection limits follow existing candidate-profile limits where applicable;
-  projects allow 50 entries, with up to 100 tags of 1–200 characters each.
-- Consolidated validation: 113 unit/API tests passed; source/test lint and format
+- Historical integration-document collection bounds and technology-tag limits
+  were superseded by the source-model decision in acceptance; they are no longer
+  implemented. Current field limits follow the source domain.
+- Earlier consolidation validation: 113 unit/API tests passed; source/test lint and format
   checks, documentation links, and `git diff --check` passed. Database integration
   tests were not run for these contract and validation changes.
+- Source-model alignment: the user selected preview naming and dates and
+  declared the integration document outdated. Updated both API schemas, the
+  OpenAPI example, the runnable mock request, and contract/privacy tests.
+  Tests cover source periods, completed education, empty sections, text limits,
+  controls, UUID privacy, free-text levels, and rejection of outdated fields.
+  Candidate normalization into the matching pipeline remains pending.
+  Verification: 149 unit/API tests passed; source/test lint and formatting,
+  documentation references, and `git diff --check` passed. Database integration
+  tests were not run; no persistence or pipeline behavior changed.

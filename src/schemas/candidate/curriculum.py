@@ -1,86 +1,131 @@
-"""Sistema Currículo's complete request body for POST /matches."""
+"""Matching data from Sistema Currículo's implemented curriculum preview.
+
+Field names follow the preview DTOs at source commit 66af300; validation follows
+its domain models. Contact, identity and presentation data are outside matching.
+"""
 
 from datetime import date
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
+from unicodedata import category
+from uuid import UUID
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
 
-def _valid_completion_month(value: str) -> str:
-    try:
-        date.fromisoformat(f"{value}-01-01" if len(value) == 4 else f"{value}-01")
-    except ValueError:
-        raise ValueError("previsao_conclusao must be a valid year and month") from None
+def _without_controls(value: object) -> object:
+    """Reject control characters in education and project text, as the source does."""
+    if isinstance(value, str) and any(category(character) == "Cc" for character in value):
+        raise ValueError("text must not contain control characters")
     return value
 
 
-CompletionDate = Annotated[
-    str,
-    Field(pattern=r"^\d{4}(-(0[1-9]|1[0-2]))?$"),
-    AfterValidator(_valid_completion_month),
+NonemptyText = Annotated[str, Field(min_length=1)]
+EducationText = Annotated[
+    str, Field(min_length=1, max_length=200), BeforeValidator(_without_controls)
 ]
-TechnologyName = Annotated[str, Field(min_length=1, max_length=200)]
-CurriculumId = Annotated[
-    str,
-    Field(
-        min_length=8,
-        max_length=64,
-        pattern=(
-            r"^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-"
-            r"[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|cur_[A-Za-z0-9]{4,60})$"
-        ),
-    ),
+ProjectTitle = EducationText
+ProjectDescription = Annotated[
+    str, Field(min_length=1, max_length=2000), BeforeValidator(_without_controls)
 ]
+ProjectTechnologies = Annotated[
+    str, Field(min_length=1, max_length=300), BeforeValidator(_without_controls)
+]
+
+
+def _private_uuid(value: object) -> object:
+    """Parse source UUID strings without reflecting parser input in errors."""
+    if isinstance(value, str):
+        try:
+            return UUID(value)
+        except ValueError:
+            raise ValueError("identifier must be a valid UUID") from None
+    return value
+
+
+CurriculumId = Annotated[UUID, BeforeValidator(_private_uuid)]
 
 
 class _CurriculumModel(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
 
-class PersonalData(_CurriculumModel):
-    cidade: str | None = Field(default=None, min_length=2, max_length=60)
-    estado: str | None = Field(default=None, pattern=r"^[A-Z]{2}$")
-    modalidade_preferencial: Literal["presencial", "remoto", "hibrido", "indiferente"]
+class _Period(_CurriculumModel):
+    """A source item identifier and chronological period; null end means ongoing."""
+
+    id: CurriculumId
+    inicio: date
+    fim: date | None
+
+    @model_validator(mode="after")
+    def _ordered_period(self) -> Self:
+        if self.fim is not None and self.fim < self.inicio:
+            raise ValueError("fim must not precede inicio")
+        return self
 
 
-class AcademicFormation(_CurriculumModel):
-    curso: str = Field(min_length=3, max_length=100)
-    instituicao: str = Field(default="FATEC-SP", min_length=2, max_length=100)
-    status: Literal["em_andamento", "concluido", "trancado"]
-    previsao_conclusao: CompletionDate | None = None
+class AcademicFormation(_Period):
+    """Academic fields and vocabulary from the implemented formation model."""
+
+    instituicao: EducationText
+    curso: EducationText
+    nivel: Literal[
+        "ensino_fundamental",
+        "ensino_medio",
+        "tecnico",
+        "tecnologo",
+        "graduacao",
+        "especializacao",
+        "mestrado",
+        "doutorado",
+    ]
+    status: Literal["em_andamento", "concluido", "interrompido"]
+
+    @model_validator(mode="after")
+    def _completed_formation_has_end(self) -> Self:
+        if self.status == "concluido" and self.fim is None:
+            raise ValueError("completed formation requires fim")
+        return self
 
 
 class Competency(_CurriculumModel):
-    nome: str = Field(min_length=1, max_length=50)
-    nivel: Literal["basico", "intermediario", "avancado"]
+    """Preview competency description and free-text proficiency."""
+
+    id: CurriculumId
+    descricao: NonemptyText
+    nivel: NonemptyText
 
 
 class CurriculumLanguage(_CurriculumModel):
-    idioma: str = Field(min_length=2, max_length=40)
-    nivel: Literal["basico", "intermediario", "avancado", "fluente"]
+    """Preview language name and free-text proficiency."""
+
+    id: CurriculumId
+    idioma: NonemptyText
+    nivel: NonemptyText
 
 
-class ProfessionalExperience(_CurriculumModel):
-    cargo: str = Field(min_length=2, max_length=80)
-    empresa: str = Field(min_length=2, max_length=80)
-    descricao: str | None = Field(default=None, max_length=1000)
+class ProfessionalExperience(_Period):
+    """Professional experience with the source's start and nullable end dates."""
+
+    empresa: NonemptyText
+    cargo: NonemptyText
+    descricao: NonemptyText
 
 
 class AcademicProject(_CurriculumModel):
-    titulo: str = Field(min_length=3, max_length=100)
-    tecnologias: list[TechnologyName] = Field(default_factory=list, max_length=100)
-    descricao: str | None = Field(default=None, max_length=1000)
+    """Source project texts, including technologies as a single string."""
+
+    id: CurriculumId
+    titulo: ProjectTitle
+    descricao: ProjectDescription
+    tecnologias: ProjectTechnologies
 
 
 class CurriculumRequest(_CurriculumModel):
-    """Flat curriculum payload; the ID is opaque and transient."""
+    """Matching sections of the preview; all identifiers remain request-scoped."""
 
     curriculo_id: CurriculumId
-    dados_pessoais: PersonalData
-    formacao_academica: list[AcademicFormation] = Field(min_length=1, max_length=20)
-    competencias: list[Competency] = Field(min_length=1, max_length=200)
-    idiomas: list[CurriculumLanguage] = Field(default_factory=list, max_length=20)
-    experiencias_profissionais: list[ProfessionalExperience] = Field(
-        default_factory=list, max_length=50
-    )
-    projetos_academicos: list[AcademicProject] = Field(default_factory=list, max_length=50)
+    formacoes: list[AcademicFormation]
+    experiencias: list[ProfessionalExperience]
+    projetos: list[AcademicProject]
+    competencias: list[Competency]
+    idiomas: list[CurriculumLanguage]

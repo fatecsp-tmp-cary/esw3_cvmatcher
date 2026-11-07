@@ -21,7 +21,8 @@ with an explicit rationale and synchronized task/document updates.
    normalization, and versioning; no geographic filtering.
 9. Matches API, health, OpenAPI, errors, production authentication. Preserve
    the [confirmed public contract](acceptance.md#resolved-api-contract) when
-   consolidating API branches: flat curriculum input, `limit`, and the #40
+   consolidating API branches: implemented preview matching sections with dates,
+   `limit`, and the #40
    job identity, eligibility, detail arrays, score, and version metadata.
 10. Quality suite, regression dataset, model-version migration, no-dedup and
    no-geographic-filtering regressions.

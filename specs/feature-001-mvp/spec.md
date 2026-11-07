@@ -85,17 +85,20 @@ compatibility, not employment probability. Public match results include boolean
 means matching eligibility, never geography. Detail arrays are required and may
 be empty. Component scores may remain internal.
 
-The resolved public API contract is documented in
-[acceptance](acceptance.md). `POST /matches` accepts the flat Sistema Currículo
-payload with `curriculo_id`, the required personal-data, academic-formation, and
-competency fields, and optional languages, professional experiences, and
-academic projects. The only query parameter is `limit`, defaulting to 10 and
-bounded from 1 through 100. `curriculo_id` is request-only: do not persist, log,
-or return it.
+The public API contract is documented in [acceptance](acceptance.md).
+`POST /matches` accepts the matching sections of the implemented Sistema
+Currículo preview: `curriculo_id`, `formacoes`, `experiencias`, `projetos`,
+`competencias`, and `idiomas`. All arrays are required and may be empty. Items
+have UUID IDs; education and experience use required `inicio` and nullable
+`fim` calendar dates. Education has a level and source status vocabulary;
+competency descriptions and language/competency levels are text. Project
+technologies are a string. Validation follows the source domain as specified
+in acceptance. The outdated integration document does not govern the schema.
 
-Curriculum arrays and project technology tags have the validation limits in
-[acceptance](acceptance.md#resolved-api-contract). These apply equally to the
-production and mock APIs; omitted optional arrays still default to empty lists.
+The request excludes identity/contact, presentation, and document fields.
+Submitted curriculum/item IDs and data are request-scoped: do not persist,
+log, or return them. The only query parameter is `limit`, defaulting to 10
+and bounded from 1 through 100. Production and mock share the same schema.
 
 The response is `MatchesResponse {matches: MatchResult[]}`. Each result contains
 `rank`, `job`, `score`, `eligibility`, `matched_skills`,

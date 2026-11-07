@@ -2,15 +2,14 @@ from fastapi.testclient import TestClient
 
 
 def valid_curriculum() -> dict:
-    return {
-        "curriculo_id": "cur_Abcd1234",
-        "dados_pessoais": {"modalidade_preferencial": "remoto"},
-        "formacao_academica": [{"curso": "Sistemas", "status": "em_andamento"}],
-        "competencias": [{"nome": "Python", "nivel": "intermediario"}],
-    }
+    from copy import deepcopy
+
+    from src.api.app import CURRICULUM_EXAMPLE
+
+    return deepcopy(CURRICULUM_EXAMPLE)
 
 
-def test_matches_contract_uses_flat_body_and_default_limit() -> None:
+def test_matches_contract_uses_preview_body_and_default_limit() -> None:
     received: list[tuple[dict, int]] = []
 
     def execute(curriculum, limit):
@@ -25,7 +24,9 @@ def test_matches_contract_uses_flat_body_and_default_limit() -> None:
     assert response.status_code == 200
     assert response.json() == {"matches": []}
     assert received[0][1] == 10
-    assert received[0][0]["formacao_academica"][0]["instituicao"] == "FATEC-SP"
+    assert received[0][0]["experiencias"][0]["inicio"].isoformat() == "2025-01-01"
+    assert received[0][0]["experiencias"][0]["fim"] is None
+    assert received[0][0]["projetos"][0]["tecnologias"] == "Java, Clean Architecture, Docker"
 
 
 def test_matches_limit_bounds_and_no_offset(client: TestClient) -> None:
@@ -78,8 +79,11 @@ def test_openapi_documents_matches_contract_and_problem_responses(client: TestCl
         }
     ]
     assert "CurriculumRequest" in str(operation["requestBody"])
-    assert payload_example["sistema_curriculo"]["value"]["curriculo_id"] == "cur_987654321"
-    assert payload_example["sistema_curriculo"]["value"]["projetos_academicos"][0]["titulo"] == (
+    assert (
+        payload_example["sistema_curriculo"]["value"]["curriculo_id"]
+        == "550e8400-e29b-41d4-a716-446655440000"
+    )
+    assert payload_example["sistema_curriculo"]["value"]["projetos"][0]["titulo"] == (
         "Sistema de Apoio Profissional"
     )
     assert "MatchesResponse" in str(operation["responses"]["200"])

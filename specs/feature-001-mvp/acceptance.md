@@ -22,17 +22,35 @@
 
 ## Resolved API contract
 
-- `POST /matches` accepts the flat Sistema Currículo payload: `curriculo_id`,
-  `dados_pessoais`, `formacao_academica`, `competencias`, optional `idiomas`,
-  optional `experiencias_profissionais`, and optional `projetos_academicos`.
-- At least one academic formation and competency are required. An omitted
-  `formacao_academica[].instituicao` defaults to `FATEC-SP`.
-- Curriculum collection maxima are 20 academic formations, 200 competencies,
-  20 languages, 50 professional experiences, and 50 academic projects. Each
-  project accepts up to 100 technology tags, each 1–200 characters after
-  trimming whitespace. Exceeding a limit returns a privacy-safe 422 response.
-- `curriculo_id` is opaque, request-only correlation data. It is never persisted,
-  logged, or returned in the response.
+- `POST /matches` accepts matching sections from Sistema Currículo's implemented
+  preview at commit `66af300`: required UUID `curriculo_id` and required arrays
+  `formacoes`, `experiencias`, `projetos`, `competencias`, and `idiomas`. Every
+  array may be empty; no additional collection cap is imposed by this contract.
+- Each item has a required UUID `id`, retained only during the request. UUIDs
+  are not restricted to version 4. Neither curriculum nor item IDs are persisted,
+  logged, or echoed in the match response.
+- Education items contain required `instituicao`, `curso`, `nivel`, `status`,
+  `inicio`, and nullable `fim`. Institution/course are 1–200 characters. Levels
+  are `ensino_fundamental`, `ensino_medio`, `tecnico`, `tecnologo`, `graduacao`,
+  `especializacao`, `mestrado`, or `doutorado`; statuses are `em_andamento`,
+  `concluido`, or `interrompido`. Completed education requires a non-null `fim`.
+  Institution is supplied by the caller; there is no `FATEC-SP` default.
+- Experience items contain required nonempty `empresa`, `cargo`, `descricao`,
+  `inicio`, and nullable `fim`. Both education and experience periods use ISO
+  calendar dates (`YYYY-MM-DD`) and require `fim >= inicio` when non-null.
+  `fim` must be present, even when null, as in the preview DTOs. A null experience
+  end date represents ongoing employment; an education end date can be an
+  expected completion date for `em_andamento`.
+- Competencies contain required nonempty `descricao` and free-text `nivel`;
+  the preview does not expose competency `categoria`. Languages contain required
+  nonempty `idioma` and free-text `nivel`, with no invented proficiency enums.
+- Projects contain required `titulo`, `descricao`, and `tecnologias` as strings,
+  with lengths 1–200, 1–2000, and 1–300 respectively. Source education/project
+  fields reject Unicode control characters; text is trimmed before length checks.
+- The request omits preview identity/contact, presentation, and document fields
+  (`estudante`, `titulo_versao`, `layout`, `documentos`). Unknown fields are
+  rejected. The old integration-document fields, date aliases, defaults,
+  proficiency enums, technology arrays, and collection bounds are not supported.
 - `limit` is the only query parameter. It defaults to 10 and accepts integers
   from 1 through 100. There is no `offset` parameter.
 - The response follows #40: `matches[]` entries contain `rank`, nested `job`,
@@ -49,12 +67,21 @@
 
 ### Consolidation decision (2026-11-06)
 
-The user confirmed the flat `POST /matches` contract in PR #130 as the agreed
-Grupo 1 integration target, retaining its `limit` parameter and RFC 9457 errors.
-The response must also satisfy issue #40 by exposing job identity, eligibility,
-and match details as specified above. This supersedes the earlier omission of
-those public fields. Differing routes and envelopes in Grupo 1 documents are
-not adopted by this service; consumer alignment remains external work.
+The user confirmed `POST /matches` in PR #130 as the Grupo 1 integration
+route, retaining its `limit` parameter and RFC 9457 errors. The response must
+satisfy issue #40 by exposing job identity, eligibility, and match details.
+
+### Source-model decision (2026-11-07)
+
+The user declared the integration document outdated and selected the implemented
+preview's field names and dates. The request schema above supersedes the earlier
+flat integration-document payload. Source authority is
+`code-alchemists-br/sistema-curriculo` commit `66af300`, specifically
+`src/backend/api/previa_versao_curriculo.py` for field names/types and
+`src/backend/domain/itens_perfil.py` plus `value_objects.py` for validation.
+The matching projection excludes identity/contact and presentation fields;
+this is an intentional request projection, not the entire preview response.
+No alternative field aliases from the outdated document or CRUD API are accepted.
 
 PR #111 must consolidate onto this request and response contract rather than
 restore its `CandidateProfile` request body. The current executor accepts

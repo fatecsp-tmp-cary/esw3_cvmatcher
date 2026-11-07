@@ -60,7 +60,7 @@ def test_mock_matches_limit_controls_response_sample_size() -> None:
 
 def test_mock_validation_errors_do_not_echo_candidate_values() -> None:
     secret = "candidate-data-that-must-not-be-echoed"
-    request = {**_SAMPLE_REQUEST, "curriculo_id": secret, "competencias": []}
+    request = {**_SAMPLE_REQUEST, "curriculo_id": secret, "competencias": [{"nivel": ""}]}
     with TestClient(create_app()) as client:
         response = client.post("/matches", json=request)
 

@@ -14,7 +14,7 @@ from src.mock_api.app import create_app as create_mock_app
 @pytest.mark.parametrize("app_factory", [create_public_app, create_mock_app])
 @pytest.mark.parametrize(
     "path",
-    [(), ("dados_pessoais",), ("formacao_academica", 0), ("projetos_academicos", 0)],
+    [(), ("experiencias", 0), ("formacoes", 0), ("projetos", 0)],
 )
 def test_extra_field_names_and_values_stay_private(app_factory, path, caplog) -> None:
     payload = deepcopy(CURRICULUM_EXAMPLE)

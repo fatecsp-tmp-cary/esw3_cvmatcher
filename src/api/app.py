@@ -10,45 +10,44 @@ from src.schemas.matches import MatchesResponse
 
 MatchExecutor = Callable[[CurriculumRequest, int], MatchesResponse]
 CURRICULUM_EXAMPLE = {
-    "curriculo_id": "cur_987654321",
-    "dados_pessoais": {
-        "cidade": "São Paulo",
-        "estado": "SP",
-        "modalidade_preferencial": "hibrido",
-    },
-    "formacao_academica": [
+    "curriculo_id": "550e8400-e29b-41d4-a716-446655440000",
+    "formacoes": [
         {
-            "curso": "Análise e Desenvolvimento de Sistemas",
+            "id": "550e8400-e29b-41d4-a716-446655440001",
             "instituicao": "FATEC-SP",
+            "curso": "Análise e Desenvolvimento de Sistemas",
+            "nivel": "tecnologo",
             "status": "em_andamento",
-            "previsao_conclusao": "2026-12",
+            "inicio": "2024-02-01",
+            "fim": "2026-12-01",
+        }
+    ],
+    "experiencias": [
+        {
+            "id": "550e8400-e29b-41d4-a716-446655440002",
+            "empresa": "Empresa de exemplo",
+            "cargo": "Estagiário de Desenvolvimento",
+            "descricao": "Desenvolvimento de APIs REST e manutenção de banco de dados relacional.",
+            "inicio": "2025-01-01",
+            "fim": None,
+        }
+    ],
+    "projetos": [
+        {
+            "id": "550e8400-e29b-41d4-a716-446655440003",
+            "titulo": "Sistema de Apoio Profissional",
+            "descricao": "Plataforma de currículos e busca de vagas.",
+            "tecnologias": "Java, Clean Architecture, Docker",
         }
     ],
     "competencias": [
-        {"nome": "Java", "nivel": "intermediario"},
-        {"nome": "Spring Boot", "nivel": "intermediario"},
-        {"nome": "PostgreSQL", "nivel": "basico"},
-        {"nome": "Git", "nivel": "intermediario"},
-    ],
-    "idiomas": [{"idioma": "Inglês", "nivel": "intermediario"}],
-    "experiencias_profissionais": [
         {
-            "cargo": "Estagiário de Desenvolvimento",
-            "empresa": "Tech Solutions",
-            "descricao": (
-                "Desenvolvimento de APIs REST e manutenção de banco de dados relacional."
-            ),
+            "id": "550e8400-e29b-41d4-a716-446655440004",
+            "descricao": "Python",
+            "nivel": "intermediario",
         }
     ],
-    "projetos_academicos": [
-        {
-            "titulo": "Sistema de Apoio Profissional",
-            "tecnologias": ["Java", "Clean Architecture", "Docker"],
-            "descricao": (
-                "Plataforma para auxílio na elaboração de currículos e busca de vagas integradas."
-            ),
-        }
-    ],
+    "idiomas": [{"id": "550e8400-e29b-41d4-a716-446655440005", "idioma": "Inglês", "nivel": "B2"}],
 }
 
 
@@ -76,7 +75,7 @@ def create_app(match_executor: MatchExecutor | None = None) -> FastAPI:
             Body(
                 openapi_examples={
                     "sistema_curriculo": {
-                        "summary": "Sample payload from Sistema Currículo",
+                        "summary": "Implemented Sistema Currículo preview: matching sections",
                         "value": CURRICULUM_EXAMPLE,
                     }
                 }

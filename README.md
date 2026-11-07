@@ -34,8 +34,8 @@ change `POSTGRES_PORT` in `.env` and use the same port in `DATABASE_URL`.
 
 ## Runnable API mock
 
-The deterministic mock server lets API consumers try the current curriculum
-request and ranked `matches` response without PostgreSQL, a matching model, or
+The deterministic mock server lets API consumers try the implemented curriculum
+preview’s matching sections and ranked `matches` response without PostgreSQL, a matching model, or
 external job sources. It returns the same synthetic result for every valid
 request; its score is an example and is not a real compatibility result.
 
