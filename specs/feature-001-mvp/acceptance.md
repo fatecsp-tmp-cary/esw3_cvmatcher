@@ -88,6 +88,8 @@ pending.
   records conservative unknown availability, no default verifier, per-record
   rejection and PARTIAL commits. Network failures roll back job changes; partial
   runs do not advance last_success_at or absence-based lifecycle evidence.
+- [ADR-005](../../docs/architecture/decisions/ADR-005-weighted-any-term-fts.md)
+  records Portuguese weighted any-term search and its English/accent limitations.
 
 ## Unresolved; address before dependent implementation
 
