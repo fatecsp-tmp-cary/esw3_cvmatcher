@@ -25,7 +25,8 @@
 - `POST /matches` accepts matching sections from Sistema Currículo's implemented
   preview: required UUID `curriculo_id` and required arrays
   `formacoes`, `experiencias`, `projetos`, `competencias`, and `idiomas`. Every
-  array may be empty; no additional collection cap is imposed by this contract.
+  array may be empty. Service caps are 20 `formacoes`, 50 `experiencias`,
+  50 `projetos`, 200 `competencias`, and 20 `idiomas` (ADR-006).
 - `curriculo_id` is the only CV identifier and is not restricted to UUID version
   4. Section items have no `id` field; extra item IDs are rejected. The curriculum
   ID is request-scoped and is never persisted, logged, or echoed in the response.
@@ -74,8 +75,8 @@ validation from `code-alchemists-br/sistema-curriculo`:
 The request excludes identity/contact and presentation fields.
 
 The executor accepts `CurriculumRequest` and `limit`.
-Transient candidate normalization and complete pipeline integration remain
-pending.
+Transient candidate normalization preserves all matching sections; complete
+pipeline integration remains pending.
 
 ## Implementation decisions
 
@@ -95,6 +96,11 @@ pending.
   label in source order wins when labels disagree. Keep all normalized labels
   as keywords so alternative source evidence remains available. Language and
   employment types remain validated free text.
+- [ADR-006](../../docs/architecture/decisions/ADR-006-curriculum-projection-and-bounds.md)
+  defines the service caps above. Align internal
+  validation with every valid public request, including empty sections, and
+  preserve source dates/levels without carrying the UUID. The public executor
+  remains CurriculumRequest plus limit.
 
 ## Unresolved; address before dependent implementation
 

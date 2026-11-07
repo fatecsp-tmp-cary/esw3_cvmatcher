@@ -15,12 +15,8 @@ Requirements and completion gates are in [spec](spec.md),
 - Skill taxonomy, job-skill and classified requirement persistence; population/extraction remain pending.
 - Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
 - Domain-enum seniority/mode aliases; missing/unknown values yield no category. APiBR uses first-recognized source-label precedence, retaining every keyword. Other categories remain text.
-
 - Ranked response validation tests for job identity, eligibility, match details and version metadata.
-
-## Pending components
-
-- [ ] Public collection caps and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
+- Public collection caps and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
 
 ## Remaining MVP work
 
@@ -37,3 +33,11 @@ Requirements and completion gates are in [spec](spec.md),
 - [ ] Release coverage and the initial textual matching slice.
 - [ ] Additional-source selection/adapter, separate from the at-least-one-source
       MVP acceptance minimum.
+
+## Verification
+
+Calendar-only request dates, empty HTML titles, malformed source URLs/timestamp
+ranges, and source-label precedence have regression coverage. Local tests,
+lint/format checks, documentation link targets, and offline migration SQL
+generation pass. PostgreSQL-backed tests remain unverified locally because the
+database service is unavailable.
