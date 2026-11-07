@@ -1,9 +1,9 @@
 """Map request-side category text onto canonical job enums."""
 
-from dataclasses import dataclass
 import unicodedata
+from dataclasses import dataclass
 
-from src.persistence.job.job import SeniorityLevel, WorkArrangement
+from src.domain.job import SeniorityLevel, WorkArrangement
 from src.schemas.candidate.profile import CandidateProfile, Language
 
 

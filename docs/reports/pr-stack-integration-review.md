@@ -70,3 +70,4 @@ status is [tasks](../../specs/feature-001-mvp/tasks.md).
 - PR #107: Documentation-only FTS decision/field changes; inherits #106 source verification (175 unit/API tests). No CI workflow change.
 - PR #108: 176 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
 - PR #109: 184 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
+- PR #110: 204 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.

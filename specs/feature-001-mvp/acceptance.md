@@ -108,6 +108,8 @@ The accepted behavioral decisions from the preceding interview are retained.
   runs do not advance last_success_at or absence-based lifecycle evidence.
 - [ADR-005](../../docs/architecture/decisions/ADR-005-weighted-any-term-fts.md)
   records Portuguese weighted any-term search and its English/accent limitations.
+- Category aliases map seniority/mode to shared domain enums; unknown values
+  yield no category. Language and employment types remain validated free text.
 
 ## Unresolved; address before dependent implementation
 

@@ -3,6 +3,11 @@ from datetime import UTC, datetime
 from html.parser import HTMLParser
 from typing import Any
 
+from src.normalization.candidate.categories import (
+    normalize_seniority,
+    normalize_work_arrangement,
+)
+
 
 class _HTMLTextParser(HTMLParser):
     _BLOCK_TAGS = {
@@ -104,6 +109,14 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("APiBR issue is missing its required title")
 
     keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
+    work_arrangement = next(
+        (value for keyword in keywords if (value := normalize_work_arrangement(keyword))),
+        None,
+    )
+    seniority_level = next(
+        (value for keyword in keywords if (value := normalize_seniority(keyword))),
+        None,
+    )
 
     return {
         "platform": "apibr",
@@ -115,8 +128,8 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         "keywords": keywords,
         "skills": [],
         "location": None,
-        "work_arrangement": None,
-        "seniority_level": None,
+        "work_arrangement": work_arrangement,
+        "seniority_level": seniority_level,
         "salary": None,
         "currency": None,
         "job_url": raw_job.get("html_url") or raw_job.get("url"),
