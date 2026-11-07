@@ -1,7 +1,8 @@
 # MVP Source Selection — Job Postings
 
 ## Status
-This document reflects the final decision for the MVP job ingestion pipeline. APiBR was defined as the single primary data source for the MVP, as decided by the Data Squad and communicated to the team on 2026-10-07. This decision follows the access issue observed with Gupy during the team meeting on 2026-10-06 and the risk assessment performed for Meu Padrinho. The Definition of Done for this task (selected source, rejected alternatives, polling approach, and limitations) is addressed in full below.
+APiBR is the single primary data source for the MVP. Source selection,
+alternatives, polling approach, and limitations are defined below.
 
 ## Selected Source: APiBR
 
@@ -24,7 +25,9 @@ APiBR (https://apibr.com) was selected as the single primary job data source for
 ## Rejected Alternatives
 
 ### Gupy
-Previously considered as the primary source. During the team meeting on 2026-10-06, multiple team members encountered an HTTP error when attempting to access the Gupy endpoint. The exact cause and status code could not be confirmed. It was hypothesized that this could be related to anomalous traffic detection on Gupy's side, but this has not been confirmed and should not be treated as established fact. Given the uncertainty around endpoint availability and the risk of losing access after implementation, Gupy was ruled out as the primary source.
+Rejected as the primary source because endpoint availability is uncertain.
+The access error's cause and status code are unconfirmed; anomalous traffic
+detection must not be treated as established fact.
 
 ### Meu Padrinho
 Considered due to a higher reported job volume (~27,600 total postings), but rejected due to:

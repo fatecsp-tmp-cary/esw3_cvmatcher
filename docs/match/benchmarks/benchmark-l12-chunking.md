@@ -129,7 +129,7 @@ nDCG@10 per resume:
 
 ### Resources (backend resume, 100 jobs, median of 3 runs, AC power)
 
-Measured with the earlier single-resume version of the script; load and memory do not depend on the
+Single-resume measurements; load and memory do not depend on the
 resume. Not repeated for the other resumes.
 
 | | L12 | e5-small |
