@@ -16,7 +16,7 @@ preferences
 ```
 
 The `Job` fields are defined in the [architecture overview](../../docs/architecture/overview.md).
-`platform + source_job_id` is intended to be unique source identity, not
+`platform + source_job_id` is unique source identity, not
 deduplication. Embedding model/version and ranking algorithm version are
 configuration/metadata, not `Job` fields. `source_expires_at` is an explicit
 source expiration; absence does not imply expiration. `raw` retention follows
@@ -33,7 +33,10 @@ APiBR (see [ADR-002](../../docs/architecture/decisions/ADR-002-apibr-mvp-source.
 
 Normalize raw job data through source parsing, HTML/whitespace/Unicode cleanup,
 section detection, skill/keyword extraction, alias normalization, requirement
-classification, then canonical Job. Requirement classes are `REQUIRED`,
+classification, then canonical Job. Strip HTML while preserving heading,
+paragraph, table-cell and list boundaries in descriptions. Normalize Unicode
+to NFC and whitespace within each line; other display text collapses whitespace.
+Keep `raw` null until retention rights are established. Requirement classes are `REQUIRED`,
 `PREFERRED`, and `NICE_TO_HAVE`; detected skills must not automatically be
 assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
 matching, and section detection are proposed. PostgreSQL FTS handles DB-level
@@ -53,6 +56,7 @@ complete snapshot; incremental absence and failed polls do not change status.
 `STALE→EXPIRED` uses configured consecutive missing snapshots and/or maximum
 stale duration; either configured condition may expire a job. Reliable explicit
 `source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.
+`EXPIRED` is terminal even if a source later reopens the record.
 Retain expired records; physical deletion is out of MVP.
 
 `last_seen_at` tracks successful observation; `last_verified_at` tracks

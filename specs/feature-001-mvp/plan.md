@@ -1,36 +1,26 @@
 # MVP implementation plan
 
-This is the proposed sequence, not a claim that work is complete. Reorder only
-with an explicit rationale and synchronized task/document updates.
+The product implementation sequence remains source evidence → canonical data →
+normalization/ingestion/lifecycle → indexes → matching → API wiring → operations.
+Source completeness remains unresolved; absence-based lifecycle changes
+require proof of a complete scan.
 
-1. Verify APiBR pagination and scan behavior, documenting whether a completed
-   scan proves a complete covered set. Until established, do not use absence to
-   mark jobs `STALE`; implement only lifecycle behavior supported by explicit
-   source evidence.
-2. Core domain: Job, DB schema/migrations, lifecycle, hashing. Resolve the
-   source identity constraint and null/duplicate ID handling first.
-3. Candidate validation, normalization, and taxonomy.
-4. Ingestion interface, polling modes, APiBR source, normalization, source runs,
-   and upsert.
-5. Lifecycle timestamps, stale/expired/reactivation, failure protection,
-   snapshot semantics, explicit expiration. Absence-based `STALE` transitions
-   depend on the verification outcome in step 1.
-6. Additional API/ATS adapters and optional web adapters; retain no-dedup rule.
-7. PostgreSQL FTS, local embeddings, pgvector, and regeneration.
-8. Filters, textual/semantic retrieval, structured scoring, ranking,
-   normalization, and versioning; no geographic filtering.
-9. Matches API, health, OpenAPI, errors, production authentication. Preserve
-   the [confirmed public contract](acceptance.md#resolved-api-contract) when
-   consolidating API branches: implemented preview matching sections with dates,
-   `limit`, and the #40
-   job identity, eligibility, detail arrays, score, and version metadata.
-10. Quality suite, regression dataset, model-version migration, no-dedup and
-   no-geographic-filtering regressions.
-11. Docker/production configuration, secrets, backups, deployment, scheduling,
-   and monitoring.
+1. Verify APiBR payload/scan/usage evidence (#113/#132/#134); keep scans incomplete
+   until proven. Implement the shared interface and bounded retries (#133/#135).
+2. Canonical persistence and source identity, hashing, source-specific upsert,
+   and conservative partial-safe ingestion. Concurrent upsert
+   and source locking remain #136/#142; scheduling remains #143.
+3. Shared taxonomy persistence, seed and classified requirements (#137/#138).
+   Preserve description sections and unknown extraction semantics.
+4. Define weighted Portuguese FTS, then implement its index and queries. Keep raw
+   rank distinct from final compatibility scores; evaluate English/accents #147.
+5. Category aliases, public response validation, and bounded
+   preview-to-profile adaptation.
+6. Complete model/version metadata, vectors, retrieval and scoring (#26/#118–#120),
+   model-change reprocessing (#141), and empty-evidence behavior (#152).
+7. Wire the production API (#121), authentication/privacy (#122), background work
+   (#123/#144/#153), lifecycle policies (#117/#145/#146), packaging/operations
+   (#124/#148–#151), and release regressions (#125). Keep #99 open.
 
-Resolve the dependent questions in [acceptance](acceptance.md) before building
-the relevant source/lifecycle, schema, API-contract, or taxonomy behavior. The
-APiBR verification in step 1 addresses clarification 1; record its evidence and
-outcome in the source-selection record and update the acceptance criteria and
-ADR if the decision changes the architecture.
+Current implementation status is in [tasks](tasks.md); requirements
+and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).
