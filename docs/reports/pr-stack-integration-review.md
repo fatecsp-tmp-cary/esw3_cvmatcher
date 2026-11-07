@@ -64,3 +64,4 @@ status is [tasks](../../specs/feature-001-mvp/tasks.md).
 ## Verification by layer
 
 - PR #101: 172 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.
+- PR #104: 175 unit/API tests passed; repository lint/format passed. PostgreSQL execution is pending the separate validation route.

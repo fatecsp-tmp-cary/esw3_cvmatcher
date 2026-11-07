@@ -1,6 +1,6 @@
 # MVP task status
 
-This branch includes the linear stack through PR #101. PR #130 is the
+This branch includes the linear stack through PR #104. PR #130 is the
 unchanged foundation at `d305975`; later PRs in the stack are not implemented
 on this branch. Requirements and completion gates are in [spec](spec.md),
 [acceptance](acceptance.md), and the
@@ -10,10 +10,10 @@ on this branch. Requirements and completion gates are in [spec](spec.md),
 
 - #130: Shared production/mock preview request and ranked response, OpenAPI, limit, health and privacy-safe RFC 9457 errors.
 - #101: Canonical job correction, source identity and four lifecycle states; section-preserving HTML cleanup. Raw remains null.
+- #104: Deterministic normalized content hashing.
 
 ## Later stack layers
 
-- [ ] #104: Deterministic normalized content hashing.
 - [ ] #105: Source-specific upsert, content/vector invalidation and stale rediscovery; PostgreSQL persistence tests. Concurrent safety is pending.
 - [ ] #106: Sequential incomplete APiBR scans, unknown availability without GitHub requests, isolated malformed records, PARTIAL/FAILED run evidence and PostgreSQL regressions.
 - [ ] #107: Portuguese weighted any-term FTS field/query/normalization decisions. Runtime/index implementation belongs to #109.
