@@ -20,7 +20,9 @@ def test_search_uses_portuguese_fts_and_active_jobs():
 
     sql = str(session.statement.compile(dialect=postgresql.dialect()))
     assert "'portuguese'::regconfig" in sql
-    assert "websearch_to_tsquery" in sql
+    assert "plainto_tsquery" in sql
+    assert "setweight" in sql
+    assert "concat_ws" not in sql
     assert "job_requirements" in sql
     assert "jobs.status =" in sql
     assert "ORDER BY" in sql

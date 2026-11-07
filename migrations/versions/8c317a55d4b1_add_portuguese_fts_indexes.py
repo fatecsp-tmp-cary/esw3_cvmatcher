@@ -24,9 +24,12 @@ def upgrade() -> None:
         "jobs",
         [
             sa.text(
-                "to_tsvector('portuguese'::regconfig, "
-                "concat_ws(' ', title, company, description, keywords::text, "
-                "skills::text, location::text))"
+                "(setweight(to_tsvector('portuguese'::regconfig, "
+                "coalesce(title, '') || ' ' || coalesce(skills::text, '')), 'A') || "
+                "setweight(to_tsvector('portuguese'::regconfig, "
+                "coalesce(company, '') || ' ' || coalesce(keywords::text, '')), 'B') || "
+                "setweight(to_tsvector('portuguese'::regconfig, "
+                "coalesce(description, '') || ' ' || coalesce(location::text, '')), 'D'))"
             )
         ],
         postgresql_using="gin",
