@@ -1,0 +1,1 @@
+"""Candidate-side normalization helpers."""
