@@ -1,6 +1,6 @@
 # MVP task status
 
-This branch includes the linear stack through PR #108. PR #130 is the
+This branch includes the linear stack through PR #109. PR #130 is the
 unchanged foundation at `d305975`; later PRs in the stack are not implemented
 on this branch. Requirements and completion gates are in [spec](spec.md),
 [acceptance](acceptance.md), and the
@@ -15,10 +15,10 @@ on this branch. Requirements and completion gates are in [spec](spec.md),
 - #106: Sequential incomplete APiBR scans, unknown availability without GitHub requests, isolated malformed records, PARTIAL/FAILED run evidence and PostgreSQL regressions.
 - #107: Portuguese weighted any-term FTS field/query/normalization decisions. Runtime/index implementation belongs to #109.
 - #108: Skill taxonomy, job-skill and classified requirement persistence; population/extraction remain pending.
+- #109: Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
 
 ## Later stack layers
 
-- [ ] #109: Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
 - [ ] #110: Domain-enum seniority/mode aliases; missing/unknown values yield no category. Other categories remain text.
 - [ ] #111: Ranked response validation tests on the inherited #130 contract; no incompatible endpoint, offset or DTO is reintroduced.
 - [ ] #112: Public collection caps and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
