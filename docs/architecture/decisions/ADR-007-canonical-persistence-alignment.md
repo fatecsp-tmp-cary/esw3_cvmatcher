@@ -5,15 +5,14 @@
 
 ## Context
 
-PR #101 adds the missing canonical columns and lifecycle states through a
-corrective migration. #130 still records source identity and the extra SQL
-`source_id` column as unresolved. Rewriting the initial migration would discard
-the schema history already present on main.
+Canonical Job fields and lifecycle states must be consistent across domain
+and persistence. Source identity is distinct from adapter configuration;
+schema corrections must support existing databases.
 
 ## Decision
 
-The user approved retaining PR #101's unique `(platform, source_job_id)`
-identity and rejection of missing/blank IDs. The surrogate `id` identifies the
+Enforce unique `(platform, source_job_id)`
+identity and reject missing/blank IDs. The surrogate `id` identifies the
 persisted job; `source_id` remains SQL-only adapter/polling metadata referencing
 `job_sources`, outside canonical Job data and API responses. Other additional
 persisted state stays in separate structures under the existing invariant.
@@ -21,15 +20,16 @@ persisted state stays in separate structures under the existing invariant.
 Preserve the original migration and apply corrective migrations for canonical
 columns, the four-state lifecycle, source-run evidence and skill/requirement
 structures. Keep the explicit unique identity constraint. Retain expired
-records. The user reaffirmed that `EXPIRED` is terminal; only `STALE` can
+records. `EXPIRED` is terminal; only `STALE` can
 reactivate from confirmed rediscovery, within the existing transition graph.
 
 ## Alternatives considered
 
 Rewrite the initial migration, identify jobs solely by the adapter configuration,
-or include adapter configuration in the canonical Job. These would obscure
-history or conflate independent domain and operational identities. Allowing
-`EXPIRED → ACTIVE` would change the approved lifecycle and was declined.
+or include adapter configuration in the canonical Job. These would break upgrades for existing databases or conflate
+independent
+domain and operational identities. Allowing `EXPIRED → ACTIVE` would violate
+the terminal lifecycle state.
 
 ## Rationale and consequences
 

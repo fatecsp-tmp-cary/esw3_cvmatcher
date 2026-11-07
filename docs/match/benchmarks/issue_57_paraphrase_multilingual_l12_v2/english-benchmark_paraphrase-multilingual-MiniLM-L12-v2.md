@@ -3,7 +3,7 @@
 **Related issue:** [TASK] Evaluate a local PT/EN embedding model #25
 **Subtask:** #57 — Benchmark sentence-transformers paraphrase-multilingual-MiniLM-L12-v2
 **Project context:** CV-Match — resume × job matching API using text search + semantic similarity
-**Script:** `scripts/benchmarks/embedding_benchmark.py` (PR #81), the same one used in tasks #56 and #57
+**Script:** `scripts/benchmarks/embedding_benchmark.py`, the same one used in tasks #56 and #57
 **Input:** `embedding_benchmark_input.json` — 1 fictional resume + 100 jobs in Portuguese
 
 ## Test environment
@@ -152,7 +152,7 @@ The two e5 models have a 512-token limit; the mpnet keeps 128 and does not avoid
 | `intfloat/multilingual-e5-base` | 512 | Medium weight |
 | `sentence-transformers/paraphrase-multilingual-mpnet-base-v2` | 128 | Heavier than MiniLM |
 
-**On quality (not only token limit):** `multilingual-e5-small` has the same size (118M parameters, 384 dimensions) and a 512-token limit, and requires prefixing texts with `"query: "` / `"passage: "`, a particularity of its training. It was **not measured in this report**, but it was measured in the multi-resume benchmark of PR #87 (`docs/match/benchmarks/benchmark-l12-chunking.md`: 5 fictional resumes, 100 jobs, human gabarito, chunking and pgvector). There, the mean nDCG@10 with the mean of the top 3 chunks was 0.698 for `multilingual-e5-small` against 0.634 for L12, and the whole resume without chunking scored 0.621 against 0.629 (truncated). With only 5 resumes, differences below about 0.05 are not reliable, so the two models are close and e5-small does not lose quality here.
+**On quality (not only token limit):** `multilingual-e5-small` has the same size (118M parameters, 384 dimensions) and a 512-token limit, and requires prefixing texts with `"query: "` / `"passage: "`, a particularity of its training. It was **not measured in this report**, but it was measured in the multi-resume benchmark (`docs/match/benchmarks/benchmark-l12-chunking.md`: 5 fictional resumes, 100 jobs, human gabarito, chunking and pgvector). There, the mean nDCG@10 with the mean of the top 3 chunks was 0.698 for `multilingual-e5-small` against 0.634 for L12, and the whole resume without chunking scored 0.621 against 0.629 (truncated). With only 5 resumes, differences below about 0.05 are not reliable, so the two models are close and e5-small does not lose quality here.
 
 **Recommendation:** the comparison with `multilingual-e5-small` suggested here was done in #87; the final model decision belongs to #26. For L12 alone, chunking is mandatory for real resumes (see the finding above).
 
@@ -165,9 +165,9 @@ The model `paraphrase-multilingual-MiniLM-L12-v2`:
 - ⚠️ Uses ~434 MB of additional RAM (peak of ~926 MB) on this machine — about half of what was measured in the previous benchmark (~825-939 MB), a difference whose cause has not been investigated; a point of attention for deployment on a low-memory free tier
 - ⚠️ The 128-token limit requires chunking for real resumes, and chunking changed half of the top 10 in this test — it is not an optional detail
 - ⚠️ Only 1 resume and no ground truth: the ranking results are indicative, not conclusive
-- `intfloat/multilingual-e5-small` was compared in PR #87 (512-token limit, same weight, mean nDCG@10 0.698 against 0.634 for L12 with chunking); the final decision is up to #26
+- `intfloat/multilingual-e5-small` was compared in the multi-resume benchmark (512-token limit, same weight, mean nDCG@10 0.698 against 0.634 for L12 with chunking); the final decision is up to #26
 
-**Reference with the model from #56 (data from PR #81, measured by the author on another machine, Linux, not redone here):**
+**Reference with the model from #56 (data from the L6 benchmark report, measured on another machine, Linux, not redone here):**
 
 - `all-MiniLM-L6-v2`: PT↔EN gap of 0.1593 (vs. 0.8226 for L12), meaning it does not relate PT sentences to their EN equivalents well
 - 256-token limit (470-token resume in 2 chunks), vs. 128 for L12 (366 tokens in 4 chunks)
@@ -176,6 +176,6 @@ The model `paraphrase-multilingual-MiniLM-L12-v2`:
 
 ## Files used
 
-- `scripts/benchmarks/embedding_benchmark.py` — shared script (PR #81)
-- `embedding_benchmark_input.json` — shared input (1 resume + 100 jobs; PR #81)
+- `scripts/benchmarks/embedding_benchmark.py` — shared script
+- `embedding_benchmark_input.json` — shared input (1 resume + 100 jobs)
 - `resultado_l12.json` — raw result of this run
