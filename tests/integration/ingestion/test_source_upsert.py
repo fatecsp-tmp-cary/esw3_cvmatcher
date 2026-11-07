@@ -1,29 +1,24 @@
 from datetime import UTC, datetime
 
 import pytest
-from sqlalchemy import create_engine, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.ingestion.upsert import upsert_job
-from src.persistence.base import Base
 from src.persistence.job.job import Job
 from src.persistence.job.job_source import JobSource
 
 
 @pytest.fixture
-def session():
-    engine = create_engine("sqlite://")
-    Base.metadata.create_all(engine)
-    with Session(engine) as db:
-        db.add_all(
-            [
-                JobSource(name="APiBR", type="api", polling_mode="sequential"),
-                JobSource(name="Other", type="api", polling_mode="sequential"),
-            ]
-        )
-        db.commit()
-        yield db
-    engine.dispose()
+def session(db_session):
+    db_session.add_all(
+        [
+            JobSource(id=1, name="APiBR", type="api", polling_mode="INCREMENTAL"),
+            JobSource(id=2, name="Other", type="api", polling_mode="INCREMENTAL"),
+        ]
+    )
+    db_session.commit()
+    return db_session
 
 
 def _job(platform: str = "apibr", *, title: str = "Data engineer") -> dict:
