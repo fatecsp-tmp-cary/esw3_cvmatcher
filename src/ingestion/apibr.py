@@ -9,11 +9,11 @@ from typing import Any, Protocol
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session
 
 from src.ingestion.upsert import upsert_job
 from src.normalization.jobs.apibr import normalize_apibr_job
-from src.normalization.jobs.apibr_status import check_apibr_job_status
 from src.persistence.job.job_source import JobSource
 from src.persistence.job.source_run import SourceRun
 
@@ -24,14 +24,14 @@ _MAX_PAGES = 1000
 
 
 class IssuePageClient(Protocol):
-    def fetch_page(self, page: int) -> list[dict[str, Any]]:
+    def fetch_page(self, page: int) -> list[Any]:
         """Return one APiBR issues page or raise when the response is invalid."""
 
 
 class APiBRClient:
     """Read APiBR issue pages one at a time until the first empty page."""
 
-    def fetch_page(self, page: int) -> list[dict[str, Any]]:
+    def fetch_page(self, page: int) -> list[Any]:
         query = urlencode({"per_page": _PAGE_SIZE, "page": page, "includeBody": "true"})
         request = Request(
             f"{_APIBR_ISSUES_URL}?{query}",
@@ -40,12 +40,12 @@ class APiBRClient:
         with urlopen(request, timeout=_REQUEST_TIMEOUT_SECONDS) as response:
             payload = json.loads(response.read())
 
-        if not isinstance(payload, list) or any(not isinstance(item, dict) for item in payload):
+        if not isinstance(payload, list):
             raise ValueError("APiBR returned an invalid issues page")
         return payload
 
 
-def iter_apibr_issues(client: IssuePageClient) -> Iterator[dict[str, Any]]:
+def iter_apibr_issues(client: IssuePageClient) -> Iterator[Any]:
     """Yield pages sequentially; the observed end does not prove completeness."""
     for page in range(1, _MAX_PAGES + 1):
         issues = client.fetch_page(page)
@@ -66,19 +66,12 @@ class APiBRRunResult:
     jobs_unchanged: int
     jobs_expired: int
     jobs_reactivated: int
+    jobs_rejected: int
 
 
-def _normalize_issue(raw: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+def _normalize_issue(raw: Any) -> tuple[dict[str, Any], bool]:
     job = normalize_apibr_job(raw)
-    state = raw.get("state")
-    if isinstance(state, str) and state in {"open", "closed"}:
-        return job, True
-
-    verified_status = check_apibr_job_status(job.get("job_url"))
-    if verified_status is None:
-        return job, False
-    job["status"] = verified_status.value
-    return job, True
+    return job, raw.get("state") in ("open", "closed")
 
 
 def ingest_apibr(
@@ -88,12 +81,12 @@ def ingest_apibr(
     *,
     started_at: datetime | None = None,
 ) -> APiBRRunResult:
-    """Poll APiBR and atomically persist jobs and the corresponding run record.
+    """Persist valid records, rejecting malformed jobs in isolated savepoints.
 
     The scan is always recorded as incomplete because the source scan has not
     been proven complete. Therefore it never marks absent jobs STALE. Polling
-    failures roll back all job updates and persist a failed run with only the
-    exception type, not potentially sensitive response text.
+    failures roll back all job updates. Rejected records produce a PARTIAL run;
+    errors contain counts or exception types, never source response text.
     """
     source = session.get(JobSource, source_id)
     if source is None:
@@ -120,18 +113,21 @@ def ingest_apibr(
         "unchanged": 0,
         "expired": 0,
         "reactivated": 0,
+        "rejected": 0,
     }
     try:
         for raw_issue in iter_apibr_issues(client):
-            normalized, verified = _normalize_issue(raw_issue)
             counts["found"] += 1
-            outcome, expired, reactivated = upsert_job(
-                session,
-                source_id,
-                normalized,
-                datetime.now(UTC),
-                verified,
-            )
+            try:
+                with session.begin_nested():
+                    normalized, verified = _normalize_issue(raw_issue)
+                    outcome, expired, reactivated = upsert_job(
+                        session, source_id, normalized, datetime.now(UTC), verified
+                    )
+                    session.flush()
+            except (ValueError, DataError, IntegrityError):
+                counts["rejected"] += 1
+                continue
             counts[outcome] += 1
             counts["expired"] += int(expired)
             counts["reactivated"] += int(reactivated)
@@ -139,7 +135,8 @@ def ingest_apibr(
         finished_at = datetime.now(UTC)
         run = session.get(SourceRun, run_id)
         source = session.get(JobSource, source_id)
-        run.status = "SUCCEEDED"
+        status = "PARTIAL" if counts["rejected"] else "SUCCEEDED"
+        run.status = status
         run.finished_at = finished_at
         run.duration_ms = int((time.perf_counter() - timer_started) * 1000)
         run.jobs_found = counts["found"]
@@ -148,11 +145,14 @@ def ingest_apibr(
         run.jobs_unchanged = counts["unchanged"]
         run.jobs_expired = counts["expired"]
         run.jobs_reactivated = counts["reactivated"]
+        run.jobs_rejected = counts["rejected"]
+        run.errors = f"RejectedRecords:{counts['rejected']}" if counts["rejected"] else None
         run.jobs_absent = 0
         run.jobs_marked_stale = 0
         source.last_run_at = started_at
-        source.last_success_at = finished_at
-        source.last_error = None
+        if status == "SUCCEEDED":
+            source.last_success_at = finished_at
+        source.last_error = run.errors
         session.commit()
     except Exception as error:
         session.rollback()
@@ -169,6 +169,7 @@ def ingest_apibr(
             run.jobs_unchanged = 0
             run.jobs_expired = 0
             run.jobs_reactivated = 0
+            run.jobs_rejected = counts["rejected"]
             run.errors = type(error).__name__
         if source is not None:
             source.last_run_at = started_at
@@ -178,7 +179,7 @@ def ingest_apibr(
 
     return APiBRRunResult(
         run_id=run_id,
-        status="SUCCEEDED",
+        status=status,
         snapshot_complete=False,
         jobs_found=counts["found"],
         jobs_created=counts["created"],
@@ -186,4 +187,5 @@ def ingest_apibr(
         jobs_unchanged=counts["unchanged"],
         jobs_expired=counts["expired"],
         jobs_reactivated=counts["reactivated"],
+        jobs_rejected=counts["rejected"],
     )

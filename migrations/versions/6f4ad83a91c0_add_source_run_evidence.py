@@ -1,7 +1,7 @@
 """Add lifecycle and execution evidence to source runs.
 
 Revision ID: 6f4ad83a91c0
-Revises: 4d6249817e17
+Revises: 8b91c7a2d4e6
 Create Date: 2026-10-27 00:00:00.000000
 """
 
@@ -71,9 +71,15 @@ def upgrade() -> None:
         ),
     )
 
+    op.add_column(
+        "source_runs",
+        sa.Column("jobs_rejected", sa.Integer(), nullable=False, server_default=sa.text("0")),
+    )
+
 
 def downgrade() -> None:
     """Remove the additional source-run evidence."""
+    op.drop_column("source_runs", "jobs_rejected")
     op.drop_column("source_runs", "jobs_reactivated")
     op.drop_column("source_runs", "jobs_expired")
     op.drop_column("source_runs", "jobs_marked_stale")
