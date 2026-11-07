@@ -6,14 +6,12 @@
 
 ## Context
 
-PR #109's uniform-weight document lets description text dominate, and its
-websearch query requires every candidate term. Its `concat_ws` functional index
-also fails PostgreSQL's immutability requirement. PR #107 lacks explicit
-normalization assumptions.
+Uniform weights let description text dominate, while all-term queries reduce
+recall for multi-skill profiles. Functional indexes require immutable expressions
+and consistent document/query normalization.
 
 ## Decision
 
-The user selected Portuguese stemming, weighted fields, and any-term retrieval.
 Use the same `portuguese` configuration for documents and plain-text queries.
 Convert the escaped lexemes from `plainto_tsquery` to an OR query, retaining
 stop-word handling and treating user operators/quotes as ordinary text.

@@ -28,8 +28,8 @@ eligibility.
 
 ## Rationale
 
-The user selected Portuguese stemming as the initial priority. The source
-dataset is Brazilian, and semantic retrieval is separately deferred until the
+Portuguese stemming is the initial priority because the source dataset is
+Brazilian, and semantic retrieval is separately deferred until the
 model selection in issue #26.
 
 ## Consequences
