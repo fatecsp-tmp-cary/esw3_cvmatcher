@@ -8,10 +8,10 @@ Requirements and completion gates are in [spec](spec.md),
 
 - Shared production/mock preview request and ranked response, OpenAPI, limit, health and privacy-safe RFC 9457 errors.
 - Canonical job correction, source identity and four lifecycle states; section-preserving HTML cleanup. Raw remains null.
+- Deterministic normalized content hashing.
 
 ## Pending components
 
-- [ ] Deterministic normalized content hashing.
 - [ ] Source-specific upsert, content/vector invalidation and stale rediscovery; PostgreSQL persistence tests. Concurrent safety is pending.
 - [ ] Sequential incomplete APiBR scans, unknown availability without GitHub requests, isolated malformed records, PARTIAL/FAILED run evidence and PostgreSQL regressions.
 - [ ] Portuguese weighted any-term FTS field/query/normalization decisions.
