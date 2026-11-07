@@ -123,3 +123,16 @@ def test_html_without_text_cannot_supply_a_required_title(empty_html):
     assert normalize_text(empty_html, preserve_sections=True) is None
     with pytest.raises(ValueError, match="required title"):
         normalize_apibr_job({"id": 123, "title": empty_html})
+
+
+@pytest.mark.parametrize(
+    "invalid_fields",
+    [
+        {"html_url": {"bad": "url"}},
+        {"url": ["invalid"]},
+        {"created_at": "0001-01-01T00:00:00+01:00"},
+    ],
+)
+def test_malformed_fields_raise_record_validation_errors(invalid_fields):
+    with pytest.raises(ValueError, match="APiBR issue has an invalid"):
+        normalize_apibr_job({"id": 2, "title": "Developer", **invalid_fields})

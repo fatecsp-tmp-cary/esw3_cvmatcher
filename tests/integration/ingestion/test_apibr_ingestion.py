@@ -231,6 +231,8 @@ def test_missing_state_preserves_existing_availability_and_verification(session)
         {"id": 2, "title": ""},
         {"id": 2, "title": "Developer", "created_at": "private-invalid-date"},
         {"id": "x" * 256, "title": "Developer"},
+        {"id": 2, "title": "Developer", "html_url": {"bad": "url"}},
+        {"id": 2, "title": "Developer", "created_at": "0001-01-01T00:00:00+01:00"},
     ],
 )
 def test_bad_record_does_not_rollback_valid_jobs(session, bad_record):

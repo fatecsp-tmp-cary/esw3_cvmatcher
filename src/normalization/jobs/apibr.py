@@ -82,12 +82,11 @@ def _normalize_publication_date(value: Any) -> datetime | None:
 
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=UTC)
+        return parsed.astimezone(UTC)
+    except (ValueError, OverflowError):
         raise ValueError("APiBR issue has an invalid created_at timestamp") from None
-
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=UTC)
-    return parsed.astimezone(UTC)
 
 
 def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
@@ -106,6 +105,10 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
     if title is None:
         raise ValueError("APiBR issue is missing its required title")
 
+    job_url = raw_job.get("html_url") or raw_job.get("url")
+    if job_url is not None and not isinstance(job_url, str):
+        raise ValueError("APiBR issue has an invalid job URL")
+
     keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
 
     return {
@@ -122,7 +125,7 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         "seniority_level": None,
         "salary": None,
         "currency": None,
-        "job_url": raw_job.get("html_url") or raw_job.get("url"),
+        "job_url": job_url,
         "publication_date": _normalize_publication_date(raw_job.get("created_at")),
         # APiBR aggregates GitHub issues; a closed issue is no longer an
         # available job even if it remains present in the scan.
