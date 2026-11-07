@@ -1,4 +1,4 @@
-"""CandidateProfile request schema (#39)."""
+"""Internal candidate representation aligned with the public curriculum projection."""
 
 import pytest
 from pydantic import ValidationError
@@ -36,7 +36,7 @@ FULL_PROFILE = {
     "preferences": {"employment_types": ["full-time"], "modes": ["remote", "hybrid"]},
 }
 
-# Smallest valid profile: skills plus role context.
+# A representative minimal nonempty profile.
 BASE = {"skills": ["Python"], "job_titles": ["Developer"]}
 
 
@@ -86,11 +86,8 @@ def test_documented_example_is_valid() -> None:
         {"skills": [], "job_titles": ["Developer"]},
     ],
 )
-def test_profile_without_skills_is_rejected(payload: dict) -> None:
-    with pytest.raises(ValidationError) as exc:
-        CandidateProfile.model_validate(payload)
-
-    assert ("skills",) in error_locs(exc)
+def test_profile_without_skills_is_accepted(payload: dict) -> None:
+    assert CandidateProfile.model_validate(payload).skills == []
 
 
 @pytest.mark.parametrize(
@@ -101,11 +98,8 @@ def test_profile_without_skills_is_rejected(payload: dict) -> None:
         {"skills": ["Python"], "occupations": ["Accountant"], "education": [{"degree": "BSc"}]},
     ],
 )
-def test_profile_without_role_context_is_rejected(payload: dict) -> None:
-    with pytest.raises(ValidationError) as exc:
-        CandidateProfile.model_validate(payload)
-
-    assert error_locs(exc) == {()}
+def test_profile_without_role_context_is_accepted(payload: dict) -> None:
+    CandidateProfile.model_validate(payload)
 
 
 @pytest.mark.parametrize(
@@ -114,7 +108,6 @@ def test_profile_without_role_context_is_rejected(payload: dict) -> None:
         ({"skills": "Python"}, ("skills",)),
         ({"skills": [""]}, ("skills", 0)),
         ({"skills": ["   "]}, ("skills", 0)),
-        ({"skills": ["x" * 201]}, ("skills", 0)),
         ({"skills": ["Python"] * 201}, ("skills",)),
         ({"years_experience": -1}, ("years_experience",)),
         ({"years_experience": "many"}, ("years_experience",)),

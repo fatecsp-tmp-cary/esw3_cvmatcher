@@ -1,6 +1,6 @@
 # MVP task status
 
-This branch includes the linear stack through PR #111. PR #130 is the
+This branch includes the linear stack through PR #112. PR #130 is the
 unchanged foundation at `d305975`; later PRs in the stack are not implemented
 on this branch. Requirements and completion gates are in [spec](spec.md),
 [acceptance](acceptance.md), and the
@@ -18,10 +18,7 @@ on this branch. Requirements and completion gates are in [spec](spec.md),
 - #109: Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
 - #110: Domain-enum seniority/mode aliases; missing/unknown values yield no category. Other categories remain text.
 - #111: Ranked response validation tests on the inherited #130 contract; no incompatible endpoint, offset or DTO is reintroduced.
-
-## Later stack layers
-
-- [ ] #112: Public collection caps and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
+- #112: Public collection caps and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
 
 ## Remaining MVP work
 

@@ -5,7 +5,7 @@ to this matching representation. Never persist or log candidate data.
 
 Categorical values (seniority, proficiency, modes, employment types) arrive as free text;
 mapping them to canonical values belongs to candidate normalization, not to this schema.
-Their canonical values are defined once the job data is available (#83).
+Seniority and mode aliases map to shared domain enums; other categories remain text.
 """
 
 from datetime import date
@@ -13,9 +13,8 @@ from typing import Annotated, Self
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
-# Bounds keep a single request from carrying an unbounded amount of text.
-ShortText = Annotated[str, Field(min_length=1, max_length=200)]
-LongText = Annotated[str, Field(min_length=1, max_length=5000)]
+# Public validation owns text bounds. Adapted values must not face stricter limits.
+NonemptyText = Annotated[str, Field(min_length=1)]
 
 
 def _is_calendar_day(value: str) -> str:
@@ -47,10 +46,10 @@ def _check_period(start: str | None, end: str | None) -> None:
 
 
 class Experience(_Schema):
-    title: ShortText
-    company: ShortText | None = None
-    description: str | None = Field(default=None, max_length=1000)
-    skills: list[ShortText] = Field(default_factory=list, max_length=100)
+    title: NonemptyText
+    company: NonemptyText | None = None
+    description: NonemptyText | None = None
+    skills: list[NonemptyText] = Field(default_factory=list, max_length=100)
     start_date: PartialDate | None = None
     end_date: PartialDate | None = Field(default=None, description="Omitted for a current role.")
 
@@ -61,13 +60,13 @@ class Experience(_Schema):
 
 
 class Education(_Schema):
-    institution: ShortText | None = None
-    degree: ShortText | None = Field(default=None, examples=["Bachelor"])
-    field_of_study: ShortText | None = Field(default=None, examples=["Computer Science"])
-    status: ShortText | None = None
+    institution: NonemptyText | None = None
+    degree: NonemptyText | None = Field(default=None, examples=["Bachelor"])
+    field_of_study: NonemptyText | None = Field(default=None, examples=["Computer Science"])
+    level: NonemptyText | None = None
+    status: NonemptyText | None = None
     start_date: PartialDate | None = None
     end_date: PartialDate | None = None
-    expected_completion: PartialDate | None = None
 
     @model_validator(mode="after")
     def _has_content_and_ordered_period(self) -> Self:
@@ -78,56 +77,51 @@ class Education(_Schema):
 
 
 class Certification(_Schema):
-    name: ShortText
-    issuer: ShortText | None = None
+    name: NonemptyText
+    issuer: NonemptyText | None = None
 
 
 class Language(_Schema):
-    name: ShortText = Field(examples=["English"])
-    proficiency: ShortText | None = Field(default=None, examples=["advanced"])
+    name: NonemptyText = Field(examples=["English"])
+    proficiency: NonemptyText | None = Field(default=None, examples=["advanced"])
 
 
 class CandidateCompetency(_Schema):
-    name: ShortText
-    level: ShortText
+    name: NonemptyText
+    level: NonemptyText
 
 
 class CandidateProject(_Schema):
-    title: ShortText
-    technologies: list[str] = Field(default_factory=list)
-    description: str | None = Field(default=None, max_length=1000)
-
-
-class CandidateLocation(_Schema):
-    city: ShortText | None = None
-    state: ShortText | None = None
+    title: NonemptyText
+    technologies: NonemptyText
+    description: NonemptyText
 
 
 class Preferences(_Schema):
-    employment_types: list[ShortText] = Field(
+    employment_types: list[NonemptyText] = Field(
         default_factory=list, max_length=10, examples=[["full-time"]]
     )
-    modes: list[ShortText] = Field(default_factory=list, max_length=10, examples=[["remote"]])
+    modes: list[NonemptyText] = Field(default_factory=list, max_length=10, examples=[["remote"]])
 
 
 class CandidateProfile(_Schema):
     """Transient matching fields adapted from a complete curriculum request."""
 
-    skills: list[ShortText] = Field(min_length=1)
-    competencies: list[CandidateCompetency] = Field(default_factory=list)
-    job_titles: list[ShortText] = Field(default_factory=list)
-    occupations: list[ShortText] = Field(default_factory=list)
-    experience: list[Experience] = Field(default_factory=list)
-    education: list[Education] = Field(default_factory=list)
-    certifications: list[Certification] = Field(default_factory=list)
-    academic_projects: list[CandidateProject] = Field(default_factory=list)
-    languages: list[Language] = Field(default_factory=list)
-    locations: list[ShortText] = Field(
+    skills: list[NonemptyText] = Field(default_factory=list, max_length=200)
+    competencies: list[CandidateCompetency] = Field(default_factory=list, max_length=200)
+    job_titles: list[NonemptyText] = Field(default_factory=list, max_length=50)
+    occupations: list[NonemptyText] = Field(default_factory=list, max_length=50)
+    experience: list[Experience] = Field(default_factory=list, max_length=50)
+    education: list[Education] = Field(default_factory=list, max_length=20)
+    certifications: list[Certification] = Field(default_factory=list, max_length=50)
+    academic_projects: list[CandidateProject] = Field(default_factory=list, max_length=50)
+    languages: list[Language] = Field(default_factory=list, max_length=20)
+    locations: list[NonemptyText] = Field(
         default_factory=list,
+        max_length=20,
         description="Kept as matching data; never used for geographic eligibility.",
     )
-    personal_location: CandidateLocation | None = None
-    seniority: ShortText | None = Field(default=None, examples=["senior"])
+    seniority: NonemptyText | None = Field(default=None, examples=["senior"])
     years_experience: float | None = Field(default=None, ge=0, le=70)
     preferences: Preferences = Field(default_factory=Preferences)
 
@@ -156,9 +150,3 @@ class CandidateProfile(_Schema):
             ]
         }
     )
-
-    @model_validator(mode="after")
-    def _has_role_context(self) -> Self:
-        if not (self.job_titles or self.experience or self.education or self.academic_projects):
-            raise ValueError("profile needs role, education or project context")
-        return self

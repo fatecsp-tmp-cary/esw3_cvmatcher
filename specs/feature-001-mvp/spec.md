@@ -10,9 +10,9 @@ jobs through `POST /matches`. CV parsing is external. `GET /health` is optional.
 Candidate profile fields:
 
 ```text
-skills[], job_titles[], occupations[], experience[], education[],
-certifications[], languages[], locations[], seniority, years_experience,
-preferences
+skills[], competencies[], job_titles[], occupations[], experience[], education[],
+certifications[], academic_projects[], languages[], locations[], seniority,
+years_experience, preferences
 ```
 
 Candidate `seniority` text maps to the existing `SeniorityLevel` values:
@@ -119,7 +119,11 @@ The public API contract is documented in [acceptance](acceptance.md).
 `POST /matches` accepts the matching sections of the implemented Sistema
 Currículo preview: `curriculo_id`, `formacoes`, `experiencias`, `projetos`,
 `competencias`, and `idiomas`. All arrays are required and may be empty. Items
-have no IDs; only `curriculo_id` is a UUID. Education and experience use
+have no IDs; only `curriculo_id` is a UUID. Service collection caps are
+20 education entries, 50 experiences, 50 projects, 200 competencies and 20
+languages. Empty sections remain valid. The transient adapter preserves every
+matching section, education/competency level and source date without carrying
+the UUID, inventing evidence, or imposing stricter internal text limits. Education and experience use
 required `inicio` and nullable `fim` calendar dates. Education has a level and source status vocabulary;
 competency descriptions and language/competency levels are text. Project
 technologies are a string. Validation follows the source domain as specified
