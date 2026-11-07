@@ -13,7 +13,6 @@ CURRICULUM_EXAMPLE = {
     "curriculo_id": "550e8400-e29b-41d4-a716-446655440000",
     "formacoes": [
         {
-            "id": "550e8400-e29b-41d4-a716-446655440001",
             "instituicao": "FATEC-SP",
             "curso": "Análise e Desenvolvimento de Sistemas",
             "nivel": "tecnologo",
@@ -24,7 +23,6 @@ CURRICULUM_EXAMPLE = {
     ],
     "experiencias": [
         {
-            "id": "550e8400-e29b-41d4-a716-446655440002",
             "empresa": "Empresa de exemplo",
             "cargo": "Estagiário de Desenvolvimento",
             "descricao": "Desenvolvimento de APIs REST e manutenção de banco de dados relacional.",
@@ -34,7 +32,6 @@ CURRICULUM_EXAMPLE = {
     ],
     "projetos": [
         {
-            "id": "550e8400-e29b-41d4-a716-446655440003",
             "titulo": "Sistema de Apoio Profissional",
             "descricao": "Plataforma de currículos e busca de vagas.",
             "tecnologias": "Java, Clean Architecture, Docker",
@@ -42,12 +39,11 @@ CURRICULUM_EXAMPLE = {
     ],
     "competencias": [
         {
-            "id": "550e8400-e29b-41d4-a716-446655440004",
             "descricao": "Python",
             "nivel": "intermediario",
         }
     ],
-    "idiomas": [{"id": "550e8400-e29b-41d4-a716-446655440005", "idioma": "Inglês", "nivel": "B2"}],
+    "idiomas": [{"idioma": "Inglês", "nivel": "B2"}],
 }
 
 

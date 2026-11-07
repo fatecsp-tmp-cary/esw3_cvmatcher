@@ -106,7 +106,7 @@ def test_source_text_boundaries_and_controls(client, section, field, maximum) ->
         assert client.post("/matches", json=payload).status_code == 422
 
 
-@pytest.mark.parametrize("field", ["id", "inicio", "fim", "descricao"])
+@pytest.mark.parametrize("field", ["inicio", "fim", "descricao"])
 def test_experience_fields_are_required_like_the_preview(client, field) -> None:
     payload = deepcopy(SOURCE_PREVIEW)
     del payload["experiencias"][0][field]
@@ -130,10 +130,23 @@ def test_source_uuid_identifiers_are_not_limited_to_version_four(client) -> None
     assert client.post("/matches", json=payload).status_code == 200
 
 
-def test_invalid_item_uuid_does_not_echo_parser_details(client) -> None:
+def test_invalid_curriculum_uuid_does_not_echo_parser_details(client) -> None:
     payload = deepcopy(SOURCE_PREVIEW)
-    payload["experiencias"][0]["id"] = "private-candidate-item"
+    payload["curriculo_id"] = "private-candidate-item"
     response = client.post("/matches", json=payload)
     assert response.status_code == 422
     assert response.json()["errors"][0]["msg"] == ("Value error, identifier must be a valid UUID")
     assert "private-candidate-item" not in response.text
+
+
+@pytest.mark.parametrize(
+    "section", ["formacoes", "experiencias", "projetos", "competencias", "idiomas"]
+)
+def test_section_item_ids_are_not_part_of_the_cv_contract(client, section) -> None:
+    payload = deepcopy(SOURCE_PREVIEW)
+    assert all("id" not in item for item in payload[section])
+    assert client.post("/matches", json=payload).status_code == 200
+    payload[section][0]["id"] = "unnecessary-item-id"
+    response = client.post("/matches", json=payload)
+    assert response.status_code == 422
+    assert response.json()["errors"][0]["type"] == "extra_forbidden"

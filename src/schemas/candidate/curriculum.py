@@ -50,9 +50,8 @@ class _CurriculumModel(BaseModel):
 
 
 class _Period(_CurriculumModel):
-    """A source item identifier and chronological period; null end means ongoing."""
+    """A chronological period; null end means ongoing."""
 
-    id: CurriculumId
     inicio: date
     fim: date | None
 
@@ -90,7 +89,6 @@ class AcademicFormation(_Period):
 class Competency(_CurriculumModel):
     """Preview competency description and free-text proficiency."""
 
-    id: CurriculumId
     descricao: NonemptyText
     nivel: NonemptyText
 
@@ -98,7 +96,6 @@ class Competency(_CurriculumModel):
 class CurriculumLanguage(_CurriculumModel):
     """Preview language name and free-text proficiency."""
 
-    id: CurriculumId
     idioma: NonemptyText
     nivel: NonemptyText
 
@@ -114,14 +111,13 @@ class ProfessionalExperience(_Period):
 class AcademicProject(_CurriculumModel):
     """Source project texts, including technologies as a single string."""
 
-    id: CurriculumId
     titulo: ProjectTitle
     descricao: ProjectDescription
     tecnologias: ProjectTechnologies
 
 
 class CurriculumRequest(_CurriculumModel):
-    """Matching sections of the preview; all identifiers remain request-scoped."""
+    """Matching sections of the preview; the curriculum ID remains request-scoped."""
 
     curriculo_id: CurriculumId
     formacoes: list[AcademicFormation]

@@ -7,7 +7,7 @@ Status reflects the implementation in this branch.
 - FastAPI app factory, health endpoint, RFC-style errors, and the documented
   `POST /matches` request/response contract. Matching remains unavailable when
   no executor is configured.
-- Candidate profile and implemented-preview curriculum schemas with UUIDs,
+- Candidate profile and implemented-preview curriculum schemas with a curriculum UUID,
   periods, source education vocabulary, project text bounds, and free-text levels.
 - Production and mock APIs share curriculum and match response schemas;
   canonical job enums are shared without importing persistence into API schemas.
@@ -69,3 +69,9 @@ Detailed feature requirements are in [spec](spec.md); completion gates are in
   Verification: 149 unit/API tests passed; source/test lint and formatting,
   documentation references, and `git diff --check` passed. Database integration
   tests were not run; no persistence or pipeline behavior changed.
+- CV identifier minimization: removed IDs from every section-item schema and
+  both examples, retaining only `curriculo_id`. API regressions cover successful
+  ID-free items and rejection of extra IDs for all five sections in both apps.
+  Verification: 157 unit/API tests passed; lint, formatting, documentation links,
+  and `git diff --check` passed. Database integration tests were not run for this
+  request-schema change.

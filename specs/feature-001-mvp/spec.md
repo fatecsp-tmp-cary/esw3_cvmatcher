@@ -89,14 +89,14 @@ The public API contract is documented in [acceptance](acceptance.md).
 `POST /matches` accepts the matching sections of the implemented Sistema
 Currículo preview: `curriculo_id`, `formacoes`, `experiencias`, `projetos`,
 `competencias`, and `idiomas`. All arrays are required and may be empty. Items
-have UUID IDs; education and experience use required `inicio` and nullable
-`fim` calendar dates. Education has a level and source status vocabulary;
+have no IDs; only `curriculo_id` is a UUID. Education and experience use
+required `inicio` and nullable `fim` calendar dates. Education has a level and source status vocabulary;
 competency descriptions and language/competency levels are text. Project
 technologies are a string. Validation follows the source domain as specified
 in acceptance. The outdated integration document does not govern the schema.
 
 The request excludes identity/contact, presentation, and document fields.
-Submitted curriculum/item IDs and data are request-scoped: do not persist,
+Submitted curriculum ID and data are request-scoped: do not persist,
 log, or return them. The only query parameter is `limit`, defaulting to 10
 and bounded from 1 through 100. Production and mock share the same schema.
 

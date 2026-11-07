@@ -26,9 +26,9 @@
   preview at commit `66af300`: required UUID `curriculo_id` and required arrays
   `formacoes`, `experiencias`, `projetos`, `competencias`, and `idiomas`. Every
   array may be empty; no additional collection cap is imposed by this contract.
-- Each item has a required UUID `id`, retained only during the request. UUIDs
-  are not restricted to version 4. Neither curriculum nor item IDs are persisted,
-  logged, or echoed in the match response.
+- `curriculo_id` is the only CV identifier and is not restricted to UUID version
+  4. Section items have no `id` field; extra item IDs are rejected. The curriculum
+  ID is request-scoped and is never persisted, logged, or echoed in the response.
 - Education items contain required `instituicao`, `curso`, `nivel`, `status`,
   `inicio`, and nullable `fim`. Institution/course are 1–200 characters. Levels
   are `ensino_fundamental`, `ensino_medio`, `tecnico`, `tecnologo`, `graduacao`,
@@ -82,6 +82,8 @@ flat integration-document payload. Source authority is
 The matching projection excludes identity/contact and presentation fields;
 this is an intentional request projection, not the entire preview response.
 No alternative field aliases from the outdated document or CRUD API are accepted.
+The user subsequently removed section-item IDs from the matching projection;
+only `curriculo_id` remains.
 
 PR #111 must consolidate onto this request and response contract rather than
 restore its `CandidateProfile` request body. The current executor accepts
