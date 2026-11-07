@@ -16,9 +16,10 @@ Requirements and completion gates are in [spec](spec.md),
 - Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
 - Domain-enum seniority/mode aliases; missing/unknown values yield no category. APiBR uses first-recognized source-label precedence, retaining every keyword. Other categories remain text.
 
+- Ranked response validation tests for job identity, eligibility, match details and version metadata.
+
 ## Pending components
 
-- [ ] Ranked response validation tests for job identity, eligibility, match details and version metadata.
 - [ ] Public collection caps and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
 
 ## Remaining MVP work
