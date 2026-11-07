@@ -1,6 +1,9 @@
 # Job Source Fixture Documentation
 
-This fixture represents a sample response payload from the external job source (GitHub Vagas / apibr) used for offline testing and integration.
+`jobs_fixture.json` is a historical captured GitHub issue, not an independently
+verified APiBR response. Its GitHub-only `state` field must not be taken as proof
+that APiBR supplies availability evidence. Missing state remains DISCOVERED.
+Real APiBR capture/mapping is tracked in #132; snapshot proof remains #113.
 
 ## File Location
 `tests/resources/jobs_fixture.json`

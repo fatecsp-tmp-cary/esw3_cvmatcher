@@ -1,77 +1,53 @@
 # MVP task status
 
-Status reflects the implementation in this branch.
-
-## Implemented scaffold
-
-- FastAPI app factory, health endpoint, RFC-style errors, and the documented
-  `POST /matches` request/response contract. Matching remains unavailable when
-  no executor is configured.
-- Candidate profile and implemented-preview curriculum schemas with a curriculum UUID,
-  periods, source education vocabulary, project text bounds, and free-text levels.
-- Production and mock APIs share curriculum and match response schemas;
-  canonical job enums are shared without importing persistence into API schemas.
-- Generated OpenAPI documentation for `/health` and `/matches`, including
-  required job identity, eligibility, matched skills, and missing requirements
-  in populated response contract tests. Mock results include synthetic IDs and
-  compatibility details; these are not calculated matching results.
-- APiBR payload normalization function (partial mapping only).
-- SQLAlchemy/Alembic setup, a tooling-check migration, and initial job, source,
-  and source-run models/migration. Canonical schema alignment remains pending.
-- README documents local PostgreSQL and current test setup.
-
-## Pending implementation
-
-- [ ] Resolve the remaining questions in [acceptance](acceptance.md)
-      before dependent implementation.
-- [ ] Align existing job/source structures with the canonical Job and lifecycle
-      requirements; implement persisted skill structures. Track the existing
-      field mismatch as unresolved clarification 4 in [acceptance](acceptance.md).
-- [ ] Implement source interface, APiBR polling, run tracking, safe upsert,
-      snapshot evidence, source-specific identity, and lifecycle.
-- [ ] Implement normalization, requirement extraction, and shared skill taxonomy.
-- [ ] Implement PostgreSQL FTS, local embedding generation, pgvector, and
-      invalidation/reprocessing.
-- [ ] Implement filters, textual/semantic retrieval, scoring, deterministic
-      ranking, and regression dataset.
-- [ ] Connect the documented matches API to request-scoped candidate
-      normalization, retrieval, scoring, and ranking; add production
-      authentication.
-- [ ] Complete unit/integration/API/e2e coverage, local Compose services,
-      deployment configuration, scheduling, and monitoring.
-
-Detailed feature requirements are in [spec](spec.md); completion gates are in
+This branch includes the linear stack through PR #101. PR #130 is the
+unchanged foundation at `d305975`; later PRs in the stack are not implemented
+on this branch. Requirements and completion gates are in [spec](spec.md),
+[acceptance](acceptance.md), and the
 [Definition of Done](../../docs/quality/definition-of-done.md).
 
-## Consolidation verification
+## Implemented on this branch
 
-- Response consolidation: `pytest tests/api/test_matches_contract.py
-  tests/api/test_mock_api.py --no-cov -q`; lint/format and diff checks passed.
-- Matching computation and candidate normalization remain pending; contract
-  tests use injected executors and deterministic mock data.
-- Validation privacy: `pytest tests/api --no-cov -q` passed, including root and
-  nested extra-field canaries in error bodies and captured logs for both apps.
-  Extra-field error locations retain only the containing object path.
-- Schema consolidation: unit/API tests and lint/format checks passed. OpenAPI
-  component parity and a mock startup with database imports blocked are covered.
-- Historical integration-document collection bounds and technology-tag limits
-  were superseded by the source-model decision in acceptance; they are no longer
-  implemented. Current field limits follow the source domain.
-- Earlier consolidation validation: 113 unit/API tests passed; source/test lint and format
-  checks, documentation links, and `git diff --check` passed. Database integration
-  tests were not run for these contract and validation changes.
-- Source-model alignment: the user selected preview naming and dates and
-  declared the integration document outdated. Updated both API schemas, the
-  OpenAPI example, the runnable mock request, and contract/privacy tests.
-  Tests cover source periods, completed education, empty sections, text limits,
-  controls, UUID privacy, free-text levels, and rejection of outdated fields.
-  Candidate normalization into the matching pipeline remains pending.
-  Verification: 149 unit/API tests passed; source/test lint and formatting,
-  documentation references, and `git diff --check` passed. Database integration
-  tests were not run; no persistence or pipeline behavior changed.
-- CV identifier minimization: removed IDs from every section-item schema and
-  both examples, retaining only `curriculo_id`. API regressions cover successful
-  ID-free items and rejection of extra IDs for all five sections in both apps.
-  Verification: 157 unit/API tests passed; lint, formatting, documentation links,
-  and `git diff --check` passed. Database integration tests were not run for this
-  request-schema change.
+- #130: Shared production/mock preview request and ranked response, OpenAPI, limit, health and privacy-safe RFC 9457 errors.
+- #101: Canonical job correction, source identity and four lifecycle states; section-preserving HTML cleanup. Raw remains null.
+
+## Later stack layers
+
+- [ ] #104: Deterministic normalized content hashing.
+- [ ] #105: Source-specific upsert, content/vector invalidation and stale rediscovery; PostgreSQL persistence tests. Concurrent safety is pending.
+- [ ] #106: Sequential incomplete APiBR scans, unknown availability without GitHub requests, isolated malformed records, PARTIAL/FAILED run evidence and PostgreSQL regressions.
+- [ ] #107: Portuguese weighted any-term FTS field/query/normalization decisions. Runtime/index implementation belongs to #109.
+- [ ] #108: Skill taxonomy, job-skill and classified requirement persistence; population/extraction remain pending.
+- [ ] #109: Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
+- [ ] #110: Domain-enum seniority/mode aliases; missing/unknown values yield no category. Other categories remain text.
+- [ ] #111: Ranked response validation tests on the inherited #130 contract; no incompatible endpoint, offset or DTO is reintroduced.
+- [ ] #112: Public collection caps and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
+
+## Remaining MVP work
+
+- [ ] Source evidence/interface/retries: #113/#115/#132–#135; optional bounded
+      availability verification #153. Real payload capture remains pending.
+- [ ] Production concurrency, taxonomy and requirement extraction:
+      #116/#136–#139/#142. Preserve source independence and uncertain evidence.
+- [ ] Lifecycle policies: #117/#145/#146. Never infer absence from an unproven scan.
+- [ ] Model selection, metadata, semantic retrieval and scoring:
+      #26/#118–#120/#140/#141/#152; textual normalization/ranking and regression
+      fixture #30/#31/#33/#34 and vertical-slice validation #45–#49.
+- [ ] API pipeline, authentication, worker and operations:
+      #121–#124/#143/#144/#148–#151; language/accent investigation #147.
+- [ ] Release coverage #125 and the initial textual slice #9. #99 remains open.
+- [ ] Additional-source selection/adapter #127/#128 are separate from the
+      at-least-one-source MVP acceptance minimum.
+
+## Restack verification
+
+The original branches were rebased separately; each layer keeps only its own
+changes and review fixes. Tests and documentation links are checked per layer.
+The CI workflow remains unchanged by the user's decision. Full PostgreSQL CI
+will run through an approved temporary draft validation PR from #112 to main,
+then that PR will be closed without merging. The source stack bases remain
+unchanged by that validation route.
+
+Current layer validation results are recorded in the restack audit. The previous
+combined #130 CI result is historical evidence, not verification of these new
+branch heads.
