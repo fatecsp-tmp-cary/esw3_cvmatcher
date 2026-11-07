@@ -37,9 +37,7 @@ class JobSkill(Base):
 
     __table_args__ = (Index("ix_job_skills_skill_id", "skill_id"),)
 
-    job_id: Mapped[int] = mapped_column(
-        ForeignKey("jobs.id", ondelete="CASCADE"), primary_key=True
-    )
+    job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id", ondelete="CASCADE"), primary_key=True)
     skill_id: Mapped[int] = mapped_column(
         ForeignKey("skills.id", ondelete="CASCADE"), primary_key=True
     )
@@ -51,13 +49,9 @@ class JobRequirement(Base):
     __table_args__ = (Index("ix_job_requirements_job_id", "job_id"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    job_id: Mapped[int] = mapped_column(
-        ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False
-    )
+    job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     requirement_class: Mapped[RequirementClass] = mapped_column(
         SQLAlchemyEnum(RequirementClass, name="requirementclass"), nullable=False
     )
-    skill_id: Mapped[int | None] = mapped_column(
-        ForeignKey("skills.id", ondelete="SET NULL")
-    )
+    skill_id: Mapped[int | None] = mapped_column(ForeignKey("skills.id", ondelete="SET NULL"))
