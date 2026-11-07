@@ -80,8 +80,7 @@ and valid records commit as `PARTIAL`; network/pagination failure rolls back
 job changes and records `FAILED`. The scan remains incomplete. See
 [ADR-003](../architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md).
 
-The historical captured fixture is a GitHub issue, not a confirmed APiBR
+The captured fixture is a GitHub issue, not a confirmed APiBR
 response. A separate synthetic state-free fixture prevents hidden network
-access in tests. APiBR disconnected during the 2026-11-07 shape check, so no
-new live response, rate limit, authentication or retention guarantee was
-established. These remain source-evidence follow-ups, including #113.
+access in tests. Live response shape, rate limits, authentication and retention rights remain
+unverified source-evidence follow-ups, including #113.

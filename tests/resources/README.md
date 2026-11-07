@@ -1,15 +1,13 @@
 # Job Source Fixture Documentation
 
-`jobs_fixture.json` is the historical captured **GitHub issue** payload. It
+`jobs_fixture.json` is a captured **GitHub issue** payload. It
 contains GitHub-only fields, including `state`; it must not be treated as
 evidence that APiBR supplies those fields.
 
-`apibr_issues.json` is a small synthetic fixture for the state-free case raised
-in PR reviews #101/#106. It deliberately omits `state` and uses HTML section
-boundaries. It is not a newly captured or independently verified APiBR response.
+`apibr_issues.json` is a small synthetic fixture for state-free records. It deliberately omits `state` and uses HTML section
+boundaries. It is not a captured or independently verified APiBR response.
 Its ingestion test forbids network access and expects `DISCOVERED`, not `ACTIVE`.
-Live APiBR shape/completeness verification remains in issue #113; the endpoint
-closed the connection during the 2026-11-07 audit.
+Live APiBR shape/completeness verification remains in issue #113.
 
 ## File Location
 `tests/resources/jobs_fixture.json`

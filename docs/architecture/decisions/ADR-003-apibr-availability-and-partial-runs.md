@@ -5,15 +5,12 @@
 
 ## Context
 
-PR #106 verifies each APiBR record without `state` against GitHub without
-authentication. Its fixture includes `state`, concealing that default network
-dependency. A malformed record also rolls back every otherwise valid job.
-APiBR snapshot completeness remains unproven under ADR-002.
+APiBR records may lack availability evidence or contain malformed data.
+Per-record availability requests add a network dependency, and one malformed
+record should not prevent ingestion of valid independent records.
+Snapshot completeness remains unproven under ADR-002.
 
 ## Decision
-
-The user selected conservative availability handling and per-record rejection
-during the stack integration interview:
 
 - Explicit `open` and `closed` evidence maps to `ACTIVE` and `EXPIRED` within
   the allowed lifecycle transitions. Missing evidence leaves a new job
