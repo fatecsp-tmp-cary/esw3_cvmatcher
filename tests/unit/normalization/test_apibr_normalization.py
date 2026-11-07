@@ -92,3 +92,26 @@ def test_normalize_apibr_job_maps_github_issue_state(state, expected_status):
     normalized = normalize_apibr_job({"id": 123, "title": "Developer", "state": state})
 
     assert normalized["status"] == expected_status
+
+
+def test_description_preserves_html_and_markdown_section_boundaries():
+    job = normalize_apibr_job(
+        {
+            "id": 123,
+            "title": "Developer",
+            "body": "<h3>Requisitos</h3><p>Python</p><h3>Diferenciais</h3>Go\n"
+            "<table><tr><td>Java</td><td>Kotlin</td></tr></table>\n## Benefícios\nPlano de saúde",
+        }
+    )
+    assert job["description"] == (
+        "Requisitos\nPython\nDiferenciais\nGo\nJava\nKotlin\n## Benefícios\nPlano de saúde"
+    )
+    assert job["raw"] is None
+    assert normalize_text("<h3>Diferenciais</h3>Go") == "Diferenciais Go"
+    assert normalize_text("<td>Java</td><td>Kotlin</td>") == "Java Kotlin"
+
+
+def test_state_free_payload_stays_discovered():
+    job = normalize_apibr_job({"id": 123, "title": "Developer", "body": "Python"})
+    assert job["status"] == "DISCOVERED"
+    assert job["last_verified_at"] is None

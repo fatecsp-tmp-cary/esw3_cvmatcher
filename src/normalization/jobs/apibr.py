@@ -5,7 +5,28 @@ from typing import Any
 
 
 class _HTMLTextParser(HTMLParser):
-    _BLOCK_TAGS = {"br", "div", "li", "p", "section", "tr"}
+    _BLOCK_TAGS = {
+        "br",
+        "div",
+        "li",
+        "p",
+        "section",
+        "tr",
+        "td",
+        "th",
+        "ul",
+        "ol",
+        "table",
+        "blockquote",
+        "pre",
+        "hr",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+    }
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -13,17 +34,17 @@ class _HTMLTextParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag in self._BLOCK_TAGS:
-            self.parts.append(" ")
+            self.parts.append("\n")
 
     def handle_endtag(self, tag: str) -> None:
         if tag in self._BLOCK_TAGS:
-            self.parts.append(" ")
+            self.parts.append("\n")
 
     def handle_data(self, data: str) -> None:
         self.parts.append(data)
 
 
-def normalize_text(text: str | None) -> str | None:
+def normalize_text(text: str | None, *, preserve_sections: bool = False) -> str | None:
     """Normalize Unicode composition and whitespace while preserving display text."""
     if not isinstance(text, str) or not text.strip():
         return None
@@ -31,6 +52,8 @@ def normalize_text(text: str | None) -> str | None:
     parser.feed(text)
     parser.close()
     normalized = unicodedata.normalize("NFC", "".join(parser.parts))
+    if preserve_sections:
+        return "\n".join(" ".join(line.split()) for line in normalized.splitlines() if line.strip())
     return " ".join(normalized.split())
 
 
@@ -80,14 +103,16 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
     if title is None:
         raise ValueError("APiBR issue is missing its required title")
 
+    keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
+
     return {
         "platform": "apibr",
         "source_job_id": normalized_source_id,
         "source_expires_at": None,
         "company": None,
         "title": title,
-        "description": normalize_text(raw_job.get("body")),
-        "keywords": normalize_keywords(raw_job.get("labels") or raw_job.get("keywords")),
+        "description": normalize_text(raw_job.get("body"), preserve_sections=True),
+        "keywords": keywords,
         "skills": [],
         "location": None,
         "work_arrangement": None,

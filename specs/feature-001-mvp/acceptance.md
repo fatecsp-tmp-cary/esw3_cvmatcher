@@ -85,32 +85,34 @@ No alternative field aliases from the outdated document or CRUD API are accepted
 The user subsequently removed section-item IDs from the matching projection;
 only `curriculo_id` remains.
 
-PR #111 must consolidate onto this request and response contract rather than
+PR #111 must build on this request and response contract rather than
 restore its `CandidateProfile` request body. The current executor accepts
 `CurriculumRequest` and `limit`; transient candidate normalization and pipeline
 integration remain pending.
 
+## Restacked implementation decisions (2026-11-07)
+
+The user corrected the delivery graph to one linear stack:
+`#130 → #101 → #104 → #105 → #106 → #107 → #108 → #109 → #110 → #111 → #112`.
+PR #130 remains exactly at `d305975`; child PRs own their changes and decisions.
+The accepted behavioral decisions from the preceding interview are retained.
+
+- [ADR-007](../../docs/architecture/decisions/ADR-007-canonical-persistence-alignment.md)
+  resolves source identity and canonical persistence: unique platform/source ID,
+  reject blank/missing IDs, SQL-only source configuration metadata, corrective
+  migrations and terminal EXPIRED. Description section preservation is approved;
+  omit raw payloads until retention rights are established.
+
 ## Unresolved; address before dependent implementation
 
-1. **APiBR snapshot completeness:** establish whether pagination/scan behavior
-   proves a complete covered set before absence can mark jobs stale. The source
-   selection record describes absent jobs as stale, while the architecture
-   requires a successful complete snapshot. See [ADR-002](../../docs/architecture/decisions/ADR-002-apibr-mvp-source.md).
-2. **Source identity constraint:** reconcile the source-selection record's
-   surrogate primary key and `source_job_id` attribute with the planned unique
-   `(platform, source_job_id)` constraint. Confirm expected null/duplicate ID
-   handling before schema implementation.
-3. **Categorical canonical values:** candidate schema currently accepts free
-   text for seniority, proficiency, mode, and employment type; canonical mapping
-   is pending job-data decisions (tracked in code as #83). Define values and
-   mapping once job data is available.
-4. **Existing persistence alignment:** the initial job migration/model already
-   exists, but the model adds `source_id` and lacks canonical fields including
-   `source_expires_at`, `currency`, `last_verified_at`, `raw`, `embedding`, and
-   `content_hash`; its status enum only has `ACTIVE` and `EXPIRED`. This conflicts
-   with the exact canonical fields and lifecycle in the architecture and feature
-   spec. Resolve before dependent persistence/lifecycle work; this consolidation
-   does not change or approve those existing differences.
+1. Verify actual APiBR payload, scan completeness and source usage/retention
+   evidence (#113/#132/#134). A synthetic state-free fixture is not proof of
+   the endpoint shape. No unproven scan may mark absent jobs stale.
+2. Select and record the CPU-feasible PT/EN embedding model/version and metadata
+   before semantic work (#26/#118/#140); preserve the fixed canonical Job fields.
+3. Define canonical language/employment requirement mappings and confidence
+   before hard exclusion (#139). Arbitrary free text is insufficient evidence.
 
-Do not resolve remaining questions by inference. Record future outcomes in the
-relevant specification, architecture/ADR if applicable, plan, and tasks.
+Implementation status is in [tasks](tasks.md). Unimplemented worker, lifecycle,
+matching and operational requirements remain pending; restacking is not an MVP
+completion claim.
