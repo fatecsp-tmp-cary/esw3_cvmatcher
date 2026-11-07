@@ -102,6 +102,10 @@ The accepted behavioral decisions from the preceding interview are retained.
   reject blank/missing IDs, SQL-only source configuration metadata, corrective
   migrations and terminal EXPIRED. Description section preservation is approved;
   omit raw payloads until retention rights are established.
+- [ADR-003](../../docs/architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md)
+  records conservative unknown availability, no default verifier, per-record
+  rejection and PARTIAL commits. Network failures roll back job changes; partial
+  runs do not advance last_success_at or absence-based lifecycle evidence.
 
 ## Unresolved; address before dependent implementation
 

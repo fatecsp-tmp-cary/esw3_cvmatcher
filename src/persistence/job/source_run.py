@@ -113,3 +113,7 @@ class SourceRun(Base):
     )
 
     errors: Mapped[str | None] = mapped_column(Text)
+
+    jobs_rejected: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )

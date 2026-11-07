@@ -135,6 +135,7 @@ def test_source_run_has_expected_fields():
         "jobs_marked_stale",
         "jobs_expired",
         "jobs_reactivated",
+        "jobs_rejected",
         "errors",
     }
 

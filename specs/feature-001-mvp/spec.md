@@ -30,6 +30,11 @@ The source interface exposes asynchronous `discover`, `fetch_jobs`,
 `INCREMENTAL` or `SNAPSHOT`; only a successful complete snapshot may make
 absence meaningful. Source adapters should provide stable IDs. MVP source:
 APiBR (see [ADR-002](../../docs/architecture/decisions/ADR-002-apibr-mvp-source.md)).
+Under [ADR-003](../../docs/architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md),
+new state-free jobs stay `DISCOVERED`, with no default GitHub requests. Reject
+malformed records independently and commit valid records as `PARTIAL` with safe
+rejected counts; pagination/network failure rolls back job changes. Neither
+partial nor unproven scans permit absence-based lifecycle changes.
 
 Normalize raw job data through source parsing, HTML/whitespace/Unicode cleanup,
 section detection, skill/keyword extraction, alias normalization, requirement
@@ -130,7 +135,7 @@ Persist `job_sources`, `source_runs`, `jobs`, `skills`, `job_skills`, and
 `type`, `polling_mode`, `enabled`, `polling_interval`, `last_run_at`,
 `last_success_at`, `next_run_at`, and `last_error`. Run records include
 `id`, `source_id`, timestamps, status, snapshot completeness, found/created/
-updated/lifecycle counts, and errors; capture enough evidence to establish
+updated/unchanged/rejected/lifecycle counts, and errors; capture enough evidence to establish
 snapshot safety, duration, polling mode, and parsing/HTTP/indexing/embedding
 failures. Scheduler flow: lock source → poll/fetch → validate → normalize →
 upsert → lifecycle update → schedule indexing/embedding. Distinguish found,

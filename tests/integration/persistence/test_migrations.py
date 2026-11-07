@@ -21,22 +21,54 @@ def test_canonical_migrations_round_trip_existing_data(db_engine):
             connection.execute(
                 text(
                     "INSERT INTO jobs (source_id, platform, source_job_id, title) "
-                    "VALUES (:id, 'migration', 'old', 'Python')"
+                    "VALUES (:source_id, 'migration', 'old', 'Python')"
                 ),
-                {"id": source_id},
+                {"source_id": source_id},
             )
+            connection.execute(
+                text(
+                    "INSERT INTO source_runs (source_id, started_at, status) "
+                    "VALUES (:source_id, now(), 'SUCCEEDED')"
+                ),
+                {"source_id": source_id},
+            )
+
         command.upgrade(config, "head")
         with db_engine.begin() as connection:
+            assert (
+                connection.scalar(
+                    text("SELECT polling_mode FROM source_runs WHERE source_id = :source_id"),
+                    {"source_id": source_id},
+                )
+                == "INCREMENTAL"
+            )
+            assert (
+                connection.scalar(
+                    text("SELECT jobs_rejected FROM source_runs WHERE source_id = :source_id"),
+                    {"source_id": source_id},
+                )
+                == 0
+            )
+            assert (
+                connection.scalar(
+                    text(
+                        "SELECT count(*) FROM jobs WHERE platform = 'migration' "
+                        "AND title = 'Python'"
+                    )
+                )
+                == 1
+            )
             connection.execute(
                 text("UPDATE jobs SET status = 'DISCOVERED' WHERE platform = 'migration'")
             )
             connection.execute(
                 text(
                     "INSERT INTO jobs (source_id, platform, source_job_id, title, status) "
-                    "VALUES (:id, 'migration', 'stale', 'Django', 'STALE')"
+                    "VALUES (:source_id, 'migration', 'stale', 'Django', 'STALE')"
                 ),
-                {"id": source_id},
+                {"source_id": source_id},
             )
+
         command.downgrade(config, "4d6249817e17")
         with db_engine.connect() as connection:
             assert connection.execute(
@@ -48,13 +80,16 @@ def test_canonical_migrations_round_trip_existing_data(db_engine):
                     "WHERE typname = 'jobstatus' ORDER BY enumsortorder"
                 )
             ).scalars().all() == ["ACTIVE", "EXPIRED"]
+        command.upgrade(config, "head")
     finally:
         command.upgrade(config, "head")
         if source_id is not None:
             with db_engine.begin() as connection:
+                for table in ("jobs", "source_runs"):
+                    connection.execute(
+                        text(f"DELETE FROM {table} WHERE source_id = :source_id"),
+                        {"source_id": source_id},
+                    )
                 connection.execute(
-                    text("DELETE FROM jobs WHERE source_id = :id"), {"id": source_id}
-                )
-                connection.execute(
-                    text("DELETE FROM job_sources WHERE id = :id"), {"id": source_id}
+                    text("DELETE FROM job_sources WHERE id = :source_id"), {"source_id": source_id}
                 )

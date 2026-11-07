@@ -3,12 +3,11 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
-from sqlalchemy import create_engine, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.ingestion import apibr as apibr_ingestion
 from src.ingestion.apibr import APiBRClient, ingest_apibr, iter_apibr_issues
-from src.persistence.base import Base
 from src.persistence.job.job import Job, JobStatus
 from src.persistence.job.job_source import JobSource
 from src.persistence.job.source_run import SourceRun
@@ -40,14 +39,10 @@ class _Response:
 
 
 @pytest.fixture
-def session():
-    engine = create_engine("sqlite://")
-    Base.metadata.create_all(engine)
-    with Session(engine) as db:
-        db.add(JobSource(name="APiBR", type="api", polling_mode="sequential"))
-        db.commit()
-        yield db
-    engine.dispose()
+def session(db_session):
+    db_session.add(JobSource(id=1, name="APiBR", type="api", polling_mode="INCREMENTAL"))
+    db_session.commit()
+    return db_session
 
 
 def _issue(issue_id: int, *, state: str = "open", body: str = "Build APIs") -> dict:
@@ -146,7 +141,7 @@ def test_ingest_updates_changed_content_and_preserves_unchanged_content_hash(
     unchanged = ingest_apibr(session, 1, _Pages([_issue(1)], []))
     assert unchanged.jobs_unchanged == 1
     assert job.content_hash == original_hash
-    assert job.embedding == [0.1, 0.2]
+    assert list(job.embedding) == pytest.approx([0.1, 0.2])
 
     changed = ingest_apibr(session, 1, _Pages([_issue(1, body="Build better APIs")], []))
     assert changed.jobs_updated == 1
@@ -205,53 +200,59 @@ def test_ingest_keeps_expired_jobs_expired_if_the_source_reopens_them(
     assert result.jobs_reactivated == 0
 
 
-def test_ingest_uses_confirmed_url_status_when_issue_state_is_missing(
-    session: Session, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(
-        apibr_ingestion,
-        "check_apibr_job_status",
-        lambda _url: JobStatus.EXPIRED,
-    )
-    issue = _issue(1)
-    issue.pop("state")
+def test_state_free_fixture_never_triggers_availability_requests(session, monkeypatch):
+    def forbid_network(*_args, **_kwargs):
+        raise AssertionError("fixture ingestion must never access the network")
 
-    result = ingest_apibr(session, 1, _Pages([issue], []))
-    job = session.scalar(select(Job).where(Job.source_job_id == "1"))
-
-    assert result.jobs_expired == 1
-    assert job.status == JobStatus.EXPIRED
-    assert job.last_verified_at is not None
-
-
-def test_ingest_does_not_verify_or_transition_on_an_unavailable_url_check(
-    session: Session, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(apibr_ingestion, "check_apibr_job_status", lambda _url: None)
-    issue = _issue(1)
-    issue.pop("state")
-
-    ingest_apibr(session, 1, _Pages([issue], []))
-    job = session.scalar(select(Job).where(Job.source_job_id == "1"))
-
+    monkeypatch.setattr(apibr_ingestion, "urlopen", forbid_network)
+    issues = json.loads(Path("tests/resources/apibr_issues.json").read_text())
+    result = ingest_apibr(session, 1, _Pages(issues, []))
+    job = session.scalar(select(Job))
+    assert result.jobs_created == len(issues)
     assert job.status == JobStatus.DISCOVERED
     assert job.last_verified_at is None
 
 
-def test_unavailable_url_check_preserves_existing_job_state_and_verification(
-    session: Session, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_missing_state_preserves_existing_availability_and_verification(session):
     ingest_apibr(session, 1, _Pages([_issue(1)], []))
-    job = session.scalar(select(Job).where(Job.source_job_id == "1"))
-    previous_verification = job.last_verified_at
-    monkeypatch.setattr(apibr_ingestion, "check_apibr_job_status", lambda _url: None)
+    job = session.scalar(select(Job))
+    verified_at = job.last_verified_at
     issue = _issue(1)
     issue.pop("state")
-
     ingest_apibr(session, 1, _Pages([issue], []))
-
     assert job.status == JobStatus.ACTIVE
-    assert job.last_verified_at == previous_verification
+    assert job.last_verified_at == verified_at
+
+
+@pytest.mark.parametrize(
+    "bad_record",
+    [
+        None,
+        {"id": 2, "title": ""},
+        {"id": 2, "title": "Developer", "created_at": "private-invalid-date"},
+        {"id": "x" * 256, "title": "Developer"},
+    ],
+)
+def test_bad_record_does_not_rollback_valid_jobs(session, bad_record):
+    result = ingest_apibr(session, 1, _Pages([_issue(1), bad_record, _issue(3)], []))
+    run = session.get(SourceRun, result.run_id)
+    source = session.get(JobSource, 1)
+    assert result.status == run.status == "PARTIAL"
+    assert result.jobs_found == 3
+    assert result.jobs_created == 2
+    assert result.jobs_rejected == run.jobs_rejected == 1
+    assert len(session.scalars(select(Job)).all()) == 2
+    assert run.errors == source.last_error == "RejectedRecords:1"
+    assert source.last_success_at is None
+    assert run.snapshot_complete is False
+    assert run.jobs_marked_stale == 0
+
+
+def test_network_failure_rolls_back_availability_changes(session):
+    ingest_apibr(session, 1, _Pages([_issue(1)], []))
+    with pytest.raises(TimeoutError):
+        ingest_apibr(session, 1, _Pages([_issue(1, state="closed")], TimeoutError()))
+    assert session.scalar(select(Job)).status == JobStatus.ACTIVE
 
 
 def test_failed_poll_rolls_back_jobs_and_records_failure_without_error_text(
