@@ -83,14 +83,14 @@ pipeline integration remains pending.
 - [ADR-007](../../docs/architecture/decisions/ADR-007-canonical-persistence-alignment.md)
   resolves source identity and canonical persistence: unique platform/source ID,
   reject blank/missing IDs, SQL-only source configuration metadata, corrective
-  migrations and terminal EXPIRED. Preserve description sections;
-  omit raw payloads until retention rights are established.
+  migrations and terminal EXPIRED.
 - [ADR-003](../../docs/architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md)
   records conservative unknown availability, no default verifier, per-record
   rejection and PARTIAL commits. Network failures roll back job changes; partial
   runs do not advance last_success_at or absence-based lifecycle evidence.
 - [ADR-005](../../docs/architecture/decisions/ADR-005-weighted-any-term-fts.md)
-  records Portuguese weighted any-term search and its English/accent limitations.
+  records Portuguese weighted any-term search and its English/accent limitations. Preserve description sections;
+  omit raw payloads until retention rights are established.
 - Category aliases map seniority/mode to shared domain enums; unknown values
   yield no category. For each APiBR category independently, the first recognized
   label in source order wins when labels disagree. Keep all normalized labels
