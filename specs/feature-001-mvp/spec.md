@@ -5,7 +5,7 @@
 The service receives an already structured CV, validates and normalizes it to a
 request-scoped `CandidateProfile`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
-jobs through `POST /matches`. CV parsing is external. `GET /health` is optional.
+jobs through `POST /matches`. CV parsing is external. `GET /health` is optional; when implemented, it must return the contract specified below.
 
 Candidate profile fields:
 
