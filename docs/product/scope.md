@@ -6,7 +6,9 @@
 - Modular multi-source job ingestion, with at least one source for MVP.
 - Job normalization, source-specific identity, content-change detection,
   lifecycle management, and expiration.
-- PostgreSQL full-text search and pgvector semantic search, using a local,
+- PostgreSQL Portuguese full-text search with weighted any-term retrieval
+  ([ADR-005](../architecture/decisions/ADR-005-weighted-any-term-fts.md)) and
+  pgvector semantic search, using a local,
   CPU-feasible PT/EN-capable embedding model.
 - Matching in stages: filters, textual retrieval, semantic retrieval,
   structured scoring, and deterministic ranking.

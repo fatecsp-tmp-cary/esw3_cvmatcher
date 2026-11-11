@@ -3,7 +3,7 @@
 **Related issue:** [TASK] Evaluate a local PT/EN embedding model #25
 **Subtask:** #56 — Benchmark sentence-transformers all-MiniLM-L6-v2
 **Project context:** CV-Match — resume × job matching API using text search + semantic similarity
-**Script:** `scripts/benchmarks/embedding_benchmark.py` (PR #81), the same one used in tasks #56 and #57
+**Script:** `scripts/benchmarks/embedding_benchmark.py`, the same one used in tasks #56 and #57
 **Input:** `embedding_benchmark_input.json` — 1 fictional resume + 100 jobs in Portuguese
 
 ## Test environment
@@ -135,9 +135,9 @@ The model `all-MiniLM-L6-v2`:
 - ⚠️ Has a 256-token limit. The 470-token resume exceeds this limit, requiring chunking to avoid silently discarding relevant information. The shared script does not measure chunking time.
 - ⚠️ Only 1 resume and no ground truth: the ranking results are indicative, not conclusive
 
-**Recommendation:** `all-MiniLM-L6-v2` is not recommended for CV-Match, because its PT/EN support is weak (gap of 0.1593) and the resume and jobs are in Portuguese. It is light and fast, so it remains useful as a baseline. The model decision belongs to #26; `multilingual-e5-small` was compared with L12 on 5 resumes in PR #87 (`docs/match/benchmarks/benchmark-l12-chunking.md`).
+**Recommendation:** `all-MiniLM-L6-v2` is not recommended for CV-Match, because its PT/EN support is weak (gap of 0.1593) and the resume and jobs are in Portuguese. It is light and fast, so it remains useful as a baseline. The model decision belongs to #26; `multilingual-e5-small` was compared with L12 on 5 resumes (`docs/match/benchmarks/benchmark-l12-chunking.md`).
 
-**Reference with the model from #57 (data from the report of PR #91, measured on another machine, not redone here):**
+**Reference with the model from #57 (data from the L12 benchmark report, measured on another machine, not redone here):**
 
 - `paraphrase-multilingual-MiniLM-L12-v2`: PT↔EN gap of 0.8226 (vs. 0.1593 for L6), meaning L12 relates PT sentences to their EN equivalents well, while L6 does not
 - 128-token limit for L12 (366 tokens in 4 chunks) vs. 256-token limit for L6 (470-token resume in 2 chunks)
@@ -146,6 +146,6 @@ The model `all-MiniLM-L6-v2`:
 
 ## Files used
 
-- `scripts/benchmarks/embedding_benchmark.py` — shared script (PR #81)
-- `embedding_benchmark_input.json` — shared input (1 resume + 100 jobs; PR #81)
+- `scripts/benchmarks/embedding_benchmark.py` — shared script
+- `embedding_benchmark_input.json` — shared input (1 resume + 100 jobs)
 - `resultado_l6.json` — raw result of this run

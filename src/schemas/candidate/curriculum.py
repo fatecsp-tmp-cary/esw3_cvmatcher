@@ -132,8 +132,8 @@ class CurriculumRequest(_CurriculumModel):
     """Matching sections of the preview; the curriculum ID remains request-scoped."""
 
     curriculo_id: CurriculumId
-    formacoes: list[AcademicFormation]
-    experiencias: list[ProfessionalExperience]
-    projetos: list[AcademicProject]
-    competencias: list[Competency]
-    idiomas: list[CurriculumLanguage]
+    formacoes: list[AcademicFormation] = Field(max_length=20)
+    experiencias: list[ProfessionalExperience] = Field(max_length=50)
+    projetos: list[AcademicProject] = Field(max_length=50)
+    competencias: list[Competency] = Field(max_length=200)
+    idiomas: list[CurriculumLanguage] = Field(max_length=20)

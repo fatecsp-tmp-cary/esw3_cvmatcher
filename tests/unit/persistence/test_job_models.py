@@ -8,6 +8,7 @@ from src.persistence.job.job import (
     WorkArrangement,
 )
 from src.persistence.job.job_source import JobSource
+from src.persistence.job.skill import JobRequirement, JobSkill, RequirementClass, Skill
 from src.persistence.job.source_run import SourceRun
 
 
@@ -17,6 +18,7 @@ def test_job_has_expected_fields():
         "source_id",
         "platform",
         "source_job_id",
+        "source_expires_at",
         "company",
         "title",
         "description",
@@ -26,11 +28,16 @@ def test_job_has_expected_fields():
         "skills",
         "keywords",
         "salary",
+        "currency",
         "job_url",
         "publication_date",
         "status",
         "first_seen_at",
         "last_seen_at",
+        "last_verified_at",
+        "raw",
+        "embedding",
+        "content_hash",
     }
 
     actual_fields = set(Job.__table__.columns.keys())
@@ -67,13 +74,18 @@ def test_normalized_enum_values():
     }
 
 
-def test_job_status_is_a_required_enum_defaulting_to_active():
+def test_job_status_is_a_required_enum_defaulting_to_discovered():
     status = Job.__table__.c.status
 
-    assert {job_status.value for job_status in JobStatus} == {"ACTIVE", "EXPIRED"}
+    assert {job_status.value for job_status in JobStatus} == {
+        "DISCOVERED",
+        "ACTIVE",
+        "STALE",
+        "EXPIRED",
+    }
     assert isinstance(status.type, SQLAlchemyEnum)
     assert not status.nullable
-    assert status.server_default.arg == JobStatus.ACTIVE.value
+    assert status.server_default.arg == JobStatus.DISCOVERED.value
 
 
 def test_normalized_fields_use_documented_storage_types():
@@ -114,13 +126,44 @@ def test_source_run_has_expected_fields():
         "finished_at",
         "status",
         "snapshot_complete",
+        "polling_mode",
+        "duration_ms",
         "jobs_found",
         "jobs_created",
         "jobs_updated",
+        "jobs_unchanged",
+        "jobs_absent",
+        "jobs_marked_stale",
+        "jobs_expired",
+        "jobs_reactivated",
+        "jobs_rejected",
         "errors",
     }
 
     assert set(SourceRun.__table__.columns.keys()) == expected_fields
+
+
+def test_skill_taxonomy_and_job_requirement_fields():
+    assert set(Skill.__table__.columns.keys()) == {
+        "id",
+        "canonical_name",
+        "category",
+        "parent_skill_id",
+        "aliases",
+    }
+    assert set(JobSkill.__table__.columns.keys()) == {"job_id", "skill_id"}
+    assert set(JobRequirement.__table__.columns.keys()) == {
+        "id",
+        "job_id",
+        "text",
+        "requirement_class",
+        "skill_id",
+    }
+    assert {item.value for item in RequirementClass} == {
+        "REQUIRED",
+        "PREFERRED",
+        "NICE_TO_HAVE",
+    }
 
 
 def test_job_references_job_source():

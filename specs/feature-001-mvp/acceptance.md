@@ -23,9 +23,10 @@
 ## Resolved API contract
 
 - `POST /matches` accepts matching sections from Sistema Currículo's implemented
-  preview at commit `66af300`: required UUID `curriculo_id` and required arrays
+  preview: required UUID `curriculo_id` and required arrays
   `formacoes`, `experiencias`, `projetos`, `competencias`, and `idiomas`. Every
-  array may be empty; no additional collection cap is imposed by this contract.
+  array may be empty. Service caps are 20 `formacoes`, 50 `experiencias`,
+  50 `projetos`, 200 `competencias`, and 20 `idiomas` (ADR-006).
 - `curriculo_id` is the only CV identifier and is not restricted to UUID version
   4. Section items have no `id` field; extra item IDs are rejected. The curriculum
   ID is request-scoped and is never persisted, logged, or echoed in the response.
@@ -49,11 +50,11 @@
   fields reject Unicode control characters; text is trimmed before length checks.
 - The request omits preview identity/contact, presentation, and document fields
   (`estudante`, `titulo_versao`, `layout`, `documentos`). Unknown fields are
-  rejected. The old integration-document fields, date aliases, defaults,
-  proficiency enums, technology arrays, and collection bounds are not supported.
+  rejected. Alternative field aliases, defaults, proficiency enums, and technology
+  arrays are not supported.
 - `limit` is the only query parameter. It defaults to 10 and accepts integers
   from 1 through 100. There is no `offset` parameter.
-- The response follows #40: `matches[]` entries contain `rank`, nested `job`,
+- `matches[]` entries contain `rank`, nested `job`,
   `score`, boolean `eligibility`, `matched_skills[]`, `missing_requirements[]`,
   `embedding_model`, and `algorithm_version`. The nested job contains a required
   stable positive integer `id` and the public descriptive fields listed in the
@@ -65,52 +66,61 @@
   object, with the arbitrary extra key removed. Known-field errors retain their
   schema field names and list indexes.
 
-### Consolidation decision (2026-11-06)
+### Source authority
 
-The user confirmed `POST /matches` in PR #130 as the Grupo 1 integration
-route, retaining its `limit` parameter and RFC 9457 errors. The response must
-satisfy issue #40 by exposing job identity, eligibility, and match details.
+The matching projection uses Sistema Currículo's preview field names and
+validation from `code-alchemists-br/sistema-curriculo`:
+`src/backend/api/previa_versao_curriculo.py` defines field names/types;
+`src/backend/domain/itens_perfil.py` and `value_objects.py` define validation.
+The request excludes identity/contact and presentation fields.
 
-### Source-model decision (2026-11-07)
+The executor accepts `CurriculumRequest` and `limit`.
+Transient candidate normalization preserves all matching sections; complete
+pipeline integration remains pending.
 
-The user declared the integration document outdated and selected the implemented
-preview's field names and dates. The request schema above supersedes the earlier
-flat integration-document payload. Source authority is
-`code-alchemists-br/sistema-curriculo` commit `66af300`, specifically
-`src/backend/api/previa_versao_curriculo.py` for field names/types and
-`src/backend/domain/itens_perfil.py` plus `value_objects.py` for validation.
-The matching projection excludes identity/contact and presentation fields;
-this is an intentional request projection, not the entire preview response.
-No alternative field aliases from the outdated document or CRUD API are accepted.
-The user subsequently removed section-item IDs from the matching projection;
-only `curriculo_id` remains.
+## Implementation decisions
 
-PR #111 must consolidate onto this request and response contract rather than
-restore its `CandidateProfile` request body. The current executor accepts
-`CurriculumRequest` and `limit`; transient candidate normalization and pipeline
-integration remain pending.
+- [ADR-007](../../docs/architecture/decisions/ADR-007-canonical-persistence-alignment.md)
+  resolves source identity and canonical persistence: unique platform/source ID,
+  reject blank/missing IDs, SQL-only source configuration metadata, corrective
+  migrations and terminal EXPIRED.
+- [ADR-003](../../docs/architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md)
+  records conservative unknown availability, no default verifier, per-record
+  rejection and PARTIAL commits. Network failures roll back job changes; partial
+  runs do not advance last_success_at or absence-based lifecycle evidence.
+- [ADR-005](../../docs/architecture/decisions/ADR-005-weighted-any-term-fts.md)
+  records Portuguese weighted any-term search and its English/accent limitations. Preserve description sections;
+  omit raw payloads until retention rights are established.
+- Category aliases map seniority/mode to shared domain enums; unknown values
+  yield no category. For each APiBR category independently, the first recognized
+  label in source order wins when labels disagree. Keep all normalized labels
+  as keywords so alternative source evidence remains available. Language and
+  employment types remain validated free text.
+- [ADR-006](../../docs/architecture/decisions/ADR-006-curriculum-projection-and-bounds.md)
+  defines the service caps above. Align internal
+  validation with every valid public request, including empty sections, and
+  preserve source dates/levels without carrying the UUID. The public executor
+  remains CurriculumRequest plus limit.
 
 ## Unresolved; address before dependent implementation
 
-1. **APiBR snapshot completeness:** establish whether pagination/scan behavior
-   proves a complete covered set before absence can mark jobs stale. The source
-   selection record describes absent jobs as stale, while the architecture
-   requires a successful complete snapshot. See [ADR-002](../../docs/architecture/decisions/ADR-002-apibr-mvp-source.md).
-2. **Source identity constraint:** reconcile the source-selection record's
-   surrogate primary key and `source_job_id` attribute with the planned unique
-   `(platform, source_job_id)` constraint. Confirm expected null/duplicate ID
-   handling before schema implementation.
-3. **Categorical canonical values:** candidate schema currently accepts free
-   text for seniority, proficiency, mode, and employment type; canonical mapping
-   is pending job-data decisions (tracked in code as #83). Define values and
-   mapping once job data is available.
-4. **Existing persistence alignment:** the initial job migration/model already
-   exists, but the model adds `source_id` and lacks canonical fields including
-   `source_expires_at`, `currency`, `last_verified_at`, `raw`, `embedding`, and
-   `content_hash`; its status enum only has `ACTIVE` and `EXPIRED`. This conflicts
-   with the exact canonical fields and lifecycle in the architecture and feature
-   spec. Resolve before dependent persistence/lifecycle work; this consolidation
-   does not change or approve those existing differences.
+1. Verify actual APiBR payload, scan completeness and source usage/retention
+   evidence. A synthetic state-free fixture is not proof of
+   the endpoint shape. No unproven scan may mark absent jobs stale.
+2. Select and record the CPU-feasible PT/EN embedding model/version and metadata
+   before semantic work; preserve the fixed canonical Job fields.
+3. Define canonical language/employment requirement mappings and confidence
+   before hard exclusion. Arbitrary free text is insufficient evidence.
 
-Do not resolve remaining questions by inference. Record future outcomes in the
-relevant specification, architecture/ADR if applicable, plan, and tasks.
+Implementation status is in [tasks](tasks.md). Unimplemented worker, lifecycle,
+matching and operational requirements remain pending.
+
+### Open documentation clarifications from PR #157
+
+- The matching-stage list names employment type and language for hard exclusion,
+  while the candidate section defers those exclusions until canonical mappings
+  exist. Confirm how the stage list should describe future versus current scope
+  before implementing those exclusions; no exclusion behavior is added here.
+- Identify the unnamed "outdated integration document" referenced by the spec.
+- Confirm whether the implemented task label "Canonical job correction" should
+  instead describe creation. The existing corrective migration is retained.

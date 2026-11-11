@@ -5,18 +5,35 @@
 The service receives an already structured CV, validates and normalizes it to a
 request-scoped `CandidateProfile`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
-jobs through `POST /matches`. CV parsing is external. `GET /health` is optional.
+jobs through `POST /matches`. CV parsing is external. `GET /health` is optional; when implemented, it must return the contract specified below.
 
 Candidate profile fields:
 
 ```text
-skills[], job_titles[], occupations[], experience[], education[],
-certifications[], languages[], locations[], seniority, years_experience,
-preferences
+skills[], competencies[], job_titles[], occupations[], experience[], education[],
+certifications[], academic_projects[], languages[], locations[], seniority,
+years_experience, preferences
 ```
 
+Candidate `seniority` text maps to the existing `SeniorityLevel` values:
+`intern`/`internship`/`estágio` → `INTERN`; `junior`/`jr`/`júnior` →
+`JUNIOR`; `mid`/`middle`/`mid-level`/`pleno` → `MID`; `senior`/`sr`/`sênior`
+→ `SENIOR`; `specialist`/`especialista` → `SPECIALIST`; and
+`coordinator`/`coordenador(a)` → `COORDINATOR`. Candidate preference modes map
+`remote`/`remoto`/`home office`/`teletrabalho` → `REMOTE`;
+`hybrid`/`híbrido` → `HYBRID`; and `on-site`/`onsite`/`presencial` →
+`ON_SITE`. Matching is case- and accent-insensitive for these aliases. Missing
+or unknown values normalize to no category and must not cause hard exclusion.
+For APiBR jobs with multiple recognized seniority or work-arrangement labels,
+select the first recognized value in source order for each category independently.
+Retain every normalized label in keywords, including conflicting alternatives.
+Language proficiency and employment type have no canonical job fields or enums
+yet; keep them as schema-validated free text. They may contribute descriptive
+matching evidence, but cannot drive hard exclusion until a canonical mapping is
+defined.
+
 The `Job` fields are defined in the [architecture overview](../../docs/architecture/overview.md).
-`platform + source_job_id` is intended to be unique source identity, not
+`platform + source_job_id` is unique source identity, not
 deduplication. Embedding model/version and ranking algorithm version are
 configuration/metadata, not `Job` fields. `source_expires_at` is an explicit
 source expiration; absence does not imply expiration. `raw` retention follows
@@ -30,14 +47,29 @@ The source interface exposes asynchronous `discover`, `fetch_jobs`,
 `INCREMENTAL` or `SNAPSHOT`; only a successful complete snapshot may make
 absence meaningful. Source adapters should provide stable IDs. MVP source:
 APiBR (see [ADR-002](../../docs/architecture/decisions/ADR-002-apibr-mvp-source.md)).
+Under [ADR-003](../../docs/architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md),
+new state-free jobs stay `DISCOVERED`, with no default GitHub requests. Reject
+malformed records independently and commit valid records as `PARTIAL` with safe
+rejected counts; pagination/network failure rolls back job changes. Neither
+partial nor unproven scans permit absence-based lifecycle changes.
 
 Normalize raw job data through source parsing, HTML/whitespace/Unicode cleanup,
 section detection, skill/keyword extraction, alias normalization, requirement
-classification, then canonical Job. Requirement classes are `REQUIRED`,
+classification, then canonical Job. Strip HTML while preserving heading,
+paragraph, table-cell and list boundaries in descriptions. Normalize Unicode
+to NFC and whitespace within each line; other display text collapses whitespace.
+Keep `raw` null until retention rights are established. Requirement classes are `REQUIRED`,
 `PREFERRED`, and `NICE_TO_HAVE`; detected skills must not automatically be
 assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
-matching, and section detection are proposed. PostgreSQL FTS handles DB-level
-tokenization, stemming, and ranking.
+matching, and section detection are proposed. PostgreSQL FTS uses Portuguese tokenization/stemming for documents and plain-text
+queries. [ADR-005](../../docs/architecture/decisions/ADR-005-weighted-any-term-fts.md)
+selects any-term queries and PostgreSQL weights A (1.0) for title/skills,
+B (0.4) for company/keywords/requirements, and D (0.1) for description/location.
+JSON fields use PostgreSQL text rendering. Index/runtime expressions must match
+and use immutable functions. Treat query quotes/operators as data; preserve
+already parsed lexemes when forming the OR query. English stemming and accent-
+insensitive matching are not guaranteed. Location remains descriptive retrieval
+text, never a separate geographic compatibility score or eligibility filter.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
 `parent_skill_id`, `aliases`); candidate-side taxonomy processing is transient.
@@ -53,6 +85,7 @@ complete snapshot; incremental absence and failed polls do not change status.
 `STALE→EXPIRED` uses configured consecutive missing snapshots and/or maximum
 stale duration; either configured condition may expire a job. Reliable explicit
 `source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.
+`EXPIRED` is terminal even if a source later reopens the record.
 Retain expired records; physical deletion is out of MVP.
 
 `last_seen_at` tracks successful observation; `last_verified_at` tracks
@@ -61,8 +94,8 @@ hash updates the job, reindexes text, nulls its embedding, and schedules
 regeneration. Unchanged content is not updated. Model/version changes
 independently invalidate and regenerate embeddings.
 
-Only active jobs are in active retrieval. FTS covers title, company, description,
-skills, requirements, and location. Semantic job representation is title,
+Only active jobs are in active retrieval. FTS covers title, company, description, keywords,
+skills, normalized requirements, and location. Semantic job representation is title,
 normalized skills, requirements, relevant description, location, and mode.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job
@@ -89,7 +122,11 @@ The public API contract is documented in [acceptance](acceptance.md).
 `POST /matches` accepts the matching sections of the implemented Sistema
 Currículo preview: `curriculo_id`, `formacoes`, `experiencias`, `projetos`,
 `competencias`, and `idiomas`. All arrays are required and may be empty. Items
-have no IDs; only `curriculo_id` is a UUID. Education and experience use
+have no IDs; only `curriculo_id` is a UUID. Service collection caps are
+20 education entries, 50 experiences, 50 projects, 200 competencies and 20
+languages. Empty sections remain valid. The transient adapter preserves every
+matching section, education/competency level and source date without carrying
+the UUID, inventing evidence, or imposing stricter internal text limits. Education and experience use
 required `inicio` and nullable `fim` calendar dates. Education has a level and source status vocabulary;
 competency descriptions and language/competency levels are text. Project
 technologies are a string. Validation follows the source domain as specified
@@ -126,7 +163,7 @@ Persist `job_sources`, `source_runs`, `jobs`, `skills`, `job_skills`, and
 `type`, `polling_mode`, `enabled`, `polling_interval`, `last_run_at`,
 `last_success_at`, `next_run_at`, and `last_error`. Run records include
 `id`, `source_id`, timestamps, status, snapshot completeness, found/created/
-updated/lifecycle counts, and errors; capture enough evidence to establish
+updated/unchanged/rejected/lifecycle counts, and errors; capture enough evidence to establish
 snapshot safety, duration, polling mode, and parsing/HTTP/indexing/embedding
 failures. Scheduler flow: lock source → poll/fetch → validate → normalize →
 upsert → lifecycle update → schedule indexing/embedding. Distinguish found,
