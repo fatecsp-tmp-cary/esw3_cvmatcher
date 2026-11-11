@@ -1,7 +1,8 @@
 # Job field extraction strategy
 
 Authority: [ADR-008](../architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md)
-and the [MVP spec](../../specs/feature-001-mvp/spec.md). Status: planned.
+and the [MVP spec](../../specs/feature-001-mvp/spec.md). Status: state/worker
+foundation implemented; local GLiNER inference and quality evaluation pending.
 
 Use GLiNER locally during background job normalization/enrichment. The reference
 is the sibling `../gline/README.md`, `extract_requirements.py`, `benchmark.py` and
@@ -58,13 +59,45 @@ The user selected these rules on 2026-11-11:
 - Operator alerts are local only: persist failed-job state and emit a structured
   error log. No webhook/email integration is required by the MVP. Error logs must
   use safe identifiers/failure categories rather than job text or credentials.
-- Retry delay and failure categories still need definition. Model/configuration
+- Transient extraction failures wait 30 seconds after the first attempt and 60
+  seconds after the second. Only fixed `inference_error` / `invalid_result` categories
+  are retained; exception messages and job text never enter errors. Model/configuration
   changes use simple stop/reprocess/restart during pre-production; no availability-
   preserving cutover is required under
   [ADR-010](../architecture/decisions/ADR-010-preproduction-and-minute-rate-limit.md). No alert is sent by this documentation.
 
-These requirements are accepted; the worker, evidence persistence, readiness
-queries and operator alert/retry mechanism remain unimplemented.
+The background foundation lives in `src/extraction/service.py`; it uses
+`job_extractions` supporting state introduced by migration `b1e001`. It does not
+add canonical Job fields or change availability. `enqueue(session, job_id, version)`
+creates work or invalidates old content/configuration, in the caller's transaction.
+A worker uses `FOR UPDATE SKIP LOCKED` to reserve one job and a random claim token,
+then commits before invoking the injected `LocalExtractor`. Current successful
+content/configuration is checked by `ready_predicate(version)`; missing, failed,
+pending, running and obsolete states fail closed. Retrieval must apply this predicate
+separately from ACTIVE availability, on every matching path. Ingestion/API/scheduler
+wiring remains the integration owner's responsibility.
+
+Claims expire after five minutes. A crash can then be recovered within the same
+three-claim budget; expired/revoked tokens cannot publish a result. A third expired
+claim records `FAILED` with fixed `claim_expired` category and emits a local
+structured error. A slow inference may consequently be repeated after lease
+expiry; this is bounded at-least-once processing, not exactly-once inference.
+Repeated terminal failures require explicit operator
+`enqueue(session, job_id, version, retry=True)`; merely polling/enqueuing unchanged
+content never resets the failure budget. Model/configuration or content changes
+start a new extraction generation. Stop workers before changing configuration.
+
+`SpanEvidence` stores character offsets, label and confidence into cleaned
+`title + "\n" + description`; source text is not duplicated in error records.
+Spans are validated before persistence, duplicate offset/label predictions are
+removed, and `requirement_class` stays null. No mandatory exclusions are enabled
+by this foundation. `chunks` provides bounded overlapping character windows with
+complete coverage and original offsets; token-budget enforcement belongs in the
+actual pinned model adapter. Explicit source metadata is untouched.
+
+This foundation is verified with synthetic injected extractors. It does not
+implement or claim GLiNER inference, taxonomy mapping, classification-quality
+validation, model acquisition, API wiring or production extraction readiness.
 
 ## Mandatory classification quality gate
 
