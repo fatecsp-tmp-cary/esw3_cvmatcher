@@ -1,34 +1,41 @@
 {
-  "curriculo_id": "cur_12345678",
-  "dados_pessoais": {
-    "cidade": "São Paulo",
-    "estado": "SP",
-    "modalidade_preferencial": "remoto"
-  },
-  "formacao_academica": [
+  "curriculo_id": "550e8400-e29b-41d4-a716-446655440000",
+  "formacoes": [
     {
+      "instituicao": "FATEC-SP",
       "curso": "Análise e Desenvolvimento de Sistemas",
-      "status": "em_andamento"
+      "nivel": "tecnologo",
+      "status": "em_andamento",
+      "inicio": "2024-02-01",
+      "fim": "2026-12-01"
+    }
+  ],
+  "experiencias": [
+    {
+      "empresa": "Empresa de exemplo",
+      "cargo": "Estagiário de Desenvolvimento",
+      "descricao": "Desenvolvimento de APIs REST e manutenção de banco de dados relacional.",
+      "inicio": "2025-01-01",
+      "fim": null
+    }
+  ],
+  "projetos": [
+    {
+      "titulo": "Sistema de Apoio Profissional",
+      "descricao": "Plataforma de currículos e busca de vagas.",
+      "tecnologias": "Java, Clean Architecture, Docker"
     }
   ],
   "competencias": [
     {
-      "nome": "Python",
+      "descricao": "Python",
       "nivel": "intermediario"
     }
   ],
   "idiomas": [
     {
       "idioma": "Inglês",
-      "nivel": "avancado"
-    }
-  ],
-  "experiencias_profissionais": [],
-  "projetos_academicos": [
-    {
-      "titulo": "Projeto de exemplo",
-      "tecnologias": ["FastAPI"],
-      "descricao": "Exemplo fictício para integração com a API."
+      "nivel": "B2"
     }
   ]
 }

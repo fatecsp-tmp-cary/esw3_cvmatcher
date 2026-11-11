@@ -1,9 +1,13 @@
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from src.mock_api.app import create_app
+from src.schemas.candidate.curriculum import CurriculumRequest
+from src.schemas.matches import MatchesResponse
 
 _PROJECT_ROOT = Path(__file__).parents[2]
 _SAMPLE_REQUEST = json.loads(
@@ -29,6 +33,10 @@ def test_mock_matches_returns_ten_deterministic_sample_jobs_by_default() -> None
     assert [match["rank"] for match in matches] == list(range(1, 11))
     assert matches[0]["job"]["title"] == "Backend Developer 001"
     assert matches[0]["score"] == 100
+    assert [match["job"]["id"] for match in matches] == list(range(1, 11))
+    assert matches[0]["eligibility"] is True
+    assert matches[0]["matched_skills"] == ["Python", "FastAPI"]
+    assert matches[0]["missing_requirements"] == []
 
 
 def test_mock_matches_limit_controls_response_sample_size() -> None:
@@ -52,7 +60,7 @@ def test_mock_matches_limit_controls_response_sample_size() -> None:
 
 def test_mock_validation_errors_do_not_echo_candidate_values() -> None:
     secret = "candidate-data-that-must-not-be-echoed"
-    request = {**_SAMPLE_REQUEST, "curriculo_id": secret, "competencias": []}
+    request = {**_SAMPLE_REQUEST, "curriculo_id": secret, "competencias": [{"nivel": ""}]}
     with TestClient(create_app()) as client:
         response = client.post("/matches", json=request)
 
@@ -76,3 +84,42 @@ def test_mock_openapi_and_swagger_ui_are_available() -> None:
     )
     assert swagger.status_code == 200
     assert "swagger-ui" in swagger.text
+
+
+def test_mock_and_production_publish_identical_contract_components() -> None:
+    from src.api.app import create_app as create_public_app
+
+    with TestClient(create_app()) as mock, TestClient(create_public_app()) as public:
+        mock_schemas = mock.get("/openapi.json").json()["components"]["schemas"]
+        public_schemas = public.get("/openapi.json").json()["components"]["schemas"]
+
+    for model in (CurriculumRequest, MatchesResponse):
+        names = {model.__name__, *model.model_json_schema().get("$defs", {})}
+        for name in names:
+            assert mock_schemas[name] == public_schemas[name]
+
+
+def test_mock_starts_without_database_libraries() -> None:
+    # The mock Docker image installs only FastAPI and Uvicorn. Guard that path
+    # in a fresh interpreter so cached imports cannot hide an ORM dependency.
+    script = """
+import importlib.abc
+import sys
+
+class BlockDatabaseImports(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.split('.')[0] in {'sqlalchemy', 'psycopg', 'pgvector', 'alembic'}:
+            raise ImportError('Database library imported by mock: ' + fullname)
+
+sys.meta_path.insert(0, BlockDatabaseImports())
+from fastapi.testclient import TestClient
+from src.mock_api.app import create_app
+
+with TestClient(create_app()) as client:
+    assert client.get('/health').json() == {'status': 'ok'}
+    assert client.get('/openapi.json').status_code == 200
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script], cwd=_PROJECT_ROOT, capture_output=True, text=True
+    )
+    assert result.returncode == 0, result.stderr
