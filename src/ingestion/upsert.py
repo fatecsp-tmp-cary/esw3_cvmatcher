@@ -1,9 +1,11 @@
 """Source-specific persistence of normalized jobs."""
 
+import hashlib
+import json
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from src.ingestion.hashing import HASH_FIELDS, content_hash
@@ -29,13 +31,23 @@ def upsert_job(
 ) -> tuple[str, bool, bool]:
     """Insert or update a job by its source platform and source job ID.
 
+    A transaction-scoped advisory lock serializes writers of the same source
+    identity, including identities that do not have a row yet. Callers must
+    commit or roll back to release it. Hash collisions only serialize unrelated
+    identities; the database unique constraint remains authoritative.
+
     The return values are the content outcome, whether this call newly expired
     the job, and whether it reactivated a stale job.
     """
     platform = normalized["platform"]
     source_job_id = normalized["source_job_id"]
+    identity = json.dumps([platform, source_job_id], ensure_ascii=False).encode("utf-8")
+    lock_key = int.from_bytes(hashlib.sha256(identity).digest()[:8], signed=True)
+    session.execute(select(func.pg_advisory_xact_lock(lock_key)))
     existing = session.scalar(
-        select(Job).where(Job.platform == platform, Job.source_job_id == source_job_id)
+        select(Job)
+        .where(Job.platform == platform, Job.source_job_id == source_job_id)
+        .execution_options(populate_existing=True)
     )
     proposed_status = JobStatus(normalized["status"])
     digest = content_hash(normalized)

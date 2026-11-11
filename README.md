@@ -134,6 +134,24 @@ pytest --no-cov -x                      # faster local loop: no coverage, stop a
 Passing `-m` replaces the default `not external` filter, so combine them when
 needed: `pytest -m "unit and not external"`.
 
+### Disposable database test runner
+
+For repeatable isolated tests under the agentic environment, use a rootless
+Docker daemon at `/run/user/<uid>/docker.sock`, prepare the existing
+`pgvector/pgvector:pg17` image, then run:
+
+```bash
+PYTHON=/path/to/working/venv/bin/python scripts/testing/postgres.sh --no-cov -q
+```
+
+The helper runs a uniquely labeled database with 512 MiB/one CPU requested,
+no host mounts and an ephemeral loopback port. It sets a synthetic `_test` URL,
+waits for readiness and removes only its own container/anonymous volumes on exit.
+It never uses `.env`, existing database volumes or a rootful Docker socket.
+Rootless cgroup enforcement depends on host configuration; check host memory
+pressure as well. Tests run serially. No image pull or package installation is
+performed by the helper.
+
 ### Layout and markers
 
 | Directory | Marker | What goes there |
@@ -220,3 +238,14 @@ Notes:
 - If a PostgreSQL installed on your machine already uses port 5432, set `POSTGRES_PORT`
   (for example `5433`) before `docker compose up -d`, and use the same port in
   `TEST_DATABASE_URL`.
+
+## Production API admission
+
+The production entry point is `src.api.app:app`. Configure `DATABASE_URL` and run
+`alembic upgrade head` before starting it with Uvicorn. It intentionally requires
+no authentication; configure HTTPS at deployment ingress. The database-backed
+quota is 60 admitted requests in any rolling minute across all replicas sharing
+the database. All HTTP paths count, including health and docs. Excess requests
+receive 429 with `Retry-After: 60`; unavailable admission state returns 503.
+See [service access policy](docs/architecture/service-access.md). The production
+matching executor remains unwired; admission does not make matching operational.

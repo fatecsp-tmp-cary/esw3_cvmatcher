@@ -1,6 +1,8 @@
-"""CandidateProfile: the structured CV data received by POST /matches.
+"""Legacy internal candidate schema, not the public POST /matches request.
 
-The external parser supplies this JSON. It is request-scoped: never persist or log it.
+The public boundary is CurriculumRequest; its lossless transient adapter is in
+src.normalization.candidate.curriculum. Do not apply this legacy schema's caps or
+required evidence to public requests. Candidate data must never persist or be logged.
 
 Categorical values (seniority, proficiency, modes, employment types) arrive as free text;
 mapping them to canonical values belongs to candidate normalization, not to this schema.

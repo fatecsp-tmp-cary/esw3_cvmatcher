@@ -74,8 +74,12 @@ validation from `code-alchemists-br/sistema-curriculo`:
 The request excludes identity/contact and presentation fields.
 
 The executor accepts `CurriculumRequest` and `limit`.
-Transient candidate normalization and complete pipeline integration remain
-pending.
+Transient normalization is implemented by `normalize_curriculum` into an immutable
+`NormalizedCandidate`, preserving section order, all text, dates, proficiency,
+education level/status and projects, while excluding the UUID. This projection
+adds no collection/text caps and accepts empty sections. Complete pipeline
+integration remains pending; the legacy `CandidateProfile` is not used as a
+second public-input validator.
 
 ## Implementation decisions
 
@@ -101,3 +105,91 @@ pending.
 
 Implementation status is in [tasks](tasks.md). Unimplemented worker, lifecycle,
 matching and operational requirements remain pending.
+
+## Extraction, contract stability and semantic evidence
+
+Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md).
+
+- Job extraction uses local GLiNER plus validated taxonomy/aliases and contextual
+  requirement classification. Check complete chunk coverage, overlap deduplication,
+  conflicts, unknown evidence and extraction-version reprocessing on offline PT/EN
+  fixtures. Set quality/runtime targets before production enablement.
+- Contract regressions must preserve the accepted Sistema Currículo request,
+  query, response and privacy-safe errors, including previously valid payloads.
+  Extraction/scoring must not add mandatory fields or tighten validation limits.
+- For each job, score every experience title/description and education entry
+  semantically. Select the three highest-scoring experiences before recency
+  weighting, and the highest-scoring education entry. Changing jobs may change
+  which experiences/education are selected.
+- Regressions cover a relevant older experience beating an irrelevant recent one
+  in selection; greater recency weight among selected experiences; education chosen
+  by semantic relevance; ties; 0–2 experiences; empty sections; and repeatability.
+  Internal evidence/embeddings and the curriculum UUID never persist or leak into
+  responses/logs. Keep component/final scores in [0,100].
+
+### Pending implementation decisions
+
+- The implementation interview selected initial semantic mixing weights of
+  **80% experience / 20% education**, subject to validation on reviewed examples.
+  See [scoring policy](../../docs/match/scoring-policy.md).
+  Recency grouping uses initial weights **1.5 / 1.25 / 1.0**, with equal recency
+  receiving equal weight. Similarity calibration and release validation remain
+  pending; the aggregation primitive is implemented but not wired to inference.
+- Select the pinned GLiNER revision, label set, confidence/quality/runtime targets,
+  supporting evidence storage and extraction retry/reprocessing policy.
+- The pending collection-cap work conflicts with freezing the currently uncapped
+  contract above. Do not add caps to this contract implicitly; reconcile any
+  accepted cap decision on another branch with the frozen baseline before merging
+  or implementing it. New restrictions require an explicitly approved versioned
+  contract. This documentation change does not select a different baseline.
+
+## Docker Compose deployment acceptance
+
+- A clean configured host can build/start the production API, worker/scheduler
+  and PostgreSQL+pgvector using the documented Compose procedure.
+- Migrations and database/model readiness complete before matching is ready;
+  startup failures are visible and do not silently serve incompatible data.
+- An end-to-end smoke test exercises fixture ingestion, background processing
+  and the production matching response under the immutable public contract.
+- Container replacement/restart preserves jobs, source state and model caches;
+  shutdown does not remove data volumes. Backup/restore is exercised on test data.
+- Deployment documentation covers configuration/secrets, migrations, readiness,
+  model preparation, updates and recovery; public deployment retains the specified
+  HTTPS, global rate-limit and database-access protections (authentication is
+  intentionally absent under ADR-009).
+
+See [deployment behavior](spec.md#docker-compose-deployment). These are pending
+release checks, not claims about the existing database-only or mock Compose files.
+
+## Implementation interview: readiness and performance
+
+- Withhold jobs from every matching path until extraction succeeds. Extraction
+  failure is not an availability transition. After three failed attempts, record
+  failure, emit a structured local error log and require explicit retry.
+  No email/webhook alert integration is required. Details and remaining
+  operational decisions are in the [extraction policy](../../docs/data/job-field-extraction.md).
+- Warm CPU `POST /matches` target: at most five seconds for 10 experiences,
+  5 education entries, 10,000 active jobs, limit=10, one request at a time.
+  This is an acceptance target awaiting measurement, not a result or public cap.
+
+- The interview selected a mandatory-classification quality gate of at least
+  **95% precision and 80% recall** on independently reviewed examples before
+  extraction may cause exclusion. Minimum sample counts and threshold tuning
+  remain pending; these are acceptance targets, not measured results.
+
+## Production caller boundary
+
+The user selected backend-only, server-to-server calls from Sistema Currículo.
+Browser CORS is disabled; no browser login flow is required. The user selected
+no authentication and a global 60-requests/minute rolling admission limit; HTTPS
+remains required. All API replicas share PostgreSQL admission state. Excess
+returns 429 with Retry-After: 60; unavailable admission state returns 503. See
+[service access](../../docs/architecture/service-access.md).
+
+## Pre-production clarification
+
+No production deployment exists. The user accepts availability interruptions and
+simple stop/reprocess/restart for model/configuration changes; no dual-version
+or rolling-cutover consistency mechanism is required. The corrected global quota
+is **60 requests per minute**, not per second. See
+[ADR-010](../../docs/architecture/decisions/ADR-010-preproduction-and-minute-rate-limit.md).

@@ -44,7 +44,10 @@ to NFC and whitespace within each line; other display text collapses whitespace.
 Keep `raw` null until retention rights are established. Requirement classes are `REQUIRED`,
 `PREFERRED`, and `NICE_TO_HAVE`; detected skills must not automatically be
 assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
-matching, and section detection are proposed. PostgreSQL FTS handles DB-level
+matching, and section detection complement the selected local GLiNER job-field
+extraction strategy. Follow [the extraction plan](../../docs/data/job-field-extraction.md)
+for evidence, confidence, contextual requirement classification, model versioning
+and failure handling. Extraction is planned, not yet implemented. PostgreSQL FTS handles DB-level
 tokenization, stemming, and ranking.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
@@ -70,7 +73,11 @@ hash updates the job, reindexes text, nulls its embedding, and schedules
 regeneration. Unchanged content is not updated. Model/version changes
 independently invalidate and regenerate embeddings.
 
-Only active jobs are in active retrieval. FTS covers title, company, description,
+Only active jobs with successful extraction are eligible for matching retrieval.
+Extraction readiness is independent of availability; pending/failed extraction
+withholds jobs without changing lifecycle state. After three failed extraction
+attempts, alert the operator and require explicit retry. See
+[extraction policy](../../docs/data/job-field-extraction.md). FTS covers title, company, description,
 skills, requirements, and location. Semantic job representation is title,
 normalized skills, requirements, relevant description, location, and mode.
 Candidate representation is job titles, occupations, skills, experience,
@@ -87,6 +94,19 @@ employment-type, and language scores; (5) combine normalized components. No
 geographic filtering/scoring. Uncertain extraction should preferably affect
 scoring rather than exclusion.
 
+The semantic component follows
+[ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md):
+evaluate each experience title/description and each education entry independently
+against each job. Select the three highest semantic experience scores per job,
+then aggregate with greater weight for more recent selected experiences. Combine
+that result with the highest semantic education score. Use existing education
+course/level fields; do not add a public description field. Fewer than three
+experiences use all available entries; missing sections never fabricate evidence.
+Initial semantic mixing is 80% experience / 20% education; distinct recency
+groups use weights 1.5/1.25/1.0 with equal weight for equal recency. Calibration
+and reviewed-example validation remain pending; see
+[scoring policy](../../docs/match/scoring-policy.md).
+
 Default final score is `0.45 * textual + 0.35 * semantic + 0.20 * structured`;
 weights are configurable and component/final scores are `[0,100]`. Score means
 compatibility, not employment probability. Public match results include boolean
@@ -94,7 +114,11 @@ compatibility, not employment probability. Public match results include boolean
 means matching eligibility, never geography. Detail arrays are required and may
 be empty. Component scores may remain internal.
 
-The public API contract is documented in [acceptance](acceptance.md).
+The public API contract is documented in [acceptance](acceptance.md) and is
+immutable. Extraction, normalization and scoring changes must preserve its field
+names, types, requiredness, validation limits, dates/nulls, query, response and
+error semantics. Future incompatible changes require a separately versioned,
+explicitly approved contract; internal adapters absorb model changes.
 `POST /matches` accepts the matching sections of the implemented Sistema
 Currículo preview: `curriculo_id`, `formacoes`, `experiencias`, `projetos`,
 `competencias`, and `idiomas`. All arrays are required and may be empty. Items
@@ -146,11 +170,37 @@ Worker handles polling, normalization, expiration, indexing, embedding, and
 model-change reprocessing. Scheduler may be bundled or separate. Embedding work
 is asynchronous and does not block ingestion/API requests. Record matching
 duration. Credentials use environment/secrets; production uses HTTPS, restricted
-DB access, data minimization, relevant LGPD principles, and authentication for
-public candidate-data endpoints.
+DB access, data minimization, relevant LGPD principles, and an open API with no authentication.
+A PostgreSQL-coordinated global rolling limit admits at most 60 HTTP requests
+per minute; excess returns privacy-safe 429. See
+[ADR-009](../../docs/architecture/decisions/ADR-009-open-api-global-rate-limit.md).
 
 Local Compose includes PostgreSQL+pgvector, API, worker; local model is cached
 in a persistent volume. Deployment stays provider-independent, prefers free
 tiers/open-source/GitHub Actions, and verifies persistent PostgreSQL, pgvector,
 scheduling, background processing, inference, and actual free-tier limits at
 deployment time.
+
+## Docker Compose deployment
+
+Docker Compose is the required packaging and execution path for local use and
+single-host deployment. Provide the production API, background worker/scheduler
+(bundled or separate under the existing architecture), and PostgreSQL+pgvector.
+The standalone mock API is a development aid and does not satisfy this requirement.
+
+Persist PostgreSQL data and cached local models, including selected embedding
+and GLiNER artifacts, across container replacement. Supply environment-specific
+configuration and credentials outside images and version control. Document model
+preparation, schema migration ordering, database readiness and application/model
+readiness so requests are not served against an incompatible or unready stack.
+Keep background polling/extraction/indexing functional under Compose.
+
+Provide a reproducible operator procedure for build/start, migrations, readiness
+checks, update, restart, shutdown without volume loss, backup/restore and recovery
+from failed startup or migration. Preserve production HTTPS, the global
+60-requests/minute admission limit, restricted database access and candidate-data
+privacy requirements. Authentication is intentionally absent under ADR-009.
+The same immutable Sistema Currículo integration contract applies to deployed APIs.
+Hosting remains provider-independent; verify actual host CPU, memory, storage and
+model requirements. A successful mock or database-only startup is not full-stack
+deployment verification.

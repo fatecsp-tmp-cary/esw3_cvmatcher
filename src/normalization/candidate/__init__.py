@@ -1,0 +1,1 @@
+"""Request-scoped candidate normalization."""
