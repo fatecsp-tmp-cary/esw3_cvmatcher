@@ -120,7 +120,7 @@ def create_app(
         app.openapi_schema = schema
         return schema
 
-    app.openapi = custom_openapi
+    app.openapi = custom_openapi  # type: ignore[method-assign]
 
     return app
 

@@ -6,7 +6,7 @@ carry submitted values or exception messages: they may contain candidate data.
 
 import logging
 import traceback
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping
 from http import HTTPStatus
 from pathlib import Path
 
@@ -62,7 +62,7 @@ def problem_response(
     title: str,
     detail: str | None = None,
     errors: list[ValidationIssue] | None = None,
-    headers: dict[str, str] | None = None,
+    headers: Mapping[str, str] | None = None,
 ) -> JSONResponse:
     problem = ProblemDetail(title=title, status=status, detail=detail, errors=errors)
     return JSONResponse(
@@ -73,7 +73,8 @@ def problem_response(
     )
 
 
-async def _handle_validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+async def _handle_validation_error(request: Request, exc: Exception) -> JSONResponse:
+    assert isinstance(exc, RequestValidationError)
     # Copy only loc/msg/type: Pydantic's "input" and "ctx" echo submitted values.
     # Extra-field locations also contain an arbitrary submitted key as the last item.
     errors = [
@@ -93,15 +94,14 @@ async def _handle_validation_error(request: Request, exc: RequestValidationError
     )
 
 
-async def _handle_http_exception(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+async def _handle_http_exception(request: Request, exc: Exception) -> JSONResponse:
+    assert isinstance(exc, StarletteHTTPException)
     title = HTTPStatus(exc.status_code).phrase
     detail = exc.detail if isinstance(exc.detail, str) and exc.detail != title else None
     return problem_response(exc.status_code, title, detail, headers=exc.headers)
 
 
-async def _handle_dependency_unavailable(
-    request: Request, exc: DependencyUnavailableError
-) -> JSONResponse:
+async def _handle_dependency_unavailable(request: Request, exc: Exception) -> JSONResponse:
     logger.warning("Dependency unavailable at %s", _origin(exc))
     return problem_response(
         503,

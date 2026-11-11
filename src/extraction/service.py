@@ -72,6 +72,8 @@ def enqueue(session: Session, job_id: int, config_version: str, *, retry: bool =
         .with_for_update()
         .execution_options(populate_existing=True)
     )
+    if state is None:
+        raise RuntimeError("Extraction state is unavailable")
     if retry or state.content_hash != job.content_hash or state.config_version != config_version:
         state.content_hash = job.content_hash
         state.config_version = config_version
@@ -155,6 +157,8 @@ class ExtractionWorker:
                 )
                 return None
             job = session.get(Job, state.job_id)
+            if job is None:
+                raise RuntimeError("Extraction job is unavailable")
             state.lease_expires_at = now + timedelta(minutes=5)
             state.status = "RUNNING"
             state.claim_token = str(uuid4())
@@ -189,10 +193,13 @@ class ExtractionWorker:
                 state is None
                 or state.status != "RUNNING"
                 or state.claim_token != claim.token
+                or state.lease_expires_at is None
                 or state.lease_expires_at <= now
             ):
                 return False
             job = session.get(Job, claim.job_id, populate_existing=True)
+            if job is None:
+                return False
             state.claim_token = None
             state.lease_expires_at = None
             state.updated_at = now
@@ -244,14 +251,15 @@ class ExtractionWorker:
         try:
             if not isinstance(spans, list) or any(not isinstance(s, SpanEvidence) for s in spans):
                 raise ValueError("Invalid extraction result")
-            serialized = [s.serialize(claim.text) for s in spans]
+            for span in spans:
+                span.serialize(claim.text)
             # Deterministic overlap duplicates are supporting evidence only.
-            unique = {}
-            for span in serialized:
-                key = (span["start"], span["end"], span["label"])
-                if key not in unique or span["confidence"] > unique[key]["confidence"]:
+            unique: dict[tuple[int, int, str], SpanEvidence] = {}
+            for span in spans:
+                key = (span.start, span.end, span.label)
+                if key not in unique or span.confidence > unique[key].confidence:
                     unique[key] = span
-            evidence = [unique[key] for key in sorted(unique)]
+            evidence = [unique[key].serialize(claim.text) for key in sorted(unique)]
         except Exception:
             self.finish(claim, None, error_code="invalid_result", now=now)
             return True

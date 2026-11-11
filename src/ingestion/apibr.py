@@ -228,7 +228,7 @@ def ingest_apibr(
 
     client = client or APiBRClient()
     started_at = started_at or datetime.now(UTC)
-    run = SourceRun(
+    run: SourceRun | None = SourceRun(
         source_id=source_id,
         started_at=started_at,
         status="RUNNING",
@@ -237,6 +237,7 @@ def ingest_apibr(
     )
     session.add(run)
     session.commit()
+    assert run is not None
     run_id = run.id
     timer_started = time.perf_counter()
 
@@ -269,6 +270,8 @@ def ingest_apibr(
         finished_at = datetime.now(UTC)
         run = session.get(SourceRun, run_id)
         source = session.get(JobSource, source_id)
+        if run is None or source is None:
+            raise RuntimeError("Source execution state is unavailable")
         status = "PARTIAL" if counts["rejected"] else "SUCCEEDED"
         run.status = status
         run.finished_at = finished_at

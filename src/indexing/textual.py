@@ -6,18 +6,18 @@ independent of session defaults and prevent JSON keys becoming job evidence.
 
 from sqlalchemy import Text, cast, func, literal, literal_column
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
-from sqlalchemy.sql.elements import ColumnElement
+from sqlalchemy.sql.elements import ColumnElement, SQLColumnExpression
 
 from src.persistence.job.job import Job
 
 # SQL constants are fixed by the algorithm, never constructed from request data.
-_CONFIG = literal_column("'pg_catalog.portuguese'::regconfig")
-_STRING_VALUES = literal_column("'[\"string\"]'::jsonb")
-_EMPTY_JSON = literal_column("'[]'::jsonb")
+_CONFIG: ColumnElement = literal_column("'pg_catalog.portuguese'::regconfig")
+_STRING_VALUES: ColumnElement = literal_column("'[\"string\"]'::jsonb")
+_EMPTY_JSON: ColumnElement = literal_column("'[]'::jsonb")
 TEXTUAL_VERSION = "portuguese-weighted-any-term-v1"
 
 
-def _text_vector(value: ColumnElement, weight: str) -> ColumnElement:
+def _text_vector(value: SQLColumnExpression, weight: str) -> ColumnElement:
     return func.setweight(
         func.to_tsvector(_CONFIG, func.coalesce(value, literal_column("''::text"))),
         literal_column(f"'{weight}'"),
@@ -25,7 +25,7 @@ def _text_vector(value: ColumnElement, weight: str) -> ColumnElement:
     )
 
 
-def _json_vector(value: ColumnElement, weight: str) -> ColumnElement:
+def _json_vector(value: SQLColumnExpression, weight: str) -> ColumnElement:
     return func.setweight(
         func.jsonb_to_tsvector(
             _CONFIG, func.coalesce(cast(value, JSONB), _EMPTY_JSON), _STRING_VALUES

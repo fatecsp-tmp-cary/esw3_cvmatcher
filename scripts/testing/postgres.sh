@@ -26,7 +26,7 @@ trap cleanup EXIT
     "$image" -c shared_buffers=64MB -c max_connections=20 >/dev/null
 ready=false
 for ((attempt=0; attempt<30; attempt++)); do
-    if "${docker_cmd[@]}" exec "$run_id" pg_isready -U cvmatch -d cvmatch_test >/dev/null; then
+    if "${docker_cmd[@]}" exec "$run_id" pg_isready -h 127.0.0.1 -U cvmatch -d cvmatch_test >/dev/null; then
         ready=true
         break
     fi
