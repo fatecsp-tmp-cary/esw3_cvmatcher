@@ -39,5 +39,14 @@ Requirements and completion gates are in [spec](spec.md),
 Calendar-only request dates, empty HTML titles, malformed source URLs/timestamp
 ranges, and source-label precedence have regression coverage. Local tests,
 lint/format checks, documentation link targets, and offline migration SQL
-generation pass. PostgreSQL-backed tests remain unverified locally because the
-database service is unavailable.
+generation pass. Combined-stack verification: 262 unit/API tests and 33 PostgreSQL/pgvector
+integration tests passed on 2026-11-11. Lint, formatting and local document
+link targets passed. See the [contribution evaluation](../../docs/reports/2026-11-11-pr-stack-evaluation.md)
+for scope and limitations.
+
+## Open documentation clarifications
+
+- [ ] Resolve the three [PR #157 clarifications](acceptance.md#open-documentation-clarifications-from-pr-157):
+      future hard-exclusion scope, unnamed integration document and canonical
+      correction/creation terminology. Exclusion implementation depends on a
+      decision; this integration does not choose one.

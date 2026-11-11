@@ -114,3 +114,13 @@ pipeline integration remains pending.
 
 Implementation status is in [tasks](tasks.md). Unimplemented worker, lifecycle,
 matching and operational requirements remain pending.
+
+### Open documentation clarifications from PR #157
+
+- The matching-stage list names employment type and language for hard exclusion,
+  while the candidate section defers those exclusions until canonical mappings
+  exist. Confirm how the stage list should describe future versus current scope
+  before implementing those exclusions; no exclusion behavior is added here.
+- Identify the unnamed "outdated integration document" referenced by the spec.
+- Confirm whether the implemented task label "Canonical job correction" should
+  instead describe creation. The existing corrective migration is retained.
