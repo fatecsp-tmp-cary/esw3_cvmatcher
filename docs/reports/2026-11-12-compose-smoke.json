@@ -1,0 +1,16 @@
+{
+  "project": "cvmatcher-smoke-8bd3a93bc1",
+  "production_deployed": false,
+  "steps": [
+    "compose configuration validated",
+    "existing pinned caches copied into disposable named model volume",
+    "clean production migrations passed",
+    "synthetic APiBR fixture ingested without live source requests",
+    "eager worker factory initialized in clean hashed image",
+    "production worker completed actual pinned offline GLiNER and E5",
+    "production API matching response deterministic",
+    "database and API replacement preserve jobs models and matching",
+    "documented dump/restore succeeds into separate empty project"
+  ],
+  "passed": true
+}

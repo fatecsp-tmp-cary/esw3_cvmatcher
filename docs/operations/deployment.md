@@ -14,7 +14,7 @@ The user confirmed local pre-production scope in
 External HTTPS termination and provider-specific deployment remain separate #150
 acceptance. The loopback API must not be treated as an externally secured service.
 Historical local offline Compose/recovery measurements are recorded in the
-validation report (planned in #178: `../reports/2026-11-12-mvp-validation.md`); repeat them when
+[validation report](../reports/2026-11-12-mvp-validation.md); repeat them when
 implementation changes warrant it rather than claiming they cover a new head.
 
 ## Operational observations

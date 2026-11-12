@@ -1,0 +1,921 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Blind calibration annotation packet; do not expose held-out labels to calibration.",
+  "source_fixture": "tests/fixtures/matching/reviewed_cases.json",
+  "source_sha256": "f84ef6e837e0a263d1dae5fc481d673211b0e69cb0cdc0f0ef2c23043485e150",
+  "human_reviewed": false,
+  "release_quality_approved": false,
+  "cases": [
+    {
+      "id": "pt-001",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Desenvolvedor backend",
+        "description": "Python é obrigatório. SQL é desejável.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento de APIs Python",
+            "description": "Desenvolvimento de APIs Python"
+          }
+        ],
+        "education": [
+          {
+            "title": "Sistemas de informação"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-003",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Contador",
+        "description": "CRC é requisito obrigatório. Excel é preferencial.",
+        "skills": [
+          "CRC",
+          "Excel"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Contabilidade fiscal",
+            "description": "Contabilidade fiscal"
+          }
+        ],
+        "education": [
+          {
+            "title": "Ciências contábeis"
+          }
+        ],
+        "competencies": [
+          "CRC"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-004",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Designer",
+        "description": "Figma é obrigatório. Photoshop não é exigido.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Design de interfaces",
+            "description": "Design de interfaces"
+          }
+        ],
+        "education": [
+          {
+            "title": "Design"
+          }
+        ],
+        "competencies": [
+          "Figma"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-005",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de dados",
+        "description": "SQL é obrigatório. Talvez Python seja útil.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Análise de dados SQL",
+            "description": "Análise de dados SQL"
+          }
+        ],
+        "education": [
+          {
+            "title": "Estatística"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-007",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Professor de inglês",
+        "description": "Inglês é obrigatório. Espanhol não é necessário.",
+        "skills": [
+          "Inglês"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Ensino de inglês",
+            "description": "Ensino de inglês"
+          }
+        ],
+        "education": [
+          {
+            "title": "Letras"
+          }
+        ],
+        "competencies": [
+          "Inglês"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-008",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Cozinheiro",
+        "description": "Cozinha profissional é obrigatória. Panificação é desejável.",
+        "skills": [
+          "Cozinha profissional",
+          "Panificação"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Preparo de refeições",
+            "description": "Preparo de refeições"
+          }
+        ],
+        "education": [
+          {
+            "title": "Gastronomia"
+          }
+        ],
+        "competencies": [
+          "Cozinha profissional"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-009",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Eletricista",
+        "description": "NR10 é obrigatório. NR35 é um diferencial.",
+        "skills": [
+          "NR10",
+          "NR35"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Manutenção elétrica",
+            "description": "Manutenção elétrica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Eletrotécnica"
+          }
+        ],
+        "competencies": [
+          "NR10"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-011",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Desenvolvedor frontend",
+        "description": "React é obrigatório. Vue é apenas um exemplo, não um requisito.",
+        "skills": [
+          "React"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Atendimento em farmácia",
+            "description": "Atendimento em farmácia"
+          }
+        ],
+        "education": [
+          {
+            "title": "Farmácia"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-012",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Farmacêutico",
+        "description": "CRF é obrigatório. Excel seria útil, mas não foi definido como requisito.",
+        "skills": [
+          "CRF"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Programação Java",
+            "description": "Programação Java"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-013",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Motorista",
+        "description": "CNH D é obrigatória. Transporte escolar é preferencial.",
+        "skills": [
+          "CNH D",
+          "Transporte escolar"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Ilustração digital",
+            "description": "Ilustração digital"
+          }
+        ],
+        "education": [
+          {
+            "title": "Artes"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-014",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista financeiro",
+        "description": "Excel é obrigatório. Power BI é um diferencial.",
+        "skills": [
+          "Excel",
+          "Power BI"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Instalação hidráulica",
+            "description": "Instalação hidráulica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Edificações"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-015",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Técnico de laboratório",
+        "description": "Microscopia é obrigatória. PCR é desejável.",
+        "skills": [
+          "Microscopia",
+          "PCR"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Vendas de móveis",
+            "description": "Vendas de móveis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-016",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Desenvolvedor sênior",
+        "description": "Java é obrigatório. Senioridade sênior é obrigatória.",
+        "skills": [
+          "Java",
+          "sênior"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento Java sênior",
+            "description": "Desenvolvimento Java sênior"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "Java"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-018",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de segurança",
+        "description": "Linux é obrigatório. Certificação CISSP é desejável.",
+        "skills": [
+          "Linux",
+          "CISSP"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Segurança de servidores Linux",
+            "description": "Segurança de servidores Linux"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Linux"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-027",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Desenvolvedor backend",
+        "description": "Python é obrigatório. SQL é desejável.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Enfermagem hospitalar",
+            "description": "Enfermagem hospitalar"
+          }
+        ],
+        "education": [
+          {
+            "title": "Enfermagem"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-029",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de dados",
+        "description": "SQL é obrigatório. Talvez Python seja útil.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Cozinha industrial",
+            "description": "Cozinha industrial"
+          }
+        ],
+        "education": [
+          {
+            "title": "Gastronomia"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-030",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Designer",
+        "description": "Figma é obrigatório. Photoshop não é exigido.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Manutenção de motores",
+            "description": "Manutenção de motores"
+          }
+        ],
+        "education": [
+          {
+            "title": "Mecânica"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-032",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de infraestrutura",
+        "description": "Docker é desejável. Docker é obrigatório segundo outra seção; confirmar com a equipe.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Administração de infraestrutura",
+            "description": "Administração de infraestrutura"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Docker"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-033",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Assistente administrativo",
+        "description": "Excel pode vir a ser necessário após revisão da vaga.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Rotinas administrativas",
+            "description": "Rotinas administrativas"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": [
+          "Excel"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-034",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Operador de caixa",
+        "description": "Não exigimos experiência com SAP.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Operação de caixa",
+            "description": "Operação de caixa"
+          }
+        ],
+        "education": [
+          {
+            "title": "Ensino médio"
+          }
+        ],
+        "competencies": [
+          "SAP"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-001",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Backend developer",
+        "description": "Python is required. SQL is preferred.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Python API development",
+            "description": "Python API development"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-003",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Designer",
+        "description": "Figma is required. Photoshop is not required.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Database administration",
+            "description": "Database administration"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-004",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Data analyst",
+        "description": "SQL is required. Python might be useful.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "SQL data analysis",
+            "description": "SQL data analysis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Statistics"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-006",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Senior developer",
+        "description": "Go is required. Senior experience is required.",
+        "skills": [
+          "Go",
+          "Senior"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Junior graphic design",
+            "description": "Junior graphic design"
+          }
+        ],
+        "education": [
+          {
+            "title": "Design"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-010",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Electrician",
+        "description": "Electrical installation is required. Python is not necessary.",
+        "skills": [
+          "Electrical installation"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Electrical maintenance",
+            "description": "Electrical maintenance"
+          }
+        ],
+        "education": [
+          {
+            "title": "Electrical technology"
+          }
+        ],
+        "competencies": [
+          "Electrical installation"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    }
+  ]
+}

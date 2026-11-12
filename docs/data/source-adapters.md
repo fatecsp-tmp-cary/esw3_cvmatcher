@@ -60,7 +60,7 @@ establish source permissions, full MVP ingestion operations, or release readines
 A primary-only, one-record read-only probe on 2026-11-12 returned HTTP200 and
 an array with id/title/body/url/created_at and keyword/label fields. The returned
 record had no availability state. Only aggregate keys/counts were retained in
-the probe report (planned in #178: `../reports/2026-11-12-source-shape.json`); no upstream record or
+[the probe report](../reports/2026-11-12-source-shape.json); no upstream record or
 poster information was saved. This establishes a current example of endpoint
 shape, not completeness, stable long-term guarantees or retention rights.
 State-free records remain DISCOVERED; no hidden GitHub verification is enabled.
