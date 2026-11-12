@@ -160,9 +160,9 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   HTTPS, global rate-limit and database-access protections (authentication is
   intentionally absent under ADR-009).
 
-See [deployment behavior](spec.md#docker-compose-deployment). The actual pinned
-offline Compose smoke passed before main reconciliation; integrated rerun and
-remaining release checks are tracked in [tasks](tasks.md).
+See [deployment behavior](spec.md#docker-compose-deployment). The pinned offline Compose smoke passed again after main reconciliation,
+including worker/API processing, replacement durability and backup/restore.
+Evidence and remaining release checks are tracked in [tasks](tasks.md).
 
 ## Implementation interview: readiness and performance
 
@@ -173,8 +173,8 @@ remaining release checks are tracked in [tasks](tasks.md).
   operational decisions are in the [extraction policy](../../docs/data/job-field-extraction.md).
 - Warm CPU `POST /matches` target: at most five seconds for 10 experiences,
   5 education entries, 10,000 active jobs, limit=10, one request at a time.
-  Pre-reconciliation synthetic measurements met this target; see [tasks](tasks.md).
-  Generalization and integrated verification remain pending; it is not a public cap.
+  The isolated reconciled synthetic reference met this target; see [tasks](tasks.md).
+  Generalization remains unproven; this workload is not a public cap.
 
 - The interview selected a mandatory-classification quality gate of at least
   **95% precision and 80% recall** on independently reviewed examples before

@@ -32,10 +32,10 @@ eligibility. The final textual/semantic/structured blend remains 0.45/0.35/0.20.
 Retain main's taxonomy persistence and category aliases. Integrate migration
 branches without rewriting accepted migration history. Parent integration uses
 `b1e004` to merge legacy `8c317a55d4b1` with `b1e003`, preserving original
-migrations. Planned `b1e005` rebuilds all three FTS indexes with accepted helper
-expressions and restores original expressions on downgrade; primary verifies
+migrations. `b1e005` rebuilds all three FTS indexes with accepted helper
+expressions and restores original expressions on downgrade; the primary verified
 all three indexes with the exact PostgreSQL drift regression. Integrated results
-remain the primary's responsibility. Per-entry semantic scoring,
+are recorded in the validation report. Per-entry semantic scoring,
 pinned model policies, terminal EXPIRED, source independence and privacy remain.
 Admission stays global PostgreSQL-backed rolling 60 requests/minute, anonymous,
 with no browser CORS; model changes may use stop/reprocess/restart.
@@ -46,6 +46,6 @@ Applying the old caps would reject valid frozen-contract requests; silently
 changing weights or fields would discard accepted FTS behavior. Neither follows
 the existing authority. Preserve historical ADRs and record precedence here.
 
-Implementation reconciliation and integrated verification remain required.
-Successful pre-reconciliation tests and real offline Compose smoke do not close
+Reconciliation and integrated database/image/Compose verification passed locally.
+Those checks and the real offline Compose smoke do not close
 quality/calibration or source-usage gates. See [task status](../../../specs/feature-001-mvp/tasks.md).

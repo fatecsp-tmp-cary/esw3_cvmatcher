@@ -5,32 +5,32 @@ remain governed by the feature spec, accepted ADRs and Definition of Done.
 
 ## Application and database verification
 
-- Final integrated disposable PostgreSQL/pgvector suite: **531 passed**, one
+- Final integrated disposable PostgreSQL/pgvector suite: **608 passed**, one
   opt-in external/model benchmark deselected. Fresh migrations, supported
   downgrade/upgrade paths, concurrent claims/admission/upserts, readiness,
   lifecycle, privacy, source independence and production API ranking are covered.
-- Mypy: no issues in 58 source files. Ruff lint and formatting passed.
-- Dependency input/provenance validation and seven checker regressions passed.
+- Mypy: no issues in 60 source files. Ruff lint and formatting passed.
+- Dependency input/provenance validation and ten checker regressions passed.
   All five pip input/hashed-lock pairs are committed. The clean production image
   installed runtime/build dependencies with hashes and passed `pip check`.
 - Docker build passed, including actual GLiNER/SentenceTransformers imports as
   non-root UID10001. The image now creates a real passwd/home entry: a bare UID
   previously failed Torch's import-time username/cache resolution.
 - Generic Alembic schema check passes. PostgreSQL deparses implicit FTS casts
-  differently from SQLAlchemy, so only `ix_jobs_active_fts` is excluded from that
+  differently from SQLAlchemy, so the three reviewed FTS indexes are excluded from that
   string comparison. A required separate regression generates a probe index and
   compares server-parsed expression, predicate, method, uniqueness, validity and
-  readiness with the migrated index. No other schema differences are suppressed.
+  readiness with each migrated index. No other schema differences are suppressed. The b1e004 merge preserves both historical migration branches; b1e005 rebuilds all three indexes with the reconciled helpers.
+
+The independently reviewed final boundary fixes clamp tolerant floating-point blends to [0,100] and reject conflicting included/constraint/shared lock pins. The primary reran 171 API/worker/ranking tests and 10 dependency-checker cases after integration. FTS review found no further defect; 24 focused tests and the database regressions passed.
 
 ## Actual offline measurements
 
 The reference request used the real pinned E5 encoder, PostgreSQL admission,
 FTS/vector retrieval, per-entry scoring and REST serialization. With 10,000
 ACTIVE jobs, 10 experiences, 5 education entries and limit10, three sequential
-warm requests took **2.157, 2.111 and 2.133 seconds**. The five-second target
-passed for this homogeneous synthetic corpus with repeated entries and one
-CPU inference thread. It is not an arbitrary-request capacity guarantee.
-See [machine-readable reference](2026-11-12-cpu-reference.json).
+warm requests took **2.157, 2.111 and 2.133 seconds**. These are pre-main-reconciliation results. The isolated reconciled run took **3.417, 3.427 and 3.498 seconds**, passing the five-second target. A preceding run overlapping image model imports took **4.111, 4.270 and 9.516 seconds** and failed; that evidence is retained. Run heavy acceptance checks serially. Neither result guarantees arbitrary-request capacity.
+See the [historical reference](2026-11-12-cpu-reference.json), [reconciled isolated reference](2026-11-12-cpu-reference-reconciled.json) and [failed concurrent-build observation](2026-11-12-cpu-reference-concurrent-build.json).
 
 An independent reviewer authored and committed 40 PT/10 EN synthetic cases
 before seeing model outputs. Primary review/fixture tests preceded actual local
@@ -63,11 +63,19 @@ database/model volumes, migration ordering, offline serving and model preparatio
 services are configured. Backup/restore scripts pass mocked safety tests and
 ShellCheck. The development database port requires an explicit separate overlay.
 
-The primary's disposable real-model Compose/replacement/restore smoke is recorded
-separately; its final observed outcome must be read before claiming deployment
-acceptance. Earlier failed attempts are preserved outside the repository. Their
-clean-image UID defect was corrected; a transient PostgreSQL recovery response
-also exposed the need for bounded readiness retries in the smoke procedure.
+The reconciled real-model Compose smoke **passed** in disposable project
+`cvmatcher-smoke-79ec1fffcf`: clean b1e005 migrations, synthetic ingestion,
+eager offline model/bootstrap, actual GLiNER/E5 worker completion, deterministic
+production API matching, database/API replacement durability and documented
+dump/restore into a separate empty project. Only the two generated projects'
+test resources/volumes were cleaned; development volumes were untouched.
+See [reconciled smoke evidence](2026-11-12-compose-reconciled.json). This is local
+acceptance, with `production_deployed: false`; external HTTPS is unverified.
+
+The user requested the existing synthetic cases be prepared for human review.
+The [blind review packet](../match/human-review/README.md) preserves all 50 inputs
+and source SHA-256, excludes existing labels/tags/model outputs, and leaves every
+annotation pending. Human review and release-quality flags remain false.
 
 ## Orchestration and preservation
 

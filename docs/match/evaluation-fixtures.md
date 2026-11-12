@@ -113,3 +113,11 @@ PYTHONPATH=. python scripts/evaluation/run_local.py --extraction-directory /path
 
 Only synthetic fixture IDs, job spans and scalar scores are written; candidate
 embeddings remain transient. Existing outputs are not overwritten.
+
+## Human review preparation (2026-11-12)
+
+At the user's request, a [blind human review packet](human-review/README.md)
+contains the same 40 PT/10 EN synthetic inputs with source hash and pending
+annotations. Existing agent labels, hint tags and model outputs are omitted.
+It has not been human-reviewed and is not a release gold set; validation,
+adjudication, sample sufficiency and held-out calibration decisions remain.

@@ -4,7 +4,7 @@ Requirements remain governed by [spec](spec.md), [acceptance](acceptance.md),
 accepted ADRs and the [Definition of Done](../../docs/quality/definition-of-done.md).
 Implementation below is distinct from release approval. #99 remains open.
 
-## Implemented before main reconciliation
+## Implemented and reconciled with main
 
 - Frozen Sistema Currículo request/query/response contract, lossless transient
   normalization, empty sections, OpenAPI and privacy-safe errors.
@@ -19,11 +19,12 @@ Implementation below is distinct from release approval. #99 remains open.
 - Pinned offline local GLiNER inference with token-aware full-text coverage,
   validated offsets/deduplication and conservative explicit skill aliases.
   Mandatory classifications remain disabled pending measured quality approval.
-- Weighted Portuguese any-term FTS and bound queries. Integration must restore
-  ADR-004/005 weights/fields, JSON text rendering and publication-date/identity
-  ties while retaining current extraction readiness on every retrieval path.
+- Weighted Portuguese any-term FTS and bound queries reconciled with ADR-004/005
+  weights/fields, JSON text rendering and publication-date/identity ties, with
+  current extraction readiness on every retrieval path. Both migration histories
+  merge at b1e004; b1e005 rebuilds all three matching FTS indexes.
 - Main taxonomy persistence and category aliases retained; both projection APIs
-  must remain compatible without superseded internal caps (ADR-011).
+  remain compatible without superseded internal caps (ADR-011).
 - Pinned local multilingual E5 encoder with full token windows, normalized vectors,
   separate provenance, bounded job maintenance and exact pgvector retrieval.
 - Production matching executor: per-entry experience/education inference,
@@ -37,9 +38,11 @@ Implementation below is distinct from release approval. #99 remains open.
 - Integrated synthetic background-to-API regressions for readiness, source
   independence, privacy, deterministic ranking and empty evidence.
 
-Before main reconciliation, the suite passed **531 tests** (one opt-in model
-benchmark deselected). Mypy passed all 58 source files; Ruff lint/format and
-production image build passed. These counts do not verify the reconciled tree. See the
+The reconciled database suite passed **608 tests** (one opt-in model benchmark
+was deselected), and mypy passed all 60 source files. After independent review,
+the primary integrated a bounded-score regression and strengthened the dependency
+checker; 171 API/worker/ranking tests and 10 checker tests passed. Ruff lint/format
+and the reconciled production image build passed. See the
 [current validation report](../../docs/reports/2026-11-12-mvp-validation.md).
 
 ## Measurements and release work
@@ -47,12 +50,18 @@ production image build passed. These counts do not verify the reconciled tree. S
 - [x] Actual cached offline GLiNER/E5 CPU execution demonstrated on synthetic text.
 - [x] Complete warm CPU reference: 10 experiences, 5 education entries, 10,000
   ACTIVE jobs, limit=10, one request at a time. Three measured requests:
-  2.157/2.111/2.133 seconds. Homogeneous synthetic corpus and repeated entries;
+  reconciled isolated run: 3.417/3.427/3.498 seconds. The earlier historical run
+  was 2.157/2.111/2.133 seconds. A run overlapping image imports failed at
+  4.111/4.270/9.516 seconds; retain that evidence and serialize heavy checks.
+  Homogeneous synthetic corpus and repeated entries;
   this does not guarantee arbitrary-request latency or model quality.
 - Synthetic 40 PT/10 EN semantic AUC was 0.989/0.994/1.0 across measured variants;
   accuracy was 72%. Mandatory recall was zero: quality gates fail and mandatory
   exclusions remain disabled. These are agent-reviewed synthetic examples, not
   human-reviewed labels or release calibration.
+- [x] Prepare the existing 40 PT/10 EN cases for blind human review, as requested.
+  See the [packet and instructions](../../docs/match/human-review/README.md); all
+  reviews are pending and no approval flags changed.
 - [ ] Independently reviewed PT/EN quality/calibration and sample sufficiency
   approval. At least 95% precision and 80% recall are required before mandatory
   extraction can exclude candidates; unclassified evidence never hard-excludes.
@@ -69,9 +78,12 @@ production image build passed. These counts do not verify the reconciled tree. S
   `passed: true`, `production_deployed: false` (local evidence). Parent copied
   this evidence to `docs/reports/2026-11-12-compose-smoke.json`; parent owns
   that report and final integrated counts.
-- [ ] Primary reruns integrated tests, static checks, migration/image and Compose
-  acceptance after main reconciliation; prior evidence is not an integrated pass.
-- [ ] Final hashed dependency consistency/CI/image gates after integration.
+- [x] Primary reran integrated database/static/migration/image/Compose acceptance
+  after main reconciliation. The real offline model worker, deterministic API,
+  database/API replacement and separate-project dump/restore passed; see the
+  [reconciled smoke](../../docs/reports/2026-11-12-compose-reconciled.json).
+- [x] Final hashed dependency consistency, local static checks and image build
+  after integration. GitHub CI execution remains separately observable on the draft PR.
 - [ ] External HTTPS termination verification belongs to an actual deployment;
   no production deployment or merge is authorized.
 

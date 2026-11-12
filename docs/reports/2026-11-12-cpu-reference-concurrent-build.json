@@ -1,0 +1,18 @@
+{
+  "jobs": 10000,
+  "experiences": 10,
+  "education": 5,
+  "limit": 10,
+  "sequential_requests": 3,
+  "torch_cpu_threads": 1,
+  "model_version": "intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3:5c3f0ac86047711128e95842afa0700b87efef3e51af032c153841abf768bba7",
+  "algorithm_version": "compatibility-v1-provisional:e5-affine-050-100-v1-provisional:f01caebc3e0177aa",
+  "warm_request_seconds": [
+    4.1111501949999365,
+    4.2702446780022,
+    9.516138872000738
+  ],
+  "target_seconds": 5,
+  "passed": false,
+  "limitations": "Homogeneous synthetic jobs and repeated entries; no quality proof."
+}

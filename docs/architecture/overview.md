@@ -68,5 +68,5 @@ provisional coefficients documented in [scoring policy](../match/scoring-policy.
 Pinned local inference and production executor wiring are implemented; calibration
 and quality approval remain pending. Portuguese FTS retains ADR-004/005 weights,
 JSON text rendering and publication-date/identity ties, with current extraction
-readiness on every path; integration verification remains pending under ADR-011.
+readiness on every path; integrated database verification passed under ADR-011.
 Taxonomy persistence and category aliases from main remain part of the system.
