@@ -17,6 +17,7 @@ from src.api.errors import (
     register_error_handlers,
 )
 from src.api.rate_limit import GlobalRateLimiter
+from src.api.runtime import production_matches, production_ready
 from src.processing import ProcessingUnavailable, RequestBudget
 from src.schemas.candidate import CurriculumRequest
 from src.schemas.matches import MatchesResponse
@@ -179,4 +180,6 @@ def create_app(
     return app
 
 
-app = create_app(rate_limiter=GlobalRateLimiter())
+app = create_app(
+    match_executor=production_matches, rate_limiter=GlobalRateLimiter(), readiness=production_ready
+)
