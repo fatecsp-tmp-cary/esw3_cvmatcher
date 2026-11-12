@@ -4,8 +4,8 @@ Revision ID: b1e005
 Revises: b1e004
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "b1e005"
 down_revision = "b1e004"
