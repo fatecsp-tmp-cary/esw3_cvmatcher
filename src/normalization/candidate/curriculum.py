@@ -8,6 +8,20 @@ from dataclasses import dataclass
 from datetime import date
 
 from src.schemas.candidate.curriculum import CurriculumRequest
+from src.schemas.candidate.profile import (
+    CandidateCompetency,
+    CandidateProfile,
+    CandidateProject,
+)
+from src.schemas.candidate.profile import (
+    Education as ProfileEducation,
+)
+from src.schemas.candidate.profile import (
+    Experience as ProfileExperience,
+)
+from src.schemas.candidate.profile import (
+    Language as ProfileLanguage,
+)
 
 
 @dataclass(frozen=True, slots=True, repr=False)
@@ -77,10 +91,6 @@ def normalize_curriculum(request: CurriculumRequest) -> NormalizedCandidate:
         languages=tuple(Language(x.idioma, x.nivel) for x in request.idiomas),
     )
 
-from src.schemas.candidate.profile import (
-    CandidateCompetency, CandidateProfile, CandidateProject,
-    Education as ProfileEducation, Experience as ProfileExperience, Language as ProfileLanguage,
-)
 
 def to_candidate_profile(curriculum: CurriculumRequest) -> CandidateProfile:
     """Preserve matching sections and dates without carrying the curriculum ID."""

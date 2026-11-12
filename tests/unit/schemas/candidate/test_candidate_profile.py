@@ -108,7 +108,6 @@ def test_profile_without_role_context_is_accepted(payload: dict) -> None:
         ({"skills": "Python"}, ("skills",)),
         ({"skills": [""]}, ("skills", 0)),
         ({"skills": ["   "]}, ("skills", 0)),
-        ({"skills": ["Python"] * 201}, ("skills",)),
         ({"years_experience": -1}, ("years_experience",)),
         ({"years_experience": "many"}, ("years_experience",)),
         ({"seniority": 3}, ("seniority",)),
@@ -185,3 +184,19 @@ def test_education_without_content_is_rejected() -> None:
         CandidateProfile.model_validate({**BASE, "education": [{"end_date": "2020"}]})
 
     assert error_locs(exc) == {("education", 0)}
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("certifications", [{"name": "Certificate"}] * 51),
+        ("occupations", ["Developer"] * 51),
+        ("locations", ["Example City"] * 21),
+        ("preferences", {"modes": ["remote"] * 11}),
+        ("preferences", {"employment_types": ["contract"] * 11}),
+        ("experience", [{"title": "Dev", "skills": ["Python"] * 101}]),
+    ],
+)
+def test_independent_profile_fields_keep_existing_limits(field, value):
+    with pytest.raises(ValidationError):
+        CandidateProfile.model_validate({field: value})
