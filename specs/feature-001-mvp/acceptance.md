@@ -77,8 +77,7 @@ The executor accepts `CurriculumRequest` and `limit`.
 Transient normalization is implemented by `normalize_curriculum` into an immutable
 `NormalizedCandidate`, preserving section order, all text, dates, proficiency,
 education level/status and projects, while excluding the UUID. This projection
-adds no collection/text caps and accepts empty sections. Complete pipeline
-integration remains pending; the legacy `CandidateProfile` is not used as a
+adds no collection/text caps and accepts empty sections. Production pipeline integration uses this projection; the legacy `CandidateProfile` is not used as a
 second public-input validator.
 
 ## Implementation decisions
@@ -98,13 +97,14 @@ second public-input validator.
 1. Verify actual APiBR payload, scan completeness and source usage/retention
    evidence (#113/#132/#134). A synthetic state-free fixture is not proof of
    the endpoint shape. No unproven scan may mark absent jobs stale.
-2. Select and record the CPU-feasible PT/EN embedding model/version and metadata
-   before semantic work (#26/#118/#140); preserve the fixed canonical Job fields.
+2. The pinned multilingual E5 model/version and separate provenance are implemented
+   (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
+   the fixed canonical Job fields.
 3. Define canonical language/employment requirement mappings and confidence
    before hard exclusion (#139). Arbitrary free text is insufficient evidence.
 
-Implementation status is in [tasks](tasks.md). Unimplemented worker, lifecycle,
-matching and operational requirements remain pending.
+Implementation status and remaining operational/quality release checks are in
+[tasks](tasks.md); implemented services are not evidence of completed deployment.
 
 ## Extraction, contract stability and semantic evidence
 
@@ -134,9 +134,11 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   See [scoring policy](../../docs/match/scoring-policy.md).
   Recency grouping uses initial weights **1.5 / 1.25 / 1.0**, with equal recency
   receiving equal weight. Similarity calibration and release validation remain
-  pending; the aggregation primitive is implemented but not wired to inference.
-- Select the pinned GLiNER revision, label set, confidence/quality/runtime targets,
-  supporting evidence storage and extraction retry/reprocessing policy.
+  pending; the aggregation primitive is implemented and wired to pinned local inference, with provisional calibration.
+- Pinned GLiNER revision/labels, provisional confidence, separate evidence storage
+  and bounded retry/reprocessing are implemented; see [local GLiNER](../../docs/data/local-gliner.md).
+  Mandatory exclusion remains disabled until independently measured quality and
+  sample sufficiency are approved.
 - The pending collection-cap work conflicts with freezing the currently uncapped
   contract above. Do not add caps to this contract implicitly; reconcile any
   accepted cap decision on another branch with the frozen baseline before merging

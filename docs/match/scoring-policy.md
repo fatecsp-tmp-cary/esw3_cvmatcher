@@ -2,7 +2,7 @@
 
 Authority: [ADR-008](../architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md)
 and the implementation interview on 2026-11-11. This records policy decisions;
-it does not claim production scoring or calibration is complete.
+production scoring is wired, while calibration and release approval remain provisional.
 
 ## Confirmed starting policy
 
@@ -21,7 +21,7 @@ it does not claim production scoring or calibration is complete.
   weights. Selection still takes the three highest semantic scores first.
 - The deterministic aggregation primitive is implemented in
   `src/matching/semantic.py`; its inputs must already be calibrated per-entry
-  scores in [0,100]. It does not implement inference, calibration or API wiring.
+  scores in [0,100]. Production inference and API wiring are provided by `src/matching/pipeline.py` and `src/api/runtime.py`. Per-entry cosine calibration is explicit and provisional.
   Its provisional policy version is `semantic-aggregation-v1-provisional`.
 
 ## Performance target
@@ -32,7 +32,7 @@ The initial reference workload is 10 experiences, 5 education entries,
 latency, with models already loaded, and report the distribution and failures;
 do not silently redefine this as a component-only or percentile-only target.
 This benchmark does not introduce public collection caps or guarantee latency
-for every accepted request size. No performance result has been measured yet.
+for every accepted request size. The opt-in offline reference passed on 2026-11-12: three complete warm requests took 2.157, 2.111 and 2.133 seconds with one CPU inference thread. Jobs were homogeneous synthetic records and entries repeated; this is a reference measurement, not general capacity or quality proof. See `tests/e2e/test_cpu_reference.py` and the current implementation validation report.
 
 ## Evaluation language mix
 
@@ -41,9 +41,9 @@ Report per-language results as well as the combined result so a language-specifi
 failure is visible. Both languages remain supported; this mix is not a geographic
 eligibility rule.
 
-## Pending interview decisions
+## Remaining calibration and release work
 
 - Similarity calibration and reviewed ranking examples/release thresholds.
-- Model/revision selection and runtime/quality tradeoffs.
+- Pinned model/revision metadata is implemented in [local embeddings](local-embeddings.md) and [local GLiNER](../data/local-gliner.md); empirical quality tradeoffs remain under evaluation.
 
 Implementation status remains in [MVP tasks](../../specs/feature-001-mvp/tasks.md).

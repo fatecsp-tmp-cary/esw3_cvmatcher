@@ -31,8 +31,9 @@ and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).
   PT/EN fixtures, pinned configuration and evidence/failure policy are defined.
 - The implementation interview selected initial 80/20 experience/education
   mixing and modest 1.5/1.25/1.0 recency weighting. Aggregation regressions are
-  implemented. Select/pin models, calibrate per-entry similarities, review
-  Portuguese/English examples (80/20 mix), then wire inference and scoring.
+  implemented. Models are pinned and inference/scoring wired. Evaluate the
+  independent Portuguese/English fixtures (80/20 mix) and calibrate per-entry
+  similarities before release approval.
   Validate the five-second warm CPU reference workload in
   [scoring policy](../../docs/match/scoring-policy.md).
 - Implement the success-only extraction readiness gate for every matching path.
@@ -43,7 +44,7 @@ and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).
   collection-cap task with the frozen contract before dependent changes.
 
 These additions follow [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md);
-implementation and release verification remain pending.
+implementation status and remaining release verification are tracked in [tasks](tasks.md).
 
 ## Docker Compose deployment work
 

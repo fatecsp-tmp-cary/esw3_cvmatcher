@@ -11,26 +11,23 @@ acceptance criteria, plan, and task status are in
 
 ## Local PostgreSQL
 
-Integration and e2e tests, and eventually the application itself, need a local
-PostgreSQL with `pgvector`. Start it with:
+Integration/e2e tests and the application use PostgreSQL with pgvector. The
+base Compose file pins the selected image digest and keeps the database private.
+For local tools, explicitly add the loopback-only development overlay:
 
 ```bash
-cp .env.example .env   # first time only; adjust values if needed
-docker compose up -d
+# First time only: copy .env.example to .env if .env does not exist; adjust it.
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
-This starts `pgvector/pgvector:pg17` on `localhost:5432` with the credentials
-from `.env` (defaults: user/password/db `cvmatch`). Check it's ready with:
+Set POSTGRES_PASSWORD in the private environment file. User/database default to
+cvmatch; the development port defaults to 127.0.0.1:5432. Change POSTGRES_PORT
+and DATABASE_URL together when needed. Check readiness with the same two files
+and `compose ps`, or `psql "$DATABASE_URL" -c "select 1;"`.
 
-```bash
-docker compose ps                       # STATUS should be "healthy"
-psql "$DATABASE_URL" -c "select 1;"     # or: docker compose exec postgres pg_isready
-```
-
-Stop it with `docker compose down` (add `-v` to also drop the data volume).
-
-If port 5432 is already taken (for example by a PostgreSQL installed on your machine),
-change `POSTGRES_PORT` in `.env` and use the same port in `DATABASE_URL`.
+Stop using `docker compose -f docker-compose.yml -f docker-compose.dev.yml down`.
+Retain named volumes; see [deployment and recovery](docs/operations/deployment.md)
+for production composition, model preparation and backup procedures.
 
 ## Runnable API mock
 
@@ -165,8 +162,7 @@ The marker is applied automatically from the directory (`tests/conftest.py`);
 don't add it by hand. Mirror the `src/` path inside each directory, e.g.
 `src/normalization/jobs/` → `tests/unit/normalization/jobs/`.
 
-`external` is the only marker set by hand, on tests that reach a live job
-source. They are deselected by default and must never be required in CI.
+`external` is set by hand for live-source checks and explicit opt-in local-model performance measurements. They are deselected by default and must never be required in CI.
 
 Conventions:
 
@@ -247,5 +243,4 @@ no authentication; configure HTTPS at deployment ingress. The database-backed
 quota is 60 admitted requests in any rolling minute across all replicas sharing
 the database. All HTTP paths count, including health and docs. Excess requests
 receive 429 with `Retry-After: 60`; unavailable admission state returns 503.
-See [service access policy](docs/architecture/service-access.md). The production
-matching executor remains unwired; admission does not make matching operational.
+See [service access policy](docs/architecture/service-access.md). The production matching executor loads the pinned offline local embedding model and queries current successful extraction/embedding state. Prepare models and run the background worker before expecting ready jobs. See [deployment operations](docs/operations/deployment.md) and [MVP task status](specs/feature-001-mvp/tasks.md) for release limitations.

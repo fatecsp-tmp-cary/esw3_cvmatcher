@@ -1,0 +1,28 @@
+{
+  "observed_at": "2026-11-12T02:01:58.951247+00:00",
+  "endpoint": "https://apibr.com/vagas/api/v2/issues",
+  "requested_page_size": 1,
+  "http_status": 200,
+  "top_level_type": "list",
+  "records_returned": 1,
+  "record_keys": [
+    "body",
+    "comments",
+    "created_at",
+    "id",
+    "keywords",
+    "labels",
+    "number",
+    "repository",
+    "title",
+    "updated_at",
+    "url",
+    "user"
+  ],
+  "with_body": 1,
+  "with_state": 0,
+  "with_stable_id": 1,
+  "raw_retained": false,
+  "scan_complete": false,
+  "usage_retention_rights_verified": false
+}

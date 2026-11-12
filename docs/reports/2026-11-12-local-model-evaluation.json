@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "dataset_kind": "agent-reviewed synthetic",
+  "release_quality_measured": false,
+  "groups": {
+    "all": {
+      "cases": 50,
+      "predictions": 50,
+      "missing_ids": [],
+      "exact_extraction": {
+        "true_positive": 15,
+        "false_positive": 101,
+        "false_negative": 76,
+        "precision": 0.12931034482758622,
+        "recall": 0.16483516483516483
+      },
+      "mandatory": {
+        "true_positive": 0,
+        "false_positive": 0,
+        "false_negative": 43,
+        "precision": null,
+        "recall": 0.0
+      },
+      "ranking": {
+        "pairwise_auc_observed": 0.9889705882352942,
+        "observed_pairs": 544,
+        "role_accuracy_all_cases": 0.72,
+        "complete": true
+      },
+      "mandatory_thresholds": {
+        "precision": 0.95,
+        "recall": 0.8,
+        "synthetic_gate_met": false
+      }
+    },
+    "pt": {
+      "cases": 40,
+      "predictions": 40,
+      "missing_ids": [],
+      "exact_extraction": {
+        "true_positive": 11,
+        "false_positive": 55,
+        "false_negative": 63,
+        "precision": 0.16666666666666666,
+        "recall": 0.14864864864864866
+      },
+      "mandatory": {
+        "true_positive": 0,
+        "false_positive": 0,
+        "false_negative": 35,
+        "precision": null,
+        "recall": 0.0
+      },
+      "ranking": {
+        "pairwise_auc_observed": 0.9940476190476191,
+        "observed_pairs": 336,
+        "role_accuracy_all_cases": 0.725,
+        "complete": true
+      },
+      "mandatory_thresholds": {
+        "precision": 0.95,
+        "recall": 0.8,
+        "synthetic_gate_met": false
+      }
+    },
+    "en": {
+      "cases": 10,
+      "predictions": 10,
+      "missing_ids": [],
+      "exact_extraction": {
+        "true_positive": 4,
+        "false_positive": 46,
+        "false_negative": 13,
+        "precision": 0.08,
+        "recall": 0.23529411764705882
+      },
+      "mandatory": {
+        "true_positive": 0,
+        "false_positive": 0,
+        "false_negative": 8,
+        "precision": null,
+        "recall": 0.0
+      },
+      "ranking": {
+        "pairwise_auc_observed": 1.0,
+        "observed_pairs": 24,
+        "role_accuracy_all_cases": 0.7,
+        "complete": true
+      },
+      "mandatory_thresholds": {
+        "precision": 0.95,
+        "recall": 0.8,
+        "synthetic_gate_met": false
+      }
+    }
+  },
+  "model_measurement": {
+    "embedding_model": "intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3:5c3f0ac86047711128e95842afa0700b87efef3e51af032c153841abf768bba7",
+    "extraction_version": "gliner-job-v1-2f6aab7a8d8cef173cc44b19",
+    "calibration_version": "e5-affine-050-100-v1-provisional",
+    "offline_cpu_threads": 1,
+    "ranking_component": "per-pair semantic only; not complete retrieval/final blended ranking",
+    "mandatory_classification_enabled": false,
+    "limitations": "Agent-reviewed synthetic corpus; no human release approval or calibration fit."
+  }
+}

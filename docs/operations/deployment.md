@@ -118,3 +118,11 @@ results. Use a different loopback API port while the original project runs.
 Exercise replacement/restart and verify retained jobs/cache before declaring
 recovery tested. This drill has not been run in this change. Keep the original
 project and volumes until recovery is independently verified.
+
+## Clean-image inference prerequisite
+
+The serving image creates UID/GID10001 with a passwd entry and writable home.
+Torch resolves that identity when GLiNER imports its optional compiler support;
+a bare numeric USER without a passwd entry fails before extraction. The image
+build now imports GLiNER and SentenceTransformers as the real non-root user,
+offline and without model weights, to catch this clean-host prerequisite.

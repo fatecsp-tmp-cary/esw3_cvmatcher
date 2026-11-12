@@ -89,3 +89,27 @@ Oracle round-trip tests copy expected labels solely to verify metric plumbing;
 they are not inference results or evidence of extraction/ranking quality. No
 model packages, database or network are required. No product contract or
 architecture changes are introduced; see [ADR-008](../architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md).
+
+## Actual offline model measurement (2026-11-12)
+
+After independent labels were committed and reviewed, the primary ran pinned
+GLiNER/E5 locally with no downloads. See the [aggregate report](../reports/2026-11-12-local-model-evaluation.json).
+Semantic per-pair role AUC was 0.989 overall, 0.994 PT and 1.000 EN; role accuracy
+at the provisional cutoff was 72%. This evaluates the semantic component, not
+complete retrieval/final blended ranking. The small synthetic set is not a
+human-reviewed release gold set or calibrated employment probability.
+
+Exact span-plus-class precision/recall was 12.9%/16.5%; GLiNER emits unclassified
+mentions, so these metrics must not be interpreted as a tuned requirement
+classifier. Mandatory recall was zero, precision undefined, and all mandatory
+gates failed. Mandatory exclusions therefore remain disabled. No threshold was
+fit to these examples after observing their labels.
+
+To repeat explicitly, with prepared caches and new output paths:
+
+```sh
+PYTHONPATH=. python scripts/evaluation/run_local.py --extraction-directory /path/to/prepared/gliner --predictions /path/to/new-synthetic-predictions.json --report /path/to/new-aggregate-report.json
+```
+
+Only synthetic fixture IDs, job spans and scalar scores are written; candidate
+embeddings remain transient. Existing outputs are not overwritten.
