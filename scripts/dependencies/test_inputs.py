@@ -77,6 +77,30 @@ class LockConsistencyTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "Unexpected lock target"):
             self.invoke("--check")
 
+    def test_build_constraint_conflict_cannot_be_recorded(self):
+        path = self.root / "requirements/local-models.lock"
+        path.write_text(path.read_text().replace("setuptools==78.1.0", "setuptools==78.2.0"))
+        with self.assertRaisesRegex(SystemExit, "Referenced dependency versions differ"):
+            self.invoke("--record")
+
+    def test_include_missing_package_cannot_be_recorded(self):
+        path = self.root / "requirements/dev.lock"
+        content = re.sub(r"\\\n\s*", " ", path.read_text())
+        path.write_text(
+            "\n".join(line for line in content.splitlines() if not line.startswith("h11=="))
+        )
+        with self.assertRaisesRegex(SystemExit, "Referenced dependency versions differ"):
+            self.invoke("--record")
+
+    def test_combined_environment_conflict_cannot_be_recorded(self):
+        # A shared transitive package outside runtime/build still must agree.
+        for name, version in (("dev.lock", "1.0"), ("local-models.lock", "2.0")):
+            path = self.root / "requirements" / name
+            entry = f"review-probe=={version} --hash=sha256:{'a' * 64}\n"
+            path.write_text(path.read_text() + "\n" + entry)
+        with self.assertRaisesRegex(SystemExit, "Development and local-model"):
+            self.invoke("--record")
+
 
 if __name__ == "__main__":
     unittest.main()

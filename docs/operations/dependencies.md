@@ -37,7 +37,9 @@ above), then `pip install --no-deps --no-build-isolation -e .` and `pip check`.
 The tooling lock is for maintainers, not the serving image. The offline check
 uses only the standard library: it verifies pyproject projections, all five
 pairs, exact pins/hash syntax and recorded artifact digests without resolving or
-downloading anything. Pip enforces distribution hashes at installation time.
+downloading anything. It also checks included lock packages, overlapping build
+constraints, and shared development/local-model pins because CI installs those
+environments together. Pip enforces distribution hashes at installation time.
 
 ## CI and serving
 

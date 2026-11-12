@@ -105,9 +105,26 @@ def main() -> None:
 
                     if release(actual) < release(version):
                         raise SystemExit(f"Version below lower bound in {name}: {package}")
-        for name in ("dev.lock", "local-models.lock"):
-            if any(locked[name].get(key) != value for key, value in locked["runtime.lock"].items()):
-                raise SystemExit(f"Runtime dependency versions differ in {name}")
+        for name, content in inputs().items():
+            packages = locked[name.replace(".in", ".lock")]
+            for line in content.splitlines():
+                if not line.startswith(("-r ", "-c ")):
+                    continue
+                directive, reference = line.split()
+                if reference not in locked:
+                    raise SystemExit(f"Unknown lock reference in {name}: {reference}")
+                # Includes require every referenced package. Constraints only
+                # restrict referenced packages that this lock actually contains.
+                for package, version in locked[reference].items():
+                    if directive == "-c" and package not in packages:
+                        continue
+                    if packages.get(package) != version:
+                        raise SystemExit(f"Referenced dependency versions differ in {name}")
+        # CI installs both environments together; neither lock may silently
+        # replace a shared package pinned by the other.
+        for package in locked["dev.lock"].keys() & locked["local-models.lock"].keys():
+            if locked["dev.lock"][package] != locked["local-models.lock"][package]:
+                raise SystemExit("Development and local-model dependency versions differ")
     if args.record:
         manifest_path.write_text(
             json.dumps(
