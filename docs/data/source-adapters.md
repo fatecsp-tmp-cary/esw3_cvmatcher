@@ -68,6 +68,39 @@ The worker invokes the bounded synchronous ingestion compatibility path; the
 common async adapter is available independently. Live calls remain optional and
 excluded from CI.
 
+## Label metadata field mapping
+
+Observed on 2026-11-12, `GET /vagas/api/v2/issues` returns each label as an object
+with `name`, `type` and `color`, plus a title-derived `keywords` string array. The
+`type` is `label` (issue labels), `APIBr` (categories assigned by the aggregator)
+or `topic` (topics of the aggregated repository). `normalize_apibr_job` maps this
+explicit metadata to canonical fields:
+
+| Canonical field | Source evidence | Rule |
+| --- | --- | --- |
+| `keywords` | every label name | Unchanged: all names are kept, including topics. |
+| `seniority_level` | non-topic labels and `keywords` | Shared seniority aliases; exactly one distinct value, otherwise empty. |
+| `work_arrangement` | non-topic labels and `keywords` | Shared work-arrangement aliases; exactly one distinct value, otherwise empty. |
+| `skills` | non-topic labels and `keywords` | Names recognized by the shared skill aliases, deduplicated and sorted. |
+
+Repository topics describe the aggregated repository, not the vacancy, and are
+never classified. Leading decorative symbols and the explicit `Level-`/`Lang-`
+prefixes used by some repositories are removed before the exact alias lookup.
+Title and description text are never interpreted here: extraction of
+requirements from text remains the separate
+[job field extraction](job-field-extraction.md) stage. Conflicting labels, such
+as an issue form that publishes every option, leave the field empty rather than
+choosing a value. `Alocado` has no agreed canonical arrangement and stays a
+keyword only. `company`, `location` and `salary` have no structured source field
+and remain empty. Work arrangement is descriptive and is never used for
+geographic eligibility. Skill recall is bounded by the shared alias list in
+`src/extraction/taxonomy.py`; unrecognized technology labels remain keywords.
+
+These fields are part of the job content hash, so a mapping change re-queues
+stored jobs for extraction and embedding. The deterministic
+`tests/resources/apibr_v2_issues.json` fixture mirrors the observed shape with
+synthetic content only; no source record is retained.
+
 ## Accepted best-effort SNAPSHOT mode
 
 [ADR-013](../architecture/decisions/ADR-013-best-effort-apibr-snapshot-attestation.md)
