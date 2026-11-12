@@ -17,6 +17,7 @@ runs:
         cache: pip
         cache-dependency-path: requirements/*.lock
 
+    # Unit embedding tests import torch: install the explicit CPU extra, without weights.
     - name: Install locked dependencies
       shell: bash
       run: |

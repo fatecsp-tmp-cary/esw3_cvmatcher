@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import re
 import tomllib
 from pathlib import Path
 
@@ -20,10 +21,12 @@ def inputs() -> dict[str, str]:
         + "\n",
         "build.in": HEADER + "\n".join(project["build-system"]["requires"]) + "\n",
         "local-models.in": HEADER
-        + "-r runtime.lock\n"
+        + "-r runtime.lock\n-c build.lock\n"
         + "\n".join(project["project"]["optional-dependencies"]["local-models"])
         + "\n",
-        "tooling.in": "# Explicit lock-generation tool change only.\npip-tools==7.6.2\n",
+        "tooling.in": (
+            "# Explicit lock-generation tool change only.\n-c build.lock\npip-tools==7.6.2\n"
+        ),
     }
 
 
@@ -47,6 +50,64 @@ def main() -> None:
         for path in sorted(directory.iterdir())
         if path.suffix in (".in", ".lock")
     }
+    if args.record or args.check:
+        expected = set(inputs()) | {name.replace(".in", ".lock") for name in inputs()}
+        if set(hashes) != expected:
+            raise SystemExit("Expected exactly five input/lock pairs")
+        locked = {}
+        for name in sorted(expected):
+            if not name.endswith(".lock"):
+                continue
+            content = (directory / name).read_text()
+            entries = re.sub(r"\\\n\s*", " ", content).splitlines()
+            packages = {}
+            for entry in entries:
+                entry = " ".join(entry.split(" #", 1)[0].split())
+                if not entry or entry.startswith("#"):
+                    continue
+                if not re.fullmatch(
+                    r"[A-Za-z0-9_.-]+(?:\[[A-Za-z0-9_,.-]+\])?==[^\s;]+"
+                    r"(?: --hash=sha256:[a-f0-9]{64})+",
+                    entry,
+                ):
+                    raise SystemExit(f"Unhashed or unsupported lock entry in {name}")
+                requirement = entry.split(" ", 1)[0]
+                package, version = requirement.split("==", 1)
+                package = re.sub(r"\[.*\]", "", package).lower().replace("_", "-")
+                if package in packages:
+                    raise SystemExit(f"Duplicate package in {name}")
+                packages[package] = version
+            if not packages:
+                raise SystemExit(f"Empty packages in {name}")
+            locked[name] = packages
+        for name, content in inputs().items():
+            packages = locked[name.replace(".in", ".lock")]
+            for requirement in content.splitlines():
+                if not requirement or requirement.startswith(("#", "-r", "-c")):
+                    continue
+                match = re.fullmatch(r"([A-Za-z0-9_.-]+)(?:\[.*\])?(==|>=)([^ ]+)", requirement)
+                if match is None:
+                    raise SystemExit(f"Unsupported input requirement in {name}")
+                package, operator, version = match.groups()
+                actual = packages.get(package.lower().replace("_", "-"))
+                if actual is None or (operator == "==" and actual != version):
+                    raise SystemExit(f"Direct requirement differs in {name}: {package}")
+                if operator == ">=":
+                    # Numeric stable releases, including post/local suffixes, cover these inputs.
+                    def release(value: str) -> tuple[int, ...]:
+                        parsed = re.fullmatch(r"(\d+(?:\.\d+)*)(?:\.post\d+)?(?:\+[^ ]+)?", value)
+                        if parsed is None:
+                            raise SystemExit(f"Unsupported release version: {value}")
+                        parts = [int(part) for part in parsed[1].split(".")]
+                        while parts and parts[-1] == 0:
+                            parts.pop()
+                        return tuple(parts)
+
+                    if release(actual) < release(version):
+                        raise SystemExit(f"Version below lower bound in {name}: {package}")
+        for name in ("dev.lock", "local-models.lock"):
+            if any(locked[name].get(key) != value for key, value in locked["runtime.lock"].items()):
+                raise SystemExit(f"Runtime dependency versions differ in {name}")
     if args.record:
         manifest_path.write_text(
             json.dumps(
@@ -54,8 +115,11 @@ def main() -> None:
                     "python": "3.12",
                     "platform": "Linux x86_64",
                     "resolver": "pip-tools==7.6.2",
+                    "indexes": ["https://pypi.org/simple", "https://download.pytorch.org/whl/cpu"],
+                    "hash_policy": "pip-compile --generate-hashes; pip install --require-hashes",
+                    "model_downloads": False,
                     "files": hashes,
-                    "limitations": "Python 3.13/Debian requires separate verification.",
+                    "limitations": "Other Python versions/architectures are unverified.",
                 },
                 indent=2,
             )
@@ -63,6 +127,12 @@ def main() -> None:
         )
     if args.check:
         recorded = json.loads(manifest_path.read_text())
+        if (recorded["python"], recorded["platform"], recorded["resolver"]) != (
+            "3.12",
+            "Linux x86_64",
+            "pip-tools==7.6.2",
+        ):
+            raise SystemExit("Unexpected lock target or resolver")
         if recorded["files"] != hashes:
             raise SystemExit("Lock provenance differs; explicitly regenerate and verify locks")
         for name in inputs():

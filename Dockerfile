@@ -16,7 +16,8 @@ COPY pyproject.toml alembic.ini ./
 COPY src/ src/
 COPY migrations/ migrations/
 COPY scripts/models/ scripts/models/
-RUN python -m pip install --no-deps --no-build-isolation .
+RUN python -m pip install --no-deps --no-build-isolation . \
+    && python -m pip check
 USER 10001
 EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
