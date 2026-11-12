@@ -134,7 +134,7 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
 
 - The implementation interview selected initial semantic mixing weights of
   **80% experience / 20% education**, subject to validation on reviewed examples.
-  See scoring policy (planned in #173: `../../docs/match/scoring-policy.md`).
+  See [scoring policy](../../docs/match/scoring-policy.md).
   Recency grouping uses initial weights **1.5 / 1.25 / 1.0**, with equal recency
   receiving equal weight. Similarity calibration and release validation remain
   pending; the aggregation primitive is implemented and wired to pinned local inference, with provisional calibration.

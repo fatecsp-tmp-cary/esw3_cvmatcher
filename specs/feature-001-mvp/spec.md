@@ -107,7 +107,7 @@ experiences use all available entries; missing sections never fabricate evidence
 Initial semantic mixing is 80% experience / 20% education; distinct recency
 groups use weights 1.5/1.25/1.0 with equal weight for equal recency. Calibration
 and reviewed-example validation remain pending; see
-scoring policy (planned in #173: `../../docs/match/scoring-policy.md`).
+[scoring policy](../../docs/match/scoring-policy.md).
 
 Default final score is `0.45 * textual + 0.35 * semantic + 0.20 * structured`;
 weights are configurable and component/final scores are `[0,100]`. Score means

@@ -64,7 +64,7 @@ The implementation interview requires successful extraction before jobs enter
 any matching path. Extraction readiness is supporting state separate from
 canonical availability; failures must not change lifecycle. The semantic
 aggregation primitive now lives in `src/matching/semantic.py`, using the
-provisional coefficients documented in scoring policy (planned in #173: `../match/scoring-policy.md`).
+provisional coefficients documented in [scoring policy](../match/scoring-policy.md).
 Pinned local inference and production executor wiring are implemented; calibration
 and quality approval remain pending. Portuguese FTS retains ADR-004/005 weights,
 JSON text rendering and publication-date/identity ties, with current extraction
