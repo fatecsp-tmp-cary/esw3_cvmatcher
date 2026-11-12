@@ -18,9 +18,10 @@ Supply `POSTGRES_PASSWORD`, optional `POSTGRES_USER`/`POSTGRES_DB` (both default
 `cvmatch`), and `DATABASE_URL` through a private local environment file or operator
 secret environment. Do not commit them. The URL must use host `postgres`, port
 5432 and URL-encoded credentials matching PostgreSQL's settings. Rotating the
-variable does not rotate an existing database account. Set
-`CVMATCHER_POSTGRES_IMAGE` to a verified pgvector/PostgreSQL 17 digest for fully
-immutable deployments; the default pins release `0.8.1-pg17` but is not a digest.
+variable does not rotate an existing database account. The default PostgreSQL image is pinned to
+`pgvector/pgvector@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8`.
+Only override `CVMATCHER_POSTGRES_IMAGE` with an independently verified
+pgvector/PostgreSQL 17 digest; mutable tags do not satisfy deployment acceptance.
 
 Always use an explicit project name. The following commands use `cvmatch`;
 substitute a distinct name for test/recovery projects. Run from the repository:

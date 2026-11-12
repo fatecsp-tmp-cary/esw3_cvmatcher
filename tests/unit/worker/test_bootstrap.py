@@ -156,3 +156,16 @@ def test_restore_refuses_initialized_database(tmp_path):
     )
     assert result.returncode == 1
     assert "empty database" in result.stderr
+
+
+def test_compose_default_postgres_image_uses_accepted_immutable_digest():
+    from pathlib import Path
+
+    accepted_image = (
+        "pgvector/pgvector@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8"
+    )
+    compose = Path("docker-compose.yml").read_text()
+    assert f"image: ${{CVMATCHER_POSTGRES_IMAGE:-{accepted_image}}}" in compose
+    documentation = Path("docs/operations/deployment.md").read_text()
+    assert accepted_image in documentation
+    assert "mutable tags do not satisfy deployment acceptance" in documentation

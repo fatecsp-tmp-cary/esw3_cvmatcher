@@ -5,6 +5,10 @@ set -euo pipefail
 cd -- "$(dirname -- "$0")/../.."
 compose=(docker compose --project-name "$1" -f docker-compose.yml -f docker-compose.production.yml)
 # Refuse any initialized application database. No --clean, DROP or volume removal.
+# Expand PostgreSQL variables inside the container, not in the operator shell.
+# shellcheck disable=SC2016
 count=$("${compose[@]}" exec -T postgres sh -c 'exec psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema NOT IN ('"'"'pg_catalog'"'"', '"'"'information_schema'"'"')"')
 [[ $count == 0 ]] || { echo "Restore requires an empty database in a separate project" >&2; exit 1; }
+# Expand PostgreSQL variables inside the container, not in the operator shell.
+# shellcheck disable=SC2016
 "${compose[@]}" exec -T postgres sh -c 'exec pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --exit-on-error --single-transaction --no-owner --no-privileges' < "$2"
