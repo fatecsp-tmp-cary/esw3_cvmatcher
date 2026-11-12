@@ -89,6 +89,10 @@ docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.pr
 curl --fail http://127.0.0.1:8000/health
 ```
 
+The worker polls enabled sources when it starts and then daily at 08:00
+`America/Sao_Paulo`; see the [worker schedule](worker.md#daily-schedule-and-poll-on-start)
+for the `CVMATCHER_SOURCE_*` variables that change this.
+
 PostgreSQL must be healthy before migrations run; migration success gates both
 application services. `/health` checks database/model readiness; migrations are
 not a substitute for model preparation. The API binds only loopback port 8000
