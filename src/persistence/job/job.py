@@ -19,6 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.domain.job import SeniorityLevel, WorkArrangement
+from src.indexing.textual import job_search_document
 from src.persistence.base import Base
 
 
@@ -96,3 +97,14 @@ class Job(Base):
     raw: Mapped[dict[str, object] | None] = mapped_column(JSON)
     embedding: Mapped[list[float] | None] = mapped_column(Vector())
     content_hash: Mapped[str | None] = mapped_column(String(255))
+
+
+# Register the migrated expression with ORM metadata so schema checks preserve it.
+Base.metadata.tables["jobs"].append_constraint(
+    Index(
+        "ix_jobs_active_fts",
+        job_search_document(),
+        postgresql_using="gin",
+        postgresql_where=Job.status == JobStatus.ACTIVE,
+    )
+)

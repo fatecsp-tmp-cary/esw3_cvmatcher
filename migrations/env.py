@@ -16,12 +16,21 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def include_object(obj, name, type_, reflected, compare_to):
+    # PostgreSQL expands implicit varchar/regconfig casts in this expression.
+    # Alembic's string comparison reports a false replacement. Its exact parsed
+    # expression, predicate, method and validity are checked against a generated
+    # probe index by the required PostgreSQL schema-drift regression instead.
+    return not (type_ == "index" and name == "ix_jobs_active_fts")
+
+
 def run_migrations_offline() -> None:
     context.configure(
         url=database_url(),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -32,7 +41,9 @@ def run_migrations_online() -> None:
     connectable = create_engine(database_url(), poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata, include_object=include_object
+        )
 
         with context.begin_transaction():
             context.run_migrations()

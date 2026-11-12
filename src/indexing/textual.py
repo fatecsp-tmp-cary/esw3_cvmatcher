@@ -8,8 +8,6 @@ from sqlalchemy import Text, cast, func, literal, literal_column
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.sql.elements import ColumnElement, SQLColumnExpression
 
-from src.persistence.job.job import Job
-
 # SQL constants are fixed by the algorithm, never constructed from request data.
 _CONFIG: ColumnElement = literal_column("'pg_catalog.portuguese'::regconfig")
 _STRING_VALUES: ColumnElement = literal_column("'[\"string\"]'::jsonb")
@@ -42,6 +40,10 @@ def job_search_document(*, requirements: ColumnElement | None = None) -> ColumnE
     from validated supporting extraction metadata. It must use the same
     expression for an index and retrieval. No requirements source is invented.
     """
+    # Lazy import lets the persistence metadata register this same expression
+    # after Job is defined, without a module import cycle.
+    from src.persistence.job.job import Job
+
     requirements = _EMPTY_JSON if requirements is None else requirements
     sections = (
         _text_vector(Job.title, "A"),
