@@ -14,6 +14,8 @@ production scoring is wired, while calibration and release approval remain provi
   score; education alone receives its full component score. Both absent yields zero.
 - Retain ADR-008 selection by semantic similarity before recency weighting, its
   recency/tie ordering and the existing final textual/semantic/structured blend.
+  The final blend stays within [0,100], including floating-point rounding at
+  the endpoints when configured weights sum to one within validation tolerance.
 - The interview selected modest recency weighting, with the newest selected
   experience receiving up to 1.5 times the oldest's weight. Use weights
   **1.5, 1.25, 1.0** for distinct recency groups from newest to oldest; equal

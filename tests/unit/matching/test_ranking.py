@@ -26,3 +26,10 @@ def test_final_blend_retains_frozen_coefficients():
         policy.score(101, 0, 0)
     with pytest.raises(ValueError):
         RankingPolicy(textual=1)
+
+
+def test_accepted_floating_point_weights_cannot_exceed_public_score_bounds():
+    policy = RankingPolicy(textual=0.4500000001)
+    assert policy.score(100, 100, 100) == 100
+    assert policy.score(0, 0, 0) == 0
+    assert policy.score(20, 40, 60) == pytest.approx(35.0)

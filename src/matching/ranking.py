@@ -49,4 +49,7 @@ class RankingPolicy:
         values = (textual, semantic, structured)
         if any(not math.isfinite(v) or not 0 <= v <= 100 for v in values):
             raise ValueError("Component scores must be finite in [0,100]")
-        return self.textual * textual + self.semantic * semantic + self.structured * structured
+        total = self.textual * textual + self.semantic * semantic + self.structured * structured
+        # Accepted weights may sum to one within floating-point tolerance. Keep
+        # their blend inside the public score bounds even at the upper endpoint.
+        return min(100.0, max(0.0, total))
