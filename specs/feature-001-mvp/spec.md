@@ -3,17 +3,15 @@
 ## Behavior
 
 The service receives an already structured CV, validates and normalizes it to a
-request-scoped `CandidateProfile`, ingests normalized source-specific jobs,
+request-scoped `NormalizedCandidate`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
 jobs through `POST /matches`. CV parsing is external. `GET /health` is optional.
 
-Candidate profile fields:
-
-```text
-skills[], job_titles[], occupations[], experience[], education[],
-certifications[], languages[], locations[], seniority, years_experience,
-preferences
-```
+The public five-section contract is defined in [acceptance](acceptance.md#resolved-api-contract).
+Its lossless transient projection preserves all sections without the UUID or
+additional caps. The legacy internal `CandidateProfile` remains a separate API;
+it must not reject valid public input through superseded internal bounds. See
+[ADR-011](../../docs/architecture/decisions/ADR-011-main-integration-compatibility.md).
 
 The `Job` fields are defined in the [architecture overview](../../docs/architecture/overview.md).
 `platform + source_job_id` is unique source identity, not
@@ -78,7 +76,11 @@ Extraction readiness is independent of availability; pending/failed extraction
 withholds jobs without changing lifecycle state. After three failed extraction
 attempts, alert the operator and require explicit retry. See
 [extraction policy](../../docs/data/job-field-extraction.md). FTS covers title, company, description,
-skills, requirements, and location. Semantic job representation is title,
+keywords, skills, normalized requirements, and location. Portuguese any-term FTS
+uses A title/skills, B company/keywords/normalized requirements and D
+description/location, PostgreSQL JSON text rendering and descending publication
+date then platform/source-ID ties under ADR-004/005. All retrieval paths require
+successful extraction for current content/configuration. Semantic job representation is title,
 normalized skills, requirements, relevant description, location, and mode.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job
@@ -173,7 +175,7 @@ duration. Credentials use environment/secrets; production uses HTTPS, restricted
 DB access, data minimization, relevant LGPD principles, and an open API with no authentication.
 A PostgreSQL-coordinated global rolling limit admits at most 60 HTTP requests
 per minute; excess returns privacy-safe 429. See
-[ADR-009](../../docs/architecture/decisions/ADR-009-open-api-global-rate-limit.md).
+[ADR-010](../../docs/architecture/decisions/ADR-010-preproduction-and-minute-rate-limit.md).
 
 Local Compose includes PostgreSQL+pgvector, API, worker; local model is cached
 in a persistent volume. Deployment stays provider-independent, prefers free

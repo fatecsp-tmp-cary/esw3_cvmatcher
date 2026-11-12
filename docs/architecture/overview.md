@@ -31,7 +31,8 @@ The transient public-request projection lives in
 `src/normalization/candidate/curriculum.py`. Its immutable `NormalizedCandidate`
 preserves all five source sections without the UUID or additional caps. It is
 an intermediate matching representation, not a new public API model. Production
-matching wiring remains pending.
+matching uses this projection; compatibility reconciliation preserves both
+projection APIs under [ADR-011](decisions/ADR-011-main-integration-compatibility.md).
 
 The intended canonical `Job` has exactly these fields:
 
@@ -52,7 +53,7 @@ belongs in separate structures. See
 [invariants](invariants.md), [ADR index](decisions/README.md), and [MVP
 spec](../../specs/feature-001-mvp/spec.md).
 
-Planned job enrichment uses local GLiNER span extraction before validated canonical
+Job enrichment uses local GLiNER span extraction before validated canonical
 mapping; its version/evidence remain separate metadata. Semantic matching evaluates
 individual experiences and education entries, selects the three best-matching
 experiences with recency weighting and the best education score per job, while
@@ -64,4 +65,8 @@ any matching path. Extraction readiness is supporting state separate from
 canonical availability; failures must not change lifecycle. The semantic
 aggregation primitive now lives in `src/matching/semantic.py`, using the
 provisional coefficients documented in [scoring policy](../match/scoring-policy.md).
-Model inference, calibration and production executor wiring remain pending.
+Pinned local inference and production executor wiring are implemented; calibration
+and quality approval remain pending. Portuguese FTS retains ADR-004/005 weights,
+JSON text rendering and publication-date/identity ties, with current extraction
+readiness on every path; integration verification remains pending under ADR-011.
+Taxonomy persistence and category aliases from main remain part of the system.

@@ -94,9 +94,10 @@ second public-input validator.
 
 ## Unresolved; address before dependent implementation
 
-1. Verify actual APiBR payload, scan completeness and source usage/retention
-   evidence (#113/#132/#134). A synthetic state-free fixture is not proof of
-   the endpoint shape. No unproven scan may mark absent jobs stale.
+1. A live one-record shape probe observed a state-free APiBR record. Verify scan
+   completeness and source usage/retention evidence (#113/#132/#134); the probe
+   proves neither availability nor completeness. No hidden verifier is enabled
+   and no unproven scan may mark absent jobs stale.
 2. The pinned multilingual E5 model/version and separate provenance are implemented
    (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
    the fixed canonical Job fields.
@@ -139,11 +140,10 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   and bounded retry/reprocessing are implemented; see [local GLiNER](../../docs/data/local-gliner.md).
   Mandatory exclusion remains disabled until independently measured quality and
   sample sufficiency are approved.
-- The pending collection-cap work conflicts with freezing the currently uncapped
-  contract above. Do not add caps to this contract implicitly; reconcile any
-  accepted cap decision on another branch with the frozen baseline before merging
-  or implementing it. New restrictions require an explicitly approved versioned
-  contract. This documentation change does not select a different baseline.
+- Existing ADR-008 authority supersedes ADR-006 collection caps and any internal
+  bounds rejecting valid public input. Preserve both projection APIs and lossless
+  source sections. [ADR-011](../../docs/architecture/decisions/ADR-011-main-integration-compatibility.md)
+  records this reconciliation without a new decision; historical ADRs stay unchanged.
 
 ## Docker Compose deployment acceptance
 
@@ -160,8 +160,9 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   HTTPS, global rate-limit and database-access protections (authentication is
   intentionally absent under ADR-009).
 
-See [deployment behavior](spec.md#docker-compose-deployment). These are pending
-release checks, not claims about the existing database-only or mock Compose files.
+See [deployment behavior](spec.md#docker-compose-deployment). The actual pinned
+offline Compose smoke passed before main reconciliation; integrated rerun and
+remaining release checks are tracked in [tasks](tasks.md).
 
 ## Implementation interview: readiness and performance
 
@@ -172,7 +173,8 @@ release checks, not claims about the existing database-only or mock Compose file
   operational decisions are in the [extraction policy](../../docs/data/job-field-extraction.md).
 - Warm CPU `POST /matches` target: at most five seconds for 10 experiences,
   5 education entries, 10,000 active jobs, limit=10, one request at a time.
-  This is an acceptance target awaiting measurement, not a result or public cap.
+  Pre-reconciliation synthetic measurements met this target; see [tasks](tasks.md).
+  Generalization and integrated verification remain pending; it is not a public cap.
 
 - The interview selected a mandatory-classification quality gate of at least
   **95% precision and 80% recall** on independently reviewed examples before
@@ -195,3 +197,13 @@ simple stop/reprocess/restart for model/configuration changes; no dual-version
 or rolling-cutover consistency mechanism is required. The corrected global quota
 is **60 requests per minute**, not per second. See
 [ADR-010](../../docs/architecture/decisions/ADR-010-preproduction-and-minute-rate-limit.md).
+
+## Main integration compatibility checks
+
+Preserve ADR-004/005 Portuguese any-term FTS weights (A title/skills; B
+company/keywords/normalized requirements; D description/location), JSON text
+rendering and publication-date-descending then platform/source-ID ties. Verify
+successful current extraction on every retrieval path and unchanged final
+0.45/0.35/0.20 blend. Retain taxonomy persistence/category aliases and both
+projection APIs; no valid public input may fail superseded internal caps.
+See [ADR-011](../../docs/architecture/decisions/ADR-011-main-integration-compatibility.md).

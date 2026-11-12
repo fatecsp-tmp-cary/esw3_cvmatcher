@@ -12,10 +12,11 @@ require proof of a complete scan.
    and source locking remain #136/#142; scheduling remains #143.
 3. Shared taxonomy persistence, seed and classified requirements (#137/#138).
    Preserve description sections and unknown extraction semantics.
-4. Define weighted Portuguese FTS, then implement its index and queries. Keep raw
+4. Reconcile index/queries with accepted ADR-004/005 weights, JSON text rendering,
+   publication-date/identity ties and current extraction readiness on all paths. Keep raw
    rank distinct from final compatibility scores; evaluate English/accents #147.
-5. Category aliases, public response validation, and bounded
-   preview-to-profile adaptation.
+5. Retain category aliases, taxonomy persistence and public response validation;
+   preserve both projection APIs and remove superseded internal caps under ADR-011.
 6. Complete model/version metadata, vectors, retrieval and scoring (#26/#118–#120),
    model-change reprocessing (#141), and empty-evidence behavior (#152).
 7. Wire the production API (#121), open access/rate limiting/privacy (#122; ADR-009), background work
@@ -40,8 +41,9 @@ and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).
   Three failed attempts require persisted failed-job state, a structured local
   error log and explicit retry. Retry delays still need definition; pre-production model changes may use
   stop/reprocess/restart without a rolling cutover; external notification services are not required.
-- Protect the immutable integration contract throughout. Reconcile the existing
-  collection-cap task with the frozen contract before dependent changes.
+- Protect the immutable integration contract throughout. ADR-008 supersedes the
+  old collection caps, recorded by [ADR-011](../../docs/architecture/decisions/ADR-011-main-integration-compatibility.md).
+  Integrate migration branches without rewriting history and rerun integrated checks.
 
 These additions follow [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md);
 implementation status and remaining release verification are tracked in [tasks](tasks.md).
@@ -53,3 +55,6 @@ stack, persistent database/model volumes, migrations/readiness, background work
 and an operator procedure. Validate clean startup, the fixture-to-matching path,
 restart persistence and backup/restore against the
 [deployment acceptance criteria](acceptance.md#docker-compose-deployment-acceptance).
+
+The real pinned offline Compose smoke passed before main reconciliation. Retest
+the integrated tree; quality/calibration and source usage remain release gates.
