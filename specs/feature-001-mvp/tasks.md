@@ -71,10 +71,14 @@ and the reconciled production image build passed. See the
 - [x] Conservative language/employment mappings and certainty rules under ADR-012;
   unknown free text remains supporting evidence. All new hard exclusions remain
   disabled pending the independently reviewed quality gates.
-- [ ] APiBR terms/retention and independent availability evidence (#113/#132/#134).
-  ADR-013 separately defines and tests best-effort scan completeness. The aggregate
-  728-record probe established no availability; raw retention, hidden availability
-  calls and absence-driven lifecycle changes remain disabled.
+- [ ] APiBR terms/retention evidence (#113/#132/#134).
+  ADR-013 separately defines and tests best-effort scan completeness. Raw
+  retention, hidden availability calls and absence-driven lifecycle changes
+  remain disabled.
+- [x] APiBR availability under accepted ADR-014 (#181): presence in the
+  open-vacancy listing of the source makes a job ACTIVE and advances
+  verification. Deactivating jobs that leave the listing remains #145; the
+  optional verifier remains #153.
 - [x] Pre-reconciliation production image build and real pinned offline Compose
   smoke: migrations, synthetic ingestion, worker GLiNER/E5, deterministic API,
   database/API replacement durability and dump/restore into an empty project.

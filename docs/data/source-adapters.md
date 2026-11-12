@@ -63,7 +63,9 @@ record had no availability state. Only aggregate keys/counts were retained in
 [the probe report](../reports/2026-11-12-source-shape.json); no upstream record or
 poster information was saved. This establishes a current example of endpoint
 shape, not completeness, stable long-term guarantees or retention rights.
-State-free records remain DISCOVERED; no hidden GitHub verification is enabled.
+Under accepted
+[ADR-014](../architecture/decisions/ADR-014-apibr-listing-presence-is-open-evidence.md),
+listed state-free records are ACTIVE; no hidden GitHub verification is enabled.
 The worker invokes the bounded synchronous ingestion compatibility path; the
 common async adapter is available independently. Live calls remain optional and
 excluded from CI.
@@ -122,5 +124,6 @@ responses. Async cancellation/truncation cannot publish completed attestation.
 This is explicitly best effort: timestamp/count equality cannot rule out concurrent
 rewrites. It does not establish source permissions, job openness, raw retention
 rights or #145 absence-driven stale/expiry. Confirmed observations remain source-
-specific; all state-free records stay DISCOVERED. The bounded live count probe
+specific; listed state-free records are ACTIVE under ADR-014. The bounded live
+count probe
 is in the [aggregate evidence](../reports/2026-11-12-apibr-count-attestation.json).
