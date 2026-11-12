@@ -13,7 +13,8 @@
 - Matching in stages: filters, textual retrieval, semantic retrieval,
   structured scoring, and deterministic ranking.
 - Unit, integration, API, and end-to-end quality coverage; OpenAPI documentation.
-- Docker Compose/local execution and optional free-tier deployment.
+- Docker Compose for local execution and single-host deployment; optional
+  free-tier hosting when its resource and persistence limits support the stack.
 
 ## Out of scope
 

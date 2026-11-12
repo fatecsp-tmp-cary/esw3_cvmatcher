@@ -107,15 +107,15 @@ class Preferences(_Schema):
 class CandidateProfile(_Schema):
     """Transient matching fields adapted from a complete curriculum request."""
 
-    skills: list[NonemptyText] = Field(default_factory=list, max_length=200)
-    competencies: list[CandidateCompetency] = Field(default_factory=list, max_length=200)
-    job_titles: list[NonemptyText] = Field(default_factory=list, max_length=50)
+    skills: list[NonemptyText] = Field(default_factory=list)
+    competencies: list[CandidateCompetency] = Field(default_factory=list)
+    job_titles: list[NonemptyText] = Field(default_factory=list)
     occupations: list[NonemptyText] = Field(default_factory=list, max_length=50)
-    experience: list[Experience] = Field(default_factory=list, max_length=50)
-    education: list[Education] = Field(default_factory=list, max_length=20)
+    experience: list[Experience] = Field(default_factory=list)
+    education: list[Education] = Field(default_factory=list)
     certifications: list[Certification] = Field(default_factory=list, max_length=50)
-    academic_projects: list[CandidateProject] = Field(default_factory=list, max_length=50)
-    languages: list[Language] = Field(default_factory=list, max_length=20)
+    academic_projects: list[CandidateProject] = Field(default_factory=list)
+    languages: list[Language] = Field(default_factory=list)
     locations: list[NonemptyText] = Field(
         default_factory=list,
         max_length=20,

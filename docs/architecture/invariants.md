@@ -30,3 +30,9 @@
 
 See [ADRs](decisions/README.md) for decision history and [scope](../product/scope.md)
 for explicit exclusions.
+
+The Sistema Currículo public integration contract is immutable under internal
+implementation changes. Preserve its accepted payloads, validation, response,
+query and error semantics; incompatible future contracts require a separately
+versioned, explicitly approved interface. See
+[ADR-008](decisions/ADR-008-extraction-contract-and-semantic-evidence.md).
