@@ -7,7 +7,7 @@ import time
 from collections.abc import Callable
 from typing import Any, Protocol
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.embeddings.config import EmbeddingConfig
@@ -15,10 +15,10 @@ from src.embeddings.retrieval import retrieve_semantic
 from src.embeddings.service import ready_predicate as embedding_ready
 from src.extraction.service import ready_predicate as extraction_ready
 from src.extraction.taxonomy import find_skills, normalize_skill
-from src.indexing.textual import any_term_query, job_search_document
+from src.indexing.textual import TEXTUAL_VERSION
 from src.matching.ranking import RankingPolicy, SimilarityCalibration
 from src.matching.semantic import ExperienceScore, semantic_score
-from src.matching.textual import candidate_query_text, retrieve_textual
+from src.matching.textual import candidate_query_text, retrieve_textual, textual_statement
 from src.normalization.candidate.curriculum import normalize_curriculum
 from src.persistence.job.job import Job, JobStatus
 from src.schemas.candidate.curriculum import CurriculumRequest
@@ -62,6 +62,7 @@ class MatchingPipeline:
             "zero": self.calibration.zero,
             "full": self.calibration.full,
             "extraction": self.extraction_version,
+            "textual_policy": TEXTUAL_VERSION,
             "semantic_policy": "semantic-aggregation-v1-provisional",
         }
         digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()[:16]
@@ -126,15 +127,16 @@ class MatchingPipeline:
                     )
                 )
             )
-            document = job_search_document()
-            query = any_term_query(query_text)
-            text_scores: dict[int, float] = dict(
-                session.execute(
-                    select(Job.id, func.ts_rank_cd(document, query, 32) * 100.0).where(
+            # Recompute the complete textual component (including requirement
+            # rows) for the considered union, even for semantic-only retrieval.
+            text_scores: dict[int, float] = {
+                job.id: float(score)
+                for job, score in session.execute(
+                    textual_statement(query_text, readiness=gate, limit=len(pool)).where(
                         Job.id.in_(sorted(pool))
                     )
-                ).all()
-            )
+                )
+            }
             scored = []
             entry_matrix: Any = np.asarray(vectors[: len(texts)], dtype=np.float64)
             for job in jobs:

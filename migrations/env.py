@@ -21,7 +21,15 @@ def include_object(obj, name, type_, reflected, compare_to):
     # Alembic's string comparison reports a false replacement. Its exact parsed
     # expression, predicate, method and validity are checked against a generated
     # probe index by the required PostgreSQL schema-drift regression instead.
-    return not (type_ == "index" and name == "ix_jobs_active_fts")
+    return not (
+        type_ == "index"
+        and name
+        in {
+            "ix_jobs_active_fts",
+            "ix_jobs_search_portuguese",
+            "ix_job_requirements_search_portuguese",
+        }
+    )
 
 
 def run_migrations_offline() -> None:

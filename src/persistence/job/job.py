@@ -108,3 +108,7 @@ Base.metadata.tables["jobs"].append_constraint(
         postgresql_where=Job.status == JobStatus.ACTIVE,
     )
 )
+
+Base.metadata.tables["jobs"].append_constraint(
+    Index("ix_jobs_search_portuguese", job_search_document(), postgresql_using="gin")
+)
