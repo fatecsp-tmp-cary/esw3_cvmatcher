@@ -1,0 +1,91 @@
+# Independent synthetic evaluation fixtures
+
+[Fixture](../../tests/fixtures/matching/reviewed_cases.json) schema 1.0 contains
+50 synthetic cases, exactly 40 Portuguese and 10 English. An independent
+reviewer agent authored and interpreted these labels before observing any model
+outputs. No inference, model reports, real candidate data, or external datasets
+were read to derive labels. These are **agent-reviewed synthetic** examples;
+they are not human-reviewed release gold and establish no measured release quality.
+
+Each stable language-prefixed ID has job title, description and positively stated
+skills, candidate experience/education/competencies without identity, a binary
+role relation, rationale and expected requirement spans. Professions, explicit
+requirements, preferences, bonuses, negation, uncertainty, unresolved conflicts,
+seniority, empty evidence and long descriptions are covered. Empty candidate
+evidence is labeled irrelevant (no evidence of role relevance).
+
+Offsets are zero-based Python Unicode character offsets in `job.description`,
+with exclusive end. The text slice must equal `text`. Labels are REQUIRED,
+PREFERRED, NICE_TO_HAVE, or JSON null. Optional/bonus wording maps to NICE_TO_HAVE;
+explicit desirable/preferred wording maps to PREFERRED. Null means the mention
+does not establish requirement strength, including negation, uncertainty and
+unresolved contradictions. For contradictory repeated concepts the first mention
+is the annotation anchor; do not interpret the first clause without its context.
+The corpus annotates listed requirement concepts, not every possible entity.
+Structured skills list only positively stated concepts. Locations never establish
+eligibility. Role relevance concerns professional alignment, not a claim that all
+mandatory requirements are satisfied. Paired related/unrelated professions make
+this distinction testable.
+
+## Offline evaluator
+
+Run from repository root using the existing Python environment:
+
+```sh
+python scripts/evaluation/evaluate.py --predictions /path/to/predictions.json
+```
+
+An optional `--fixtures` overrides the default fixture path. External predictions
+must use this shape (the illustrative span matches pt-001):
+
+```json
+{
+  "schema_version": "1.0",
+  "predictions": [
+    {
+      "id": "pt-001",
+      "requirements": [
+        {"text": "Python", "start": 0, "end": 6, "requirement_class": "REQUIRED"}
+      ],
+      "role_score": 85
+    }
+  ]
+}
+```
+
+Scores must be finite in [0,100]. Unknown/duplicate IDs, duplicate spans,
+incorrect offsets and vocabulary fail validation. Missing cases are allowed and
+explicitly listed. Each provided case must supply both fields; an empty
+requirements list is an explicit empty extraction. No prediction means empty
+extraction for recall and incorrect role classification, including irrelevant
+cases. Missing predictions cannot satisfy the synthetic mandatory gate.
+
+JSON stdout reports micro precision/recall and counts globally and by language.
+Exact extraction matches `(start, end, requirement_class)`, including null.
+Mandatory metrics restrict both sides to REQUIRED; wrong class is a miss and,
+when applicable, a false positive. Undefined precision/recall is JSON null.
+Ranking quality is pairwise AUC over observed relevant/irrelevant case scores,
+with ties worth 0.5, explicit observed pair counts and completeness. This measures
+role separation across independent pairs, not per-candidate retrieval NDCG.
+Missing cases are excluded from observed AUC but count against all-case role
+accuracy (fixed score cutoff 50). Never present partial AUC as complete quality.
+
+The synthetic mandatory gate requires complete prediction coverage, precision
+>=95% and recall >=80%, separately for each reported group. These are the
+[acceptance targets](../../specs/feature-001-mvp/acceptance.md), not a claim they
+have passed. Minimum release sample sizes, calibration and human review remain
+unresolved. The CLI exits 0 for a valid report regardless of gate result and 2
+for invalid input. Primary owns model inference and scoring integration; this
+change provides neither. External predictions should contain synthetic data only;
+the CLI prints aggregate metrics and stable missing IDs, never candidate text.
+
+Run fixture and evaluator regression checks:
+
+```sh
+python -m pytest --no-cov -q tests/unit/evaluation/test_fixture_contract.py
+```
+
+Oracle round-trip tests copy expected labels solely to verify metric plumbing;
+they are not inference results or evidence of extraction/ranking quality. No
+model packages, database or network are required. No product contract or
+architecture changes are introduced; see [ADR-008](../architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md).
