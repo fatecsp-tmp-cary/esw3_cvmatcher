@@ -9,10 +9,25 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  HF_HUB_OFFLINE: "1"
+  TRANSFORMERS_OFFLINE: "1"
+
 permissions:
   contents: read
 
 jobs:
+  locks:
+    name: Offline lock consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/dependencies/inputs.py --check
+      - run: python -m unittest discover -s scripts/dependencies -p "test_*.py"
+
   lint:
     name: Lint and format
     runs-on: ubuntu-latest
@@ -61,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: pgvector/pgvector:pg17
+        image: pgvector/pgvector@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8
         env:
           POSTGRES_USER: cvmatch
           POSTGRES_PASSWORD: cvmatch
@@ -74,6 +89,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
+      DATABASE_URL: postgresql+psycopg://cvmatch:cvmatch@localhost:5432/cvmatch_test
       TEST_DATABASE_URL: postgresql://cvmatch:cvmatch@localhost:5432/cvmatch_test
     steps:
       - name: Checkout
@@ -82,20 +98,18 @@ jobs:
       - name: Set up Python and dependencies
         uses: ./.github/actions/setup-python-deps
 
+      - name: Migration round trip and schema drift
+        run: |
+          alembic upgrade head
+          alembic downgrade base
+          alembic upgrade head
+          alembic check
+
       - name: Run integration and e2e tests
         run: |
           mkdir -p reports
-          # `run:` uses `bash -e`; route pytest's exit code through `||` so it
-          # can be inspected. Exit code 5 (no tests collected) is accepted until
-          # the first database-backed tests land (#37).
           pytest -ra -m "(integration or e2e) and not external" \
-            --junitxml=reports/junit-integration.xml || code=$?
-          code=${code:-0}
-          if [ "$code" -eq 5 ]; then
-            echo "::notice::No integration or e2e tests collected yet."
-            exit 0
-          fi
-          exit "$code"
+            --junitxml=reports/junit-integration.xml
 
       - name: Upload test report
         if: ${{ !cancelled() }}
@@ -104,3 +118,18 @@ jobs:
           name: junit-integration
           path: reports/junit-integration.xml
           if-no-files-found: ignore
+
+  types:
+    name: Type checking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-deps
+      - run: mypy
+
+  docker:
+    name: Production image build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --tag cvmatcher:ci .
