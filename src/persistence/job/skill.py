@@ -6,6 +6,7 @@ from sqlalchemy import JSON, ForeignKey, Index, Integer, String, Text, text
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
+from src.indexing.textual import requirement_search_document
 from src.persistence.base import Base
 
 
@@ -55,3 +56,12 @@ class JobRequirement(Base):
         SQLAlchemyEnum(RequirementClass, name="requirementclass"), nullable=False
     )
     skill_id: Mapped[int | None] = mapped_column(ForeignKey("skills.id", ondelete="SET NULL"))
+
+
+Base.metadata.tables["job_requirements"].append_constraint(
+    Index(
+        "ix_job_requirements_search_portuguese",
+        requirement_search_document(),
+        postgresql_using="gin",
+    )
+)

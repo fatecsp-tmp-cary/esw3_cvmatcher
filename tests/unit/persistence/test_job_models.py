@@ -126,6 +126,7 @@ def test_source_run_has_expected_fields():
         "finished_at",
         "status",
         "snapshot_complete",
+        "snapshot_evidence",
         "polling_mode",
         "duration_ms",
         "jobs_found",
