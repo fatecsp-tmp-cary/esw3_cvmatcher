@@ -43,7 +43,7 @@ Keep `raw` null until retention rights are established. Requirement classes are 
 `PREFERRED`, and `NICE_TO_HAVE`; detected skills must not automatically be
 assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
 matching, and section detection complement the selected local GLiNER job-field
-extraction strategy. Follow the extraction plan (planned in #170: `../../docs/data/job-field-extraction.md`)
+extraction strategy. Follow [the extraction plan](../../docs/data/job-field-extraction.md)
 for evidence, confidence, contextual requirement classification, model versioning
 and failure handling. Pinned offline extraction and bounded job-state processing are implemented; mandatory classification remains disabled pending measured quality approval. PostgreSQL FTS handles DB-level
 tokenization, stemming, and ranking.
@@ -75,7 +75,7 @@ Only active jobs with successful extraction are eligible for matching retrieval.
 Extraction readiness is independent of availability; pending/failed extraction
 withholds jobs without changing lifecycle state. After three failed extraction
 attempts, alert the operator and require explicit retry. See
-extraction policy (planned in #170: `../../docs/data/job-field-extraction.md`). FTS covers title, company, description,
+[extraction policy](../../docs/data/job-field-extraction.md). FTS covers title, company, description,
 keywords, skills, normalized requirements, and location. Portuguese any-term FTS
 uses A title/skills, B company/keywords/normalized requirements and D
 description/location, PostgreSQL JSON text rendering and descending publication

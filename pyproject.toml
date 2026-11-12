@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=69"]
+requires = ["setuptools==78.1.0", "wheel==0.48.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -16,9 +16,19 @@ dependencies = [
     "pgvector>=0.3",
 ]
 
+[project.optional-dependencies]
+local-models = [
+    "torch==2.9.1+cpu",
+    "gliner==0.2.30",
+    "sentence-transformers==3.4.1",
+    "transformers==4.57.6",
+    "protobuf==7.36.1",
+]
+
 [dependency-groups]
 dev = [
     "ruff>=0.6",
+    "mypy==2.4.1",
     "pytest>=8",
     "pytest-asyncio>=0.24",
     "pytest-cov>=5",
@@ -64,6 +74,7 @@ known-first-party = ["src"]
 testpaths = ["tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 addopts = [
     "--import-mode=importlib",
     "--strict-markers",
@@ -82,3 +93,18 @@ markers = [
 
 [tool.coverage.run]
 source = ["src"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+ignore_missing_imports = true
+
+# External inference libraries are dynamically loaded behind tested adapters.
+# Checking their dependency source recursively is outside the project type gate.
+[[tool.mypy.overrides]]
+module = ["torch.*", "sentence_transformers.*", "transformers.*", "gliner.*", "numpy.*"]
+follow_imports = "skip"

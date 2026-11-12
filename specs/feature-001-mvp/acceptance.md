@@ -139,7 +139,7 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   receiving equal weight. Similarity calibration and release validation remain
   pending; the aggregation primitive is implemented and wired to pinned local inference, with provisional calibration.
 - Pinned GLiNER revision/labels, provisional confidence, separate evidence storage
-  and bounded retry/reprocessing are implemented; see local GLiNER (planned in #170: `../../docs/data/local-gliner.md`).
+  and bounded retry/reprocessing are implemented; see [local GLiNER](../../docs/data/local-gliner.md).
   Mandatory exclusion remains disabled until independently measured quality and
   sample sufficiency are approved.
 - Existing ADR-008 authority supersedes ADR-006 collection caps and any internal
@@ -172,7 +172,7 @@ Evidence and remaining release checks are tracked in [tasks](tasks.md).
   failure is not an availability transition. After three failed attempts, record
   failure, emit a structured local error log and require explicit retry.
   No email/webhook alert integration is required. Details and remaining
-  operational decisions are in the extraction policy (planned in #170: `../../docs/data/job-field-extraction.md`).
+  operational decisions are in the [extraction policy](../../docs/data/job-field-extraction.md).
 - Warm CPU `POST /matches` target: at most five seconds for 10 experiences,
   5 education entries, 10,000 active jobs, limit=10, one request at a time.
   The isolated reconciled synthetic reference met this target; see [tasks](tasks.md).

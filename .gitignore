@@ -184,3 +184,7 @@ secrets/
 # ------------------------------------------------------------
 .claude/
 CLAUDE.local.md
+
+# Reviewed model preparation scripts are source, never model weights.
+!scripts/models/
+!scripts/models/*.py

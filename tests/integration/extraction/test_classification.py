@@ -1,0 +1,71 @@
+from sqlalchemy import select
+
+from src.extraction.contracts import SpanEvidence
+from src.extraction.persistence import persist_requirements, seed_taxonomy
+from src.persistence.job.job import Job, JobStatus
+from src.persistence.job.job_source import JobSource
+from src.persistence.job.skill import JobRequirement, JobSkill, Skill
+
+
+def test_classified_generation_preserves_canonical_content_and_replaces_associations(db_session):
+    session = db_session
+    source = JobSource(name="classified-fixture", type="api", polling_mode="INCREMENTAL")
+    session.add(source)
+    session.flush()
+    job = Job(
+        source_id=source.id,
+        platform="fixture",
+        source_job_id="classified",
+        title="Developer",
+        status=JobStatus.ACTIVE,
+        content_hash="unchanged",
+        skills=[],
+    )
+    session.add(job)
+    session.flush()
+    text = "Required: Python\nPreferred: PostgreSQL\nOptional: Docker\nUnknown: SQL"
+    evidence = [
+        SpanEvidence(text.rindex(name), text.rindex(name) + len(name), "skill", 0.9).serialize(text)
+        for name in ["Python", "PostgreSQL", "Docker", "SQL"]
+    ]
+    persist_requirements(session, job, evidence, text)
+    rows = session.scalars(select(JobRequirement).where(JobRequirement.job_id == job.id)).all()
+    assert {(row.text, row.requirement_class.value) for row in rows} == {
+        ("Python", "REQUIRED"),
+        ("PostgreSQL", "PREFERRED"),
+        ("Docker", "NICE_TO_HAVE"),
+    }
+    assert evidence[-1]["requirement_class"] is None
+    assert job.content_hash == "unchanged" and job.skills == []
+    before = session.scalars(select(Skill.id).order_by(Skill.id)).all()
+    seed_taxonomy(session)
+    assert session.scalars(select(Skill.id).order_by(Skill.id)).all() == before
+    text = "Preferred: JS"
+    evidence = [SpanEvidence(11, 13, "skill", 0.9).serialize(text)]
+    persist_requirements(session, job, evidence, text)
+    assert evidence[0]["canonical_skill"] == "JavaScript"
+    assert session.scalars(
+        select(JobRequirement.text).where(JobRequirement.job_id == job.id)
+    ).all() == ["JS"]
+    assert session.scalars(
+        select(Skill.canonical_name).join(JobSkill).where(JobSkill.job_id == job.id)
+    ).all() == ["JavaScript"]
+
+
+def test_conflicting_requirement_strengths_remain_unclassified(db_session):
+    session = db_session
+    source = JobSource(name="conflict-fixture", type="api", polling_mode="INCREMENTAL")
+    session.add(source)
+    session.flush()
+    job = Job(source_id=source.id, platform="fixture", source_job_id="conflict", title="Role")
+    session.add(job)
+    session.flush()
+    text = "Required: Python\nOptional: Python"
+    starts = [text.index("Python"), text.rindex("Python")]
+    evidence = [SpanEvidence(start, start + 6, "skill", 0.9).serialize(text) for start in starts]
+    persist_requirements(session, job, evidence, text)
+    assert all(item["requirement_class"] is None for item in evidence)
+    assert (
+        session.scalars(select(JobRequirement.id).where(JobRequirement.job_id == job.id)).all()
+        == []
+    )
