@@ -25,6 +25,9 @@ python scripts/dependencies/inputs.py --check
 Review version/hash changes before recording provenance; `--record` attests
 artifacts, it does not independently verify registry ownership. Existing pins
 are retained unless intentionally upgraded with pip-compile's upgrade options.
+Keep `--allow-unsafe` when generating build/tooling/CPU locks: pip-tools otherwise
+omits required setuptools/pip entries even with hashes enabled. The tooling and
+CPU inputs constrain setuptools through `build.lock`, so regenerate build first.
 Keep the exact CPU torch and inference versions in pyproject. Never put private
 index credentials in inputs, generated headers, provenance or logs.
 
@@ -54,3 +57,15 @@ Container build, database migration and clean-host acceptance require execution;
 lock consistency alone does not establish those deployment results. See the
 [Definition of Done](../quality/definition-of-done.md) and
 [architecture invariants](../architecture/invariants.md).
+
+## Resolver cache maintenance
+
+Initial CPU hash generation can take about 15 minutes and retain several GiB of
+HTTP distribution payloads. Preserve completed locks/provenance before cleanup,
+and wait for all pip/pip-tools processes using the cache to exit. To reclaim
+large downloads while retaining most useful index metadata, remove only `.body`
+files at least 10 MiB beneath the resolver's `pip-tools/http-v2` cache. Smaller
+bodies and response metadata can remain; later resolution may download removed
+payloads again. This cache is separate from model artifacts and application data.
+Never remove model caches or another running task's downloads as part of this
+procedure. Coordinate cleanup and subsequent image builds with the primary.
