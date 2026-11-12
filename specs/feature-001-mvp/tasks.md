@@ -78,8 +78,10 @@ and the reconciled production image build passed. See the
   remain disabled.
 - [x] APiBR availability under accepted ADR-014 (#181): presence in the
   open-vacancy listing of the source makes a job ACTIVE and advances
-  verification. Deactivating jobs that leave the listing remains #145; the
-  optional verifier remains #153.
+  verification. The optional verifier remains #153.
+- [x] Absence under accepted ADR-015 (#186): ACTIVE jobs missing from a qualifying
+  SNAPSHOT poll become STALE and rediscovery reactivates them. STALE→EXPIRED
+  thresholds remain #145; sources default to INCREMENTAL, where absence is ignored.
 - [x] Pre-reconciliation production image build and real pinned offline Compose
   smoke: migrations, synthetic ingestion, worker GLiNER/E5, deterministic API,
   database/API replacement durability and dump/restore into an empty project.

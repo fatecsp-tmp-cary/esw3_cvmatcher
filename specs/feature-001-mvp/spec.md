@@ -61,6 +61,9 @@ States: `DISCOVERED`, `ACTIVE`, `STALE`, `EXPIRED`. Allowed transitions:
 `DISCOVERED→ACTIVE`, `DISCOVERED→EXPIRED`, `ACTIVE→STALE`, `ACTIVE→EXPIRED`,
 `STALE→ACTIVE`, `STALE→EXPIRED`. `STALE` means absence from a successful
 complete snapshot; incremental absence and failed polls do not change status.
+For APiBR, one SNAPSHOT poll that qualifies under ADR-013 marks absent `ACTIVE`
+jobs of that source `STALE`
+([ADR-015](../../docs/architecture/decisions/ADR-015-qualifying-snapshot-absence-marks-stale.md)).
 `STALE→EXPIRED` uses configured consecutive missing snapshots and/or maximum
 stale duration; either configured condition may expire a job. Reliable explicit
 `source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.

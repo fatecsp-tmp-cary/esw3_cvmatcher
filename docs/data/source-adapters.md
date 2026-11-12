@@ -123,7 +123,9 @@ responses. Async cancellation/truncation cannot publish completed attestation.
 
 This is explicitly best effort: timestamp/count equality cannot rule out concurrent
 rewrites. It does not establish source permissions, job openness, raw retention
-rights or #145 absence-driven stale/expiry. Confirmed observations remain source-
+rights or the #145 stale-expiry thresholds. Accepted
+[ADR-015](../architecture/decisions/ADR-015-qualifying-snapshot-absence-marks-stale.md)
+marks ACTIVE jobs absent from a qualifying snapshot STALE. Confirmed observations remain source-
 specific; listed state-free records are ACTIVE under ADR-014. The bounded live
 count probe
 is in the [aggregate evidence](../reports/2026-11-12-apibr-count-attestation.json).

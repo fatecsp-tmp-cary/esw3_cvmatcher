@@ -6,8 +6,12 @@ The caller owns the transaction. Its clock must be timezone-aware. Records remai
 stored, and repeated execution is idempotent. EXPIRED is terminal.
 
 Polling failures, old `last_seen_at`, and missing jobs in incomplete APiBR scans
-are never expiration evidence. STALE age/missing-snapshot policies remain pending
-until approved source coverage and thresholds exist. Extraction/embedding state
+are never expiration evidence. Under
+[ADR-015](../architecture/decisions/ADR-015-qualifying-snapshot-absence-marks-stale.md),
+`ACTIVE` jobs of a source absent from one qualifying SNAPSHOT poll become `STALE`,
+and a later poll that lists them again reactivates them. `SourceRun.jobs_absent`
+and `jobs_marked_stale` record the counts. The `STALE→EXPIRED` age and
+missing-snapshot thresholds remain pending (#145). Extraction/embedding state
 is independent: failures withhold matching readiness without changing availability.
 
 The scoped test helper probes PostgreSQL over TCP, so its temporary initialization
