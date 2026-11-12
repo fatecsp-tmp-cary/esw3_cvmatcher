@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 import pytest
 from sqlalchemy import Index, literal, select, text, true
 from sqlalchemy.dialects.postgresql import JSONB
@@ -8,6 +10,7 @@ from src.matching.textual import retrieve_textual, textual_statement
 from src.normalization.candidate.curriculum import NormalizedCandidate
 from src.persistence.job.job import Job, JobStatus
 from src.persistence.job.job_source import JobSource
+from src.persistence.job.skill import JobRequirement, RequirementClass
 
 
 @pytest.fixture
@@ -47,32 +50,23 @@ def test_portuguese_stemming_and_any_term_queries(session):
         assert session.execute(textual_statement(query, readiness=true())).all() == []
 
 
-def test_json_string_values_unicode_and_keys_are_not_search_evidence(session):
+def test_json_text_rendering_and_unicode_follow_accepted_adr005(session):
     add_job(
         session,
         "unicode",
         title="Operação",
         skills=["Kubernetes", "Café"],
-        location={"state": "Paraná", "secret_json_key": "São Paulo"},
+        keywords=["Quasar"],
+        location={"searchablekey": "Paraná"},
     )
-    assert identities(session.execute(textual_statement("Kubernetes", readiness=true()))) == [
-        "unicode"
-    ]
-    assert identities(session.execute(textual_statement("Paraná", readiness=true()))) == ["unicode"]
-    assert identities(session.execute(textual_statement("Café", readiness=true()))) == ["unicode"]
-    assert session.execute(textual_statement("secret_json_key", readiness=true())).all() == []
-    # Numeric values, booleans and object keys cannot manufacture textual skills.
-    requirement = literal({"fabricatedkey": "Rust", "count": 909, "required": True}, type_=JSONB)
+    for query in ("Kubernetes", "Paraná", "Café", "Quasar", "searchablekey"):
+        assert identities(session.execute(textual_statement(query, readiness=true()))) == [
+            "unicode"
+        ]
+    requirement = literal(["Rust"], type_=JSONB)
     assert identities(
         session.execute(textual_statement("Rust", readiness=true(), requirements=requirement))
     ) == ["unicode"]
-    for query in ("fabricatedkey", "909", "true"):
-        assert (
-            session.execute(
-                textual_statement(query, readiness=true(), requirements=requirement)
-            ).all()
-            == []
-        )
 
 
 def test_readiness_fail_closed_and_availability_independent(session):
@@ -95,12 +89,12 @@ def test_weighting_stable_source_ties_and_no_geographic_exclusion(session):
     statement = textual_statement("Python", readiness=true())
     first = session.execute(statement).all()
     second = session.execute(statement).all()
-    assert identities(first) == ["a-title", "0-title", "b-skills", "c-company", "z-body"]
+    assert identities(first) == ["a-title", "b-skills", "0-title", "c-company", "z-body"]
     assert [(job.id, score) for job, score in first] == [(job.id, score) for job, score in second]
     assert all(0 <= score <= 100 for _, score in first)
     assert identities(session.execute(textual_statement("Python", readiness=true(), limit=2))) == [
         "a-title",
-        "0-title",
+        "b-skills",
     ]
 
 
@@ -150,3 +144,47 @@ def test_search_expression_supports_immutable_gin_index(session):
         session.execute(DropIndex(index))
     finally:
         Job.__table__.indexes.discard(index)
+
+
+def test_requirement_rows_combined_once_and_normalized_after_raw_sum(session):
+    from src.matching.textual import search_active_jobs
+
+    both = add_job(session, "both", title="Python")
+    only_requirement = add_job(session, "requirement")
+    for job in (both, only_requirement):
+        for _ in range(2):
+            session.add(
+                JobRequirement(
+                    job_id=job.id, text="Python", requirement_class=RequirementClass.REQUIRED
+                )
+            )
+    session.flush()
+    raw = search_active_jobs(session, "Python", readiness=true())
+    bounded = session.execute(textual_statement("Python", readiness=true())).all()
+    assert identities(bounded) == ["both", "requirement"]
+    assert len(raw) == len(bounded) == 2
+    for match, (job, score) in zip(raw, bounded, strict=True):
+        assert match.job.id == job.id
+        assert score == pytest.approx(100 * match.score / (1 + match.score))
+    # Repeated rows do not multiply rank, and missing readiness withholds both paths.
+    assert raw[0].score == pytest.approx(1.4)
+    assert raw[1].score == pytest.approx(0.4)
+    assert session.execute(textual_statement("Python")).all() == []
+    assert identities(
+        session.execute(textual_statement("Python", readiness=Job.id == both.id))
+    ) == ["both"]
+    pool = textual_statement("Python", readiness=true(), limit=2).where(
+        Job.id.in_([only_requirement.id])
+    )
+    assert identities(session.execute(pool)) == ["requirement"]
+
+
+def test_publication_ties_descending_and_nulls_last(session):
+    add_job(session, "a-null", title="Python")
+    add_job(session, "b-old", title="Python", publication_date=datetime(2024, 1, 1, tzinfo=UTC))
+    add_job(session, "z-new", title="Python", publication_date=datetime(2025, 1, 1, tzinfo=UTC))
+    assert identities(session.execute(textual_statement("Python", readiness=true()))) == [
+        "z-new",
+        "b-old",
+        "a-null",
+    ]
