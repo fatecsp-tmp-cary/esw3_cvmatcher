@@ -1,4 +1,5 @@
 import json
+from datetime import UTC, datetime, time, timedelta, timezone
 from threading import Event
 from types import SimpleNamespace
 
@@ -6,7 +7,13 @@ import pytest
 
 from src.worker.__main__ import main
 from src.worker.runtime import BackgroundWorker, CycleResult
-from src.worker.scheduler import interval_seconds, source_lock
+from src.worker.scheduler import (
+    SourceScheduler,
+    interval_seconds,
+    next_daily_run,
+    parse_daily_time,
+    source_lock,
+)
 
 
 class Extraction:
@@ -220,3 +227,67 @@ def test_busy_advisory_lock_is_neither_polled_nor_unlocked():
         assert not acquired
     assert not connection.invalidated
     assert len(connection.calls) == 1
+
+
+@pytest.mark.parametrize(
+    "value,expected", [("08:00", time(8, 0)), (" 23:59 ", time(23, 59)), ("00:00", time(0, 0))]
+)
+def test_daily_time_accepts_24_hour_values(value, expected):
+    assert parse_daily_time(value) == expected
+
+
+@pytest.mark.parametrize("value", ["", "8:00", "24:00", "08:60", "08h00", "08:00:00", "noon"])
+def test_daily_time_rejects_other_formats(value):
+    with pytest.raises(ValueError):
+        parse_daily_time(value)
+
+
+SAO_PAULO = timezone(timedelta(hours=-3))
+
+
+@pytest.mark.parametrize(
+    "after,expected",
+    [
+        # 07:59 local: the same day at 08:00 local (11:00 UTC).
+        (datetime(2026, 11, 12, 10, 59, tzinfo=UTC), datetime(2026, 11, 12, 11, tzinfo=UTC)),
+        # Exactly 08:00 local: strictly later, so the next day.
+        (datetime(2026, 11, 12, 11, 0, tzinfo=UTC), datetime(2026, 11, 13, 11, tzinfo=UTC)),
+        # 22:00 local on the 12th is already the 13th in UTC.
+        (datetime(2026, 11, 13, 1, 0, tzinfo=UTC), datetime(2026, 11, 13, 11, tzinfo=UTC)),
+    ],
+)
+def test_next_daily_run_uses_the_configured_local_time(after, expected):
+    assert next_daily_run(after, time(8, 0), SAO_PAULO) == expected
+
+
+@pytest.mark.parametrize("gap", [-1, True, 1.5])
+def test_invalid_startup_gap_is_rejected(gap):
+    with pytest.raises(ValueError):
+        SourceScheduler(None, None, startup_min_gap_seconds=gap)
+
+
+def test_only_the_first_loop_cycle_forces_a_poll_when_enabled():
+    stop = Event()
+    calls = []
+
+    def run_due(**kwargs):
+        calls.append(kwargs.get("force", False))
+        if len(calls) == 3:
+            stop.set()
+        return ()
+
+    subject = worker(scheduler=SimpleNamespace(run_due=run_due), poll_on_start=True)
+    subject.enqueue_missing = lambda: 0
+    subject.run_forever(stop, poll_seconds=0.001)
+
+    assert calls == [True, False, False]
+
+
+def test_loop_never_forces_a_poll_by_default_and_once_stays_bounded():
+    calls = []
+    subject = worker(scheduler=SimpleNamespace(run_due=lambda **kwargs: calls.append(kwargs) or ()))
+    subject.enqueue_missing = lambda: 0
+    subject.run_once()
+
+    assert calls == [{"now": None}]
+    assert subject.poll_on_start is False

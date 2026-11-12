@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, time, timedelta, timezone
 from threading import Event
 from types import SimpleNamespace
 from uuid import uuid4
@@ -296,3 +296,57 @@ def test_failed_poller_cannot_commit_staged_job_changes(db_engine, records, outc
     assert scheduler(db_engine, {name: poll}).run_due(now=NOW)[0].status == "FAILED"
     with Session(db_engine) as session:
         assert session.scalar(select(Job.id).where(Job.source_id == identifier)) is None
+
+
+def _succeeding(calls):
+    def poll(session, identifier):
+        calls.append(identifier)
+        session.commit()
+        return SimpleNamespace(status="SUCCEEDED")
+
+    return poll
+
+
+def test_daily_schedule_sets_next_run_to_the_configured_local_time(db_engine, records):
+    source, name = records(polling_interval=30)
+    calls = []
+    subject = scheduler(
+        db_engine,
+        {name: _succeeding(calls)},
+        daily_at=time(8, 0),
+        timezone=timezone(timedelta(hours=-3)),
+    )
+
+    assert [outcome.source_id for outcome in subject.run_due(now=NOW)] == [source]
+    with Session(db_engine) as session:
+        # NOW is 09:00 local, so the next 08:00 local is the following day (11:00 UTC).
+        assert session.get(JobSource, source).next_run_at == datetime(2026, 11, 12, 11, tzinfo=UTC)
+    assert subject.run_due(now=NOW) == ()
+
+
+def test_forced_start_poll_ignores_next_run_but_respects_enablement_and_recent_runs(
+    db_engine, records
+):
+    waiting, waiting_name = records(next_run_at=NOW + timedelta(hours=20))
+    old_run, old_name = records(
+        next_run_at=NOW + timedelta(hours=20), last_run_at=NOW - timedelta(minutes=10)
+    )
+    recent, recent_name = records(
+        next_run_at=NOW + timedelta(hours=20), last_run_at=NOW - timedelta(minutes=9)
+    )
+    disabled, disabled_name = records(enabled=False)
+    calls = []
+    subject = scheduler(
+        db_engine,
+        dict.fromkeys((waiting_name, old_name, recent_name, disabled_name), _succeeding(calls)),
+    )
+
+    assert subject.run_due(now=NOW) == ()
+    outcomes = subject.run_due(now=NOW, force=True)
+
+    assert {outcome.source_id for outcome in outcomes} == {waiting, old_run} == set(calls)
+    with Session(db_engine) as session:
+        assert session.get(JobSource, recent).last_run_at == NOW - timedelta(minutes=9)
+        assert session.get(JobSource, disabled).last_run_at is None
+    # The forced run is now recent, so an immediate restart does not poll again.
+    assert subject.run_due(now=NOW, force=True) == ()
