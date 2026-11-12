@@ -92,9 +92,9 @@ def test_normalize_apibr_job_rejects_non_object_payload(payload):
 
 @pytest.mark.parametrize(
     ("state", "expected_status"),
-    [("open", "ACTIVE"), ("closed", "EXPIRED"), (None, "DISCOVERED")],
+    [("open", "ACTIVE"), ("closed", "EXPIRED"), (None, "ACTIVE"), ("unexpected", "ACTIVE")],
 )
-def test_normalize_apibr_job_maps_github_issue_state(state, expected_status):
+def test_normalize_apibr_job_maps_listing_presence_and_explicit_state(state, expected_status):
     normalized = normalize_apibr_job({"id": 123, "title": "Developer", "state": state})
 
     assert normalized["status"] == expected_status
@@ -117,10 +117,17 @@ def test_description_preserves_html_and_markdown_section_boundaries():
     assert normalize_text("<td>Java</td><td>Kotlin</td>") == "Java Kotlin"
 
 
-def test_state_free_payload_stays_discovered():
+def test_state_free_listed_payload_is_active():
     job = normalize_apibr_job({"id": 123, "title": "Developer", "body": "Python"})
-    assert job["status"] == "DISCOVERED"
+    assert job["status"] == "ACTIVE"
+    # Ingestion records the verification time of a successful observation.
     assert job["last_verified_at"] is None
+
+
+def test_live_shape_records_without_state_are_active():
+    statuses = {normalize_apibr_job(record)["status"] for record in _live_shape_fixture().values()}
+
+    assert statuses == {"ACTIVE"}
 
 
 @pytest.mark.parametrize("empty_html", ["<p> </p>", "<!--hidden-->", "<br>&nbsp;"])

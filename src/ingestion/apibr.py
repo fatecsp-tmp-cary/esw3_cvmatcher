@@ -251,8 +251,8 @@ class APiBRRunResult:
 
 
 def _normalize_issue(raw: Any) -> tuple[dict[str, Any], bool]:
-    job = normalize_apibr_job(raw)
-    return job, raw.get("state") in ("open", "closed")
+    # Every record observed in the listing carries availability evidence (ADR-014).
+    return normalize_apibr_job(raw), True
 
 
 def ingest_apibr(
