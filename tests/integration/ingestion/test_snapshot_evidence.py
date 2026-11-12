@@ -37,7 +37,7 @@ class Client:
         )
 
 
-def test_complete_and_incomplete_counts_do_not_invent_availability_or_absence(db_session):
+def test_only_a_qualifying_snapshot_marks_absent_active_jobs_stale(db_session):
     session = db_session
     source = JobSource(name="counted-snapshot", type="api", polling_mode="SNAPSHOT")
     session.add(source)
@@ -57,16 +57,118 @@ def test_complete_and_incomplete_counts_do_not_invent_availability_or_absence(db
     assert run.polling_mode == "SNAPSHOT"
     assert run.snapshot_evidence["qualified"] is True
     assert run.snapshot_evidence["distinct_ids"] == 2
-    assert run.jobs_absent == run.jobs_marked_stale == 0
-    assert session.get(Job, previous.id).status == JobStatus.ACTIVE
+    assert run.jobs_absent == run.jobs_marked_stale == 1
+    assert complete.jobs_absent == complete.jobs_marked_stale == 1
+    assert session.get(Job, previous.id).status == JobStatus.STALE
     assert session.scalars(select(Job.status).where(Job.source_job_id != "missing")).all() == [
         JobStatus.ACTIVE,
         JobStatus.ACTIVE,
     ]
+    later = Job(
+        source_id=source.id,
+        platform="apibr",
+        source_job_id="later-missing",
+        title="Observed before a non-qualifying scan",
+        status=JobStatus.ACTIVE,
+    )
+    session.add(later)
+    session.commit()
     incomplete = ingest_apibr(session, source.id, Client(expected=3))
+    incomplete_run = session.get(SourceRun, incomplete.run_id)
     assert incomplete.status == "SUCCEEDED" and incomplete.snapshot_complete is False
-    assert session.get(SourceRun, incomplete.run_id).snapshot_evidence["qualified"] is False
-    assert session.get(Job, previous.id).status == JobStatus.ACTIVE
+    assert incomplete_run.snapshot_evidence["qualified"] is False
+    assert incomplete_run.jobs_absent == incomplete_run.jobs_marked_stale == 0
+    assert session.get(Job, later.id).status == JobStatus.ACTIVE
+    assert session.get(Job, previous.id).status == JobStatus.STALE
+
+
+def _absent_job(session, source, identity, status=JobStatus.ACTIVE):
+    job = Job(
+        source_id=source.id,
+        platform="apibr",
+        source_job_id=identity,
+        title="Previously observed",
+        status=status,
+    )
+    session.add(job)
+    session.commit()
+    return job.id
+
+
+def test_qualifying_snapshot_leaves_other_sources_and_other_states_untouched(db_session):
+    session = db_session
+    source = JobSource(name="scoped-snapshot", type="api", polling_mode="SNAPSHOT")
+    other = JobSource(name="other-source", type="api", polling_mode="SNAPSHOT")
+    session.add_all([source, other])
+    session.flush()
+    foreign = _absent_job(session, other, "foreign")
+    discovered = _absent_job(session, source, "discovered", JobStatus.DISCOVERED)
+    expired = _absent_job(session, source, "expired", JobStatus.EXPIRED)
+    already_stale = _absent_job(session, source, "stale", JobStatus.STALE)
+
+    result = ingest_apibr(session, source.id, Client())
+
+    assert result.snapshot_complete is True
+    # DISCOVERED and STALE are absent but not newly marked; EXPIRED is not counted.
+    assert (result.jobs_absent, result.jobs_marked_stale) == (2, 0)
+    assert session.get(Job, foreign).status == JobStatus.ACTIVE
+    assert session.get(Job, discovered).status == JobStatus.DISCOVERED
+    assert session.get(Job, expired).status == JobStatus.EXPIRED
+    assert session.get(Job, already_stale).status == JobStatus.STALE
+
+
+def test_incremental_scan_never_marks_absence(db_session):
+    session = db_session
+    source = JobSource(name="incremental-source", type="api", polling_mode="INCREMENTAL")
+    session.add(source)
+    session.flush()
+    missing = _absent_job(session, source, "missing")
+
+    result = ingest_apibr(session, source.id, Client())
+
+    assert result.status == "SUCCEEDED" and result.snapshot_complete is False
+    assert (result.jobs_absent, result.jobs_marked_stale) == (0, 0)
+    assert session.get(Job, missing).status == JobStatus.ACTIVE
+
+
+def test_partial_snapshot_never_marks_absence(db_session):
+    session = db_session
+    source = JobSource(name="partial-snapshot", type="api", polling_mode="SNAPSHOT")
+    session.add(source)
+    session.flush()
+    missing = _absent_job(session, source, "missing")
+
+    class Rejecting(Client):
+        def fetch_page(self, page):
+            return [{"id": 1, "title": "Python"}, {"id": 2, "title": ""}] if page == 1 else []
+
+    result = ingest_apibr(session, source.id, Rejecting())
+
+    assert result.status == "PARTIAL" and result.snapshot_complete is False
+    assert (result.jobs_absent, result.jobs_marked_stale) == (0, 0)
+    assert session.get(Job, missing).status == JobStatus.ACTIVE
+
+
+def test_rediscovery_in_a_later_snapshot_reactivates_a_stale_job(db_session):
+    session = db_session
+    source = JobSource(name="rediscovery-snapshot", type="api", polling_mode="SNAPSHOT")
+    session.add(source)
+    session.flush()
+    returning = _absent_job(session, source, "3")
+    assert ingest_apibr(session, source.id, Client()).jobs_marked_stale == 1
+    assert session.get(Job, returning).status == JobStatus.STALE
+
+    class Relisted(Client):
+        def fetch_page(self, page):
+            return [{"id": i, "title": "Python", "body": "Python APIs"} for i in [1, 2, 3]] * (
+                page == 1
+            )
+
+    result = ingest_apibr(session, source.id, Relisted(expected=3))
+
+    assert result.snapshot_complete is True
+    assert (result.jobs_reactivated, result.jobs_marked_stale) == (1, 0)
+    assert session.get(Job, returning).status == JobStatus.ACTIVE
 
 
 @pytest.mark.parametrize("fail_after_scan", [False, True])
