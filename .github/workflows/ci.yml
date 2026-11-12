@@ -4,7 +4,6 @@ on:
   push:
     branches: main
   pull_request:
-    branches: main
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -62,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: pgvector/pgvector:pg17
+        image: pgvector/pgvector@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8
         env:
           POSTGRES_USER: cvmatch
           POSTGRES_PASSWORD: cvmatch
@@ -86,17 +85,8 @@ jobs:
       - name: Run integration and e2e tests
         run: |
           mkdir -p reports
-          # `run:` uses `bash -e`; route pytest's exit code through `||` so it
-          # can be inspected. Exit code 5 (no tests collected) is accepted until
-          # the first database-backed tests land (#37).
           pytest -ra -m "(integration or e2e) and not external" \
-            --junitxml=reports/junit-integration.xml || code=$?
-          code=${code:-0}
-          if [ "$code" -eq 5 ]; then
-            echo "::notice::No integration or e2e tests collected yet."
-            exit 0
-          fi
-          exit "$code"
+            --junitxml=reports/junit-integration.xml
 
       - name: Upload test report
         if: ${{ !cancelled() }}
@@ -105,3 +95,18 @@ jobs:
           name: junit-integration
           path: reports/junit-integration.xml
           if-no-files-found: ignore
+
+  types:
+    name: Type checking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-deps
+      - run: mypy
+
+  docker:
+    name: Production image build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --tag cvmatcher:ci .

@@ -1,6 +1,21 @@
+# Preserve the original default-deny build context; include reviewed source only.
 **
 !pyproject.toml
-!src
+!alembic.ini
+!src/
 !src/**
+!migrations/
+!migrations/**
+!requirements/
+!requirements/**
+!scripts/
+!scripts/models/
+!scripts/models/*.py
 **/__pycache__/
 **/*.py[cod]
+**/.env
+**/.env.*
+**/*.key
+**/*.pem
+**/*.safetensors
+**/*.bin

@@ -8,7 +8,7 @@ if [[ "$("${docker_cmd[@]}" info --format '{{json .SecurityOptions}}')" != *'nam
     echo 'Refusing a daemon without rootless security.' >&2
     exit 1
 fi
-image='pgvector/pgvector:pg17'
+image='pgvector/pgvector@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8'
 "${docker_cmd[@]}" image inspect "$image" >/dev/null
 run_id="cvmatcher-test-$(date +%s)-$$"
 cleanup() {

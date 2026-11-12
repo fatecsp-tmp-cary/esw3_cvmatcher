@@ -12,6 +12,7 @@ from src.api.errors import (
     register_error_handlers,
 )
 from src.api.rate_limit import GlobalRateLimiter
+from src.api.runtime import production_matches, production_ready
 from src.schemas.candidate import CurriculumRequest
 from src.schemas.matches import MatchesResponse
 
@@ -58,6 +59,7 @@ def create_app(
     match_executor: MatchExecutor | None = None,
     *,
     rate_limiter: GlobalRateLimiter | None = None,
+    readiness: Callable[[], None] | None = None,
 ) -> FastAPI:
     """Build the CV-Match API application."""
     app = FastAPI(title="CV-Match", version="0.1.0")
@@ -80,6 +82,8 @@ def create_app(
 
     @app.get("/health", tags=["system"])
     def health() -> dict[str, str]:
+        if readiness is not None:
+            readiness()
         return {"status": "ok"}
 
     @app.post(
@@ -125,4 +129,6 @@ def create_app(
     return app
 
 
-app = create_app(rate_limiter=GlobalRateLimiter())
+app = create_app(
+    match_executor=production_matches, rate_limiter=GlobalRateLimiter(), readiness=production_ready
+)

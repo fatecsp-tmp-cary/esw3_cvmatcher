@@ -1,0 +1,2 @@
+# Explicit lock-generation tool change only.
+pip-tools==7.6.2
