@@ -5,6 +5,14 @@ from html import escape
 from html.parser import HTMLParser
 from typing import Any
 
+from src.domain.categories import normalize_seniority, normalize_work_arrangement
+from src.extraction.taxonomy import canonical_skill
+
+# Aggregated repositories decorate labels with leading symbols ("🏢 Remoto") or
+# explicit "Level-"/"Lang-" prefixes ("Level-sênior", "Lang-python").
+_LABEL_DECORATION = re.compile(r"^[^\w.#+]+")
+_LABEL_PREFIX = re.compile(r"^(?:level|lang)[-_ ]+", re.IGNORECASE)
+
 
 class _HTMLTextParser(HTMLParser):
     _BLOCK_TAGS = {
@@ -120,6 +128,37 @@ def normalize_keywords(labels: Any) -> list[str]:
     return keywords
 
 
+def vacancy_labels(raw_job: dict[str, Any]) -> list[str]:
+    """Return cleaned vacancy-level label names from an APiBR issue.
+
+    APiBR label objects carry a ``type``. Repository ``topic`` labels describe
+    the aggregated repository, not the vacancy, and are ignored. Untyped string
+    labels and the title-derived ``keywords`` are vacancy-level evidence.
+    """
+    names = []
+    for field in ("labels", "keywords"):
+        values = raw_job.get(field)
+        if not isinstance(values, list):
+            continue
+        for value in values:
+            if isinstance(value, dict):
+                if value.get("type") == "topic":
+                    continue
+                value = value.get("name")
+            text = normalize_text(value) if isinstance(value, str) else None
+            if text is None:
+                continue
+            cleaned = _LABEL_PREFIX.sub("", _LABEL_DECORATION.sub("", text)).strip()
+            if cleaned:
+                names.append(cleaned)
+    return names
+
+
+def _only(values: set[Any]) -> Any | None:
+    """Return the single explicit value; missing or conflicting evidence is unknown."""
+    return next(iter(values)) if len(values) == 1 else None
+
+
 def _normalize_publication_date(value: Any) -> datetime | None:
     if value is None:
         return None
@@ -157,6 +196,18 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
 
     keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
 
+    # Only exact shared aliases are mapped. Free text is never interpreted, and
+    # conflicting labels (for example every option of an issue form) stay unknown.
+    labels = vacancy_labels(raw_job)
+    seniority = {level for name in labels if (level := normalize_seniority(name)) is not None}
+    arrangement = {
+        mode for name in labels if (mode := normalize_work_arrangement(name)) is not None
+    }
+    skills = sorted(
+        {skill for name in labels if (skill := canonical_skill(name)) is not None},
+        key=str.casefold,
+    )
+
     return {
         "platform": "apibr",
         "source_job_id": normalized_source_id,
@@ -165,10 +216,10 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         "title": title,
         "description": normalize_text(raw_job.get("body"), preserve_sections=True),
         "keywords": keywords,
-        "skills": [],
+        "skills": skills,
         "location": None,
-        "work_arrangement": None,
-        "seniority_level": None,
+        "work_arrangement": _only(arrangement),
+        "seniority_level": _only(seniority),
         "salary": None,
         "currency": None,
         "job_url": job_url,
