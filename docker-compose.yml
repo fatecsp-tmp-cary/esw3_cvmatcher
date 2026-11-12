@@ -1,19 +1,20 @@
 services:
   postgres:
-    image: pgvector/pgvector:pg17
+    image: ${CVMATCHER_POSTGRES_IMAGE:-pgvector/pgvector@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8}
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-cvmatch}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cvmatch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-cvmatch}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cvmatch} -d ${POSTGRES_DB:-cvmatch}"]
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
 
 volumes:
   postgres_data:

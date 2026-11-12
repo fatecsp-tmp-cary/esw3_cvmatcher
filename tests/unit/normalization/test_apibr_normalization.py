@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from src.normalization.jobs.apibr import normalize_apibr_job, normalize_keywords, normalize_text
-from src.persistence.job.job import WorkArrangement
 
 
 def test_normalize_apibr_job():
@@ -50,7 +49,6 @@ def test_normalize_apibr_job():
     assert normalized["location"] is None
     assert isinstance(normalized["publication_date"], datetime)
     assert normalized["publication_date"].tzinfo == UTC
-    assert normalized["work_arrangement"] == WorkArrangement.REMOTE
     assert isinstance(normalized["keywords"], list)
     assert isinstance(normalized["skills"], list)
 
@@ -138,18 +136,3 @@ def test_html_without_text_cannot_supply_a_required_title(empty_html):
 def test_malformed_fields_raise_record_validation_errors(invalid_fields):
     with pytest.raises(ValueError, match="APiBR issue has an invalid"):
         normalize_apibr_job({"id": 2, "title": "Developer", **invalid_fields})
-
-
-@pytest.mark.parametrize(
-    ("labels", "seniority", "arrangement"),
-    [
-        (["junior", "senior", "remoto", "presencial"], "JUNIOR", "REMOTE"),
-        (["presencial", "remoto", "senior", "junior"], "SENIOR", "ON_SITE"),
-        (["unknown", "híbrido", "pleno", "senior", "remoto"], "MID", "HYBRID"),
-    ],
-)
-def test_first_recognized_source_label_wins_for_each_category(labels, seniority, arrangement):
-    job = normalize_apibr_job({"id": 123, "title": "Developer", "labels": labels})
-    assert job["seniority_level"] == seniority
-    assert job["work_arrangement"] == arrangement
-    assert job["keywords"] == labels

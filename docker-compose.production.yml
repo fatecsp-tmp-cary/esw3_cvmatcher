@@ -1,0 +1,74 @@
+# Always combine with docker-compose.yml and an explicit --project-name.
+x-application: &application
+  image: cvmatcher-local:production
+  build:
+    context: .
+  environment: &environment
+    DATABASE_URL: ${DATABASE_URL:?Set URL-encoded PostgreSQL URL using host postgres}
+    CVMATCHER_EXTRACTION_DIRECTORY: /models/extraction
+    CVMATCHER_EMBEDDING_CACHE: /models/huggingface
+    HF_HOME: /models/huggingface
+    HF_HUB_OFFLINE: "1"
+    TRANSFORMERS_OFFLINE: "1"
+    HF_HUB_DISABLE_TELEMETRY: "1"
+    OMP_NUM_THREADS: "1"
+    MKL_NUM_THREADS: "1"
+  volumes:
+    - model_cache:/models
+  init: true
+  mem_limit: 3g
+  cpus: 1.0
+
+services:
+  model-init:
+    <<: *application
+    profiles: [prepare]
+    user: "0:0"
+    command: ["python", "-c", "import os; os.makedirs('/models/huggingface', exist_ok=True); os.chown('/models', 10001, 10001); os.chown('/models/huggingface', 10001, 10001)"]
+  prepare-extraction:
+    <<: *application
+    profiles: [prepare]
+    environment:
+      <<: *environment
+      HF_HUB_OFFLINE: "0"
+      TRANSFORMERS_OFFLINE: "0"
+    command: ["python", "scripts/models/prepare_extraction.py", "/models/extraction"]
+  prepare-embeddings:
+    <<: *application
+    profiles: [prepare]
+    environment:
+      <<: *environment
+      HF_HUB_OFFLINE: "0"
+      TRANSFORMERS_OFFLINE: "0"
+    command: ["python", "scripts/models/prepare_embeddings.py", "--cache-dir", "/models/huggingface", "--manifest", "/models/embedding-provenance.json"]
+  migrate:
+    <<: *application
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  worker:
+    <<: *application
+    command: ["python", "-m", "src.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    stop_grace_period: 120s
+  api:
+    <<: *application
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${CVMATCHER_API_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=30)"]
+      interval: 30s
+      timeout: 35s
+      start_period: 120s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  model_cache:

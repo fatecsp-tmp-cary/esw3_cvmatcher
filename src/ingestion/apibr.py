@@ -1,17 +1,20 @@
 """Sequential APiBR polling with source-run evidence and safe job upserts."""
 
+import asyncio
 import json
 import time
-from collections.abc import Iterator
+from collections.abc import AsyncIterator, Callable, Iterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Protocol
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session
 
+from src.ingestion.adapters import PollingMode, RetryPolicy, SourceError
 from src.ingestion.upsert import upsert_job
 from src.normalization.jobs.apibr import normalize_apibr_job
 from src.persistence.job.job_source import JobSource
@@ -29,20 +32,151 @@ class IssuePageClient(Protocol):
 
 
 class APiBRClient:
-    """Read APiBR issue pages one at a time until the first empty page."""
+    """Bounded synchronous APiBR page transport, also usable by async adapters."""
 
-    def fetch_page(self, page: int) -> list[Any]:
+    def __init__(
+        self,
+        *,
+        transport: Callable[[Request, int], bytes] | None = None,
+        retry_policy: RetryPolicy | None = None,
+        sleep: Callable[[float], None] = time.sleep,
+        now: Callable[[], datetime] = lambda: datetime.now(UTC),
+    ) -> None:
+        self.transport = transport or self._read_response
+        self.retry_policy = retry_policy or RetryPolicy()
+        self.sleep = sleep
+        self.now = now
+
+    @staticmethod
+    def _read_response(request: Request, timeout: int) -> bytes:
+        with urlopen(request, timeout=timeout) as response:
+            return response.read()
+
+    def request_page(self, page: int) -> list[Any]:
+        """Perform one request; errors expose categories, never upstream text."""
+        if isinstance(page, bool) or not isinstance(page, int) or page < 1:
+            raise ValueError("page must be a positive integer")
         query = urlencode({"per_page": _PAGE_SIZE, "page": page, "includeBody": "true"})
         request = Request(
             f"{_APIBR_ISSUES_URL}?{query}",
             headers={"Accept": "application/json", "User-Agent": "cv-match-job-ingestor"},
         )
-        with urlopen(request, timeout=_REQUEST_TIMEOUT_SECONDS) as response:
-            payload = json.loads(response.read())
-
+        try:
+            raw = self.transport(request, _REQUEST_TIMEOUT_SECONDS)
+        except HTTPError as error:
+            retryable = error.code == 429 or 500 <= error.code <= 599
+            category = (
+                "http_rate_limit"
+                if error.code == 429
+                else "http_server_failure"
+                if retryable
+                else "http_permanent_failure"
+            )
+            retry_after = error.headers.get("Retry-After") if error.headers is not None else None
+            error.close()
+            raise SourceError(category, retryable=retryable, retry_after=retry_after) from None
+        except (URLError, OSError):
+            raise SourceError("transport_failure", retryable=True) from None
+        except Exception:
+            raise SourceError("transport_failure") from None
+        try:
+            payload = json.loads(raw)
+        except (ValueError, TypeError, UnicodeError):
+            raise SourceError("invalid_page") from None
         if not isinstance(payload, list):
-            raise ValueError("APiBR returned an invalid issues page")
+            raise SourceError("invalid_page")
         return payload
+
+    def fetch_page(self, page: int) -> list[Any]:
+        for attempt in range(1, self.retry_policy.max_attempts + 1):
+            try:
+                return self.request_page(page)
+            except SourceError as error:
+                if not error.retryable or attempt == self.retry_policy.max_attempts:
+                    raise
+                self.sleep(self.retry_policy.delay(attempt, error.retry_after, self.now()))
+        raise AssertionError("unreachable retry state")
+
+
+class APiBRAdapter:
+    """Async common source interface without hidden GitHub availability requests.
+
+    All records are returned unchanged for ingestion's independent normalization
+    and rejection. Reaching an empty page does not prove snapshot completeness.
+    """
+
+    platform = "apibr"
+    polling_mode = PollingMode.INCREMENTAL
+    snapshot_complete = False
+
+    def __init__(
+        self,
+        client: APiBRClient | None = None,
+        *,
+        max_pages: int = _MAX_PAGES,
+        sleep: Callable[[float], Any] = asyncio.sleep,
+    ) -> None:
+        if (
+            isinstance(max_pages, bool)
+            or not isinstance(max_pages, int)
+            or not 1 <= max_pages <= _MAX_PAGES
+        ):
+            raise ValueError("max_pages must be between 1 and the page safety limit")
+        self.client = client or APiBRClient()
+        self.max_pages = max_pages
+        self.sleep = sleep
+
+    async def _fetch_page(self, page: int) -> list[Any]:
+        policy = self.client.retry_policy
+        for attempt in range(1, policy.max_attempts + 1):
+            try:
+                # Only the bounded blocking HTTP operation runs in a thread;
+                # retry waits remain cancellable in the event loop.
+                return await asyncio.to_thread(self.client.request_page, page)
+            except SourceError as error:
+                if not error.retryable or attempt == policy.max_attempts:
+                    raise
+                await self.sleep(policy.delay(attempt, error.retry_after, self.client.now()))
+        raise AssertionError("unreachable retry state")
+
+    async def fetch_jobs(self) -> AsyncIterator[Any]:
+        for page in range(1, self.max_pages + 1):
+            records = await self._fetch_page(page)
+            if not records:
+                return
+            for record in records:
+                yield record
+        raise SourceError("page_safety_limit")
+
+    async def discover(self) -> AsyncIterator[str]:
+        async for record in self.fetch_jobs():
+            if not isinstance(record, dict):
+                raise SourceError("invalid_discovery_record")
+            identity = record.get("id")
+            if (
+                isinstance(identity, bool)
+                or not isinstance(identity, (int, str))
+                or not str(identity).strip()
+            ):
+                raise SourceError("invalid_discovery_record")
+            yield str(identity).strip()
+
+    async def fetch_job(self, source_job_id: str) -> dict[str, Any] | None:
+        if not isinstance(source_job_id, str) or not source_job_id.strip():
+            raise ValueError("source_job_id must be a nonempty string")
+        async for record in self.fetch_jobs():
+            if isinstance(record, dict):
+                identity = record.get("id")
+                if (
+                    not isinstance(identity, bool)
+                    and isinstance(identity, (int, str))
+                    and str(identity).strip() == source_job_id.strip()
+                ):
+                    return record
+        return None
+
+    def normalize(self, raw_job: Any) -> dict[str, Any]:
+        return normalize_apibr_job(raw_job)
 
 
 def iter_apibr_issues(client: IssuePageClient) -> Iterator[Any]:
@@ -94,7 +228,7 @@ def ingest_apibr(
 
     client = client or APiBRClient()
     started_at = started_at or datetime.now(UTC)
-    run = SourceRun(
+    run: SourceRun | None = SourceRun(
         source_id=source_id,
         started_at=started_at,
         status="RUNNING",
@@ -103,6 +237,7 @@ def ingest_apibr(
     )
     session.add(run)
     session.commit()
+    assert run is not None
     run_id = run.id
     timer_started = time.perf_counter()
 
@@ -135,6 +270,8 @@ def ingest_apibr(
         finished_at = datetime.now(UTC)
         run = session.get(SourceRun, run_id)
         source = session.get(JobSource, source_id)
+        if run is None or source is None:
+            raise RuntimeError("Source execution state is unavailable")
         status = "PARTIAL" if counts["rejected"] else "SUCCEEDED"
         run.status = status
         run.finished_at = finished_at
