@@ -73,7 +73,7 @@ no daily reset or automatic explicit retry occurs. Both model services retain
 their three-attempt ceilings and backoff. Unit tests patch model constructors
 and session boundaries; serving uses the actual local inference classes.
 
-See deployment procedures (planned in #177: `deployment.md`) for Compose setup and recovery.
+See [deployment procedures](deployment.md) for Compose setup and recovery.
 
 For model/config changes in pre-production, stop workers/API, update the pinned
 configuration, reprocess jobs, verify matching readiness and restart. Missing or
