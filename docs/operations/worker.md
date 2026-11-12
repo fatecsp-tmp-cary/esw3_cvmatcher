@@ -49,7 +49,7 @@ FAILED, RUNNING, PENDING or SUCCEEDED extraction state. The extraction service
 retains its three-attempt ceiling, backoff and explicit-retry requirement.
 No availability transition is inferred from extraction or polling failure.
 
-`python -m src.worker --once` runs one cycle after production factory wiring.
+`python -m src.worker --once` runs one bounded production cycle.
 `python -m src.worker --retry-extraction JOB_ID` explicitly resets extraction
 work for that persisted numeric job ID using the configured extraction version.
 This command neither receives nor stores a curriculum and does not change job
@@ -58,12 +58,22 @@ loop with a five-second delay; SIGINT/SIGTERM request a stop after the active cy
 and interrupt idle waiting. They do not forcibly terminate in-flight model/HTTP
 work. Injected source transport retains its own bounded page request policy.
 
-The entrypoint's `create_default_worker()` intentionally fails safely until
-production integration supplies the pinned extractor, model/config versions,
-database engine, embedding callback and reliable source-expiration callback.
-Unit tests can inject `main(..., worker_factory=...)`; do not replace local model
-inference with a fake extractor in production. This implementation does not
-claim that model/bootstrap wiring or complete Compose deployment is ready.
+The entrypoint imports `src.worker.bootstrap.create_default_worker()`. It uses
+`DATABASE_URL` for PostgreSQL, requires `CVMATCHER_EXTRACTION_DIRECTORY` to point
+to the prepared pinned GLiNER directory, and passes `CVMATCHER_EMBEDDING_CACHE`
+to the offline embedding encoder. Extraction uses `EXTRACTION_VERSION` from the
+pinned policy. Missing/invalid extraction artifacts fail startup with a fixed
+safe category. Embedding loading is lazy; a missing cache fails processing using
+the service's bounded retry policy. API readiness separately validates its model.
+
+Embedding maintenance enqueues at most 100 non-expired jobs with successful,
+current extraction and missing/outdated embedding provenance, then processes at
+most 100 claims. Current FAILED rows are excluded from maintenance enqueueing;
+no daily reset or automatic explicit retry occurs. Both model services retain
+their three-attempt ceilings and backoff. Unit tests patch model constructors
+and session boundaries; serving uses the actual local inference classes.
+
+See [deployment procedures](deployment.md) for Compose setup and recovery.
 
 For model/config changes in pre-production, stop workers/API, update the pinned
 configuration, reprocess jobs, verify matching readiness and restart. Missing or

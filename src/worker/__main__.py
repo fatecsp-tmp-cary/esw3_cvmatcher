@@ -7,14 +7,10 @@ import signal
 from collections.abc import Callable, Sequence
 from threading import Event
 
+from src.worker.bootstrap import create_default_worker
 from src.worker.runtime import BackgroundWorker
 
 logger = logging.getLogger(__name__)
-
-
-def create_default_worker() -> BackgroundWorker:
-    """Production integration must supply pinned local model/bootstrap wiring."""
-    raise RuntimeError("worker_configuration_unavailable")
 
 
 def main(
