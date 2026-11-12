@@ -89,6 +89,20 @@ docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.pr
 curl --fail http://127.0.0.1:8000/health
 ```
 
+No source is configured automatically. After migrations, register the APiBR
+source once; the command is idempotent, needs only the database and never loads
+a model:
+
+```sh
+docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml run --rm worker python -m src.worker.sources register apibr --polling-mode SNAPSHOT
+```
+
+Use `--polling-mode INCREMENTAL` (the default) to ignore absence, or `--disabled`
+to register without polling. `SNAPSHOT` enables the qualifying-snapshot rules of
+ADR-013 and ADR-015. Running the command again updates the mode and enabled flag
+and preserves scheduling timestamps and run history. Only supported source names
+are accepted.
+
 The worker polls enabled sources when it starts and then daily at 08:00
 `America/Sao_Paulo`; see the [worker schedule](worker.md#daily-schedule-and-poll-on-start)
 for the `CVMATCHER_SOURCE_*` variables that change this.
