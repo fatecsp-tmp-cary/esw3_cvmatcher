@@ -25,7 +25,11 @@ THRESHOLD = 0.3
 MAX_TOKENS = 384
 MAX_CHARACTERS = 1200
 OVERLAP_CHARACTERS = 200
-INFERENCE_PACKAGES = {"gliner": "0.2.30", "transformers": "4.57.6", "torch": "2.9.1+cpu"}
+INFERENCE_PACKAGES = {
+    "gliner": "0.2.30",
+    "transformers": "4.57.6",
+    "torch": "2.9.1+cpu",
+}
 _POLICY: dict[str, object] = {
     "model": MODEL_ID,
     "model_revision": MODEL_REVISION,
@@ -165,9 +169,17 @@ class GlinerExtractor:
             for entity in entities:
                 if not isinstance(entity, dict):
                     raise ValueError("Invalid local extraction prediction")
-                local = SpanEvidence(
-                    entity.get("start"), entity.get("end"), entity.get("label"), entity.get("score")
-                )
+                start, end = entity.get("start"), entity.get("end")
+                label, confidence = entity.get("label"), entity.get("score")
+                if (
+                    type(start) is not int
+                    or type(end) is not int
+                    or not isinstance(label, str)
+                    or isinstance(confidence, bool)
+                    or not isinstance(confidence, (int, float))
+                ):
+                    raise ValueError("Invalid local extraction evidence")
+                local = SpanEvidence(start, end, label, float(confidence))
                 local.serialize(chunk.text)
                 if (
                     local.label not in LABELS
@@ -185,9 +197,10 @@ class GlinerExtractor:
                     )
                 )
         # Resolve same-label overlapping windows deterministically, preserving strongest evidence.
-        selected = []
+        selected: list[SpanEvidence] = []
         for span in sorted(
-            predictions, key=lambda s: (-s.confidence, -(s.end - s.start), s.start, s.label)
+            predictions,
+            key=lambda s: (-s.confidence, -(s.end - s.start), s.start, s.label),
         ):
             if not any(
                 span.label == old.label and span.start < old.end and old.start < span.end

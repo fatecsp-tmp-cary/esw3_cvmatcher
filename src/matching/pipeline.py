@@ -5,7 +5,7 @@ import json
 import logging
 import time
 from collections.abc import Callable
-from typing import Protocol
+from typing import Any, Protocol
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -121,13 +121,14 @@ class MatchingPipeline:
             vector_jobs = set(
                 session.scalars(
                     select(Job.id).where(
-                        Job.id.in_(sorted(pool)), embedding_ready(config, self.extraction_version)
+                        Job.id.in_(sorted(pool)),
+                        embedding_ready(config, self.extraction_version),
                     )
                 )
             )
             document = job_search_document()
             query = any_term_query(query_text)
-            text_scores = dict(
+            text_scores: dict[int, float] = dict(
                 session.execute(
                     select(Job.id, func.ts_rank_cd(document, query, 32) * 100.0).where(
                         Job.id.in_(sorted(pool))
@@ -135,11 +136,11 @@ class MatchingPipeline:
                 ).all()
             )
             scored = []
-            entry_matrix = np.asarray(vectors[: len(texts)], dtype=np.float64)
+            entry_matrix: Any = np.asarray(vectors[: len(texts)], dtype=np.float64)
             for job in jobs:
                 semantic = 0.0
                 if texts and job.id in vector_jobs and job.embedding is not None:
-                    job_vector = np.asarray(normalized_vector(job.embedding), dtype=np.float64)
+                    job_vector: Any = np.asarray(normalized_vector(job.embedding), dtype=np.float64)
                     similarities = np.clip(entry_matrix @ job_vector, -1.0, 1.0)
                     entry_scores = [self.calibration.score(float(value)) for value in similarities]
                     experiences = tuple(
@@ -155,10 +156,15 @@ class MatchingPipeline:
                 total = self.ranking.score(float(text_scores.get(job.id, 0)), semantic, structured)
                 scored.append((total, job, sorted(matched & skills)))
             scored.sort(
-                key=lambda item: (-item[0], item[1].platform, item[1].source_job_id, item[1].id)
+                key=lambda item: (
+                    -item[0],
+                    item[1].platform,
+                    item[1].source_job_id,
+                    item[1].id,
+                )
             )
             matches = []
-            for rank, (score, job, matched) in enumerate(scored[:limit], start=1):
+            for rank, (score, job, matched_skills) in enumerate(scored[:limit], start=1):
                 payload = {name: getattr(job, name) for name in MatchedJob.model_fields}
                 matches.append(
                     MatchResult(
@@ -166,7 +172,7 @@ class MatchingPipeline:
                         job=MatchedJob(**payload),
                         score=score,
                         eligibility=True,
-                        matched_skills=matched,
+                        matched_skills=matched_skills,
                         # Mandatory model classifications stay disabled pending measured quality.
                         missing_requirements=[],
                         embedding_model=self.encoder.model_version,
