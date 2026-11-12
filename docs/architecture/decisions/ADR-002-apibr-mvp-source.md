@@ -30,4 +30,4 @@ for the MVP, while acknowledging source coverage and payload limitations.
 APiBR coverage and body formats constrain ingestion. Whether a completed APiBR
 scan is a provably complete snapshot, and therefore safe to use for absence-based
 stale transitions, must be clarified before implementing that behavior. See
-[future PR clarifications](../../../specs/feature-001-mvp/acceptance.md).
+[implementation clarifications](../../../specs/feature-001-mvp/acceptance.md).

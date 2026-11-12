@@ -76,3 +76,49 @@ def normalize_curriculum(request: CurriculumRequest) -> NormalizedCandidate:
         competencies=tuple(Competency(x.descricao, x.nivel) for x in request.competencias),
         languages=tuple(Language(x.idioma, x.nivel) for x in request.idiomas),
     )
+
+from src.schemas.candidate.profile import (
+    CandidateCompetency, CandidateProfile, CandidateProject,
+    Education as ProfileEducation, Experience as ProfileExperience, Language as ProfileLanguage,
+)
+
+def to_candidate_profile(curriculum: CurriculumRequest) -> CandidateProfile:
+    """Preserve matching sections and dates without carrying the curriculum ID."""
+    return CandidateProfile(
+        skills=[item.descricao for item in curriculum.competencias],
+        competencies=[
+            CandidateCompetency(name=item.descricao, level=item.nivel)
+            for item in curriculum.competencias
+        ],
+        job_titles=[item.cargo for item in curriculum.experiencias],
+        experience=[
+            ProfileExperience(
+                title=item.cargo,
+                company=item.empresa,
+                description=item.descricao,
+                start_date=item.inicio.isoformat(),
+                end_date=item.fim.isoformat() if item.fim else None,
+            )
+            for item in curriculum.experiencias
+        ],
+        education=[
+            ProfileEducation(
+                institution=item.instituicao,
+                degree=item.curso,
+                level=item.nivel,
+                status=item.status,
+                start_date=item.inicio.isoformat(),
+                end_date=item.fim.isoformat() if item.fim else None,
+            )
+            for item in curriculum.formacoes
+        ],
+        academic_projects=[
+            CandidateProject(
+                title=item.titulo, technologies=item.tecnologias, description=item.descricao
+            )
+            for item in curriculum.projetos
+        ],
+        languages=[
+            ProfileLanguage(name=item.idioma, proficiency=item.nivel) for item in curriculum.idiomas
+        ],
+    )
