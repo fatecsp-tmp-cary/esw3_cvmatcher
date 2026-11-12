@@ -26,3 +26,5 @@ superseded by later ADRs; do not rewrite their rationale or status history.
 - [ADR-012: Issue completion and reviewed evaluation](ADR-012-issue-completion-and-evaluation-policy.md) — accepted interview decisions for request budgets, conservative mappings, evaluation and local deployment scope.
 
 - [ADR-013: Best-effort APiBR snapshot attestation](ADR-013-best-effort-apibr-snapshot-attestation.md) — accepted conditional source-health/count completeness, without availability or absence-driven expiry.
+
+- [ADR-014: APiBR listing presence is open-vacancy evidence](ADR-014-apibr-listing-presence-is-open-evidence.md) — supersedes only the ADR-003 `DISCOVERED` rule for records without explicit state; absence-driven expiry stays separate.
