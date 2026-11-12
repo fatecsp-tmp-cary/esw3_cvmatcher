@@ -49,6 +49,12 @@ services:
         condition: service_healthy
   worker:
     <<: *application
+    environment:
+      <<: *environment
+      # Poll enabled sources when the worker starts and then daily at this local time.
+      CVMATCHER_SOURCE_POLL_ON_START: ${CVMATCHER_SOURCE_POLL_ON_START:-1}
+      CVMATCHER_SOURCE_DAILY_AT: ${CVMATCHER_SOURCE_DAILY_AT:-08:00}
+      CVMATCHER_SOURCE_TIMEZONE: ${CVMATCHER_SOURCE_TIMEZONE:-America/Sao_Paulo}
     command: ["python", "-m", "src.worker"]
     depends_on:
       migrate:
