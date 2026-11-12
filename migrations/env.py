@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine, pool
 
-from src.persistence import api_admission, extraction  # noqa: F401
+from src.persistence import api_admission, embedding, extraction  # noqa: F401
 from src.persistence.base import Base
 from src.persistence.database import database_url
 from src.persistence.job import job, job_source, source_run  # noqa: F401
