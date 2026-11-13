@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from src.embeddings.config import EmbeddingConfig
 from src.embeddings.encoder import normalized_vector
 from src.embeddings.service import ready_predicate
-from src.persistence.job.job import Job, JobStatus
+from src.persistence.job.job import ACTIVE_STATUSES, Job, JobStatus, status_predicate
 
 
 def semantic_statement(
@@ -15,6 +15,7 @@ def semantic_statement(
     extraction_version: str,
     *,
     limit: int = 100,
+    statuses: tuple[JobStatus, ...] = ACTIVE_STATUSES,
 ):
     if type(limit) is not int or limit < 1:
         raise ValueError("Retrieval limit must be a positive integer")
@@ -23,7 +24,7 @@ def semantic_statement(
     similarity = func.greatest(-1.0, func.least(1.0, literal(1.0) - distance)).label("similarity")
     return (
         select(Job, similarity)
-        .where(Job.status == JobStatus.ACTIVE, ready_predicate(config, extraction_version))
+        .where(status_predicate(statuses), ready_predicate(config, extraction_version))
         .order_by(distance.asc(), Job.platform.asc(), Job.source_job_id.asc(), Job.id.asc())
         .limit(limit)
     )
@@ -36,11 +37,14 @@ def retrieve_semantic(
     extraction_version: str,
     *,
     limit: int = 100,
+    statuses: tuple[JobStatus, ...] = ACTIVE_STATUSES,
 ) -> list[tuple[Job, float]]:
     """Return cosine similarities [-1,1]; caller owns empirical score calibration."""
     return [
         (job, float(score))
         for job, score in session.execute(
-            semantic_statement(query_vector, config, extraction_version, limit=limit)
+            semantic_statement(
+                query_vector, config, extraction_version, limit=limit, statuses=statuses
+            )
         )
     ]

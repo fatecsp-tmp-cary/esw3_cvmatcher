@@ -99,6 +99,27 @@ class Job(Base):
     content_hash: Mapped[str | None] = mapped_column(String(255))
 
 
+# Matching ranks currently active jobs before every other status (ADR-016).
+ACTIVE_STATUSES: tuple[JobStatus, ...] = (JobStatus.ACTIVE,)
+INACTIVE_STATUSES: tuple[JobStatus, ...] = (
+    JobStatus.DISCOVERED,
+    JobStatus.STALE,
+    JobStatus.EXPIRED,
+)
+
+
+def status_predicate(statuses: tuple[JobStatus, ...]):
+    """SQL predicate for a status group.
+
+    A single status keeps the equality form matched by the partial active indexes.
+    """
+    if not statuses:
+        raise ValueError("at least one job status is required")
+    if len(statuses) == 1:
+        return Job.status == statuses[0]
+    return Job.status.in_(statuses)
+
+
 # Register the migrated expression with ORM metadata so schema checks preserve it.
 Base.metadata.tables["jobs"].append_constraint(
     Index(
