@@ -7,7 +7,9 @@
     "url": "https://github.com/example-org/vagas/issues/101",
     "title": "[Remoto] Pessoa Desenvolvedora Backend Java - Empresa Sintética",
     "comments": 0,
-    "keywords": ["Remoto"],
+    "keywords": [
+      "Remoto"
+    ],
     "user": {
       "id": 1,
       "login": "synthetic-poster",
@@ -15,21 +17,81 @@
       "url": "https://github.com/synthetic-poster"
     },
     "labels": [
-      {"name": "Backend", "type": "APIBr", "color": "b4fca0"},
-      {"name": "Brasil", "type": "APIBr", "color": "aa6464"},
-      {"name": "Nacional", "type": "APIBr", "color": "649b64"},
-      {"name": "Backend-jobs", "type": "topic", "color": "746464"},
-      {"name": "Remote-jobs", "type": "topic", "color": "646464"},
-      {"name": "Trabalho-remoto", "type": "topic", "color": "646464"},
-      {"name": "CLT", "type": "label", "color": "ededed"},
-      {"name": "Sênior", "type": "label", "color": "ededed"},
-      {"name": "Java", "type": "label", "color": "ededed"},
-      {"name": "Remoto", "type": "label", "color": "ededed"},
-      {"name": "PostgreSQL", "type": "label", "color": "ededed"},
-      {"name": "Docker", "type": "label", "color": "ededed"},
-      {"name": "AWS", "type": "label", "color": "ededed"},
-      {"name": "Spring", "type": "label", "color": "ededed"},
-      {"name": "Verificada", "type": "label", "color": "ededed"}
+      {
+        "name": "Backend",
+        "type": "APIBr",
+        "color": "b4fca0"
+      },
+      {
+        "name": "Brasil",
+        "type": "APIBr",
+        "color": "aa6464"
+      },
+      {
+        "name": "Nacional",
+        "type": "APIBr",
+        "color": "649b64"
+      },
+      {
+        "name": "Backend-jobs",
+        "type": "topic",
+        "color": "746464"
+      },
+      {
+        "name": "Remote-jobs",
+        "type": "topic",
+        "color": "646464"
+      },
+      {
+        "name": "Trabalho-remoto",
+        "type": "topic",
+        "color": "646464"
+      },
+      {
+        "name": "CLT",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Sênior",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Java",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Remoto",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "PostgreSQL",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Docker",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "AWS",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Spring",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Verificada",
+        "type": "label",
+        "color": "ededed"
+      }
     ],
     "repository": {
       "id": 10,
@@ -37,7 +99,9 @@
       "full_name": "example-org/vagas",
       "description": "Synthetic repository used only by tests.",
       "url": "https://github.com/example-org/vagas",
-      "organization": {"login": "example-org"}
+      "organization": {
+        "login": "example-org"
+      }
     },
     "body": "## Descrição da vaga\nManter APIs REST em Java.\n## Requisitos\nJava e PostgreSQL."
   },
@@ -57,12 +121,36 @@
       "url": "https://github.com/synthetic-recruiter"
     },
     "labels": [
-      {"name": "Backend", "type": "APIBr", "color": "b4fca0"},
-      {"name": "Level-sênior", "type": "label", "color": "ededed"},
-      {"name": "👴 Senior", "type": "label", "color": "ededed"},
-      {"name": "Lang-python", "type": "label", "color": "ededed"},
-      {"name": "🏢 Remoto", "type": "label", "color": "ededed"},
-      {"name": "💰 N/A", "type": "label", "color": "ededed"}
+      {
+        "name": "Backend",
+        "type": "APIBr",
+        "color": "b4fca0"
+      },
+      {
+        "name": "Level-sênior",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "👴 Senior",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Lang-python",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "🏢 Remoto",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "💰 N/A",
+        "type": "label",
+        "color": "ededed"
+      }
     ],
     "repository": {
       "id": 10,
@@ -70,7 +158,9 @@
       "full_name": "example-org/vagas",
       "description": "Synthetic repository used only by tests.",
       "url": "https://github.com/example-org/vagas",
-      "organization": {"login": "example-org"}
+      "organization": {
+        "login": "example-org"
+      }
     },
     "body": "### Description\nBuild data pipelines in Python."
   },
@@ -82,7 +172,9 @@
     "url": "https://github.com/example-org/vagas/issues/103",
     "title": "[Remoto] Engenharia de Software (Rust)",
     "comments": 0,
-    "keywords": ["Remoto"],
+    "keywords": [
+      "Remoto"
+    ],
     "user": {
       "id": 3,
       "login": "synthetic-poster",
@@ -90,19 +182,71 @@
       "url": "https://github.com/synthetic-poster"
     },
     "labels": [
-      {"name": "Rust", "type": "APIBr", "color": "b4fca0"},
-      {"name": "Vagas", "type": "topic", "color": "646464"},
-      {"name": "Alocado", "type": "label", "color": "ededed"},
-      {"name": "Remoto", "type": "label", "color": "ededed"},
-      {"name": "Presencial", "type": "label", "color": "ededed"},
-      {"name": "Híbrido", "type": "label", "color": "ededed"},
-      {"name": "Júnior", "type": "label", "color": "ededed"},
-      {"name": "Pleno", "type": "label", "color": "ededed"},
-      {"name": "Sênior", "type": "label", "color": "ededed"},
-      {"name": "Especialista", "type": "label", "color": "ededed"},
-      {"name": "CLT", "type": "label", "color": "ededed"},
-      {"name": "PJ", "type": "label", "color": "ededed"},
-      {"name": "🚦 Awaiting Triage", "type": "label", "color": "ededed"}
+      {
+        "name": "Rust",
+        "type": "APIBr",
+        "color": "b4fca0"
+      },
+      {
+        "name": "Vagas",
+        "type": "topic",
+        "color": "646464"
+      },
+      {
+        "name": "Alocado",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Remoto",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Presencial",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Híbrido",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Júnior",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Pleno",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Sênior",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "Especialista",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "CLT",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "PJ",
+        "type": "label",
+        "color": "ededed"
+      },
+      {
+        "name": "🚦 Awaiting Triage",
+        "type": "label",
+        "color": "ededed"
+      }
     ],
     "repository": {
       "id": 11,
@@ -110,7 +254,9 @@
       "full_name": "example-rust/vagas",
       "description": "Synthetic repository used only by tests.",
       "url": "https://github.com/example-rust/vagas",
-      "organization": {"login": "example-rust"}
+      "organization": {
+        "login": "example-rust"
+      }
     },
     "body": "### Alocação\n- [ ] Alocado\n- [x] Remoto\n- [ ] Presencial\n- [ ] Híbrido\n### Nível\n- [ ] Júnior\n- [ ] Pleno\n- [x] Sênior\n- [x] Especialista"
   },
@@ -130,11 +276,31 @@
       "url": "https://github.com/synthetic-bot"
     },
     "labels": [
-      {"name": "Internacional", "type": "APIBr", "color": "649b64"},
-      {"name": "Remote-jobs", "type": "topic", "color": "646464"},
-      {"name": "Trabalho-remoto", "type": "topic", "color": "646464"},
-      {"name": "Java-dev", "type": "topic", "color": "646464"},
-      {"name": "Python", "type": "topic", "color": "646464"}
+      {
+        "name": "Internacional",
+        "type": "APIBr",
+        "color": "649b64"
+      },
+      {
+        "name": "Remote-jobs",
+        "type": "topic",
+        "color": "646464"
+      },
+      {
+        "name": "Trabalho-remoto",
+        "type": "topic",
+        "color": "646464"
+      },
+      {
+        "name": "Java-dev",
+        "type": "topic",
+        "color": "646464"
+      },
+      {
+        "name": "Python",
+        "type": "topic",
+        "color": "646464"
+      }
     ],
     "repository": {
       "id": 12,
@@ -142,8 +308,83 @@
       "full_name": "example-boards/software-engineering",
       "description": "Synthetic repository used only by tests.",
       "url": "https://github.com/example-boards/software-engineering",
-      "organization": {"login": "example-boards"}
+      "organization": {
+        "login": "example-boards"
+      }
     },
     "body": "We are hiring a software engineer."
+  },
+  {
+    "id": 910005,
+    "number": 105,
+    "created_at": "2026-10-06T12:00:00Z",
+    "updated_at": "2026-10-06T12:00:00Z",
+    "url": "https://github.com/example-org/vagas/issues/105",
+    "title": "[Remoto] Desenvolvedor Python Sênior - Empresa Sintética",
+    "comments": 0,
+    "keywords": [],
+    "user": {
+      "id": 910005,
+      "login": "synthetic-poster",
+      "avatar_url": "https://example.invalid/avatar.png",
+      "url": "https://github.com/synthetic-poster"
+    },
+    "labels": [
+      {
+        "name": "Backend",
+        "type": "APIBr",
+        "color": "b4fca0"
+      },
+      {
+        "name": "Brasil",
+        "type": "APIBr",
+        "color": "aa6464"
+      }
+    ],
+    "repository": {
+      "id": 13,
+      "name": "vagas",
+      "full_name": "example-org/vagas",
+      "description": "Synthetic repository used only by tests.",
+      "url": "https://github.com/example-org/vagas",
+      "organization": {
+        "login": "example-org"
+      }
+    },
+    "body": "Descrição sintética sem campos estruturados."
+  },
+  {
+    "id": 910006,
+    "number": 106,
+    "created_at": "2026-10-06T12:00:00Z",
+    "updated_at": "2026-10-06T12:00:00Z",
+    "url": "https://github.com/example-org/vagas/issues/106",
+    "title": "Vaga Desenvolvedor Java - Empresa Sintética",
+    "comments": 0,
+    "keywords": [],
+    "user": {
+      "id": 910006,
+      "login": "synthetic-poster",
+      "avatar_url": "https://example.invalid/avatar.png",
+      "url": "https://github.com/synthetic-poster"
+    },
+    "labels": [
+      {
+        "name": "Vagas",
+        "type": "topic",
+        "color": "646464"
+      }
+    ],
+    "repository": {
+      "id": 13,
+      "name": "vagas",
+      "full_name": "example-org/vagas",
+      "description": "Synthetic repository used only by tests.",
+      "url": "https://github.com/example-org/vagas",
+      "organization": {
+        "login": "example-org"
+      }
+    },
+    "body": "# Desenvolvedor Java\n- 📍 Localização: Remoto\n- 📈 Nível: pleno\n- 📃 Contrato: clt\n- 💰 Salário: R$ 8.000,00\n## Requisitos:\nJava e SQL."
   }
 ]

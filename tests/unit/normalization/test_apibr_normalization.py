@@ -181,10 +181,14 @@ def _live_shape_fixture() -> dict[int, dict]:
         ),
         # Decorated and prefixed labels agree on one value each.
         (910002, SeniorityLevel.SENIOR, WorkArrangement.REMOTE, ["Python"]),
-        # Every issue-form option arrives as a label: conflicting evidence stays unknown.
-        (910003, None, None, []),
-        # Only repository topics: nothing describes the vacancy itself.
+        # Every issue-form option arrives as a label; only the checked body options resolve.
+        (910003, None, WorkArrangement.REMOTE, []),
+        # Only repository topics and a title without category words.
         (910004, None, None, []),
+        # No label or section: a lone word of the title is the only evidence.
+        (910005, SeniorityLevel.SENIOR, WorkArrangement.REMOTE, []),
+        # Explicit "Nível:" and "Localização:" lines of the job body.
+        (910006, SeniorityLevel.MID, WorkArrangement.REMOTE, []),
     ],
 )
 def test_live_shape_labels_map_to_canonical_fields(record_id, seniority, arrangement, skills):
@@ -243,16 +247,16 @@ def test_untyped_string_labels_and_title_keywords_are_vacancy_evidence():
     ],
 )
 def test_conflicting_or_unrecognized_arrangement_stays_unknown(labels):
-    job = normalize_apibr_job({"id": 1, "title": "[Remoto] Developer", "labels": labels})
+    job = normalize_apibr_job({"id": 1, "title": "Developer", "labels": labels})
 
     assert job["work_arrangement"] is None
 
 
-def test_free_text_is_never_interpreted_as_a_category_or_skill():
+def test_body_prose_is_never_interpreted_as_a_category_or_skill():
     job = normalize_apibr_job(
         {
             "id": 1,
-            "title": "[Remoto] Senior Python Developer",
+            "title": "Developer",
             "body": "Vaga remota para pessoa sênior com Python e Docker.",
         }
     )
