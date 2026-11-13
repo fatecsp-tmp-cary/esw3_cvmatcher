@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      HF_HOME: ${{ runner.temp }}/review-hf
+      HF_HOME: /tmp/cvmatcher-review-hf
       HF_HUB_DISABLE_TELEMETRY: "1"
       OPENBLAS_NUM_THREADS: "1"
       OMP_NUM_THREADS: "1"
       MKL_NUM_THREADS: "1"
-      CVMATCHER_REVIEW_OUTPUT: ${{ runner.temp }}/review-results
-      CVMATCHER_REVIEW_MODEL: ${{ runner.temp }}/review-model
+      CVMATCHER_REVIEW_OUTPUT: /tmp/cvmatcher-review-results
+      CVMATCHER_REVIEW_MODEL: /tmp/cvmatcher-review-model
       CVMATCHER_REVIEW_GOLD: ${{ github.workspace }}/review-evidence/human-gold.json
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +38,6 @@ jobs:
         if: always()
         with:
           name: reviewed-model-evidence
-          path: ${{ runner.temp }}/review-results
+          path: /tmp/cvmatcher-review-results
           retention-days: 30
           if-no-files-found: warn
