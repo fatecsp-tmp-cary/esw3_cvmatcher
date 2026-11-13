@@ -149,7 +149,11 @@ The response is `MatchesResponse {matches: MatchResult[]}`. Each result contains
 `missing_requirements`, `embedding_model`, and `algorithm_version`. The nested
 job contains `id` (the stable positive integer persisted job ID), `company`, `title`, `description`, `keywords`, `location`,
 `work_arrangement`, `seniority_level`, `skills`, `salary`, `currency`,
-`job_url`, and `publication_date`. The public contract omits `curriculo_id`
+`job_url`, and `publication_date`. The `skills` of a result are the job's own
+skills plus the skills the worker associated with it from explicit requirement
+contexts
+([ADR-017](../../docs/architecture/decisions/ADR-017-job-field-evidence-order-and-extracted-skills.md)).
+The public contract omits `curriculo_id`
 and internal component scores. Ranking order is represented by
 array order and `rank`. `GET /health` returns `{"status":"ok"}`. FastAPI
 publishes the OpenAPI schema and Swagger UI.

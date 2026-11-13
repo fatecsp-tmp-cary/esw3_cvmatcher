@@ -14,7 +14,9 @@ Implementation below is distinct from release approval. #99 remains open.
   partial/failure handling. Unproven scans never establish absence.
 - APiBR label metadata maps to canonical seniority, work arrangement and skills
   through exact shared aliases; repository topics, free text and conflicting
-  labels are never classified (#180).
+  labels are never classified (#180). Proposed ADR-017 (#196, draft) adds explicit
+  body fields and a lone title word as weaker evidence, and shows extracted skills
+  in results; its status is pending review.
 - PostgreSQL identity/source scheduling locks, bounded background cycles and
   reliable source-timestamp expiration. Optional poll on worker start and a
   configured daily local polling time, 08:00 America/Sao_Paulo in Compose (#184).

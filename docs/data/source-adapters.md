@@ -81,22 +81,32 @@ explicit metadata to canonical fields:
 | Canonical field | Source evidence | Rule |
 | --- | --- | --- |
 | `keywords` | every label name | Unchanged: all names are kept, including topics. |
-| `seniority_level` | non-topic labels and `keywords` | Shared seniority aliases; exactly one distinct value, otherwise empty. |
-| `work_arrangement` | non-topic labels and `keywords` | Shared work-arrangement aliases; exactly one distinct value, otherwise empty. |
+| `seniority_level` | non-topic labels and `keywords`, then explicit body fields, then the title | Shared seniority aliases; exactly one distinct value per evidence level, in that order. |
+| `work_arrangement` | non-topic labels and `keywords`, then explicit body fields, then the title | Shared work-arrangement aliases; exactly one distinct value per evidence level, in that order. |
 | `skills` | non-topic labels and `keywords` | Names recognized by the shared skill aliases, deduplicated and sorted. |
 
 Repository topics describe the aggregated repository, not the vacancy, and are
 never classified. Leading decorative symbols and the explicit `Level-`/`Lang-`
 prefixes used by some repositories are removed before the exact alias lookup.
-Title and description text are never interpreted here: extraction of
-requirements from text remains the separate
+Seniority and work arrangement use the strongest evidence ([ADR-017](../architecture/decisions/ADR-017-job-field-evidence-order-and-extracted-skills.md)):
+typed labels first, then explicit body fields, then a single recognizable
+word of the title. The first of labels and body fields with exactly one
+distinct value wins; explicit but conflicting evidence leaves the field empty
+and the title is not consulted. A body field is an inline `Nível: pleno` or
+`Localização: Remoto` line, or a `Nível`/`Alocação`/`Modalidade`/`Local`
+heading followed by options, where unchecked `[ ]` options are ignored. The
+title is used only when nothing explicit produced a value and it holds exactly
+one distinct value; `Pleno/Sênior` or `Remote.com` stay unknown. Prose is never
+interpreted, and extraction of requirements from text remains the separate
 [job field extraction](job-field-extraction.md) stage. Conflicting labels, such
-as an issue form that publishes every option, leave the field empty rather than
-choosing a value. `Alocado` has no agreed canonical arrangement and stays a
+as an issue form that publishes every option, resolve only through its checked
+body options. `Alocado` has no agreed canonical arrangement and stays a
 keyword only. `company`, `location` and `salary` have no structured source field
 and remain empty. Work arrangement is descriptive and is never used for
 geographic eligibility. Skill recall is bounded by the shared alias list in
 `src/extraction/taxonomy.py`; unrecognized technology labels remain keywords.
+The `skills` of a match result also include the skills the worker associated with
+the job from explicit requirement contexts, deduplicated; the stored job is unchanged.
 
 These fields are part of the job content hash, so a mapping change re-queues
 stored jobs for extraction and embedding. The deterministic
