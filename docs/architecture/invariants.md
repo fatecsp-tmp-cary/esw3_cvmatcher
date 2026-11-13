@@ -19,7 +19,10 @@
   out of canonical job data and API payloads. Put other additional persisted
   data in separate structures.
 - Lifecycle status represents availability. Expired jobs remain historical and
-  are excluded from active retrieval. Polling failure never changes lifecycle.
+  are excluded from the active ranking group. Jobs that are not active may only
+  follow every active result and are marked ineligible
+  ([ADR-016](decisions/ADR-016-inactive-jobs-complete-ranked-matches.md)).
+  Polling failure never changes lifecycle.
 - Source-specific jobs remain independent: no cross-source deduplication,
   merging, or same-opportunity detection.
 - Regenerate embeddings independently after content or embedding model/version

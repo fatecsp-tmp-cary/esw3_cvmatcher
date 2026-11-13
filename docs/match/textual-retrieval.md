@@ -43,7 +43,10 @@ successful extraction to return jobs. Omitted `readiness` becomes SQL false in
 both job and requirement branches, including the legacy wrapper. Integrators
 must check current content hash and extraction configuration; pending, failed
 or obsolete extraction remains withheld. An explicit true predicate appears only
-in focused FTS fixtures. Only ACTIVE jobs pass. Location is textual evidence,
+in focused FTS fixtures. Only ACTIVE jobs pass by default; the pipeline searches
+the inactive status group separately under
+[ADR-016](../architecture/decisions/ADR-016-inactive-jobs-complete-ranked-matches.md).
+Location is textual evidence,
 never geographic eligibility.
 
 `textual_statement()` returns `Select(Job, textual_score)` and supports appended

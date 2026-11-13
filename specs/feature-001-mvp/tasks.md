@@ -40,6 +40,8 @@ Implementation below is distinct from release approval. #99 remains open.
   paths, safe 429/Retry-After:60 and fail-closed 503; no authentication or CORS.
 - Independent agent-reviewed synthetic fixtures: 40 Portuguese/10 English;
   exact-span/class metrics, per-language reporting and missing-prediction handling.
+- Ranked matches list active jobs first; ready jobs in other statuses only
+  fill the remaining positions with `eligibility: false` (ADR-016, #194).
 - Integrated synthetic background-to-API regressions for readiness, source
   independence, privacy, deterministic ranking and empty evidence.
 
