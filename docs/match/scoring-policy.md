@@ -60,8 +60,9 @@ Experience/education weights above are unchanged. All new hard exclusions stay
 disabled until user review. The human reviewer is the user; minimum 40 PT/10 EN
 cases split 20 PT/5 EN calibration and 20 PT/5 EN held out. Freeze calibration and
 score cutoff before held-out evaluation. Semantic role AUC >=0.90 and accuracy
->=80% are required separately per language; these targets remain unmeasured on
-human-reviewed held-out gold. Existing agent labels are not substituted for it.
+>=80% are required separately per language; these targets were measured on human-reviewed held-out gold on 2026-11-13.
+English semantic AUC and both extraction gates failed; see the
+[evaluation evidence](../reports/2026-11-13-reviewed-evaluation/README.md). Existing agent labels are not substituted for it.
 
 Seniority comparison uses explicit title markers only in the already selected
 experience entries whose versioned semantic role score reaches the frozen relevance

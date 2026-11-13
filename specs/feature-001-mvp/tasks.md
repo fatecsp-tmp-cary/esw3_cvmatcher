@@ -112,7 +112,7 @@ approval alone. Local deployment acceptance is distinct from external #150.
   implement/regress qualifying and rejected best-effort count attestations.
   Availability and #145 absence/expiration policy remain separate.
 
-- [ ] User annotates the frozen calibration/held-out packets, then calibrated
+- [x] User annotates the frozen calibration/held-out packets, then calibrated
   models are evaluated against the accepted numerical gates. This is an external
   input/evidence requirement, not a completed policy or implementation decision.
 
@@ -123,3 +123,22 @@ observations; the repeat is not a guarantee of stable latency. The outlier cause
 remains unestablished.
 See [completion evidence](../../docs/reports/2026-11-12-issue-completion.md) for
 static checks, per-step tests, Compose/recovery scope and remaining human gates.
+
+## Human-reviewed evaluation — 2026-11-13
+
+- [x] User reviewed/adjudicated all 40 PT/10 EN cases; source hashes, unchanged
+  inputs, exact spans and frozen 25/25 partition validated.
+- [x] Fit similarity zero anchor on calibration only (0.67; full 1.0, cutoff 50),
+  version/hash the configuration, then evaluate the held-out cases without tuning.
+- [x] Independently recompute metrics and verify hashes/partition membership.
+- [ ] Satisfy held-out quality gates: extraction fails in both languages;
+  mandatory recall is zero; English semantic AUC is 0.75 (target 0.90).
+- [ ] Human review of evidence and release-quality approval. No new hard
+  exclusions or deployment are enabled. The fitted artifact has not replaced
+  the provisional application configuration.
+
+This supersedes earlier pending-annotation/unmeasured status above; the original
+blind packet templates remain unchanged. [Full evidence](../../docs/reports/2026-11-13-reviewed-evaluation/README.md)
+records calibration/held-out counts and failures. The actual model run used
+application source 1139ada96caf4ede262c3a26e7c2e7cb4af97478. Any subsequent tuning
+informed by held-out failures requires a new independent validation protocol.

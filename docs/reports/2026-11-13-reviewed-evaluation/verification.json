@@ -1,0 +1,7 @@
+{
+  "independently_recomputed_metrics_match": true,
+  "gold_protocol_script_hashes_verified": true,
+  "exact_disjoint_partition_predictions_verified": true,
+  "calibration_grid_selection_verified": true,
+  "heldout_used_for_tuning": false
+}

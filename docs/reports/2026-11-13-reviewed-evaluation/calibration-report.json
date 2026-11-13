@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.0",
+  "dataset_kind": "human-reviewed synthetic",
+  "release_quality_measured": false,
+  "release_quality_approved": false,
+  "groups": {
+    "all": {
+      "cases": 25,
+      "predictions": 25,
+      "missing_ids": [],
+      "exact_extraction": {
+        "true_positive": 3,
+        "false_positive": 46,
+        "false_negative": 39,
+        "precision": 0.061224489795918366,
+        "recall": 0.07142857142857142
+      },
+      "mandatory": {
+        "true_positive": 3,
+        "false_positive": 5,
+        "false_negative": 22,
+        "precision": 0.375,
+        "recall": 0.12
+      },
+      "field_spans": {
+        "true_positive": 36,
+        "false_positive": 13,
+        "false_negative": 6,
+        "precision": 0.7346938775510204,
+        "recall": 0.8571428571428571
+      },
+      "ranking": {
+        "pairwise_auc_observed": 0.9733333333333334,
+        "observed_pairs": 150,
+        "role_accuracy_all_cases": 0.88,
+        "complete": true
+      },
+      "field_thresholds": {
+        "precision": 0.9,
+        "recall": 0.8,
+        "targets_met": false
+      },
+      "semantic_role_thresholds": {
+        "auc": 0.9,
+        "accuracy": 0.8,
+        "cutoff": 50,
+        "targets_met": true
+      },
+      "mandatory_thresholds": {
+        "precision": 0.95,
+        "recall": 0.8,
+        "synthetic_gate_met": false
+      }
+    },
+    "pt": {
+      "cases": 20,
+      "predictions": 20,
+      "missing_ids": [],
+      "exact_extraction": {
+        "true_positive": 1,
+        "false_positive": 38,
+        "false_negative": 32,
+        "precision": 0.02564102564102564,
+        "recall": 0.030303030303030304
+      },
+      "mandatory": {
+        "true_positive": 1,
+        "false_positive": 3,
+        "false_negative": 18,
+        "precision": 0.25,
+        "recall": 0.05263157894736842
+      },
+      "field_spans": {
+        "true_positive": 28,
+        "false_positive": 11,
+        "false_negative": 5,
+        "precision": 0.717948717948718,
+        "recall": 0.8484848484848485
+      },
+      "ranking": {
+        "pairwise_auc_observed": 0.9791666666666666,
+        "observed_pairs": 96,
+        "role_accuracy_all_cases": 0.85,
+        "complete": true
+      },
+      "field_thresholds": {
+        "precision": 0.9,
+        "recall": 0.8,
+        "targets_met": false
+      },
+      "semantic_role_thresholds": {
+        "auc": 0.9,
+        "accuracy": 0.8,
+        "cutoff": 50,
+        "targets_met": true
+      },
+      "mandatory_thresholds": {
+        "precision": 0.95,
+        "recall": 0.8,
+        "synthetic_gate_met": false
+      }
+    },
+    "en": {
+      "cases": 5,
+      "predictions": 5,
+      "missing_ids": [],
+      "exact_extraction": {
+        "true_positive": 2,
+        "false_positive": 8,
+        "false_negative": 7,
+        "precision": 0.2,
+        "recall": 0.2222222222222222
+      },
+      "mandatory": {
+        "true_positive": 2,
+        "false_positive": 2,
+        "false_negative": 4,
+        "precision": 0.5,
+        "recall": 0.3333333333333333
+      },
+      "field_spans": {
+        "true_positive": 8,
+        "false_positive": 2,
+        "false_negative": 1,
+        "precision": 0.8,
+        "recall": 0.8888888888888888
+      },
+      "ranking": {
+        "pairwise_auc_observed": 1.0,
+        "observed_pairs": 6,
+        "role_accuracy_all_cases": 1.0,
+        "complete": true
+      },
+      "field_thresholds": {
+        "precision": 0.9,
+        "recall": 0.8,
+        "targets_met": false
+      },
+      "semantic_role_thresholds": {
+        "auc": 0.9,
+        "accuracy": 0.8,
+        "cutoff": 50,
+        "targets_met": true
+      },
+      "mandatory_thresholds": {
+        "precision": 0.95,
+        "recall": 0.8,
+        "synthetic_gate_met": false
+      }
+    }
+  },
+  "heldout_targets_met": false,
+  "measurement": {
+    "version": "human-calibration-v1-932d24279f9a",
+    "zero": 0.67,
+    "full": 1.0,
+    "cutoff": 50,
+    "frozen_at": "2026-11-13T23:30:25.567663+00:00",
+    "gold_sha256": "8c6c83278a007dc23bda9d557b358567e43d24b8e66ae80fa118ccf720790829",
+    "protocol_sha256": "242e62b1bd85a913f695e2b68684fd17a30b9174503427d11dc6d5db5209d9e3",
+    "script_sha256": "d8df5a3c5c2dbdc0c82f76580bc6aeab6f6885452f3b95ea2d39a26b955db437",
+    "embedding_model": "intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3:5c3f0ac86047711128e95842afa0700b87efef3e51af032c153841abf768bba7",
+    "extraction_version": "gliner-job-v1-4df2c1fb6c07cff156fdbb7c",
+    "calibration_ids": [
+      "en-001",
+      "en-003",
+      "en-004",
+      "en-006",
+      "en-010",
+      "pt-001",
+      "pt-003",
+      "pt-004",
+      "pt-005",
+      "pt-007",
+      "pt-008",
+      "pt-009",
+      "pt-011",
+      "pt-012",
+      "pt-013",
+      "pt-014",
+      "pt-015",
+      "pt-016",
+      "pt-018",
+      "pt-027",
+      "pt-029",
+      "pt-030",
+      "pt-032",
+      "pt-033",
+      "pt-034"
+    ],
+    "heldout_ids": [
+      "en-002",
+      "en-005",
+      "en-007",
+      "en-008",
+      "en-009",
+      "pt-002",
+      "pt-006",
+      "pt-010",
+      "pt-017",
+      "pt-019",
+      "pt-020",
+      "pt-021",
+      "pt-022",
+      "pt-023",
+      "pt-024",
+      "pt-025",
+      "pt-026",
+      "pt-028",
+      "pt-031",
+      "pt-035",
+      "pt-036",
+      "pt-037",
+      "pt-038",
+      "pt-039",
+      "pt-040"
+    ],
+    "release_quality_approved": false,
+    "hard_exclusions_enabled": false
+  }
+}

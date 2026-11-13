@@ -1,0 +1,18 @@
+{
+  "README.md": "c024325a38b3065a3183ff4211378c36db9856e60aaf6c8117ac1b5c93cb3154",
+  "adjudication.json": "e42660a2e75cbbaf28922414405ab31266ef3f5d4604e9c2a0a6e4e8d00b2c3c",
+  "calibration-predictions.json": "6bb306bbad344c2d57754b824ceb0a2e330be29a2e379d7655339ae3e4d39b30",
+  "calibration-raw.json": "00c0a3de2ee05e2dc68edde26016424641aad6b6991fe376a068fd9a336407f7",
+  "calibration-report.json": "aaea5606b96382ecb05de119a3fb229a395b7225753a6a17c9257355c95fdd9c",
+  "calibration-search.json": "41d3b0c41d053d9f018e1ff0d5ee9d6064fcd7cbbaec6eb68d1eb1f40d252ef7",
+  "embedding-manifest.json": "687feca8223464c6bfc64e23344313bfb5f0395f83abc14caec3de0b10ae175e",
+  "extraction-manifest.json": "fbdf651a13cff0c50ba5ad0fa2880483806c0fb051f8146e1602bfab296051e0",
+  "frozen-calibration.json": "f40a0e22a40ddbaf5c4691d8c67ef37473679c1b0b02cc8f7a7333085db7df98",
+  "heldout-case-errors.json": "7347ce0fc33c47ee20dc8e9d96cd8c9e529ae7d78939cf4b4cf731e246f0d339",
+  "heldout-predictions.json": "a0eb43611c3842ee37488d4fb87ecf91c1e6822214ec3b816cf76c1025b6c91d",
+  "heldout-report.json": "2a1b27fed6a005f0cd040f7ed0a29dc6cef37747688eb2d403923afeb21932ad",
+  "installed-packages.txt": "b4361747550ba5e39036bab8dd8823b5a2dab026cb9d5dd41655bd97c35364ab",
+  "protocol.json": "242e62b1bd85a913f695e2b68684fd17a30b9174503427d11dc6d5db5209d9e3",
+  "review_evidence.py": "d8df5a3c5c2dbdc0c82f76580bc6aeab6f6885452f3b95ea2d39a26b955db437",
+  "verification.json": "a9d8aad54930d5c7a90b8af9ca7d61757843aba9494b258560e266280a272f8b"
+}

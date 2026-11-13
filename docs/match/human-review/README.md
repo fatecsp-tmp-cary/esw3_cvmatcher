@@ -63,7 +63,9 @@ The user is the human reviewer. Under ADR-012, review both blind packets:
 human labels are used. Exact and explicitly translated job-title groups stay
 together; the assignment uses input-title hashes, not labels/model outcomes.
 This reduces obvious role duplication without claiming statistical independence.
-All 50 annotations remain pending. Edit only each `review` object as above;
+The original template packets retain pending placeholders. The user completed
+and adjudicated all 50 cases on 2026-11-13; see the [validated evaluation
+evidence](../../reports/2026-11-13-reviewed-evaluation/README.md). Edit only each `review` object as above;
 do not copy existing agent labels or model predictions. Keep an independent
 rationale, stable reviewer identifier and timezone-aware review timestamp.
 
@@ -84,3 +86,7 @@ The accepted targets are span precision 90%/recall 80%, mandatory precision
 95%/recall 80%, semantic role AUC 0.90 and accuracy 80%, each per language.
 Undefined metrics or absent positive support do not pass. None have passed on
 these still-unreviewed human packets.
+
+Human-reviewed gold is versioned at `review-evidence/human-gold.json` on this
+evidence branch. Existing template packets and original user files are preserved.
+The measured held-out gates fail; human review is not model-quality approval.

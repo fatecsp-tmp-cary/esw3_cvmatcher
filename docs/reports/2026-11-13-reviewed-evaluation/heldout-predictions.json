@@ -1,0 +1,551 @@
+{
+  "schema_version": "1.0",
+  "predictions": [
+    {
+      "id": "pt-002",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 14,
+          "text": "Registro COREN",
+          "requirement_class": null
+        },
+        {
+          "start": 30,
+          "end": 48,
+          "text": "Experiência em UTI",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 67.82384374215762
+    },
+    {
+      "id": "pt-006",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 7,
+          "text": "AutoCAD",
+          "requirement_class": null
+        },
+        {
+          "start": 23,
+          "end": 28,
+          "text": "Revit",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 61.29608708152595
+    },
+    {
+      "id": "pt-010",
+      "requirements": [
+        {
+          "start": 19,
+          "end": 25,
+          "text": "Inglês",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 60.35601471982252
+    },
+    {
+      "id": "pt-017",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 10,
+          "text": "JavaScript",
+          "requirement_class": null
+        },
+        {
+          "start": 26,
+          "end": 44,
+          "text": "Experiência sênior",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 70.82761109055753
+    },
+    {
+      "id": "pt-019",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 6,
+          "text": "TCP/IP",
+          "requirement_class": null
+        },
+        {
+          "start": 22,
+          "end": 32,
+          "text": "Kubernetes",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 60.59890918854268
+    },
+    {
+      "id": "pt-020",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 3,
+          "text": "C++",
+          "requirement_class": null
+        },
+        {
+          "start": 19,
+          "end": 23,
+          "text": "Rust",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 64.20592433243364
+    },
+    {
+      "id": "pt-021",
+      "requirements": [],
+      "role_score": 61.55421513700194
+    },
+    {
+      "id": "pt-022",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Scrum",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 61.29860192855108
+    },
+    {
+      "id": "pt-023",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 11,
+          "text": "Atendimento",
+          "requirement_class": null
+        },
+        {
+          "start": 27,
+          "end": 33,
+          "text": "Inglês",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 69.02900418738815
+    },
+    {
+      "id": "pt-024",
+      "requirements": [],
+      "role_score": 64.74781868033894
+    },
+    {
+      "id": "pt-025",
+      "requirements": [],
+      "role_score": 63.76298234227055
+    },
+    {
+      "id": "pt-026",
+      "requirements": [],
+      "role_score": 44.077328177132266
+    },
+    {
+      "id": "pt-028",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 14,
+          "text": "Registro COREN",
+          "requirement_class": null
+        },
+        {
+          "start": 30,
+          "end": 48,
+          "text": "Experiência em UTI",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 51.31356812667021
+    },
+    {
+      "id": "pt-031",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 6,
+          "text": "Python",
+          "requirement_class": null
+        },
+        {
+          "start": 22,
+          "end": 28,
+          "text": "Python",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 68.14210715635656
+    },
+    {
+      "id": "pt-035",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 9,
+          "text": "Doutorado",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 62.91761700049183
+    },
+    {
+      "id": "pt-036",
+      "requirements": [
+        {
+          "start": 25,
+          "end": 37,
+          "text": "obrigatórios",
+          "requirement_class": null
+        },
+        {
+          "start": 39,
+          "end": 47,
+          "text": "Selenium",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 54.912452724880005
+    },
+    {
+      "id": "pt-037",
+      "requirements": [
+        {
+          "start": 25,
+          "end": 37,
+          "text": "obrigatórios",
+          "requirement_class": null
+        },
+        {
+          "start": 39,
+          "end": 47,
+          "text": "Selenium",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 49.36362253326506
+    },
+    {
+      "id": "pt-038",
+      "requirements": [],
+      "role_score": 0.0
+    },
+    {
+      "id": "pt-039",
+      "requirements": [
+        {
+          "start": 4800,
+          "end": 4803,
+          "text": "SQL",
+          "requirement_class": null
+        },
+        {
+          "start": 4819,
+          "end": 4824,
+          "text": "Spark",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 60.47621210084094
+    },
+    {
+      "id": "pt-040",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 11,
+          "text": "Catalogação",
+          "requirement_class": null
+        },
+        {
+          "start": 27,
+          "end": 31,
+          "text": "MARC",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 68.24501892897659
+    },
+    {
+      "id": "en-002",
+      "requirements": [
+        {
+          "start": 34,
+          "end": 48,
+          "text": "ICU experience",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 56.077510974753025
+    },
+    {
+      "id": "en-005",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 4,
+          "text": "Java",
+          "requirement_class": "NICE_TO_HAVE"
+        },
+        {
+          "start": 19,
+          "end": 23,
+          "text": "Java",
+          "requirement_class": "NICE_TO_HAVE"
+        }
+      ],
+      "role_score": 56.193556680740826
+    },
+    {
+      "id": "en-007",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Scrum",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 53.83777598913723
+    },
+    {
+      "id": "en-008",
+      "requirements": [],
+      "role_score": 0.0
+    },
+    {
+      "id": "en-009",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 45,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 47,
+          "end": 92,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 188,
+          "end": 233,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 235,
+          "end": 280,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 329,
+          "end": 374,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 376,
+          "end": 421,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 517,
+          "end": 562,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 658,
+          "end": 703,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 705,
+          "end": 750,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 799,
+          "end": 844,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 846,
+          "end": 891,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 987,
+          "end": 1032,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1034,
+          "end": 1079,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1081,
+          "end": 1126,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1128,
+          "end": 1173,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1175,
+          "end": 1220,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1222,
+          "end": 1267,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1363,
+          "end": 1408,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1504,
+          "end": 1549,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1645,
+          "end": 1690,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1786,
+          "end": 1831,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1833,
+          "end": 1878,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 1974,
+          "end": 2019,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 2115,
+          "end": 2160,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 3055,
+          "end": 3100,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 3102,
+          "end": 3147,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 3243,
+          "end": 3288,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 3384,
+          "end": 3429,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 3525,
+          "end": 3570,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 3572,
+          "end": 3617,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 3713,
+          "end": 3758,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 3854,
+          "end": 3899,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 3995,
+          "end": 4040,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 4136,
+          "end": 4181,
+          "text": "Team context: documentation and collaboration",
+          "requirement_class": null
+        },
+        {
+          "start": 4700,
+          "end": 4703,
+          "text": "SQL",
+          "requirement_class": null
+        },
+        {
+          "start": 4717,
+          "end": 4722,
+          "text": "Spark",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 41.45287617773185
+    }
+  ]
+}

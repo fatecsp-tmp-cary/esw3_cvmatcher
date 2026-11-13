@@ -1,0 +1,16 @@
+{
+  "authority": "User explicitly confirmed uncertainty notes are final decisions.",
+  "originals_unchanged": true,
+  "packets": [
+    {
+      "source": "/workspace/reviewed/human-review/calibration.json",
+      "sha256": "ec600c22cb18e51e5e5196563596d06eab80184eef0bb588ef36179b1e2e1b42",
+      "adjudicated_cases": 13
+    },
+    {
+      "source": "/workspace/reviewed/human-review/heldout.json",
+      "sha256": "34a037fc1e1e588baaa903c4c3bcee89e842b76945f027f62d4d3ee615017121",
+      "adjudicated_cases": 8
+    }
+  ]
+}

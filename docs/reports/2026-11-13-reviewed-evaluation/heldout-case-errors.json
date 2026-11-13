@@ -1,0 +1,1876 @@
+[
+  {
+    "id": "pt-002",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 67.82384374215762,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        9,
+        14
+      ],
+      [
+        45,
+        48
+      ]
+    ],
+    "extra_spans": [
+      [
+        0,
+        14
+      ],
+      [
+        30,
+        48
+      ]
+    ],
+    "missing_span_classes": [
+      [
+        45,
+        48,
+        "PREFERRED"
+      ],
+      [
+        9,
+        14,
+        "REQUIRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        14,
+        null
+      ],
+      [
+        30,
+        48,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "COREN",
+        "start": 9,
+        "end": 14,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "UTI",
+        "start": 45,
+        "end": 48,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 14,
+        "text": "Registro COREN",
+        "requirement_class": null
+      },
+      {
+        "start": 30,
+        "end": 48,
+        "text": "Experiência em UTI",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-006",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 61.29608708152595,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        7,
+        "REQUIRED"
+      ],
+      [
+        23,
+        28,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        7,
+        null
+      ],
+      [
+        23,
+        28,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "AutoCAD",
+        "start": 0,
+        "end": 7,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Revit",
+        "start": 23,
+        "end": 28,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 7,
+        "text": "AutoCAD",
+        "requirement_class": null
+      },
+      {
+        "start": 23,
+        "end": 28,
+        "text": "Revit",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-010",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 60.35601471982252,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        0,
+        3
+      ]
+    ],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        3,
+        "REQUIRED"
+      ],
+      [
+        19,
+        25,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        19,
+        25,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "OAB",
+        "start": 0,
+        "end": 3,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Inglês",
+        "start": 19,
+        "end": 25,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 19,
+        "end": 25,
+        "text": "Inglês",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-017",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 70.82761109055753,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [
+      [
+        26,
+        44
+      ]
+    ],
+    "missing_span_classes": [
+      [
+        0,
+        10,
+        "REQUIRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        10,
+        null
+      ],
+      [
+        26,
+        44,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "JavaScript",
+        "start": 0,
+        "end": 10,
+        "requirement_class": "REQUIRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 10,
+        "text": "JavaScript",
+        "requirement_class": null
+      },
+      {
+        "start": 26,
+        "end": 44,
+        "text": "Experiência sênior",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-019",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 60.59890918854268,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        6,
+        "REQUIRED"
+      ],
+      [
+        22,
+        32,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        6,
+        null
+      ],
+      [
+        22,
+        32,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "TCP/IP",
+        "start": 0,
+        "end": 6,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Kubernetes",
+        "start": 22,
+        "end": 32,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 6,
+        "text": "TCP/IP",
+        "requirement_class": null
+      },
+      {
+        "start": 22,
+        "end": 32,
+        "text": "Kubernetes",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-020",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 64.20592433243364,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        3,
+        "REQUIRED"
+      ],
+      [
+        19,
+        23,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        3,
+        null
+      ],
+      [
+        19,
+        23,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "C++",
+        "start": 0,
+        "end": 3,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Rust",
+        "start": 19,
+        "end": 23,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 3,
+        "text": "C++",
+        "requirement_class": null
+      },
+      {
+        "start": 19,
+        "end": 23,
+        "text": "Rust",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-021",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 61.55421513700194,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        0,
+        7
+      ]
+    ],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        7,
+        "REQUIRED"
+      ]
+    ],
+    "extra_span_classes": [],
+    "expected_requirements": [
+      {
+        "text": "Windows",
+        "start": 0,
+        "end": 7,
+        "requirement_class": "REQUIRED"
+      }
+    ],
+    "predicted_requirements": []
+  },
+  {
+    "id": "pt-022",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 61.29860192855108,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        19,
+        22
+      ]
+    ],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        5,
+        "PREFERRED"
+      ],
+      [
+        19,
+        22,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        5,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Scrum",
+        "start": 0,
+        "end": 5,
+        "requirement_class": "PREFERRED"
+      },
+      {
+        "text": "PMP",
+        "start": 19,
+        "end": 22,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 5,
+        "text": "Scrum",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-023",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 69.02900418738815,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        11,
+        "REQUIRED"
+      ],
+      [
+        27,
+        33,
+        "NICE_TO_HAVE"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        11,
+        null
+      ],
+      [
+        27,
+        33,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Atendimento",
+        "start": 0,
+        "end": 11,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Inglês",
+        "start": 27,
+        "end": 33,
+        "requirement_class": "NICE_TO_HAVE"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 11,
+        "text": "Atendimento",
+        "requirement_class": null
+      },
+      {
+        "start": 27,
+        "end": 33,
+        "text": "Inglês",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-024",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 64.74781868033894,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        0,
+        7
+      ],
+      [
+        23,
+        29
+      ]
+    ],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        7,
+        "REQUIRED"
+      ],
+      [
+        23,
+        29,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [],
+    "expected_requirements": [
+      {
+        "text": "Francês",
+        "start": 0,
+        "end": 7,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Alemão",
+        "start": 23,
+        "end": 29,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": []
+  },
+  {
+    "id": "pt-025",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 63.76298234227055,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        0,
+        12
+      ],
+      [
+        28,
+        46
+      ]
+    ],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        12,
+        "REQUIRED"
+      ],
+      [
+        28,
+        46,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [],
+    "expected_requirements": [
+      {
+        "text": "Recrutamento",
+        "start": 0,
+        "end": 12,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Folha de pagamento",
+        "start": 28,
+        "end": 46,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": []
+  },
+  {
+    "id": "pt-026",
+    "language": "pt",
+    "expected_role": "irrelevant",
+    "role_score": 44.077328177132266,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        0,
+        12
+      ],
+      [
+        28,
+        46
+      ]
+    ],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        12,
+        "REQUIRED"
+      ],
+      [
+        28,
+        46,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [],
+    "expected_requirements": [
+      {
+        "text": "Recrutamento",
+        "start": 0,
+        "end": 12,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Folha de pagamento",
+        "start": 28,
+        "end": 46,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": []
+  },
+  {
+    "id": "pt-028",
+    "language": "pt",
+    "expected_role": "irrelevant",
+    "role_score": 51.31356812667021,
+    "role_correct": false,
+    "missing_spans": [
+      [
+        9,
+        14
+      ],
+      [
+        45,
+        48
+      ]
+    ],
+    "extra_spans": [
+      [
+        0,
+        14
+      ],
+      [
+        30,
+        48
+      ]
+    ],
+    "missing_span_classes": [
+      [
+        45,
+        48,
+        "PREFERRED"
+      ],
+      [
+        9,
+        14,
+        "REQUIRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        14,
+        null
+      ],
+      [
+        30,
+        48,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "COREN",
+        "start": 9,
+        "end": 14,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "UTI",
+        "start": 45,
+        "end": 48,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 14,
+        "text": "Registro COREN",
+        "requirement_class": null
+      },
+      {
+        "start": 30,
+        "end": 48,
+        "text": "Experiência em UTI",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-031",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 68.14210715635656,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        6,
+        "REQUIRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        6,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Python",
+        "start": 0,
+        "end": 6,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Python",
+        "start": 22,
+        "end": 28,
+        "requirement_class": null
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 6,
+        "text": "Python",
+        "requirement_class": null
+      },
+      {
+        "start": 22,
+        "end": 28,
+        "text": "Python",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-035",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 62.91761700049183,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        25,
+        36
+      ]
+    ],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        9,
+        "REQUIRED"
+      ],
+      [
+        25,
+        36,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        9,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Doutorado",
+        "start": 0,
+        "end": 9,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Publicações",
+        "start": 25,
+        "end": 36,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 9,
+        "text": "Doutorado",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-036",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 54.912452724880005,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        0,
+        20
+      ]
+    ],
+    "extra_spans": [
+      [
+        25,
+        37
+      ]
+    ],
+    "missing_span_classes": [
+      [
+        0,
+        20,
+        "REQUIRED"
+      ],
+      [
+        39,
+        47,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        25,
+        37,
+        null
+      ],
+      [
+        39,
+        47,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Testes automatizados",
+        "start": 0,
+        "end": 20,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Selenium",
+        "start": 39,
+        "end": 47,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 25,
+        "end": 37,
+        "text": "obrigatórios",
+        "requirement_class": null
+      },
+      {
+        "start": 39,
+        "end": 47,
+        "text": "Selenium",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-037",
+    "language": "pt",
+    "expected_role": "irrelevant",
+    "role_score": 49.36362253326506,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        0,
+        20
+      ]
+    ],
+    "extra_spans": [
+      [
+        25,
+        37
+      ]
+    ],
+    "missing_span_classes": [
+      [
+        0,
+        20,
+        "REQUIRED"
+      ],
+      [
+        39,
+        47,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        25,
+        37,
+        null
+      ],
+      [
+        39,
+        47,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Testes automatizados",
+        "start": 0,
+        "end": 20,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Selenium",
+        "start": 39,
+        "end": 47,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 25,
+        "end": 37,
+        "text": "obrigatórios",
+        "requirement_class": null
+      },
+      {
+        "start": 39,
+        "end": 47,
+        "text": "Selenium",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-038",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 0.0,
+    "role_correct": false,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [],
+    "extra_span_classes": [],
+    "expected_requirements": [],
+    "predicted_requirements": []
+  },
+  {
+    "id": "pt-039",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 60.47621210084094,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        4800,
+        4803,
+        "REQUIRED"
+      ],
+      [
+        4819,
+        4824,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        4800,
+        4803,
+        null
+      ],
+      [
+        4819,
+        4824,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "SQL",
+        "start": 4800,
+        "end": 4803,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Spark",
+        "start": 4819,
+        "end": 4824,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 4800,
+        "end": 4803,
+        "text": "SQL",
+        "requirement_class": null
+      },
+      {
+        "start": 4819,
+        "end": 4824,
+        "text": "Spark",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "pt-040",
+    "language": "pt",
+    "expected_role": "relevant",
+    "role_score": 68.24501892897659,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        11,
+        "REQUIRED"
+      ],
+      [
+        27,
+        31,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        11,
+        null
+      ],
+      [
+        27,
+        31,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Catalogação",
+        "start": 0,
+        "end": 11,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "MARC",
+        "start": 27,
+        "end": 31,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 11,
+        "text": "Catalogação",
+        "requirement_class": null
+      },
+      {
+        "start": 27,
+        "end": 31,
+        "text": "MARC",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "en-002",
+    "language": "en",
+    "expected_role": "relevant",
+    "role_score": 56.077510974753025,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        0,
+        20
+      ],
+      [
+        34,
+        37
+      ]
+    ],
+    "extra_spans": [
+      [
+        34,
+        48
+      ]
+    ],
+    "missing_span_classes": [
+      [
+        0,
+        20,
+        "REQUIRED"
+      ],
+      [
+        34,
+        37,
+        "NICE_TO_HAVE"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        34,
+        48,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Nursing registration",
+        "start": 0,
+        "end": 20,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "ICU",
+        "start": 34,
+        "end": 37,
+        "requirement_class": "NICE_TO_HAVE"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 34,
+        "end": 48,
+        "text": "ICU experience",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "en-005",
+    "language": "en",
+    "expected_role": "relevant",
+    "role_score": 56.193556680740826,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        4,
+        "REQUIRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        4,
+        "NICE_TO_HAVE"
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Java",
+        "start": 0,
+        "end": 4,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Java",
+        "start": 19,
+        "end": 23,
+        "requirement_class": "NICE_TO_HAVE"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 4,
+        "text": "Java",
+        "requirement_class": "NICE_TO_HAVE"
+      },
+      {
+        "start": 19,
+        "end": 23,
+        "text": "Java",
+        "requirement_class": "NICE_TO_HAVE"
+      }
+    ]
+  },
+  {
+    "id": "en-007",
+    "language": "en",
+    "expected_role": "relevant",
+    "role_score": 53.83777598913723,
+    "role_correct": true,
+    "missing_spans": [
+      [
+        20,
+        23
+      ]
+    ],
+    "extra_spans": [],
+    "missing_span_classes": [
+      [
+        0,
+        5,
+        "PREFERRED"
+      ],
+      [
+        20,
+        23,
+        "NICE_TO_HAVE"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        5,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "Scrum",
+        "start": 0,
+        "end": 5,
+        "requirement_class": "PREFERRED"
+      },
+      {
+        "text": "PMP",
+        "start": 20,
+        "end": 23,
+        "requirement_class": "NICE_TO_HAVE"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 5,
+        "text": "Scrum",
+        "requirement_class": null
+      }
+    ]
+  },
+  {
+    "id": "en-008",
+    "language": "en",
+    "expected_role": "relevant",
+    "role_score": 0.0,
+    "role_correct": false,
+    "missing_spans": [],
+    "extra_spans": [],
+    "missing_span_classes": [],
+    "extra_span_classes": [],
+    "expected_requirements": [],
+    "predicted_requirements": []
+  },
+  {
+    "id": "en-009",
+    "language": "en",
+    "expected_role": "irrelevant",
+    "role_score": 41.45287617773185,
+    "role_correct": true,
+    "missing_spans": [],
+    "extra_spans": [
+      [
+        0,
+        45
+      ],
+      [
+        47,
+        92
+      ],
+      [
+        188,
+        233
+      ],
+      [
+        235,
+        280
+      ],
+      [
+        329,
+        374
+      ],
+      [
+        376,
+        421
+      ],
+      [
+        517,
+        562
+      ],
+      [
+        658,
+        703
+      ],
+      [
+        705,
+        750
+      ],
+      [
+        799,
+        844
+      ],
+      [
+        846,
+        891
+      ],
+      [
+        987,
+        1032
+      ],
+      [
+        1034,
+        1079
+      ],
+      [
+        1081,
+        1126
+      ],
+      [
+        1128,
+        1173
+      ],
+      [
+        1175,
+        1220
+      ],
+      [
+        1222,
+        1267
+      ],
+      [
+        1363,
+        1408
+      ],
+      [
+        1504,
+        1549
+      ],
+      [
+        1645,
+        1690
+      ],
+      [
+        1786,
+        1831
+      ],
+      [
+        1833,
+        1878
+      ],
+      [
+        1974,
+        2019
+      ],
+      [
+        2115,
+        2160
+      ],
+      [
+        3055,
+        3100
+      ],
+      [
+        3102,
+        3147
+      ],
+      [
+        3243,
+        3288
+      ],
+      [
+        3384,
+        3429
+      ],
+      [
+        3525,
+        3570
+      ],
+      [
+        3572,
+        3617
+      ],
+      [
+        3713,
+        3758
+      ],
+      [
+        3854,
+        3899
+      ],
+      [
+        3995,
+        4040
+      ],
+      [
+        4136,
+        4181
+      ]
+    ],
+    "missing_span_classes": [
+      [
+        4700,
+        4703,
+        "REQUIRED"
+      ],
+      [
+        4717,
+        4722,
+        "PREFERRED"
+      ]
+    ],
+    "extra_span_classes": [
+      [
+        0,
+        45,
+        null
+      ],
+      [
+        1034,
+        1079,
+        null
+      ],
+      [
+        1081,
+        1126,
+        null
+      ],
+      [
+        1128,
+        1173,
+        null
+      ],
+      [
+        1175,
+        1220,
+        null
+      ],
+      [
+        1222,
+        1267,
+        null
+      ],
+      [
+        1363,
+        1408,
+        null
+      ],
+      [
+        1504,
+        1549,
+        null
+      ],
+      [
+        1645,
+        1690,
+        null
+      ],
+      [
+        1786,
+        1831,
+        null
+      ],
+      [
+        1833,
+        1878,
+        null
+      ],
+      [
+        188,
+        233,
+        null
+      ],
+      [
+        1974,
+        2019,
+        null
+      ],
+      [
+        2115,
+        2160,
+        null
+      ],
+      [
+        235,
+        280,
+        null
+      ],
+      [
+        3055,
+        3100,
+        null
+      ],
+      [
+        3102,
+        3147,
+        null
+      ],
+      [
+        3243,
+        3288,
+        null
+      ],
+      [
+        329,
+        374,
+        null
+      ],
+      [
+        3384,
+        3429,
+        null
+      ],
+      [
+        3525,
+        3570,
+        null
+      ],
+      [
+        3572,
+        3617,
+        null
+      ],
+      [
+        3713,
+        3758,
+        null
+      ],
+      [
+        376,
+        421,
+        null
+      ],
+      [
+        3854,
+        3899,
+        null
+      ],
+      [
+        3995,
+        4040,
+        null
+      ],
+      [
+        4136,
+        4181,
+        null
+      ],
+      [
+        47,
+        92,
+        null
+      ],
+      [
+        4700,
+        4703,
+        null
+      ],
+      [
+        4717,
+        4722,
+        null
+      ],
+      [
+        517,
+        562,
+        null
+      ],
+      [
+        658,
+        703,
+        null
+      ],
+      [
+        705,
+        750,
+        null
+      ],
+      [
+        799,
+        844,
+        null
+      ],
+      [
+        846,
+        891,
+        null
+      ],
+      [
+        987,
+        1032,
+        null
+      ]
+    ],
+    "expected_requirements": [
+      {
+        "text": "SQL",
+        "start": 4700,
+        "end": 4703,
+        "requirement_class": "REQUIRED"
+      },
+      {
+        "text": "Spark",
+        "start": 4717,
+        "end": 4722,
+        "requirement_class": "PREFERRED"
+      }
+    ],
+    "predicted_requirements": [
+      {
+        "start": 0,
+        "end": 45,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 47,
+        "end": 92,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 188,
+        "end": 233,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 235,
+        "end": 280,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 329,
+        "end": 374,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 376,
+        "end": 421,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 517,
+        "end": 562,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 658,
+        "end": 703,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 705,
+        "end": 750,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 799,
+        "end": 844,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 846,
+        "end": 891,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 987,
+        "end": 1032,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1034,
+        "end": 1079,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1081,
+        "end": 1126,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1128,
+        "end": 1173,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1175,
+        "end": 1220,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1222,
+        "end": 1267,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1363,
+        "end": 1408,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1504,
+        "end": 1549,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1645,
+        "end": 1690,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1786,
+        "end": 1831,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1833,
+        "end": 1878,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 1974,
+        "end": 2019,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 2115,
+        "end": 2160,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 3055,
+        "end": 3100,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 3102,
+        "end": 3147,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 3243,
+        "end": 3288,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 3384,
+        "end": 3429,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 3525,
+        "end": 3570,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 3572,
+        "end": 3617,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 3713,
+        "end": 3758,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 3854,
+        "end": 3899,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 3995,
+        "end": 4040,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 4136,
+        "end": 4181,
+        "text": "Team context: documentation and collaboration",
+        "requirement_class": null
+      },
+      {
+        "start": 4700,
+        "end": 4703,
+        "text": "SQL",
+        "requirement_class": null
+      },
+      {
+        "start": 4717,
+        "end": 4722,
+        "text": "Spark",
+        "requirement_class": null
+      }
+    ]
+  }
+]
