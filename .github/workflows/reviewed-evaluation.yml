@@ -1,0 +1,43 @@
+name: Reviewed calibration and held-out evidence
+on:
+  push:
+    branches: [task_125_reviewed_evaluation_20261113]
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HF_HOME: ${{ runner.temp }}/review-hf
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      CVMATCHER_REVIEW_OUTPUT: ${{ runner.temp }}/review-results
+      CVMATCHER_REVIEW_MODEL: ${{ runner.temp }}/review-model
+      CVMATCHER_REVIEW_GOLD: ${{ github.workspace }}/review-evidence/human-gold.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-deps
+      - name: Prepare exact pinned public models
+        run: |
+          python scripts/models/prepare_extraction.py "$CVMATCHER_REVIEW_MODEL"
+          python scripts/models/prepare_embeddings.py --cache-dir "$HF_HOME/hub" --manifest "${{ runner.temp }}/embedding-manifest.json"
+      - name: Calibrate then freeze and evaluate held-out cases
+        env:
+          HF_HUB_OFFLINE: "1"
+          TRANSFORMERS_OFFLINE: "1"
+        run: |
+          python -u review_evidence.py
+          python -m pip freeze > "$CVMATCHER_REVIEW_OUTPUT/installed-packages.txt"
+          cp "${{ runner.temp }}/embedding-manifest.json" "$CVMATCHER_REVIEW_OUTPUT/embedding-manifest.json"
+          cp "$CVMATCHER_REVIEW_MODEL/provenance.json" "$CVMATCHER_REVIEW_OUTPUT/extraction-manifest.json"
+          cp review_evidence.py "$CVMATCHER_REVIEW_OUTPUT/review_evidence.py"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reviewed-model-evidence
+          path: ${{ runner.temp }}/review-results
+          retention-days: 30
+          if-no-files-found: warn
