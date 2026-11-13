@@ -30,3 +30,5 @@ superseded by later ADRs; do not rewrite their rationale or status history.
 - [ADR-014: APiBR listing presence is open-vacancy evidence](ADR-014-apibr-listing-presence-is-open-evidence.md) — supersedes only the ADR-003 `DISCOVERED` rule for records without explicit state; absence-driven expiry stays separate.
 
 - [ADR-015: Absence from a qualifying APiBR snapshot marks jobs STALE](ADR-015-qualifying-snapshot-absence-marks-stale.md) — enables `ACTIVE→STALE` for sources explicitly configured as SNAPSHOT; `STALE→EXPIRED` thresholds remain #145.
+
+- [ADR-016: Inactive jobs complete the ranked matches after active jobs](ADR-016-inactive-jobs-complete-ranked-matches.md) — supersedes active-only retrieval: other statuses only fill remaining positions, with `eligibility: false`.
