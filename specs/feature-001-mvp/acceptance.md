@@ -243,7 +243,7 @@ qualifying/incomplete attestations and these conservative lifecycle protections.
 
 ## Extraction correction acceptance (issue #116 / PR #170)
 
-Authority: [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+Authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md).
 
 - Regress multiple clause strengths, local-over-heading precedence, negated and
   affirmative occurrences, PT/EN cue variants, PREFERRED versus NICE_TO_HAVE,
@@ -263,3 +263,15 @@ Authority: [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-contex
   copies. The diagnosed held-out set is regression material; independent acceptance
   remains pending a fresh blind review. Keep ADR-012 numeric gates and score-only
   behavior. Additional mandatory sample minimums remain a future exclusion decision.
+
+## Bilingual search interview — issues #147/#159
+
+Authority: [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
+
+Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
+
+## Mandatory coverage interview — issue #120
+
+Authority: [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
+
+Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
