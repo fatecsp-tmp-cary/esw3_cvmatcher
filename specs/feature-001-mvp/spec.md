@@ -89,7 +89,9 @@ keywords, skills, normalized requirements, and location. Portuguese any-term FTS
 uses A title/skills, B company/keywords/normalized requirements and D
 description/location, PostgreSQL JSON text rendering and descending publication
 date then platform/source-ID ties under ADR-004/005. All retrieval paths require
-successful extraction for current content/configuration. Semantic job representation is title,
+successful extraction for current content/configuration. The implemented FTS
+helpers fail closed when readiness is omitted; production pipeline wiring is
+planned in #174–#175. Semantic job representation is title,
 normalized skills, current normalized requirement texts (sorted and deduplicated),
 relevant description, location string values in sorted-key order, and mode. Passage
 representation is part of the embedding policy identity; its changes require
@@ -240,3 +242,9 @@ from requirement selection; background detections cannot become requirements.
 No canonical Job/public API change or new hard exclusion is permitted. Original
 reviewed evidence is preserved; policy-updated copies are calibration/regression
 material and cannot renew held-out independence.
+
+## Bilingual search interview — issues #147/#159
+
+Authority: [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
+
+Use a separate lower-case ASCII projection, Portuguese and English stemming, and bounded fuzzy fill-only retrieval under ADR-022. Original Unicode/display/span evidence stays intact. The current Portuguese FTS remains the implemented baseline until the planned change is verified.

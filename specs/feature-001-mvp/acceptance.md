@@ -266,6 +266,11 @@ Authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction-contex
   remains pending a fresh blind review. Keep ADR-012 numeric gates and score-only
   behavior. Additional mandatory sample minimums remain a future exclusion decision.
 
+## Bilingual search interview — issues #147/#159
+
+Authority: [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
+
+Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
 
 ## Concurrent source-identity persistence
 

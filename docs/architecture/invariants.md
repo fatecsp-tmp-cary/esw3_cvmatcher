@@ -42,3 +42,7 @@ Extraction detection, classification and requirement selection are distinct unde
 Keep exact Unicode evidence offsets, negation/conflict/approximation provenance
 and disabled exclusions. Approximation never changes canonical Job/public API
 fields, authoritative aliases or candidate retention boundaries.
+
+Search projections under [ADR-022](decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md)
+never replace canonical/display Unicode or original extraction-offset coordinates.
+Fuzzy retrieval remains supporting score/retrieval evidence, not canonical equivalence.

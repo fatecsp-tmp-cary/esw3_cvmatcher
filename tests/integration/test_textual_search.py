@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, true
 
 from src.ingestion.upsert import upsert_job
 from src.matching.textual import search_active_jobs
@@ -16,7 +16,7 @@ from src.persistence.job.skill import JobRequirement, RequirementClass
 def test_postgresql_searches_the_captured_job_and_requirement_fixture(db_session):
     fixture_path = Path("tests/resources/jobs_fixture.json")
     issues = json.loads(fixture_path.read_text(encoding="utf-8"))
-    issue = issues[0]
+    issue = {**issues[0], "state": "open"}  # Synthetic availability for this FTS fixture.
     source = JobSource(name="APiBR FTS fixture", type="api", polling_mode="sequential")
     db_session.add(source)
     db_session.flush()
@@ -34,8 +34,10 @@ def test_postgresql_searches_the_captured_job_and_requirement_fixture(db_session
     )
     db_session.flush()
 
-    fixture_matches = search_active_jobs(db_session, "Python")
-    requirement_matches = search_active_jobs(db_session, "VectorDatabaseQuasar")
+    fixture_matches = search_active_jobs(db_session, readiness=true(), query="Python")
+    requirement_matches = search_active_jobs(
+        db_session, readiness=true(), query="VectorDatabaseQuasar"
+    )
 
     assert any(match.job.id == job.id for match in fixture_matches)
     assert any(match.job.id == job.id for match in requirement_matches)
@@ -64,7 +66,7 @@ def test_any_term_retrieval_and_field_weights(db_session, source):
     django = _insert(db_session, source, "django", title="Django", status=JobStatus.ACTIVE)
     _insert(db_session, source, "unrelated", title="Kotlin", status=JobStatus.ACTIVE)
 
-    matches = search_active_jobs(db_session, "Python Django Kubernetes")
+    matches = search_active_jobs(db_session, readiness=true(), query="Python Django Kubernetes")
     scores = {m.job.id: m.score for m in matches}
     assert set(scores) == {title.id, description.id, django.id}
     assert scores[title.id] > scores[description.id]
@@ -79,15 +81,31 @@ def test_inactive_jobs_are_excluded_from_both_search_paths(db_session, source, s
         )
     )
     db_session.flush()
-    assert search_active_jobs(db_session, "Python Kubernetes") == []
+    assert search_active_jobs(db_session, readiness=true(), query="Python Kubernetes") == []
 
 
 def test_query_operators_are_plain_text_and_order_is_stable(db_session, source):
     first = _insert(db_session, source, "a", title="Python", status=JobStatus.ACTIVE)
     second = _insert(db_session, source, "b", title="Python", status=JobStatus.ACTIVE)
     for _ in range(2):
-        assert [m.job.id for m in search_active_jobs(db_session, "Python' | Django:*")] == [
+        assert [
+            m.job.id
+            for m in search_active_jobs(db_session, readiness=true(), query="Python' | Django:*")
+        ] == [
             first.id,
             second.id,
         ]
-    assert search_active_jobs(db_session, "de a e") == []
+    assert search_active_jobs(db_session, readiness=true(), query="de a e") == []
+
+
+def test_legacy_search_fails_closed_for_job_and_requirement_evidence(db_session, source):
+    job = _insert(db_session, source, "unready", title="Python", status=JobStatus.ACTIVE)
+    db_session.add(
+        JobRequirement(job_id=job.id, text="Quasar", requirement_class=RequirementClass.REQUIRED)
+    )
+    db_session.flush()
+    assert search_active_jobs(db_session, "Python Quasar") == []
+    assert search_active_jobs(db_session, "Quasar") == []
+    assert [m.job.id for m in search_active_jobs(db_session, "Quasar", readiness=true())] == [
+        job.id
+    ]

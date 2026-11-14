@@ -25,9 +25,13 @@ Requirements and completion gates are in [spec](spec.md),
 - Skill taxonomy, explicit project-alias seed, job-skill and classified requirement
   persistence; local pinned GLiNER, exact-alias supplemental detection and ADR-018
   clause-local score-only projection. Versioned evidence, three-claim retry/lease
-  recovery and readiness predicate are implemented. API retrieval gating/wiring
-  remains planned in #172–#175; quality/release approval and exclusions stay disabled.
-- Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; final score implementation remains planned.
+  recovery and readiness predicate are implemented. FTS helpers require explicit
+  extraction readiness; production pipeline/API wiring remains planned in
+  #174–#175. Quality/release approval and exclusions stay disabled.
+- Immutable weighted FTS indexes and active-only any-term/requirement retrieval
+  with fail-closed extraction readiness, bounded textual components and stable
+  ties are implemented. Legacy retrieval retains raw rank; final compatibility
+  scoring and production pipeline integration remain planned.
 - Domain-enum seniority/mode aliases; missing/unknown values yield no category. APiBR uses first-recognized source-label precedence, retaining every keyword. Other categories remain text.
 - Ranked response validation tests for job identity, eligibility, match details and version metadata.
 - Uncapped public collections and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
@@ -94,6 +98,11 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 - [ ] Define minimum mandatory-mention support if future exclusions are proposed.
       All new exclusions remain disabled; no release/merge approval is implied.
 
+## Bilingual search interview — issues #147/#159
+
+- [x] Record the user decision in [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
+- [ ] Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
 
 ## PR #167 incremental verification
 
@@ -129,3 +138,10 @@ correction/evaluation history above retains its original evidence scope.
 See the [review record](../../docs/reports/2026-11-14-pr171-review.md) for
 GitHub/Codex dispositions, requirement-passage and location regressions, policy
 invalidation, telemetry import ordering and independent-connection claim checks.
+
+
+## PR #172 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr172-review.md) for
+GitHub/Codex dispositions, post-merge FTS/index checks and the limited accented
+JSON-prefix observations. ADR-022 policy remains accepted but unimplemented.

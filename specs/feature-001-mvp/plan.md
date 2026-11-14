@@ -14,8 +14,10 @@ absence-based lifecycle changes remain separate policy/implementation work.
    with pinned local extraction and ADR-018 clause-local score-only projection.
    Preserve sections and unknown/negated evidence. Keep exclusions disabled;
    production scheduling and independent quality acceptance remain pending.
-4. Define weighted Portuguese FTS, then implement its index and queries. Keep raw
-   rank distinct from final compatibility scores; evaluate English/accents.
+4. Weighted Portuguese FTS indexes and shared query expressions are implemented,
+   with explicit extraction readiness on both job and requirement paths. Keep raw
+   rank distinct from bounded textual/final compatibility scores. Production
+   pipeline wiring and ADR-022 bilingual/ASCII/fuzzy implementation remain pending.
 5. Category aliases, public response validation, and bounded
    lossless uncapped curriculum projection.
 6. Pinned local embeddings, job-only model/version metadata, versioned passage
@@ -40,3 +42,8 @@ Preserve old held-out labels/results and designate updated copies regression-onl
 Document numerical failures, new blind-review dependency and disabled exclusions.
 Implementation belongs to PR #170; downstream evaluation packets/evaluator wiring
 belong to PR #178. Verify combined behavior without merging either PR.
+
+## Bilingual search interview — issues #147/#159
+
+Follow [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md). Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
+Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
