@@ -12,7 +12,9 @@ persistence, source, migration, geographic filter or absence-based expiration.
 Session from `sessions()` for each poll. A poller receives `(session, source_id)`
 and returns an object with `status` equal to `SUCCEEDED`, `PARTIAL` or `FAILED`.
 The default poller maps the case-folded source name `apibr` to `ingest_apibr`.
-Other enabled names require explicit adapter registration; unknown names record
+Register it with `python -m src.worker.sources register apibr`; see
+[deployment](deployment.md). Other enabled names require explicit adapter
+registration; unknown names record
 `unsupported_source` without invoking another source or making hidden requests.
 
 Only enabled sources with no `next_run_at` or a due timestamp are considered,
