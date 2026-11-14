@@ -1,0 +1,67 @@
+"""Exploratory synthetic term comparisons; never canonicalization approval."""
+import hashlib
+import json
+import os
+import sys
+from pathlib import Path
+
+os.environ['HF_HUB_OFFLINE'] = '1'
+os.environ['TRANSFORMERS_OFFLINE'] = '1'
+os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
+sys.path.insert(0, '/home/agent/workspace/esw3_cvmatcher')
+
+import torch
+from src.embeddings.config import EmbeddingConfig
+from src.embeddings.encoder import LocalEmbeddingEncoder
+
+torch.set_num_threads(1)
+pairs = [
+    ('C', 'C#', 'distinct'),
+    ('C', 'R', 'distinct'),
+    ('Java', 'JavaScript', 'distinct'),
+    ('Ruby', 'Rails', 'related'),
+    ('PHP', 'WordPress', 'related'),
+    ('JavaScript', 'JS', 'alias'),
+    ('C#', 'C sharp', 'alias'),
+    ('PostgreSQL', 'Postgres', 'alias'),
+    ('C', 'C', 'identity'),
+]
+terms = sorted({term for left, right, _ in pairs for term in (left, right)})
+encoder = LocalEmbeddingEncoder(EmbeddingConfig(cache_directory='/home/agent/.cache/huggingface/hub'))
+results = []
+for template_name, template in [('bare', '{}'), ('english', 'Experience with {}'), ('portuguese', 'Experiência com {}')]:
+    texts = [template.format(term) for term in terms]
+    queries = dict(zip(terms, encoder.encode_queries(texts), strict=True))
+    passages = dict(zip(terms, encoder.encode_jobs(texts), strict=True))
+    for left, right, relation in pairs:
+        dot = lambda a, b: sum(x * y for x, y in zip(a, b, strict=True))
+        results.append({
+            'template': template_name, 'left': left, 'right': right, 'relation': relation,
+            'query_query': dot(queries[left], queries[right]),
+            'passage_passage': dot(passages[left], passages[right]),
+            'query_passage': dot(queries[left], passages[right]),
+            'reverse_query_passage': dot(queries[right], passages[left]),
+        })
+summaries = []
+for template in ('bare', 'english', 'portuguese'):
+    rows = [row for row in results if row['template'] == template]
+    for mode in ('query_query', 'passage_passage', 'query_passage', 'reverse_query_passage'):
+        negative_max = max(row[mode] for row in rows if row['relation'] == 'distinct')
+        related_min = min(row[mode] for row in rows if row['relation'] == 'related')
+        alias_min = min(row[mode] for row in rows if row['relation'] == 'alias')
+        summaries.append({'template': template, 'mode': mode,
+                          'distinct_max': negative_max, 'related_min': related_min,
+                          'alias_min': alias_min,
+                          'separates_distinct_from_related': negative_max < related_min,
+                          'separates_distinct_from_aliases': negative_max < alias_min})
+report = {'model_version': encoder.model_version,
+          'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+          'torch_version': torch.__version__, 'cpu_threads': 1,
+          'metric': 'raw cosine of normalized vectors; no score calibration',
+          'automatic_canonicalization_enabled': False,
+          'limitations': 'Small user-requested diagnostic. Related tools are not aliases. No acceptance threshold fitted.',
+          'results': results, 'summaries': summaries}
+output = Path(__file__).with_name('results.json')
+with output.open('x') as stream:
+    stream.write(json.dumps(report, indent=2, ensure_ascii=False) + '\n')
+print(json.dumps(report, indent=2, ensure_ascii=False))
