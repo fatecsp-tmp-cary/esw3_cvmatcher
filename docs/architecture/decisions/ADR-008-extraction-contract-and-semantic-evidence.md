@@ -21,7 +21,7 @@ agreed Sistema Currículo integration boundary.
 ## Decision
 
 Use a local GLiNER extraction stage for job text as specified in the
-extraction strategy (planned in #170: `../../data/job-field-extraction.md`). Normalize extracted
+[extraction strategy](../../data/job-field-extraction.md). Normalize extracted
 spans through shared aliases/taxonomy and validate them before canonical mapping.
 Do not infer mandatory status from an entity label or model confidence alone.
 Source identity, availability and explicit structured metadata remain authoritative;

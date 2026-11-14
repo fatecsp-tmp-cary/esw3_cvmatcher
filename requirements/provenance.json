@@ -1,0 +1,24 @@
+{
+  "python": "3.12",
+  "platform": "Linux x86_64",
+  "resolver": "pip-tools==7.6.2",
+  "indexes": [
+    "https://pypi.org/simple",
+    "https://download.pytorch.org/whl/cpu"
+  ],
+  "hash_policy": "pip-compile --generate-hashes; pip install --require-hashes",
+  "model_downloads": false,
+  "files": {
+    "build.in": "70bc56dc5521a20258b1f2671afeae126b30e35841f9485c99f0ecf199db0664",
+    "build.lock": "11826d38e0a05513ec36d103bd045c3ec3b85265974b39a5669f7ce518de583e",
+    "dev.in": "7d9622994f067a3f9936b174cd42393daf077855d839e10ee89cd9fcb58d0175",
+    "dev.lock": "307d1afbb5fa6bdf3f9d6d1c224208ffc9664870bf080732d4e4e21e697bb424",
+    "local-models.in": "d886cda2fd3580b7f49aa9d5d9338f1500dc6189473ddf41f778b2dc0b1cea7b",
+    "local-models.lock": "ab56f5fe1a716d4e9802b78aebbe7ca26cbf2f226161cc8007c2ad122bb394e3",
+    "runtime.in": "9a5135f307cad03af47d6c571800570fccf3f5f1a154220a007923fe3a932a1e",
+    "runtime.lock": "9d8569a3e55875aa62ef0b2e0c5a44d0465db0228fc2f8ad20742264b2339046",
+    "tooling.in": "b4c09da63101b3140efeba88cd3412cdcadb078fdbfe6906ccaf98933c25124b",
+    "tooling.lock": "33fb2b06f6ced5cad2cd7e55385a1b956025f704891007298d63bd067fac154a"
+  },
+  "limitations": "Other Python versions/architectures are unverified."
+}

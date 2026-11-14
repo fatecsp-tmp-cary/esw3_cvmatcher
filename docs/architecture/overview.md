@@ -64,8 +64,9 @@ The implementation interview requires successful extraction before jobs enter
 any matching path. Extraction readiness is supporting state separate from
 canonical availability; failures must not change lifecycle. The semantic
 aggregation primitive and its provisional coefficients are planned in stack PR #173
-(`src/matching/semantic.py` and `../match/scoring-policy.md`). Pinned local inference
-is planned in #170–#171 and production executor wiring in #175; calibration
+(`src/matching/semantic.py` and `../match/scoring-policy.md`). Pinned local GLiNER extraction, versioned evidence and bounded claim/retry
+processing are implemented in #170. Local embedding inference remains planned
+in #171 and production executor wiring in #175; calibration
 and quality approval remain pending. Portuguese FTS retains ADR-004/005 weights,
 JSON text rendering and publication-date/identity ties, with extraction
 readiness on every path planned in stack PR #172. Integrated database verification

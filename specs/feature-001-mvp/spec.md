@@ -45,9 +45,12 @@ Keep `raw` null until retention rights are established. Requirement classes are 
 `PREFERRED`, and `NICE_TO_HAVE`; detected skills must not automatically be
 assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
 matching, and section detection complement the selected local GLiNER job-field
-extraction strategy. Follow the extraction plan (planned in #170: `../../docs/data/job-field-extraction.md`)
+extraction strategy. Follow [the extraction plan](../../docs/data/job-field-extraction.md)
 for evidence, confidence, contextual requirement classification, model versioning
-and failure handling. Pinned offline extraction and bounded job-state processing are planned in stack PR #170; mandatory classification remains disabled pending measured quality approval. PostgreSQL FTS handles DB-level
+and failure handling. Pinned offline extraction and bounded job-state processing are implemented in
+stack PR #170, including clause-local score-only requirement classification under
+ADR-018. Mandatory exclusions remain disabled pending independent quality
+approval; production API wiring is deferred to #175. PostgreSQL FTS handles DB-level
 tokenization, stemming, and ranking.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
@@ -81,7 +84,7 @@ Only active jobs with successful extraction are eligible for matching retrieval.
 Extraction readiness is independent of availability; pending/failed extraction
 withholds jobs without changing lifecycle state. After three failed extraction
 attempts, alert the operator and require explicit retry. See
-extraction policy (planned in #170: `../../docs/data/job-field-extraction.md`). FTS covers title, company, description,
+[extraction policy](../../docs/data/job-field-extraction.md). FTS covers title, company, description,
 keywords, skills, normalized requirements, and location. Portuguese any-term FTS
 uses A title/skills, B company/keywords/normalized requirements and D
 description/location, PostgreSQL JSON text rendering and descending publication
@@ -222,3 +225,15 @@ The same immutable Sistema Currículo integration contract applies to deployed A
 Hosting remains provider-independent; verify actual host CPU, memory, storage and
 model requirements. A successful mock or database-only startup is not full-stack
 deployment verification.
+
+## Extraction correction policy (issue #116)
+
+[ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md)
+governs clause-local cue attribution, section fallback, negated-null and hedged
+NICE_TO_HAVE evidence, strongest-class consolidation with retained conflict flags,
+smallest meaningful exact Unicode spans, dedicated internal entity labels and
+bounded score-only typo matching on both job/candidate sides. Detection is separate
+from requirement selection; background detections cannot become requirements.
+No canonical Job/public API change or new hard exclusion is permitted. Original
+reviewed evidence is preserved; policy-updated copies are calibration/regression
+material and cannot renew held-out independence.
