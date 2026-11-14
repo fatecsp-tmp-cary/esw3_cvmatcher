@@ -44,7 +44,7 @@ The provisional labels are `skill`, `tool`, `framework`, `database`, `cloud`,
 `education`, `work experience requirement`, `professional credential`,
 `professional license`, `language`, `certification`; threshold is 0.3. Labels/confidence
 never imply mandatory status. Occurrence classes are assigned only by explicit clause/section context under
-[ADR-014](../architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+[ADR-018](../architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md).
 Unknown/negated detections remain null. Classification supports scores only;
 all new hard exclusions remain disabled regardless of assigned strength. Structured source metadata, canonical
 Job fields and lifecycle remain untouched.
