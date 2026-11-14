@@ -77,8 +77,8 @@ The executor accepts `CurriculumRequest` and `limit`.
 Transient normalization is implemented by `normalize_curriculum` into an immutable
 `NormalizedCandidate`, preserving section order, all text, dates, proficiency,
 education level/status and projects, while excluding the UUID. This projection
-adds no collection/text caps and accepts empty sections. Production pipeline integration uses this projection; the legacy `CandidateProfile` is not used as a
-second public-input validator.
+adds no collection/text caps and accepts empty sections. Production pipeline integration must use this projection and is pending in stack
+PR #175; the legacy `CandidateProfile` must not become a second public-input validator.
 
 ## Implementation decisions
 
@@ -99,7 +99,7 @@ second public-input validator.
    policy; source usage/retention evidence remains #134. The earlier shape probe
    proves neither availability nor completeness. No hidden verifier is enabled
    and no unproven scan may mark absent jobs stale.
-2. The pinned multilingual E5 model/version and separate provenance are implemented
+2. The pinned multilingual E5 model/version and separate provenance are implemented in stack PR #171
    (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
    the fixed canonical Job fields.
 3. ADR-012 defines conservative canonical language/employment mappings (#139).
@@ -137,7 +137,7 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   See [scoring policy](../../docs/match/scoring-policy.md).
   Recency grouping uses initial weights **1.5 / 1.25 / 1.0**, with equal recency
   receiving equal weight. Similarity calibration and release validation remain
-  pending; the aggregation primitive is implemented and wired to pinned local inference, with provisional calibration.
+  pending; the aggregation primitive is planned in stack PR #173, with production inference wiring in #174–#175 and provisional calibration.
 - Pinned GLiNER revision/labels, provisional confidence, separate evidence storage
   and bounded retry/reprocessing are implemented; see [local GLiNER](../../docs/data/local-gliner.md).
   Mandatory exclusion remains disabled until independently measured quality and
@@ -162,8 +162,10 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   HTTPS, global rate-limit and database-access protections (authentication is
   intentionally absent under ADR-009).
 
-See [deployment behavior](spec.md#docker-compose-deployment). The pinned offline Compose smoke passed again after main reconciliation,
-including worker/API processing, replacement durability and backup/restore.
+See [deployment behavior](spec.md#docker-compose-deployment). The pinned offline Compose smoke is historical evidence from the original
+integration after main reconciliation, including worker/API processing, replacement
+durability and backup/restore. It has not been rerun for this branch; current-head
+Compose acceptance remains pending.
 Evidence and remaining release checks are tracked in [tasks](tasks.md).
 
 ## Implementation interview: readiness and performance
@@ -275,3 +277,36 @@ Implement and compare the approved separate projection, bilingual retrieval and 
 Authority: [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
 
 Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
+
+## Concurrent source-identity persistence
+
+- Concurrent inserts/updates preserve unique platform/source identity, content
+  hashes, terminal expiration and refreshed committed lifecycle evidence.
+- Reversed overlapping APiBR scans complete without deadlock. All remote page
+  fetches precede identity locking; batch locks use a deterministic order and
+  no more than 256 stripes regardless of record count.
+- Per-record malformed data remains isolated. Unexpected persistence failure
+  rolls back every job change in that scan and records a failed run.
+
+These incremental regressions are recorded in the
+[PR #167 review](../../docs/reports/2026-11-14-pr167-review.md).
+
+
+## Explicit source-timestamp expiration
+
+Due reliable source expiry expires nonterminal records once, preserves retained
+history and first/last observation plus verification timestamps, and remains
+terminal when ingestion runs concurrently. Ambiguous expiry/clock representations
+are rejected. A partial due-time index agrees with migrated PostgreSQL metadata.
+See the [PR #169 review](../../docs/reports/2026-11-14-pr169-review.md).
+
+
+## PR #171 embedding maintenance acceptance
+
+Equivalent normalized location objects must produce identical passages despite
+JSON key insertion order. Current normalized requirements participate in passages;
+changed extraction/model/passage-policy versions invalidate prior vectors.
+Independent-connection tests must preserve skip-locked claims without locking Job
+rows, and preparation must set telemetry configuration before importing the hub.
+Current-head verification is recorded in the
+[PR #171 review](../../docs/reports/2026-11-14-pr171-review.md).

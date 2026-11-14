@@ -249,3 +249,58 @@ def test_embedding_schema_constraints_and_migration_round_trip(db_engine, job_id
         enqueue(session, job_id, CONFIG, EXTRACTION)
     assert worker(db_engine).process_once()
     assert ready(db_engine, job_id)
+
+
+def test_claim_includes_requirements_and_new_extraction_generation_requeues(db_engine, job_id):
+    from src.persistence.job.skill import JobRequirement, RequirementClass
+
+    with Session(db_engine) as session, session.begin():
+        session.add(
+            JobRequirement(
+                job_id=job_id, text="SQL expertise", requirement_class=RequirementClass.REQUIRED
+            )
+        )
+    claim = worker(db_engine).claim()
+    assert claim is not None and "SQL expertise" in claim.text
+    assert worker(db_engine).finish(claim, VECTOR)
+    updated = "extraction-test-v2"
+    with Session(db_engine) as session, session.begin():
+        session.get(JobExtraction, job_id).config_version = updated
+        session.execute(delete(JobRequirement).where(JobRequirement.job_id == job_id))
+        session.add(
+            JobRequirement(
+                job_id=job_id, text="Java expertise", requirement_class=RequirementClass.PREFERRED
+            )
+        )
+        enqueue(session, job_id, CONFIG, updated)
+        assert session.get(Job, job_id).embedding is None
+    assert not ready(db_engine, job_id)
+    assert worker(db_engine).claim() is None
+    current_worker = worker(db_engine, extraction_version=updated)
+    current = current_worker.claim()
+    assert current is not None and "Java expertise" in current.text
+    assert "SQL expertise" not in current.text
+    assert current_worker.finish(current, VECTOR)
+    assert ready(db_engine, job_id, extraction_version=updated)
+
+
+def test_claim_reads_locked_job_without_waiting_and_skips_locked_embedding(db_engine, job_id):
+    # Claim locks only JobEmbedding. Its Job read uses MVCC, so it cannot form
+    # the JobEmbedding -> Job lock-order cycle alleged by the GitHub review.
+    with ThreadPoolExecutor(max_workers=1) as pool, Session(db_engine) as holding:
+        holding.scalar(select(Job).where(Job.id == job_id).with_for_update())
+        future = pool.submit(worker(db_engine).claim)
+        try:
+            claim = future.result(timeout=3)
+            assert claim is not None
+        finally:
+            holding.rollback()
+    with Session(db_engine) as session, session.begin():
+        enqueue(session, job_id, CONFIG, EXTRACTION, retry=True)
+    with ThreadPoolExecutor(max_workers=1) as pool, Session(db_engine) as holding:
+        enqueue(holding, job_id, CONFIG, EXTRACTION, retry=True)
+        future = pool.submit(worker(db_engine).claim)
+        try:
+            assert future.result(timeout=3) is None
+        finally:
+            holding.rollback()

@@ -9,7 +9,7 @@ from src.extraction.contracts import SpanEvidence
 from src.extraction.spans import entity_bounds
 from src.extraction.taxonomy import alias_spans, match_skill
 
-VERSION = "clause-strongest-negation-hedge-conflict-v3"
+VERSION = "clause-strongest-negation-hedge-conflict-v4"
 STRENGTH = {None: 0, "NICE_TO_HAVE": 1, "PREFERRED": 2, "REQUIRED": 3}
 CUES = {
     "REQUIRED": (
@@ -59,7 +59,7 @@ def _local(text: str, start: int, end: int):
             else:
                 strengths.append(name)
     mention = key(text[start:end])
-    if re.search(r"\b(?:without|no|sem)\s+" + re.escape(mention) + r"\b", context):
+    if re.search(r"\b(?:without|no|sem|not|nao)\s+" + re.escape(mention) + r"\b", context):
         negated = True
         strengths = []
     strengths.extend("NICE_TO_HAVE" for h in hedges if not NEGATION.search(context[: h.start()]))
