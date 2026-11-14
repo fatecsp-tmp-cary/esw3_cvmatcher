@@ -92,6 +92,8 @@ def evaluate(fixture, predictions, *, case_ids=None):
     )
     heldout = (
         reviewed
+        and provenance.get("heldout_independent", True) is True
+        and provenance.get("labels_independently_reviewed_after_policy_change", True) is True
         and case_ids is not None
         and set(case_ids) == set(provenance.get("partition", {}).get("heldout_ids", []))
     )
@@ -115,7 +117,14 @@ def evaluate(fixture, predictions, *, case_ids=None):
         supplied[case_id] = prediction
     report = {
         "schema_version": "1.0",
-        "dataset_kind": "human-reviewed synthetic" if reviewed else "agent-reviewed synthetic",
+        "dataset_kind": (
+            "policy-adjudicated human-reviewed synthetic"
+            if provenance.get("policy_adjudication")
+            else "human-reviewed synthetic"
+            if reviewed
+            else "agent-reviewed synthetic"
+        ),
+        "heldout_independent": bool(heldout),
         "release_quality_measured": bool(heldout),
         "release_quality_approved": False,
         "groups": {},

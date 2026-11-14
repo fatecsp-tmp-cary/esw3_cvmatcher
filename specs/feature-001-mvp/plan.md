@@ -40,7 +40,7 @@ and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).
   [scoring policy](../../docs/match/scoring-policy.md).
 - Implement the success-only extraction readiness gate for every matching path.
   Three failed attempts require persisted failed-job state, a structured local
-  error log and explicit retry. Retry delays still need definition; pre-production model changes may use
+  error log and explicit retry. Retry delays are 30/60 seconds under the extraction policy; pre-production model changes may use
   stop/reprocess/restart without a rolling cutover; external notification services are not required.
 - Protect the immutable integration contract throughout. ADR-008 supersedes the
   old collection caps, recorded by [ADR-011](../../docs/architecture/decisions/ADR-011-main-integration-compatibility.md).
@@ -59,3 +59,15 @@ restart persistence and backup/restore against the
 
 The real pinned offline Compose smoke passed before main reconciliation. Retest
 the integrated tree; quality/calibration and source usage remain release gates.
+
+## Issue #116 extraction correction
+
+Follow [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md):
+implement clause-local context and requirement projection, preserve raw detections,
+add explicit entity labels/span trimming and shared conservative typo support.
+Validate deterministic extraction tests and PostgreSQL publication before full
+relevant tests; evaluate policy-updated calibration labels only and freeze artifacts.
+Preserve old held-out labels/results and designate updated copies regression-only.
+Document numerical failures, new blind-review dependency and disabled exclusions.
+Implementation belongs to PR #170; downstream evaluation packets/evaluator wiring
+belong to PR #178. Verify combined behavior without merging either PR.
