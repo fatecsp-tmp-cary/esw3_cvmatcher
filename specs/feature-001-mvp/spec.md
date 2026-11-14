@@ -170,6 +170,16 @@ upsert → lifecycle update → schedule indexing/embedding. Distinguish found,
 created, updated, unchanged, and absent-from-complete-snapshot. PostgreSQL locks
 prevent overlapping same-source runs/conflicting lifecycle operations.
 
+Implemented source-identity upserts use 256 bounded PostgreSQL advisory-lock
+stripes shared by all writers. APiBR fetches and normalizes the scan before
+identity locking, acquires the complete stripe set in ascending order, then
+applies observations in source order with per-record rejection savepoints and
+one outer commit. Fetch/pagination or unexpected write failure leaves no job
+changes. Other multi-record callers must acquire their full stripe set before
+writing; no remote I/O may run while identity locks are held. Stripe collisions
+may serialize unrelated identities without merging their records. Scheduler
+source coordination remains a separate requirement.
+
 Worker handles polling, normalization, expiration, indexing, embedding, and
 model-change reprocessing. Scheduler may be bundled or separate. Embedding work
 is asynchronous and does not block ingestion/API requests. Record matching

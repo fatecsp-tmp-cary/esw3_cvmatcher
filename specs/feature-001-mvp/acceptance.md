@@ -242,3 +242,17 @@ alone may qualify; missing health/incremental scans stay incomplete. This is not
 an atomic proof. Qualifying scans still do not invent availability or execute the
 separate #145 absence/expiration policy. The #125 regression criterion covers both
 qualifying/incomplete attestations and these conservative lifecycle protections.
+
+
+## Concurrent source-identity persistence
+
+- Concurrent inserts/updates preserve unique platform/source identity, content
+  hashes, terminal expiration and refreshed committed lifecycle evidence.
+- Reversed overlapping APiBR scans complete without deadlock. All remote page
+  fetches precede identity locking; batch locks use a deterministic order and
+  no more than 256 stripes regardless of record count.
+- Per-record malformed data remains isolated. Unexpected persistence failure
+  rolls back every job change in that scan and records a failed run.
+
+These incremental regressions are recorded in the
+[PR #167 review](../../docs/reports/2026-11-14-pr167-review.md).
