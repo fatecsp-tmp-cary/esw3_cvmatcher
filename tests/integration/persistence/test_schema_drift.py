@@ -17,14 +17,17 @@ def test_migrated_database_has_no_unreviewed_schema_drift(db_engine):
 
 
 @pytest.mark.parametrize(
-    ("model", "index_name"),
+    ("model", "index_name", "method"),
     [
-        (Job, "ix_jobs_active_fts"),
-        (Job, "ix_jobs_search_portuguese"),
-        (JobRequirement, "ix_job_requirements_search_portuguese"),
+        (Job, "ix_jobs_active_fts", "gin"),
+        (Job, "ix_jobs_search_portuguese", "gin"),
+        (Job, "ix_jobs_due_source_expiry", "btree"),
+        (JobRequirement, "ix_job_requirements_search_portuguese", "gin"),
     ],
 )
-def test_fts_index_matches_postgresql_parsed_expression_and_predicate(db_engine, model, index_name):
+def test_index_matches_postgresql_parsed_expression_and_predicate(
+    db_engine, model, index_name, method
+):
     """Compare in PostgreSQL rather than ignore an expression normalization gap."""
     index = next(index for index in model.__table__.indexes if index.name == index_name)
     probe = index_name + "_probe"
@@ -40,6 +43,6 @@ def test_fts_index_matches_postgresql_parsed_expression_and_predicate(db_engine,
         actual = connection.execute(query, {"name": index_name}).one()
         expected = connection.execute(query, {"name": probe}).one()
         assert tuple(actual) == tuple(expected)
-        assert actual[:4] == ("gin", False, True, True)
+        assert actual[:4] == (method, False, True, True)
         # Names above are fixed developer constants, never submitted SQL data.
         connection.execute(text(f"DROP INDEX {probe}"))

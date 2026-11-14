@@ -40,7 +40,7 @@ class RankingPolicy:
             not self.version
             or any(not math.isfinite(w) or w < 0 for w in weights)
             or not math.isclose(sum(weights), 1.0)
-            or isinstance(self.retrieval_limit, bool)
+            or type(self.retrieval_limit) is not int
             or self.retrieval_limit < 1
         ):
             raise ValueError("Invalid ranking policy")

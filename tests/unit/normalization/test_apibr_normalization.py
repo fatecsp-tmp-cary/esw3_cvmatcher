@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from src.domain.job import SeniorityLevel, WorkArrangement
 from src.normalization.jobs.apibr import normalize_apibr_job, normalize_keywords, normalize_text
 
 
@@ -148,3 +149,26 @@ def test_malformed_fields_raise_record_validation_errors(invalid_fields):
 )
 def test_preserves_markdown_autolinks_and_literal_type_arguments(body):
     assert normalize_apibr_job({"id": 1, "title": "Engineer", "body": body})["description"] == body
+
+
+@pytest.mark.parametrize(
+    ("labels", "mode", "level"),
+    [
+        (
+            ["Python", "Remoto", "Híbrido", "Júnior", "Sênior"],
+            WorkArrangement.REMOTE,
+            SeniorityLevel.JUNIOR,
+        ),
+        (
+            [{"name": "Híbrido"}, {"name": "Remoto"}, {"name": "Pleno"}],
+            WorkArrangement.HYBRID,
+            SeniorityLevel.MID,
+        ),
+        (["Python", "Unknown"], None, None),
+    ],
+)
+def test_source_labels_keep_first_recognized_categories_and_all_keywords(labels, mode, level):
+    job = normalize_apibr_job({"id": 1, "title": "Developer", "labels": labels})
+    assert job["work_arrangement"] == mode
+    assert job["seniority_level"] == level
+    assert job["keywords"] == normalize_keywords(labels)

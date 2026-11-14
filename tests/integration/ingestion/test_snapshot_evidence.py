@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from src.ingestion.adapters import SourceError
 from src.ingestion.apibr import ingest_apibr
@@ -105,3 +105,53 @@ def test_exhausted_health_transport_failure_rolls_back_all_payload_updates(
     assert run.jobs_created == run.jobs_updated == 0
     assert run.errors == "SourceError"
     assert session.get(JobSource, source.id).last_success_at is None
+
+
+def test_snapshot_network_finishes_before_locks_and_db_rejection_invalidates_evidence(
+    db_session, monkeypatch
+):
+    from src.ingestion import apibr
+
+    source = JobSource(name="snapshot-write-rejection", type="api", polling_mode="SNAPSHOT")
+    db_session.add(source)
+    db_session.commit()
+    remote_calls = []
+
+    class UnlockedClient(Client):
+        def assert_unlocked(self):
+            assert (
+                db_session.scalar(
+                    text(
+                        "SELECT count(*) FROM pg_locks "
+                        "WHERE locktype = 'advisory' AND pid = pg_backend_pid()"
+                    )
+                )
+                == 0
+            )
+
+        def fetch_health(self):
+            self.assert_unlocked()
+            remote_calls.append("health")
+            return super().fetch_health()
+
+        def fetch_page(self, page):
+            self.assert_unlocked()
+            remote_calls.append(f"page-{page}")
+            return super().fetch_page(page)
+
+    original = apibr.upsert_job
+
+    def reject_second(session, source_id, normalized, observed_at, verified):
+        assert remote_calls == ["health", "page-1", "page-2", "health"]
+        if normalized["source_job_id"] == "2":
+            raise ValueError("synthetic persistence rejection")
+        return original(session, source_id, normalized, observed_at, verified)
+
+    monkeypatch.setattr(apibr, "upsert_job", reject_second)
+    result = ingest_apibr(db_session, source.id, UnlockedClient())
+    run = db_session.get(SourceRun, result.run_id)
+    assert result.status == "PARTIAL"
+    assert result.snapshot_complete is False
+    assert run.snapshot_evidence["qualified"] is False
+    assert run.snapshot_evidence["rejections"] == run.jobs_rejected == 1
+    assert db_session.scalars(select(Job.source_job_id)).all() == ["1"]

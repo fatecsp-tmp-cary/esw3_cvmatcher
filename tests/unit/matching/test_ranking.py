@@ -33,3 +33,14 @@ def test_accepted_floating_point_weights_cannot_exceed_public_score_bounds():
     assert policy.score(100, 100, 100) == 100
     assert policy.score(0, 0, 0) == 0
     assert policy.score(20, 40, 60) == pytest.approx(35.0)
+
+
+@pytest.mark.parametrize("limit", [False, True, 0, -1, 1.5, float("nan"), float("inf"), "10", None])
+def test_retrieval_limit_rejects_non_integer_or_nonpositive_counts(limit):
+    with pytest.raises(ValueError, match="Invalid ranking policy"):
+        RankingPolicy(retrieval_limit=limit)
+
+
+@pytest.mark.parametrize("limit", [1, 100, 1000])
+def test_retrieval_limit_accepts_positive_integer_counts(limit):
+    assert RankingPolicy(retrieval_limit=limit).retrieval_limit == limit

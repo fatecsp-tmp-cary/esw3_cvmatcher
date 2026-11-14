@@ -216,3 +216,45 @@ def test_seniority_wrapper_is_trimmed_without_changing_source_unicode():
     text = "Senioridade sênior é obrigatória."
     (row,) = annotate_spans(text, evidence(text, "Senioridade sênior"))
     assert text[row["start"] : row["end"]] == "sênior"
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["Python required, but not Java.", "Python obrigatório, mas não Java."],
+)
+def test_omitted_predicate_negation_retains_null_evidence(text):
+    raw = []
+    rows = annotate_spans(text, raw)
+    assert [row["requirement_class"] for row in rows] == ["REQUIRED", None]
+    assert [row["negated"] for row in rows] == [False, True]
+    assert text[rows[1]["start"] : rows[1]["end"]] == "Java"
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["Python required, but not only Java.", "Python obrigatório, mas não só Java."],
+)
+def test_not_only_is_affirmative_with_shared_predicate(text):
+    rows = annotate_spans(text, [])
+    assert [row["requirement_class"] for row in rows] == ["REQUIRED", "REQUIRED"]
+    assert not any(row["negated"] for row in rows)
+
+
+@pytest.mark.parametrize(
+    "heading",
+    ["Benefits", "Benefícios", "Responsibilities", "Responsabilidades", "How to apply"],
+)
+def test_inline_background_heading_terminates_requirements(heading):
+    text = f"Requirements:\nPython required\n{heading}: health insurance\nJava required."
+    raw = []
+    rows = annotate_spans(text, raw)
+    assert [text[row["start"] : row["end"]] for row in rows] == ["Python"]
+    java = next(row for row in raw if text[row["start"] : row["end"]] == "Java")
+    assert not java["requirement_selected"] and java["requirement_class"] is None
+
+
+def test_inline_requirement_heading_carries_strength_to_following_lines():
+    text = "Required: Python\nJava\nBenefits: Docker\nSQL required."
+    rows = annotate_spans(text, [])
+    assert [text[row["start"] : row["end"]] for row in rows] == ["Python", "Java"]
+    assert [row["requirement_class"] for row in rows] == ["REQUIRED", "REQUIRED"]

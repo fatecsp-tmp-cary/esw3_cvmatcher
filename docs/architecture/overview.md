@@ -31,7 +31,7 @@ The transient public-request projection lives in
 `src/normalization/candidate/curriculum.py`. Its immutable `NormalizedCandidate`
 preserves all five source sections without the UUID or additional caps. It is
 an intermediate matching representation, not a new public API model. Production
-matching uses this projection; compatibility reconciliation preserves both
+matching integration is pending in stack PR #175; compatibility reconciliation preserves both
 projection APIs under [ADR-011](decisions/ADR-011-main-integration-compatibility.md).
 
 The intended canonical `Job` has exactly these fields:
@@ -63,10 +63,16 @@ preserving the public integration contract. See
 The implementation interview requires successful extraction before jobs enter
 any matching path. Extraction readiness is supporting state separate from
 canonical availability; failures must not change lifecycle. The semantic
-aggregation primitive now lives in `src/matching/semantic.py`, using the
+aggregation primitive is implemented in `src/matching/semantic.py`, using the
 provisional coefficients documented in [scoring policy](../match/scoring-policy.md).
-Pinned local inference and production executor wiring are implemented; calibration
+Pinned local GLiNER extraction, versioned evidence and bounded claim/retry
+processing are implemented in #170. Pinned local embedding inference, job-only
+provenance and semantic retrieval are implemented in #171; production executor
+wiring remains planned in #175. Embedding passages include normalized requirement
+text and deterministic location ordering under a versioned policy. Calibration
 and quality approval remain pending. Portuguese FTS retains ADR-004/005 weights,
-JSON text rendering and publication-date/identity ties, with current extraction
-readiness on every path; integrated database verification passed under ADR-011.
+JSON text rendering and publication-date/identity ties, with extraction
+readiness on job and requirement retrieval paths implemented in #172. Production
+pipeline callers remain planned in #174–#175. Integrated database verification
+under ADR-011 is historical evidence from the original integration, not this head.
 Taxonomy persistence and category aliases from main remain part of the system.

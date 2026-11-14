@@ -33,7 +33,7 @@ def _validate_score(value: float) -> None:
 class SemanticPolicy:
     """Interview starting coefficients; calibration/release approval is pending."""
 
-    version: str = "semantic-aggregation-v1-provisional"
+    version: str = "semantic-aggregation-v2-provisional"
     experience_weight: float = 0.8
     education_weight: float = 0.2
     recency_weights: tuple[float, float, float] = (1.5, 1.25, 1.0)
@@ -79,9 +79,16 @@ def semantic_score(
     # Stable sorting preserves input position when both score and recency tie.
     selected = [experiences[index] for index in selected_experience_indices(experiences)]
     total = denominator = 0.0
-    scale = max(policy.experience_weight, policy.education_weight)
-    experience_weight = policy.experience_weight / scale
-    education_weight = policy.education_weight / scale
+    # Scale only available sections. An absent section's much larger weight
+    # must not underflow the sole available component to zero.
+    available_weights = []
+    if selected:
+        available_weights.append(policy.experience_weight)
+    if education_scores:
+        available_weights.append(policy.education_weight)
+    scale = max(available_weights, default=1.0)
+    experience_weight = policy.experience_weight / scale if selected else 0.0
+    education_weight = policy.education_weight / scale if education_scores else 0.0
     if selected:
         recencies = sorted({x.recency for x in selected}, reverse=True)
         weights = {
