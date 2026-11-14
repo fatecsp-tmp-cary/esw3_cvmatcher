@@ -7,8 +7,10 @@ from importlib.metadata import version
 from pathlib import Path
 
 from src.extraction.classification import VERSION as CLASSIFICATION_VERSION
+from src.extraction.context import VERSION as CONTEXT_VERSION
 from src.extraction.contracts import SpanEvidence, TextChunk
 from src.extraction.persistence import SEED_VERSION
+from src.extraction.spans import VERSION as SPAN_VERSION
 
 MODEL_ID = "urchade/gliner_multi-v2.1"
 MODEL_REVISION = "443d26d654e0324125a96bebd8e796c14ff2efe6"
@@ -22,6 +24,10 @@ LABELS = (
     "cloud",
     "education",
     "work experience requirement",
+    "professional credential",
+    "professional license",
+    "language",
+    "certification",
 )
 THRESHOLD = 0.3
 MAX_TOKENS = 384
@@ -45,6 +51,9 @@ _POLICY: dict[str, object] = {
     "dedup": "same-label-overlap-confidence-length-offset-v1",
     "mandatory_classification": False,
     "context_classification": CLASSIFICATION_VERSION,
+    "context_policy": CONTEXT_VERSION,
+    "span_policy": SPAN_VERSION,
+    "supplemental_detection": "exact-bounded-project-aliases-v1",
     "taxonomy": SEED_VERSION,
     "packages": INFERENCE_PACKAGES,
 }
