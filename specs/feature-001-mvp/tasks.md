@@ -50,3 +50,26 @@ for scope and limitations.
       future hard-exclusion scope, unnamed integration document and canonical
       correction/creation terminology. Exclusion implementation depends on a
       decision; this integration does not choose one.
+
+## Issue #116 extraction correction — 2026-11-14
+
+Policy authority: [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+
+- [x] Interview and record user decisions before dependent implementation.
+- [x] Implement clause-local strengths, negated-null/hedged optional evidence,
+      strongest-occurrence consolidation with retained conflict flags, selection
+      separate from detection, section/background handling and exact span trimming.
+- [x] Add dedicated credential/license/language/certification labels and version
+      bounded score-only typo support shared by job/candidate matching.
+- [x] Test approved semantic equivalence examples; scalar thresholds do not separate
+      related pairs from all distinct languages. Automatic merging remains disabled.
+- [x] Complete focused PostgreSQL and full relevant test verification; see
+      [correction evidence](../../docs/reports/2026-11-14-extraction-correction.md).
+- [x] Update calibration/old-held-out copies with case-level policy provenance on
+      evaluation PR #178; preserve originals and historical failures.
+- [x] Run calibration only; freeze extraction version, calibration and cutoff;
+      preserve PT/EN metrics, failed gates and case errors.
+- [ ] Obtain a fresh independently reviewed held-out set for future acceptance.
+      Reused held-out labels are regression evidence, not renewed independence.
+- [ ] Define minimum mandatory-mention support if future exclusions are proposed.
+      All new exclusions remain disabled; no release/merge approval is implied.
