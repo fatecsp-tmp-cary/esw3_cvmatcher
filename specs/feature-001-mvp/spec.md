@@ -2,10 +2,12 @@
 
 ## Behavior
 
-The service receives an already structured CV, validates and normalizes it to a
+The required service behavior is to receive an already structured CV, validate and normalize it to a
 request-scoped `NormalizedCandidate`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
-jobs through `POST /matches`. CV parsing is external. `GET /health` is optional.
+jobs through `POST /matches`. Production normalization/pipeline wiring is pending
+in stack PR #175; this branch implements the projection and contract. CV parsing
+is external. `GET /health` is optional.
 
 The public five-section contract is defined in [acceptance](acceptance.md#resolved-api-contract).
 Its lossless transient projection preserves all sections without the UUID or
@@ -45,7 +47,7 @@ assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
 matching, and section detection complement the selected local GLiNER job-field
 extraction strategy. Follow the extraction plan (planned in #170: `../../docs/data/job-field-extraction.md`)
 for evidence, confidence, contextual requirement classification, model versioning
-and failure handling. Pinned offline extraction and bounded job-state processing are implemented; mandatory classification remains disabled pending measured quality approval. PostgreSQL FTS handles DB-level
+and failure handling. Pinned offline extraction and bounded job-state processing are planned in stack PR #170; mandatory classification remains disabled pending measured quality approval. PostgreSQL FTS handles DB-level
 tokenization, stemming, and ranking.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
@@ -167,6 +169,16 @@ failures. Scheduler flow: lock source → poll/fetch → validate → normalize 
 upsert → lifecycle update → schedule indexing/embedding. Distinguish found,
 created, updated, unchanged, and absent-from-complete-snapshot. PostgreSQL locks
 prevent overlapping same-source runs/conflicting lifecycle operations.
+
+Implemented source-identity upserts use 256 bounded PostgreSQL advisory-lock
+stripes shared by all writers. APiBR fetches and normalizes the scan before
+identity locking, acquires the complete stripe set in ascending order, then
+applies observations in source order with per-record rejection savepoints and
+one outer commit. Fetch/pagination or unexpected write failure leaves no job
+changes. Other multi-record callers must acquire their full stripe set before
+writing; no remote I/O may run while identity locks are held. Stripe collisions
+may serialize unrelated identities without merging their records. Scheduler
+source coordination remains a separate requirement.
 
 Worker handles polling, normalization, expiration, indexing, embedding, and
 model-change reprocessing. Scheduler may be bundled or separate. Embedding work

@@ -2,14 +2,12 @@
 
 from dataclasses import dataclass
 
-from sqlalchemy import Text, cast, func, literal_column, select, union_all
-from sqlalchemy.dialects.postgresql import TSQUERY
+from sqlalchemy import func, select, union_all
 from sqlalchemy.orm import Session
 
+from src.indexing.textual import any_term_query, job_search_document, requirement_search_document
 from src.persistence.job.job import Job, JobStatus
 from src.persistence.job.skill import JobRequirement
-
-_PORTUGUESE_CONFIG = literal_column("'portuguese'::regconfig")
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,24 +16,6 @@ class TextualMatch:
 
     job: Job
     score: float
-
-
-def _weighted_vector(weight, first, second):
-    # Keep these expressions identical to the functional index migration.
-    text = (
-        func.coalesce(first, literal_column("''"))
-        + literal_column("' '")
-        + func.coalesce(second, literal_column("''"))
-    )
-    return func.setweight(func.to_tsvector(_PORTUGUESE_CONFIG, text), literal_column(f"'{weight}'"))
-
-
-def _job_vector():
-    return (
-        _weighted_vector("A", Job.title, cast(Job.skills, Text))
-        .op("||")(_weighted_vector("B", Job.company, cast(Job.keywords, Text)))
-        .op("||")(_weighted_vector("D", Job.description, cast(Job.location, Text)))
-    )
 
 
 def search_active_jobs(
@@ -59,16 +39,10 @@ def search_active_jobs(
     if not query.strip():
         return []
 
-    # Parse as plain text first, then OR the escaped PostgreSQL lexemes. Caller
-    # quotes/operators remain data, and stop words use the same configuration.
-    plain_query = cast(func.plainto_tsquery(_PORTUGUESE_CONFIG, query), Text)
-    # Cast the already normalized lexemes; to_tsquery would stem them again.
-    tsquery = cast(func.replace(plain_query, " & ", " | "), TSQUERY)
-    job_vector = _job_vector()
-    requirement_vector = func.to_tsvector(_PORTUGUESE_CONFIG, JobRequirement.text)
-    requirement_rank = func.ts_rank_cd(
-        func.setweight(requirement_vector, literal_column("'B'")), tsquery
-    )
+    tsquery = any_term_query(query)
+    job_vector = job_search_document()
+    requirement_vector = requirement_search_document()
+    requirement_rank = func.ts_rank_cd(requirement_vector, tsquery)
     requirement_matches = (
         select(
             JobRequirement.job_id.label("job_id"),
