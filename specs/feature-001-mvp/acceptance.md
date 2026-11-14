@@ -243,7 +243,7 @@ qualifying/incomplete attestations and these conservative lifecycle protections.
 
 ## Extraction correction acceptance (issue #116 / PR #170)
 
-Authority: [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+Authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md).
 
 - Regress multiple clause strengths, local-over-heading precedence, negated and
   affirmative occurrences, PT/EN cue variants, PREFERRED versus NICE_TO_HAVE,
