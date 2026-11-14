@@ -22,7 +22,11 @@ Requirements and completion gates are in [spec](spec.md),
   ADR-013 best-effort health/count attestation; all remote calls finish before
   identity locking and persistence rejection invalidates qualification.
 - Portuguese weighted any-term FTS field/query/normalization decisions.
-- Skill taxonomy, job-skill and classified requirement persistence; population/extraction remain pending.
+- Skill taxonomy, explicit project-alias seed, job-skill and classified requirement
+  persistence; local pinned GLiNER, exact-alias supplemental detection and ADR-018
+  clause-local score-only projection. Versioned evidence, three-claim retry/lease
+  recovery and readiness predicate are implemented. API retrieval gating/wiring
+  remains planned in #172–#175; quality/release approval and exclusions stay disabled.
 - Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
 - Domain-enum seniority/mode aliases; missing/unknown values yield no category. APiBR uses first-recognized source-label precedence, retaining every keyword. Other categories remain text.
 - Ranked response validation tests for job identity, eligibility, match details and version metadata.
@@ -32,7 +36,7 @@ Requirements and completion gates are in [spec](spec.md),
 
 - [ ] Source usage/permission evidence and worker integration of the async interface;
       optional bounded availability verification. Real payload capture is pending.
-- [ ] Scheduler/source-run concurrency, taxonomy population and requirement extraction.
+- [ ] Scheduler/source-run concurrency and production extraction scheduling/wiring.
       Preserve source independence and uncertain evidence.
 - [ ] Lifecycle policies. Never infer absence from an unproven scan.
 - [ ] Model selection, metadata, semantic retrieval, scoring, model-change
@@ -105,3 +109,10 @@ See the [review record](../../docs/reports/2026-11-14-pr169-review.md) for
 concurrent sweep/upsert coordination, reliable-field preconditions, index
 migration and regression verification. Absence/stale-age policies and scheduler
 integration remain separate work.
+
+
+## PR #170 incremental review verification
+
+See the [review record](../../docs/reports/2026-11-14-pr170-review.md) for actual
+GitHub/Codex review dispositions and current-head extraction checks. Existing
+correction/evaluation history above retains its original evidence scope.
