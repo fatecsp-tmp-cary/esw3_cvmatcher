@@ -149,7 +149,7 @@ or fitted calibration is claimed.
 
 ## Extraction-policy correction (2026-11-14)
 
-[ADR-014](../architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md)
+[ADR-018](../architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md)
 supersedes old negation/conflict conventions for current extraction. Keep the
 original synthetic/reviewed evidence unchanged and use the
 [policy-updated copies](human-review/extraction-policy-v2/README.md). Human source
