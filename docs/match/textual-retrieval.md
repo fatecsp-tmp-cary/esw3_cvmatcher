@@ -67,8 +67,11 @@ predicates. PostgreSQL regressions cover field weights, JSON text, requirement
 rank combination, readiness, publication ties and immutable expression indexing;
 the [PR #172 review](../reports/2026-11-14-pr172-review.md) records current
 PostgreSQL verification after merging predecessor fixes. Migrated index/ORM
-expression parity is tested. Production pipeline/algorithm-version integration
-remains planned in #174–#175; this is not production performance evidence.
+expression parity is tested. The request-scoped matching pipeline now combines
+these scores with semantic and structured evidence, and fingerprints retrieval
+and scoring policies in its algorithm version. It rechecks considered jobs for
+current textual or semantic evidence before returning them. API composition
+remains planned in #175; this is not production performance evidence.
 
 The current JSON serializer escapes non-ASCII characters. The specific `Café`
 and `Paraná` regressions pass because Portuguese queries stem to `caf` and

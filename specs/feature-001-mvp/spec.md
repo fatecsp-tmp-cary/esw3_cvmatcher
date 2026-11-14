@@ -5,8 +5,8 @@
 The required service behavior is to receive an already structured CV, validate and normalize it to a
 request-scoped `NormalizedCandidate`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
-jobs through `POST /matches`. Production normalization/pipeline wiring is pending
-in stack PR #175; this branch implements the projection and contract. CV parsing
+jobs through `POST /matches`. The request-scoped normalization/retrieval/scoring
+pipeline is implemented; production API composition is pending in stack PR #175. CV parsing
 is external. `GET /health` is optional.
 
 The public five-section contract is defined in [acceptance](acceptance.md#resolved-api-contract).
@@ -90,8 +90,12 @@ uses A title/skills, B company/keywords/normalized requirements and D
 description/location, PostgreSQL JSON text rendering and descending publication
 date then platform/source-ID ties under ADR-004/005. All retrieval paths require
 successful extraction for current content/configuration. The implemented FTS
-helpers fail closed when readiness is omitted; production pipeline wiring is
-planned in #174–#175. Semantic job representation is title,
+helpers fail closed when readiness is omitted. The request-scoped pipeline
+supplies current extraction readiness, unions considered candidates, then rechecks
+active state and final evidence. A candidate remains only if it has current textual
+evidence or available experience/education queries and a current valid embedding.
+Textual matches may remain without a vector. Projects/competencies/languages alone
+do not trigger semantic retrieval. Production API composition is planned in #175. Semantic job representation is title,
 normalized skills, current normalized requirement texts (sorted and deduplicated),
 relevant description, location string values in sorted-key order, and mode. Passage
 representation is part of the embedding policy identity; its changes require

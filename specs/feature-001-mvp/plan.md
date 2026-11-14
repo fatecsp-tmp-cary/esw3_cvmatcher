@@ -17,15 +17,16 @@ absence-based lifecycle changes remain separate policy/implementation work.
 4. Weighted Portuguese FTS indexes and shared query expressions are implemented,
    with explicit extraction readiness on both job and requirement paths. Keep raw
    rank distinct from bounded textual/final compatibility scores. Production
-   pipeline wiring and ADR-022 bilingual/ASCII/fuzzy implementation remain pending.
+   API composition and ADR-022 bilingual/ASCII/fuzzy implementation remain pending.
 5. Category aliases, public response validation, and bounded
    lossless uncapped curriculum projection.
 6. Pinned local embeddings, job-only model/version metadata, versioned passage
    representation, semantic retrieval and model/extraction-change invalidation are
    implemented. Deterministic semantic aggregation and final blend primitives are
    implemented in #173, including count validation and available-section numeric
-   bounds. Complete production retrieval/scoring integration and empty-evidence
-   behavior; validate calibration independently before release approval.
+   bounds. Request-scoped combined retrieval/scoring, empty-input handling and
+   final readiness/evidence rechecks are implemented in #174. Complete API
+   composition and validate calibration independently before release approval.
 7. Wire the production matching API and privacy, background work and bounded
    availability verification, lifecycle policies, packaging/operations, and
    release regressions. Complete the initial textual matching slice.

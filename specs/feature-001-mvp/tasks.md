@@ -26,13 +26,13 @@ Requirements and completion gates are in [spec](spec.md),
   persistence; local pinned GLiNER, exact-alias supplemental detection and ADR-018
   clause-local score-only projection. Versioned evidence, three-claim retry/lease
   recovery and readiness predicate are implemented. FTS helpers require explicit
-  extraction readiness; production pipeline/API wiring remains planned in
-  #174–#175. Quality/release approval and exclusions stay disabled.
+  extraction readiness. Request-scoped pipeline wiring is implemented in #174;
+  production API composition remains planned in #175. Quality/release approval and exclusions stay disabled.
 - Immutable weighted FTS indexes and active-only any-term/requirement retrieval
   with fail-closed extraction readiness, bounded textual components and stable
   ties are implemented. Legacy retrieval retains raw rank. Deterministic final
   compatibility primitives, versioned calibration and semantic aggregation are
-  implemented in #173; production pipeline integration remains planned.
+  implemented in #173 and integrated into the request-scoped pipeline in #174.
 - Domain-enum seniority/mode aliases; missing/unknown values yield no category. APiBR uses first-recognized source-label precedence, retaining every keyword. Other categories remain text.
 - Ranked response validation tests for job identity, eligibility, match details and version metadata.
 - Uncapped public collections and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
@@ -41,7 +41,7 @@ Requirements and completion gates are in [spec](spec.md),
   bounded claims/retries, content/model/extraction invalidation and semantic
   retrieval are implemented. Passages include normalized requirements and
   deterministic locations under a versioned representation policy. Production
-  pipeline wiring and empirical calibration/release acceptance remain pending.
+  API composition and empirical calibration/release acceptance remain pending.
 
 ## Remaining MVP work
 
@@ -50,10 +50,9 @@ Requirements and completion gates are in [spec](spec.md),
 - [ ] Scheduler/source-run concurrency and production extraction scheduling/wiring.
       Preserve source independence and uncertain evidence.
 - [ ] Lifecycle policies. Never infer absence from an unproven scan.
-- [ ] Production retrieval/scoring integration, empty-evidence behavior and
-      textual normalization/ranking;
-      a fixed regression fixture and vertical-slice validation.
-- [ ] API pipeline, anonymous global admission limiting (ADR-009/010), worker scheduling, source locking and
+- [ ] API composition, ADR-022 textual normalization/retrieval changes, a fixed
+      release regression fixture and vertical-slice acceptance validation.
+- [ ] Production API executor/readiness composition, worker scheduling, source locking and
       operations; language/accent investigation.
 - [ ] Release coverage and the initial textual matching slice.
 - [ ] Additional-source selection/adapter, separate from the at-least-one-source
@@ -160,3 +159,11 @@ See the [review record](../../docs/reports/2026-11-14-pr173-review.md) for both
 review dispositions, retrieval-count validation, available-section normalization
 and current-head checks. ADR-021 mandatory coverage is accepted but remains
 unimplemented; no new exclusion, blend weight or release approval is introduced.
+
+## PR #174 incremental verification
+
+Request-scoped pipeline union, current-evidence rechecks and deterministic scoring
+are implemented. Fake-encoder PostgreSQL regressions cover empty/competency-only
+input, deduplication, stale/inactive provenance, invalid vectors/counts, stable
+ordering and privacy/geography invariants. See the
+[review record](../../docs/reports/2026-11-14-pr174-review.md) for actual results.
