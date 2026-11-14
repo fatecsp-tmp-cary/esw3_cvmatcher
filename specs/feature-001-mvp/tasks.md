@@ -25,7 +25,7 @@ Implementation below is distinct from release approval. #99 remains open.
   three-attempt failure and explicit retry. Failed jobs are withheld from matching.
 - Pinned offline local GLiNER inference with token-aware full-text coverage,
   validated offsets/deduplication and conservative explicit skill aliases.
-  Mandatory classifications remain disabled pending measured quality approval.
+  Explicit requirement classes support scores; mandatory exclusions remain disabled pending measured quality approval.
 - Weighted Portuguese any-term FTS and bound queries reconciled with ADR-004/005
   weights/fields, JSON text rendering and publication-date/identity ties, with
   current extraction readiness on every retrieval path. Both migration histories

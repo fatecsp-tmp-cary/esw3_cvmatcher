@@ -104,7 +104,8 @@ second public-input validator.
    so listed jobs are ACTIVE. No hidden verifier is enabled. Under accepted
    ADR-015, a job absent from a qualifying SNAPSHOT poll becomes STALE; no
    incremental, partial, failed or non-qualifying scan may mark absent jobs
-   stale, and STALE→EXPIRED thresholds remain #145.
+   stale. ADR-020 selects three qualifying absent snapshots for STALE→EXPIRED;
+   counter/expiry implementation remains #145.
 2. The pinned multilingual E5 model/version and separate provenance are implemented
    (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
    the fixed canonical Job fields.
