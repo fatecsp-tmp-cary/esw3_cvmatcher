@@ -240,3 +240,26 @@ alone may qualify; missing health/incremental scans stay incomplete. This is not
 an atomic proof. Qualifying scans still do not invent availability or execute the
 separate #145 absence/expiration policy. The #125 regression criterion covers both
 qualifying/incomplete attestations and these conservative lifecycle protections.
+
+## Extraction correction acceptance (issue #116 / PR #170)
+
+Authority: [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+
+- Regress multiple clause strengths, local-over-heading precedence, negated and
+  affirmative occurrences, PT/EN cue variants, PREFERRED versus NICE_TO_HAVE,
+  strongest occurrence selection and retained conflict/negation/approximation flags.
+- Retain detected-but-unclassified evidence. Select requirements separately from
+  company/benefits/application/background text; test repeated explicit requirements,
+  missing/malformed sections, credential/multiword wrappers and exact Unicode offsets.
+- Regress typo tolerance on both job and candidate evidence: minimum five characters,
+  at most one edit including adjacent transposition, unique closest concept, exact
+  aliases first, preserved punctuation/short names, no permanent alias creation.
+- Keep empty candidate/no requirement cases in role metrics under explicit
+  evidence-based labels. Preserve zero semantic evidence and no all-empty matches.
+- Run focused extraction tests, relevant full unit/integration suites and offline
+  calibration only before freezing extraction/configuration and calibration/cutoff.
+  Preserve failures and case errors; report PT/EN separately.
+- Keep original reviewed labels/results. Record authorized policy updates in new
+  copies. The diagnosed held-out set is regression material; independent acceptance
+  remains pending a fresh blind review. Keep ADR-012 numeric gates and score-only
+  behavior. Additional mandatory sample minimums remain a future exclusion decision.
