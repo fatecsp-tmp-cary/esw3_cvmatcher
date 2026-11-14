@@ -63,3 +63,11 @@ def test_upsert_leaves_unchanged_content_and_updates_changed_content(session: Se
     assert changed == ("updated", False, False)
     assert job.content_hash != original_hash
     assert job.title == "Senior data engineer"
+
+
+@pytest.mark.parametrize("expiry", [datetime(2026, 11, 11), "2026-11-11T00:00:00Z", 0])
+def test_upsert_rejects_unnormalized_or_ambiguous_expiry(session, expiry):
+    normalized = {**_job(), "source_expires_at": expiry}
+    with pytest.raises(ValueError, match="timezone-aware datetime"):
+        upsert_job(session, 1, normalized, datetime.now(UTC), True)
+    assert session.scalar(select(Job.id)) is None

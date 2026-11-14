@@ -9,6 +9,9 @@ Requirements and completion gates are in [spec](spec.md),
 - Shared production/mock preview request and ranked response, OpenAPI, limit, health and privacy-safe RFC 9457 errors.
 - Canonical job correction, source identity and four lifecycle states; section-preserving HTML cleanup. Raw remains null.
 - Deterministic normalized content hashing.
+- Reliable explicit-source timestamp expiration with bounded ingestion-stripe
+  coordination, indexed due-time selection and unchanged observation/verification
+  timestamps. APiBR supplies no supported source expiry and emits null.
 - Source-specific upsert, content/vector invalidation and stale rediscovery; PostgreSQL persistence tests. Concurrent identity writes use bounded, ordered
   advisory-lock stripes; APiBR buffers observations before locking and retains
   atomic scan rollback. Independent-connection regressions cover inserts,
@@ -71,3 +74,11 @@ current-head checks and later-adapter integration requirements.
 See the [review record](../../docs/reports/2026-11-14-pr168-review.md) for
 category-label regression fixes, network-free identity-locking integration,
 review dispositions and current-head verification.
+
+
+## PR #169 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr169-review.md) for
+concurrent sweep/upsert coordination, reliable-field preconditions, index
+migration and regression verification. Absence/stale-age policies and scheduler
+integration remain separate work.

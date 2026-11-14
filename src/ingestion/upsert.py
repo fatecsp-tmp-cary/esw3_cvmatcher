@@ -33,6 +33,21 @@ def _identity_lock_key(platform: str, source_job_id: str) -> int:
     return int.from_bytes(hashlib.sha256(identity).digest()[:8]) % _IDENTITY_LOCK_STRIPES
 
 
+def _lock_stripes(session: Session, keys: Iterable[int]) -> None:
+    for key in keys:
+        session.execute(select(func.pg_advisory_xact_lock(_IDENTITY_LOCK_NAMESPACE, key)))
+
+
+def lock_all_job_identities(session: Session) -> None:
+    """Coordinate a bulk lifecycle write with every identity writer, boundedly.
+
+    This must be the transaction's first identity-lock operation, or the complete
+    set must already be held. Expanding a previously held subset can invert lock
+    order relative to another writer. Callers must commit/rollback promptly.
+    """
+    _lock_stripes(session, range(_IDENTITY_LOCK_STRIPES))
+
+
 def lock_job_identities(session: Session, identities: Iterable[tuple[str, str]]) -> None:
     """Acquire a complete batch in global key order before writing any identity.
 
@@ -41,8 +56,7 @@ def lock_job_identities(session: Session, identities: Iterable[tuple[str, str]])
     stripe collisions from introducing a different acquisition order. At most
     256 two-integer advisory locks are held per transaction.
     """
-    for key in sorted({_identity_lock_key(*identity) for identity in identities}):
-        session.execute(select(func.pg_advisory_xact_lock(_IDENTITY_LOCK_NAMESPACE, key)))
+    _lock_stripes(session, sorted({_identity_lock_key(*identity) for identity in identities}))
 
 
 def upsert_job(
@@ -64,6 +78,11 @@ def upsert_job(
     The return values are the content outcome, whether this call newly expired
     the job, and whether it reactivated a stale job.
     """
+    expiry = normalized.get("source_expires_at")
+    if expiry is not None and (
+        not isinstance(expiry, datetime) or expiry.tzinfo is None or expiry.utcoffset() is None
+    ):
+        raise ValueError("source expiry must be a timezone-aware datetime")
     platform = normalized["platform"]
     source_job_id = normalized["source_job_id"]
     lock_job_identities(session, [(platform, source_job_id)])
