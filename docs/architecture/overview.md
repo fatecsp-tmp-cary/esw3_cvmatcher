@@ -72,7 +72,11 @@ wiring remains planned in #175. Embedding passages include normalized requiremen
 text and deterministic location ordering under a versioned policy. Calibration
 and quality approval remain pending. Portuguese FTS retains ADR-004/005 weights,
 JSON text rendering and publication-date/identity ties, with extraction
-readiness on job and requirement retrieval paths implemented in #172. Production
-pipeline callers remain planned in #174–#175. Integrated database verification
+readiness on job and requirement retrieval paths implemented in #172. The request-scoped pipeline in `src/matching/pipeline.py` now combines textual
+and semantic retrieval, rechecks readiness and computes deterministic final scores.
+Only experience/education entries supply semantic queries. A considered job must
+still have textual evidence or current semantic-vector evidence at the final
+check; valid textual hits do not require an embedding. API composition remains
+planned in #175. Integrated database verification
 under ADR-011 is historical evidence from the original integration, not this head.
 Taxonomy persistence and category aliases from main remain part of the system.

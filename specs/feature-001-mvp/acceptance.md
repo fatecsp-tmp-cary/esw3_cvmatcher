@@ -77,8 +77,9 @@ The executor accepts `CurriculumRequest` and `limit`.
 Transient normalization is implemented by `normalize_curriculum` into an immutable
 `NormalizedCandidate`, preserving section order, all text, dates, proficiency,
 education level/status and projects, while excluding the UUID. This projection
-adds no collection/text caps and accepts empty sections. Production pipeline integration must use this projection and is pending in stack
-PR #175; the legacy `CandidateProfile` must not become a second public-input validator.
+adds no collection/text caps and accepts empty sections. The matching pipeline
+uses this projection; production API composition remains pending in stack PR #175.
+The legacy `CandidateProfile` must not become a second public-input validator.
 
 ## Implementation decisions
 
@@ -137,8 +138,9 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   See [scoring policy](../../docs/match/scoring-policy.md).
   Recency grouping uses initial weights **1.5 / 1.25 / 1.0**, with equal recency
   receiving equal weight. Similarity calibration and release validation remain
-  pending; the deterministic aggregation primitive is implemented in #173, with production
-  inference wiring still pending in #174–#175 and provisional calibration.
+  pending; the deterministic aggregation primitive is implemented in #173 and
+  request-scoped inference/retrieval/scoring in #174. Production API composition
+  remains pending in #175 and calibration remains provisional.
 - Pinned GLiNER revision/labels, provisional confidence, separate evidence storage
   and bounded retry/reprocessing are implemented; see [local GLiNER](../../docs/data/local-gliner.md).
   Mandatory exclusion remains disabled until independently measured quality and
@@ -320,3 +322,19 @@ SQL retrieval. Semantic aggregation normalizes over available sections even for
 extreme positive finite weight ratios; a missing section cannot erase the other
 section's evidence. Defaults and final blend remain unchanged. See the
 [review record](../../docs/reports/2026-11-14-pr173-review.md).
+
+## Request-scoped matching pipeline verification
+
+- Empty curricula return no matches before encoding or database access. Without
+  experience/education, no semantic query is invented from other sections; actual
+  textual evidence remains eligible for textual/structured scoring.
+- Textual/semantic union deduplicates persisted job IDs. Only active jobs with
+  current extraction pass; semantic evidence also requires current model, content,
+  extraction and valid vector dimensions. Recheck final textual/vector evidence
+  so stale pool hits cannot become unscored recommendations.
+- Invalid encoder counts/vectors fail explicitly. Final scores/order/ranks remain
+  deterministic; candidate identity/content stay out of logs and responses, and
+  contrasting job locations/modes never create geographic eligibility exclusions.
+
+See the [PR #174 review](../../docs/reports/2026-11-14-pr174-review.md) for scoped
+verification. Production API composition and release acceptance remain pending.
