@@ -10,8 +10,8 @@ are never expiration evidence. Under
 [ADR-015](../architecture/decisions/ADR-015-qualifying-snapshot-absence-marks-stale.md),
 `ACTIVE` jobs of a source absent from one qualifying SNAPSHOT poll become `STALE`,
 and a later poll that lists them again reactivates them. `SourceRun.jobs_absent`
-and `jobs_marked_stale` record the counts. The `STALE→EXPIRED` age and
-missing-snapshot thresholds remain pending (#145). Extraction/embedding state
+and `jobs_marked_stale` record the counts. The `STALE→EXPIRED` policy is now three qualifying absence snapshots with no age
+trigger (ADR-020); counters and implementation remain pending #145. Extraction/embedding state
 is independent: failures withhold matching readiness without changing availability.
 
 The scoped test helper probes PostgreSQL over TCP, so its temporary initialization
