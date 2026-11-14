@@ -41,10 +41,12 @@ Set `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` in deployment as an addition
 operational safeguard; preparation is the sole intentional network step.
 
 The provisional labels are `skill`, `tool`, `framework`, `database`, `cloud`,
-`education`, `work experience requirement`; threshold is 0.3. Labels/confidence
-never imply mandatory status. All persisted span evidence keeps
-`requirement_class=null` until independently reviewed mandatory classification
-meets the existing precision/recall gates. Structured source metadata, canonical
+`education`, `work experience requirement`, `professional credential`,
+`professional license`, `language`, `certification`; threshold is 0.3. Labels/confidence
+never imply mandatory status. Occurrence classes are assigned only by explicit clause/section context under
+[ADR-014](../architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+Unknown/negated detections remain null. Classification supports scores only;
+all new hard exclusions remain disabled regardless of assigned strength. Structured source metadata, canonical
 Job fields and lifecycle remain untouched.
 
 Each input is the worker's cleaned title, newline and description. Windows cover
@@ -66,9 +68,12 @@ span and stable offset order; final output is sorted by original offsets/label.
 This merges evidence within one job only and never merges source jobs.
 
 `src.extraction.taxonomy` provides explicit aliases and bounded phrase matching:
-`normalize_skill`, `canonical_skill` and `find_skills`. Unknown text is not assigned
-a requirement class. Punctuation in C++, C# and Node.js is retained; partial-word
-or fuzzy similarity does not manufacture a known skill.
+`normalize_skill`, `canonical_skill` and `find_skills`. Exact aliases preserve punctuation in C++, C# and Node.js. Unknown terms of
+at least five characters may have one unique edit-distance match, including an
+adjacent transposition, with punctuation/word boundaries preserved. This approximate
+match supports scoring only and does not manufacture canonical equivalence,
+mandatory satisfaction or permanent aliases. Shared candidate lookup uses the
+same policy without storing or logging candidate data.
 
 Offline tests inject a model backend and exercise coverage, offsets, invalid
 predictions, aliases, provenance corruption and the exact token budget. Actual
@@ -95,3 +100,16 @@ the pinned conversion semantics unchanged rather than applying a model-specific
 regex workaround from another architecture. PT/EN quality evaluation must measure
 these limitations before release. Initial smoke attempts exposed missing and then
 incompatible Protobuf dependencies; the final compatible pin above resolved both.
+
+## Corrected detection and projection
+
+GLiNER remains the local model detector. Exact occurrences from the explicit
+project vocabulary supplement missed model entities; they carry
+`detection_source=exact_alias`. Their confidence 1.0 denotes an exact lexical
+match, not a calibrated model probability or mandatory status. No fuzzy offsets
+are synthesized. The same clause classifier and selection rules govern both
+sources; cue-only model spans are retained but not selected as entities.
+Generic seniority/experience/credential wrappers are trimmed without losing
+meaningful quantities or original Unicode offsets. Raw detection offsets remain
+available beside selected entity boundaries. The project vocabulary includes
+explicit CNH category names separately; categories are never inferred or merged.
