@@ -1,0 +1,1827 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Blind human review of synthetic PT/EN examples; no release approval implied.",
+  "source_fixture": "tests/fixtures/matching/reviewed_cases.json",
+  "source_sha256": "f84ef6e837e0a263d1dae5fc481d673211b0e69cb0cdc0f0ef2c23043485e150",
+  "human_reviewed": false,
+  "release_quality_approved": false,
+  "cases": [
+    {
+      "id": "pt-001",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Desenvolvedor backend",
+        "description": "Python é obrigatório. SQL é desejável.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento de APIs Python",
+            "description": "Desenvolvimento de APIs Python"
+          }
+        ],
+        "education": [
+          {
+            "title": "Sistemas de informação"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-002",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Enfermeiro",
+        "description": "Registro COREN é obrigatório. Experiência em UTI é um diferencial.",
+        "skills": [
+          "COREN",
+          "UTI"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Enfermagem hospitalar",
+            "description": "Enfermagem hospitalar"
+          }
+        ],
+        "education": [
+          {
+            "title": "Enfermagem"
+          }
+        ],
+        "competencies": [
+          "COREN"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-003",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Contador",
+        "description": "CRC é requisito obrigatório. Excel é preferencial.",
+        "skills": [
+          "CRC",
+          "Excel"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Contabilidade fiscal",
+            "description": "Contabilidade fiscal"
+          }
+        ],
+        "education": [
+          {
+            "title": "Ciências contábeis"
+          }
+        ],
+        "competencies": [
+          "CRC"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-004",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Designer",
+        "description": "Figma é obrigatório. Photoshop não é exigido.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Design de interfaces",
+            "description": "Design de interfaces"
+          }
+        ],
+        "education": [
+          {
+            "title": "Design"
+          }
+        ],
+        "competencies": [
+          "Figma"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-005",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de dados",
+        "description": "SQL é obrigatório. Talvez Python seja útil.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Análise de dados SQL",
+            "description": "Análise de dados SQL"
+          }
+        ],
+        "education": [
+          {
+            "title": "Estatística"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-006",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Engenheiro civil",
+        "description": "AutoCAD é obrigatório. Revit é um diferencial.",
+        "skills": [
+          "AutoCAD",
+          "Revit"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Projetos estruturais",
+            "description": "Projetos estruturais"
+          }
+        ],
+        "education": [
+          {
+            "title": "Engenharia civil"
+          }
+        ],
+        "competencies": [
+          "AutoCAD"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-007",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Professor de inglês",
+        "description": "Inglês é obrigatório. Espanhol não é necessário.",
+        "skills": [
+          "Inglês"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Ensino de inglês",
+            "description": "Ensino de inglês"
+          }
+        ],
+        "education": [
+          {
+            "title": "Letras"
+          }
+        ],
+        "competencies": [
+          "Inglês"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-008",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Cozinheiro",
+        "description": "Cozinha profissional é obrigatória. Panificação é desejável.",
+        "skills": [
+          "Cozinha profissional",
+          "Panificação"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Preparo de refeições",
+            "description": "Preparo de refeições"
+          }
+        ],
+        "education": [
+          {
+            "title": "Gastronomia"
+          }
+        ],
+        "competencies": [
+          "Cozinha profissional"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-009",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Eletricista",
+        "description": "NR10 é obrigatório. NR35 é um diferencial.",
+        "skills": [
+          "NR10",
+          "NR35"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Manutenção elétrica",
+            "description": "Manutenção elétrica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Eletrotécnica"
+          }
+        ],
+        "competencies": [
+          "NR10"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-010",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Advogado",
+        "description": "OAB é obrigatória. Inglês é desejável.",
+        "skills": [
+          "OAB",
+          "Inglês"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Contencioso cível",
+            "description": "Contencioso cível"
+          }
+        ],
+        "education": [
+          {
+            "title": "Direito"
+          }
+        ],
+        "competencies": [
+          "OAB"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-011",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Desenvolvedor frontend",
+        "description": "React é obrigatório. Vue é apenas um exemplo, não um requisito.",
+        "skills": [
+          "React"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Atendimento em farmácia",
+            "description": "Atendimento em farmácia"
+          }
+        ],
+        "education": [
+          {
+            "title": "Farmácia"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-012",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Farmacêutico",
+        "description": "CRF é obrigatório. Excel seria útil, mas não foi definido como requisito.",
+        "skills": [
+          "CRF"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Programação Java",
+            "description": "Programação Java"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-013",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Motorista",
+        "description": "CNH D é obrigatória. Transporte escolar é preferencial.",
+        "skills": [
+          "CNH D",
+          "Transporte escolar"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Ilustração digital",
+            "description": "Ilustração digital"
+          }
+        ],
+        "education": [
+          {
+            "title": "Artes"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-014",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista financeiro",
+        "description": "Excel é obrigatório. Power BI é um diferencial.",
+        "skills": [
+          "Excel",
+          "Power BI"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Instalação hidráulica",
+            "description": "Instalação hidráulica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Edificações"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-015",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Técnico de laboratório",
+        "description": "Microscopia é obrigatória. PCR é desejável.",
+        "skills": [
+          "Microscopia",
+          "PCR"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Vendas de móveis",
+            "description": "Vendas de móveis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-016",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Desenvolvedor sênior",
+        "description": "Java é obrigatório. Senioridade sênior é obrigatória.",
+        "skills": [
+          "Java",
+          "sênior"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento Java sênior",
+            "description": "Desenvolvimento Java sênior"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "Java"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-017",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Desenvolvedor júnior",
+        "description": "JavaScript é obrigatório. Experiência sênior não é exigida.",
+        "skills": [
+          "JavaScript"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento JavaScript júnior",
+            "description": "Desenvolvimento JavaScript júnior"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "JavaScript"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-018",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de segurança",
+        "description": "Linux é obrigatório. Certificação CISSP é desejável.",
+        "skills": [
+          "Linux",
+          "CISSP"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Segurança de servidores Linux",
+            "description": "Segurança de servidores Linux"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Linux"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-019",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Administrador de redes",
+        "description": "TCP/IP é obrigatório. Kubernetes é um diferencial.",
+        "skills": [
+          "TCP/IP",
+          "Kubernetes"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Redes corporativas",
+            "description": "Redes corporativas"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "TCP/IP"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-020",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Engenheiro de software",
+        "description": "C++ é obrigatório. Rust é preferencial.",
+        "skills": [
+          "C++",
+          "Rust"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Sistemas embarcados C++",
+            "description": "Sistemas embarcados C++"
+          }
+        ],
+        "education": [
+          {
+            "title": "Engenharia de computação"
+          }
+        ],
+        "competencies": [
+          "C++"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-021",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de suporte",
+        "description": "Windows é obrigatório. Linux não é obrigatório.",
+        "skills": [
+          "Windows"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Suporte Windows",
+            "description": "Suporte Windows"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Windows"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-022",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Gerente de projetos",
+        "description": "Scrum é desejável. PMP é um diferencial.",
+        "skills": [
+          "Scrum",
+          "PMP"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Gestão de projetos",
+            "description": "Gestão de projetos"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": [
+          "Scrum"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-023",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Recepcionista",
+        "description": "Atendimento é obrigatório. Inglês é opcional.",
+        "skills": [
+          "Atendimento",
+          "Inglês"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Recepção e atendimento",
+            "description": "Recepção e atendimento"
+          }
+        ],
+        "education": [
+          {
+            "title": "Secretariado"
+          }
+        ],
+        "competencies": [
+          "Atendimento"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-024",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Tradutor",
+        "description": "Francês é obrigatório. Alemão é preferencial.",
+        "skills": [
+          "Francês",
+          "Alemão"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Tradução de francês",
+            "description": "Tradução de francês"
+          }
+        ],
+        "education": [
+          {
+            "title": "Letras"
+          }
+        ],
+        "competencies": [
+          "Francês"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-025",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de RH",
+        "description": "Recrutamento é obrigatório. Folha de pagamento é desejável.",
+        "skills": [
+          "Recrutamento",
+          "Folha de pagamento"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Recrutamento e seleção",
+            "description": "Recrutamento e seleção"
+          }
+        ],
+        "education": [
+          {
+            "title": "Recursos humanos"
+          }
+        ],
+        "competencies": [
+          "Recrutamento"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-026",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de RH",
+        "description": "Recrutamento é obrigatório. Folha de pagamento é desejável.",
+        "skills": [
+          "Recrutamento",
+          "Folha de pagamento"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Soldagem industrial",
+            "description": "Soldagem industrial"
+          }
+        ],
+        "education": [
+          {
+            "title": "Metalurgia"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-027",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Desenvolvedor backend",
+        "description": "Python é obrigatório. SQL é desejável.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Enfermagem hospitalar",
+            "description": "Enfermagem hospitalar"
+          }
+        ],
+        "education": [
+          {
+            "title": "Enfermagem"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-028",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Enfermeiro",
+        "description": "Registro COREN é obrigatório. Experiência em UTI é um diferencial.",
+        "skills": [
+          "COREN",
+          "UTI"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento de APIs Python",
+            "description": "Desenvolvimento de APIs Python"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-029",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de dados",
+        "description": "SQL é obrigatório. Talvez Python seja útil.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Cozinha industrial",
+            "description": "Cozinha industrial"
+          }
+        ],
+        "education": [
+          {
+            "title": "Gastronomia"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-030",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Designer",
+        "description": "Figma é obrigatório. Photoshop não é exigido.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Manutenção de motores",
+            "description": "Manutenção de motores"
+          }
+        ],
+        "education": [
+          {
+            "title": "Mecânica"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-031",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de sistemas",
+        "description": "Python é obrigatório. Python não é obrigatório; a equipe não resolveu a divergência.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Análise de sistemas Python",
+            "description": "Análise de sistemas Python"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-032",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de infraestrutura",
+        "description": "Docker é desejável. Docker é obrigatório segundo outra seção; confirmar com a equipe.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Administração de infraestrutura",
+            "description": "Administração de infraestrutura"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Docker"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-033",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Assistente administrativo",
+        "description": "Excel pode vir a ser necessário após revisão da vaga.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Rotinas administrativas",
+            "description": "Rotinas administrativas"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": [
+          "Excel"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-034",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Operador de caixa",
+        "description": "Não exigimos experiência com SAP.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Operação de caixa",
+            "description": "Operação de caixa"
+          }
+        ],
+        "education": [
+          {
+            "title": "Ensino médio"
+          }
+        ],
+        "competencies": [
+          "SAP"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-035",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Pesquisador",
+        "description": "Doutorado é obrigatório. Publicações são desejáveis.",
+        "skills": [
+          "Doutorado",
+          "Publicações"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Pesquisa científica",
+            "description": "Pesquisa científica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Doutorado em física"
+          }
+        ],
+        "competencies": [
+          "Doutorado"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-036",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de testes",
+        "description": "Testes automatizados são obrigatórios. Selenium é um diferencial.",
+        "skills": [
+          "Testes automatizados",
+          "Selenium"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Garantia de qualidade de software",
+            "description": "Garantia de qualidade de software"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "Testes automatizados"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-037",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Analista de testes",
+        "description": "Testes automatizados são obrigatórios. Selenium é um diferencial.",
+        "skills": [
+          "Testes automatizados",
+          "Selenium"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Nutrição clínica",
+            "description": "Nutrição clínica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Nutrição"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-038",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Assistente sem requisitos",
+        "description": "A equipe apresentará as atividades na entrevista.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [],
+        "education": [],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-039",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Arquiteto de dados",
+        "description": "Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. SQL é obrigatório. Spark é desejável.",
+        "skills": [
+          "SQL",
+          "Spark"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Arquitetura de dados SQL",
+            "description": "Arquitetura de dados SQL"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "pt-040",
+      "language": "pt",
+      "synthetic": true,
+      "job": {
+        "title": "Bibliotecário",
+        "description": "Catalogação é obrigatória. MARC é um diferencial.",
+        "skills": [
+          "Catalogação",
+          "MARC"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Catalogação de acervo",
+            "description": "Catalogação de acervo"
+          }
+        ],
+        "education": [
+          {
+            "title": "Biblioteconomia"
+          }
+        ],
+        "competencies": [
+          "Catalogação"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-001",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Backend developer",
+        "description": "Python is required. SQL is preferred.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Python API development",
+            "description": "Python API development"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-002",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Nurse",
+        "description": "Nursing registration is required. ICU experience is a bonus.",
+        "skills": [
+          "Nursing registration",
+          "ICU"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Hospital nursing",
+            "description": "Hospital nursing"
+          }
+        ],
+        "education": [
+          {
+            "title": "Nursing"
+          }
+        ],
+        "competencies": [
+          "Nursing registration"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-003",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Designer",
+        "description": "Figma is required. Photoshop is not required.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Database administration",
+            "description": "Database administration"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-004",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Data analyst",
+        "description": "SQL is required. Python might be useful.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "SQL data analysis",
+            "description": "SQL data analysis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Statistics"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-005",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Systems analyst",
+        "description": "Java is mandatory. Java is optional; the conflicting sections remain unresolved.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Java systems analysis",
+            "description": "Java systems analysis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": [
+          "Java"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-006",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Senior developer",
+        "description": "Go is required. Senior experience is required.",
+        "skills": [
+          "Go",
+          "Senior"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Junior graphic design",
+            "description": "Junior graphic design"
+          }
+        ],
+        "education": [
+          {
+            "title": "Design"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-007",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Project manager",
+        "description": "Scrum is preferred. PMP is a nice-to-have.",
+        "skills": [
+          "Scrum",
+          "PMP"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Project management",
+            "description": "Project management"
+          }
+        ],
+        "education": [
+          {
+            "title": "Business"
+          }
+        ],
+        "competencies": [
+          "Scrum"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-008",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Unspecified assistant",
+        "description": "Responsibilities will be discussed later.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [],
+        "education": [],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-009",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Data architect",
+        "description": "Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. SQL is required. Spark is preferred.",
+        "skills": [
+          "SQL",
+          "Spark"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Pastry preparation",
+            "description": "Pastry preparation"
+          }
+        ],
+        "education": [
+          {
+            "title": "Culinary arts"
+          }
+        ],
+        "competencies": []
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    },
+    {
+      "id": "en-010",
+      "language": "en",
+      "synthetic": true,
+      "job": {
+        "title": "Electrician",
+        "description": "Electrical installation is required. Python is not necessary.",
+        "skills": [
+          "Electrical installation"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Electrical maintenance",
+            "description": "Electrical maintenance"
+          }
+        ],
+        "education": [
+          {
+            "title": "Electrical technology"
+          }
+        ],
+        "competencies": [
+          "Electrical installation"
+        ]
+      },
+      "review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "role_relation": null,
+        "requirements": null,
+        "rationale": null,
+        "uncertainties": null
+      }
+    }
+  ]
+}

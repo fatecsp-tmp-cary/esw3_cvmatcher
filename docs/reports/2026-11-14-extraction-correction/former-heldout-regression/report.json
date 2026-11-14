@@ -1,0 +1,254 @@
+{
+  "schema_version": "1.0",
+  "dataset_kind": "policy-adjudicated human-reviewed synthetic",
+  "heldout_independent": false,
+  "release_quality_measured": false,
+  "release_quality_approved": false,
+  "groups": {
+    "all": {
+      "cases": 25,
+      "predictions": 25,
+      "missing_ids": [],
+      "exact_extraction": {
+        "true_positive": 39,
+        "false_positive": 0,
+        "false_negative": 5,
+        "precision": 1.0,
+        "recall": 0.8863636363636364
+      },
+      "mandatory": {
+        "true_positive": 17,
+        "false_positive": 0,
+        "false_negative": 4,
+        "precision": 1.0,
+        "recall": 0.8095238095238095
+      },
+      "field_spans": {
+        "true_positive": 39,
+        "false_positive": 0,
+        "false_negative": 5,
+        "precision": 1.0,
+        "recall": 0.8863636363636364
+      },
+      "ranking": {
+        "pairwise_auc_observed": 1.0,
+        "observed_pairs": 114,
+        "role_accuracy_all_cases": 0.96,
+        "complete": true
+      },
+      "field_thresholds": {
+        "precision": 0.9,
+        "recall": 0.8,
+        "targets_met": true
+      },
+      "semantic_role_thresholds": {
+        "auc": 0.9,
+        "accuracy": 0.8,
+        "cutoff": 50,
+        "targets_met": true
+      },
+      "mandatory_thresholds": {
+        "precision": 0.95,
+        "recall": 0.8,
+        "synthetic_gate_met": true
+      }
+    },
+    "pt": {
+      "cases": 20,
+      "predictions": 20,
+      "missing_ids": [],
+      "exact_extraction": {
+        "true_positive": 32,
+        "false_positive": 0,
+        "false_negative": 5,
+        "precision": 1.0,
+        "recall": 0.8648648648648649
+      },
+      "mandatory": {
+        "true_positive": 14,
+        "false_positive": 0,
+        "false_negative": 4,
+        "precision": 1.0,
+        "recall": 0.7777777777777778
+      },
+      "field_spans": {
+        "true_positive": 32,
+        "false_positive": 0,
+        "false_negative": 5,
+        "precision": 1.0,
+        "recall": 0.8648648648648649
+      },
+      "ranking": {
+        "pairwise_auc_observed": 1.0,
+        "observed_pairs": 64,
+        "role_accuracy_all_cases": 0.95,
+        "complete": true
+      },
+      "field_thresholds": {
+        "precision": 0.9,
+        "recall": 0.8,
+        "targets_met": true
+      },
+      "semantic_role_thresholds": {
+        "auc": 0.9,
+        "accuracy": 0.8,
+        "cutoff": 50,
+        "targets_met": true
+      },
+      "mandatory_thresholds": {
+        "precision": 0.95,
+        "recall": 0.8,
+        "synthetic_gate_met": false
+      }
+    },
+    "en": {
+      "cases": 5,
+      "predictions": 5,
+      "missing_ids": [],
+      "exact_extraction": {
+        "true_positive": 7,
+        "false_positive": 0,
+        "false_negative": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "mandatory": {
+        "true_positive": 3,
+        "false_positive": 0,
+        "false_negative": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "field_spans": {
+        "true_positive": 7,
+        "false_positive": 0,
+        "false_negative": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "ranking": {
+        "pairwise_auc_observed": 1.0,
+        "observed_pairs": 6,
+        "role_accuracy_all_cases": 1.0,
+        "complete": true
+      },
+      "field_thresholds": {
+        "precision": 0.9,
+        "recall": 0.8,
+        "targets_met": true
+      },
+      "semantic_role_thresholds": {
+        "auc": 0.9,
+        "accuracy": 0.8,
+        "cutoff": 50,
+        "targets_met": true
+      },
+      "mandatory_thresholds": {
+        "precision": 0.95,
+        "recall": 0.8,
+        "synthetic_gate_met": true
+      }
+    }
+  },
+  "heldout_targets_met": false,
+  "measurement": {
+    "phase": "regression",
+    "frozen": {
+      "zero": 0.67,
+      "full": 1.0,
+      "cutoff": 50,
+      "version": "extraction-policy-v2-calibration-46a3c521a1da",
+      "frozen_at": "2026-11-14T02:47:05.040270+00:00",
+      "extraction_version": "gliner-job-v1-10f349187d105fe9764c7dc2",
+      "extraction_policy": {
+        "model": "urchade/gliner_multi-v2.1",
+        "model_revision": "443d26d654e0324125a96bebd8e796c14ff2efe6",
+        "tokenizer": "microsoft/mdeberta-v3-base",
+        "tokenizer_revision": "a0484667b22365f84929a935b5e50a51f71f159d",
+        "labels": [
+          "skill",
+          "tool",
+          "framework",
+          "database",
+          "cloud",
+          "education",
+          "work experience requirement",
+          "professional credential",
+          "professional license",
+          "language",
+          "certification"
+        ],
+        "threshold": 0.3,
+        "max_tokens": 384,
+        "max_characters": 1200,
+        "overlap_characters": 200,
+        "dedup": "same-label-overlap-confidence-length-offset-v1",
+        "mandatory_classification": false,
+        "context_classification": "clause-strongest-negation-hedge-conflict-v3",
+        "context_policy": "sentence-clause-sections-v2",
+        "span_policy": "smallest-meaningful-entity-v3",
+        "supplemental_detection": "exact-bounded-project-aliases-v1",
+        "taxonomy": "explicit-aliases-single-edit-min5-v3",
+        "packages": {
+          "gliner": "0.2.30",
+          "transformers": "4.57.6",
+          "torch": "2.9.1+cpu"
+        }
+      },
+      "gold_sha256": "bf9153b024230ff2cb8ba389a6b0bf27623d7a35cd3b0cd97acac76b23ba3752",
+      "code_hashes": {
+        "src/extraction/__init__.py": "d1215ac7f02c2276cc03e88e223030aebd6597b542cbc2476ac83875e95b4349",
+        "src/extraction/classification.py": "93bcb42f7b0fc0beace9f51c3e982dc7c72a0051d243c119c2e36e511849c86c",
+        "src/extraction/context.py": "e9c241286f42ec2b11140c7010621f69826ce8b5bdd9a7811032be6f294aabd8",
+        "src/extraction/contracts.py": "f8b01ec7a848c61bdaba56fe2c3d83576e65c6fe1bd8cd7f39009027e4be2d3f",
+        "src/extraction/gliner.py": "461f3eacaac35d78f6830786d8449e579488408e61410ea12edc97c45edbaad0",
+        "src/extraction/persistence.py": "cf4fc800a2d4a7201ab400cf1fec51d43cd4ccf2d8038a0559c2ca85373f5d8a",
+        "src/extraction/service.py": "785fda5d5da44732cd9961fceba8516a6f6769bccc8b5efe73879167940d7a49",
+        "src/extraction/spans.py": "f784e508d7ec014beb42d30d779b7fcdcace49580c7542bc556850fe28fc1e35",
+        "src/extraction/taxonomy.py": "b9f4ef78d8c248f4016d491d132da20abd45ee8996095773f0212fe083e725b4",
+        "src/embeddings/config.py": "ce0adb051091012e981a07bf5696406dcf581ba25401004b7cd2e63ec3b43469",
+        "src/embeddings/encoder.py": "de482804264c4000bdc4cc05c30e51c1d03fdf73a13a912812df9e49c80649e1",
+        "src/matching/ranking.py": "aa7d4eb06c0c0dd1fee29f81cf51eacd84fe7e61738aafe3aff78afb5b4b5e59",
+        "src/matching/semantic.py": "12018487714d59851b9587e0fbbcb5e3bcd963bb0938f4952073372d9f13519a",
+        "scripts/evaluation/evaluate.py": "93591055c6ac234cf1180c929f9974bbd7f2a5708553b4e13b7bb2ae2eaf146f",
+        "scripts/evaluation/measure_extraction_policy.py": "a50ff8dfaaa54b37019f06fdce19c0fe7904b48dcf35bafd6fc49cf894af7e03"
+      },
+      "protocol_sha256": "a91440478ea318077e3eaf19741f2785d535864d2e4aa11554c7e87198ef7cfa",
+      "embedding_model": "intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3:5c3f0ac86047711128e95842afa0700b87efef3e51af032c153841abf768bba7",
+      "artifact_manifest_sha256": "54db83e06a1862b3d9168e32a4270544dd27602b4fb93a704b11955ccf244ef9",
+      "calibration_ids": [
+        "en-001",
+        "en-003",
+        "en-004",
+        "en-006",
+        "en-010",
+        "pt-001",
+        "pt-003",
+        "pt-004",
+        "pt-005",
+        "pt-007",
+        "pt-008",
+        "pt-009",
+        "pt-011",
+        "pt-012",
+        "pt-013",
+        "pt-014",
+        "pt-015",
+        "pt-016",
+        "pt-018",
+        "pt-027",
+        "pt-029",
+        "pt-030",
+        "pt-032",
+        "pt-033",
+        "pt-034"
+      ],
+      "heldout_used_for_fitting": false,
+      "independent_acceptance": false,
+      "release_quality_approved": false,
+      "hard_exclusions_enabled": false
+    },
+    "semantic_component_only": true,
+    "runtime_calibration_changed": false
+  }
+}

@@ -1,0 +1,2373 @@
+{
+  "schema_version": "1.0",
+  "provenance": {
+    "kind": "agent-reviewed synthetic",
+    "reviewer": "independent evaluation2 agent",
+    "labels_before_model_outputs": true,
+    "human_reviewed": false,
+    "release_quality_measured": false
+  },
+  "cases": [
+    {
+      "id": "pt-001",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "explicit_required_preferred"
+      ],
+      "job": {
+        "title": "Desenvolvedor backend",
+        "description": "Python é obrigatório. SQL é desejável.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento de APIs Python",
+            "description": "Desenvolvimento de APIs Python"
+          }
+        ],
+        "education": [
+          {
+            "title": "Sistemas de informação"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Python",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "SQL",
+            "start": 22,
+            "end": 25,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-002",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "regulated_profession"
+      ],
+      "job": {
+        "title": "Enfermeiro",
+        "description": "Registro COREN é obrigatório. Experiência em UTI é um diferencial.",
+        "skills": [
+          "COREN",
+          "UTI"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Enfermagem hospitalar",
+            "description": "Enfermagem hospitalar"
+          }
+        ],
+        "education": [
+          {
+            "title": "Enfermagem"
+          }
+        ],
+        "competencies": [
+          "COREN"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "COREN",
+            "start": 9,
+            "end": 14,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "UTI",
+            "start": 45,
+            "end": 48,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-003",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "explicit_preferred"
+      ],
+      "job": {
+        "title": "Contador",
+        "description": "CRC é requisito obrigatório. Excel é preferencial.",
+        "skills": [
+          "CRC",
+          "Excel"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Contabilidade fiscal",
+            "description": "Contabilidade fiscal"
+          }
+        ],
+        "education": [
+          {
+            "title": "Ciências contábeis"
+          }
+        ],
+        "competencies": [
+          "CRC"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "CRC",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Excel",
+            "start": 29,
+            "end": 34,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-004",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "negation"
+      ],
+      "job": {
+        "title": "Designer",
+        "description": "Figma é obrigatório. Photoshop não é exigido.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Design de interfaces",
+            "description": "Design de interfaces"
+          }
+        ],
+        "education": [
+          {
+            "title": "Design"
+          }
+        ],
+        "competencies": [
+          "Figma"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 21,
+            "end": 30,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-005",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "uncertainty"
+      ],
+      "job": {
+        "title": "Analista de dados",
+        "description": "SQL é obrigatório. Talvez Python seja útil.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Análise de dados SQL",
+            "description": "Análise de dados SQL"
+          }
+        ],
+        "education": [
+          {
+            "title": "Estatística"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "SQL",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 26,
+            "end": 32,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Conditional wording does not establish requirement strength."
+      }
+    },
+    {
+      "id": "pt-006",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Engenheiro civil",
+        "description": "AutoCAD é obrigatório. Revit é um diferencial.",
+        "skills": [
+          "AutoCAD",
+          "Revit"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Projetos estruturais",
+            "description": "Projetos estruturais"
+          }
+        ],
+        "education": [
+          {
+            "title": "Engenharia civil"
+          }
+        ],
+        "competencies": [
+          "AutoCAD"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "AutoCAD",
+            "start": 0,
+            "end": 7,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Revit",
+            "start": 23,
+            "end": 28,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-007",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "language_negation"
+      ],
+      "job": {
+        "title": "Professor de inglês",
+        "description": "Inglês é obrigatório. Espanhol não é necessário.",
+        "skills": [
+          "Inglês"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Ensino de inglês",
+            "description": "Ensino de inglês"
+          }
+        ],
+        "education": [
+          {
+            "title": "Letras"
+          }
+        ],
+        "competencies": [
+          "Inglês"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Inglês",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Espanhol",
+            "start": 22,
+            "end": 30,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-008",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Cozinheiro",
+        "description": "Cozinha profissional é obrigatória. Panificação é desejável.",
+        "skills": [
+          "Cozinha profissional",
+          "Panificação"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Preparo de refeições",
+            "description": "Preparo de refeições"
+          }
+        ],
+        "education": [
+          {
+            "title": "Gastronomia"
+          }
+        ],
+        "competencies": [
+          "Cozinha profissional"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Cozinha profissional",
+            "start": 0,
+            "end": 20,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Panificação",
+            "start": 36,
+            "end": 47,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-009",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "safety_training"
+      ],
+      "job": {
+        "title": "Eletricista",
+        "description": "NR10 é obrigatório. NR35 é um diferencial.",
+        "skills": [
+          "NR10",
+          "NR35"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Manutenção elétrica",
+            "description": "Manutenção elétrica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Eletrotécnica"
+          }
+        ],
+        "competencies": [
+          "NR10"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "NR10",
+            "start": 0,
+            "end": 4,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "NR35",
+            "start": 20,
+            "end": 24,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-010",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "regulated_profession"
+      ],
+      "job": {
+        "title": "Advogado",
+        "description": "OAB é obrigatória. Inglês é desejável.",
+        "skills": [
+          "OAB",
+          "Inglês"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Contencioso cível",
+            "description": "Contencioso cível"
+          }
+        ],
+        "education": [
+          {
+            "title": "Direito"
+          }
+        ],
+        "competencies": [
+          "OAB"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "OAB",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Inglês",
+            "start": 19,
+            "end": 25,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-011",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "example_negation"
+      ],
+      "job": {
+        "title": "Desenvolvedor frontend",
+        "description": "React é obrigatório. Vue é apenas um exemplo, não um requisito.",
+        "skills": [
+          "React"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Atendimento em farmácia",
+            "description": "Atendimento em farmácia"
+          }
+        ],
+        "education": [
+          {
+            "title": "Farmácia"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "React",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Vue",
+            "start": 21,
+            "end": 24,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-012",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "uncertainty"
+      ],
+      "job": {
+        "title": "Farmacêutico",
+        "description": "CRF é obrigatório. Excel seria útil, mas não foi definido como requisito.",
+        "skills": [
+          "CRF"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Programação Java",
+            "description": "Programação Java"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "CRF",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Excel",
+            "start": 19,
+            "end": 24,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Conditional wording does not establish requirement strength."
+      }
+    },
+    {
+      "id": "pt-013",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Motorista",
+        "description": "CNH D é obrigatória. Transporte escolar é preferencial.",
+        "skills": [
+          "CNH D",
+          "Transporte escolar"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Ilustração digital",
+            "description": "Ilustração digital"
+          }
+        ],
+        "education": [
+          {
+            "title": "Artes"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "CNH D",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Transporte escolar",
+            "start": 21,
+            "end": 39,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-014",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Analista financeiro",
+        "description": "Excel é obrigatório. Power BI é um diferencial.",
+        "skills": [
+          "Excel",
+          "Power BI"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Instalação hidráulica",
+            "description": "Instalação hidráulica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Edificações"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Excel",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Power BI",
+            "start": 21,
+            "end": 29,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-015",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Técnico de laboratório",
+        "description": "Microscopia é obrigatória. PCR é desejável.",
+        "skills": [
+          "Microscopia",
+          "PCR"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Vendas de móveis",
+            "description": "Vendas de móveis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Microscopia",
+            "start": 0,
+            "end": 11,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "PCR",
+            "start": 27,
+            "end": 30,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-016",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "seniority"
+      ],
+      "job": {
+        "title": "Desenvolvedor sênior",
+        "description": "Java é obrigatório. Senioridade sênior é obrigatória.",
+        "skills": [
+          "Java",
+          "sênior"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento Java sênior",
+            "description": "Desenvolvimento Java sênior"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "Java"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Java",
+            "start": 0,
+            "end": 4,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "sênior",
+            "start": 32,
+            "end": 38,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-017",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "seniority_negation"
+      ],
+      "job": {
+        "title": "Desenvolvedor júnior",
+        "description": "JavaScript é obrigatório. Experiência sênior não é exigida.",
+        "skills": [
+          "JavaScript"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento JavaScript júnior",
+            "description": "Desenvolvimento JavaScript júnior"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "JavaScript"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "JavaScript",
+            "start": 0,
+            "end": 10,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "sênior",
+            "start": 38,
+            "end": 44,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-018",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "certification"
+      ],
+      "job": {
+        "title": "Analista de segurança",
+        "description": "Linux é obrigatório. Certificação CISSP é desejável.",
+        "skills": [
+          "Linux",
+          "CISSP"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Segurança de servidores Linux",
+            "description": "Segurança de servidores Linux"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Linux"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Linux",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "CISSP",
+            "start": 34,
+            "end": 39,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-019",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "technical_punctuation"
+      ],
+      "job": {
+        "title": "Administrador de redes",
+        "description": "TCP/IP é obrigatório. Kubernetes é um diferencial.",
+        "skills": [
+          "TCP/IP",
+          "Kubernetes"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Redes corporativas",
+            "description": "Redes corporativas"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "TCP/IP"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "TCP/IP",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Kubernetes",
+            "start": 22,
+            "end": 32,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-020",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "technical_punctuation"
+      ],
+      "job": {
+        "title": "Engenheiro de software",
+        "description": "C++ é obrigatório. Rust é preferencial.",
+        "skills": [
+          "C++",
+          "Rust"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Sistemas embarcados C++",
+            "description": "Sistemas embarcados C++"
+          }
+        ],
+        "education": [
+          {
+            "title": "Engenharia de computação"
+          }
+        ],
+        "competencies": [
+          "C++"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "C++",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Rust",
+            "start": 19,
+            "end": 23,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-021",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "negation"
+      ],
+      "job": {
+        "title": "Analista de suporte",
+        "description": "Windows é obrigatório. Linux não é obrigatório.",
+        "skills": [
+          "Windows"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Suporte Windows",
+            "description": "Suporte Windows"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Windows"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Windows",
+            "start": 0,
+            "end": 7,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Linux",
+            "start": 23,
+            "end": 28,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-022",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "no_required"
+      ],
+      "job": {
+        "title": "Gerente de projetos",
+        "description": "Scrum é desejável. PMP é um diferencial.",
+        "skills": [
+          "Scrum",
+          "PMP"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Gestão de projetos",
+            "description": "Gestão de projetos"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": [
+          "Scrum"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Scrum",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "PREFERRED"
+          },
+          {
+            "text": "PMP",
+            "start": 19,
+            "end": 22,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-023",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "optional"
+      ],
+      "job": {
+        "title": "Recepcionista",
+        "description": "Atendimento é obrigatório. Inglês é opcional.",
+        "skills": [
+          "Atendimento",
+          "Inglês"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Recepção e atendimento",
+            "description": "Recepção e atendimento"
+          }
+        ],
+        "education": [
+          {
+            "title": "Secretariado"
+          }
+        ],
+        "competencies": [
+          "Atendimento"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Atendimento",
+            "start": 0,
+            "end": 11,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Inglês",
+            "start": 27,
+            "end": 33,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-024",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "language"
+      ],
+      "job": {
+        "title": "Tradutor",
+        "description": "Francês é obrigatório. Alemão é preferencial.",
+        "skills": [
+          "Francês",
+          "Alemão"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Tradução de francês",
+            "description": "Tradução de francês"
+          }
+        ],
+        "education": [
+          {
+            "title": "Letras"
+          }
+        ],
+        "competencies": [
+          "Francês"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Francês",
+            "start": 0,
+            "end": 7,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Alemão",
+            "start": 23,
+            "end": 29,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-025",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_alignment"
+      ],
+      "job": {
+        "title": "Analista de RH",
+        "description": "Recrutamento é obrigatório. Folha de pagamento é desejável.",
+        "skills": [
+          "Recrutamento",
+          "Folha de pagamento"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Recrutamento e seleção",
+            "description": "Recrutamento e seleção"
+          }
+        ],
+        "education": [
+          {
+            "title": "Recursos humanos"
+          }
+        ],
+        "competencies": [
+          "Recrutamento"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Recrutamento",
+            "start": 0,
+            "end": 12,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Folha de pagamento",
+            "start": 28,
+            "end": 46,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-026",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_mismatch"
+      ],
+      "job": {
+        "title": "Analista de RH",
+        "description": "Recrutamento é obrigatório. Folha de pagamento é desejável.",
+        "skills": [
+          "Recrutamento",
+          "Folha de pagamento"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Soldagem industrial",
+            "description": "Soldagem industrial"
+          }
+        ],
+        "education": [
+          {
+            "title": "Metalurgia"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Recrutamento",
+            "start": 0,
+            "end": 12,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Folha de pagamento",
+            "start": 28,
+            "end": 46,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-027",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_mismatch"
+      ],
+      "job": {
+        "title": "Desenvolvedor backend",
+        "description": "Python é obrigatório. SQL é desejável.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Enfermagem hospitalar",
+            "description": "Enfermagem hospitalar"
+          }
+        ],
+        "education": [
+          {
+            "title": "Enfermagem"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Python",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "SQL",
+            "start": 22,
+            "end": 25,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-028",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_mismatch"
+      ],
+      "job": {
+        "title": "Enfermeiro",
+        "description": "Registro COREN é obrigatório. Experiência em UTI é um diferencial.",
+        "skills": [
+          "COREN",
+          "UTI"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento de APIs Python",
+            "description": "Desenvolvimento de APIs Python"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "COREN",
+            "start": 9,
+            "end": 14,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "UTI",
+            "start": 45,
+            "end": 48,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-029",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_mismatch"
+      ],
+      "job": {
+        "title": "Analista de dados",
+        "description": "SQL é obrigatório. Talvez Python seja útil.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Cozinha industrial",
+            "description": "Cozinha industrial"
+          }
+        ],
+        "education": [
+          {
+            "title": "Gastronomia"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "SQL",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 26,
+            "end": 32,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-030",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_mismatch"
+      ],
+      "job": {
+        "title": "Designer",
+        "description": "Figma é obrigatório. Photoshop não é exigido.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Manutenção de motores",
+            "description": "Manutenção de motores"
+          }
+        ],
+        "education": [
+          {
+            "title": "Mecânica"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 21,
+            "end": 30,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-031",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "conflict"
+      ],
+      "job": {
+        "title": "Analista de sistemas",
+        "description": "Python é obrigatório. Python não é obrigatório; a equipe não resolveu a divergência.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Análise de sistemas Python",
+            "description": "Análise de sistemas Python"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Python",
+            "start": 0,
+            "end": 6,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Unresolved contradictory statements do not establish requirement strength."
+      }
+    },
+    {
+      "id": "pt-032",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "conflict"
+      ],
+      "job": {
+        "title": "Analista de infraestrutura",
+        "description": "Docker é desejável. Docker é obrigatório segundo outra seção; confirmar com a equipe.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Administração de infraestrutura",
+            "description": "Administração de infraestrutura"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Docker"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Docker",
+            "start": 0,
+            "end": 6,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Unresolved contradictory statements do not establish requirement strength."
+      }
+    },
+    {
+      "id": "pt-033",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "uncertainty"
+      ],
+      "job": {
+        "title": "Assistente administrativo",
+        "description": "Excel pode vir a ser necessário após revisão da vaga.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Rotinas administrativas",
+            "description": "Rotinas administrativas"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": [
+          "Excel"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Excel",
+            "start": 0,
+            "end": 5,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Conditional wording does not establish requirement strength."
+      }
+    },
+    {
+      "id": "pt-034",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "negation_only"
+      ],
+      "job": {
+        "title": "Operador de caixa",
+        "description": "Não exigimos experiência com SAP.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Operação de caixa",
+            "description": "Operação de caixa"
+          }
+        ],
+        "education": [
+          {
+            "title": "Ensino médio"
+          }
+        ],
+        "competencies": [
+          "SAP"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "SAP",
+            "start": 29,
+            "end": 32,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-035",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "education"
+      ],
+      "job": {
+        "title": "Pesquisador",
+        "description": "Doutorado é obrigatório. Publicações são desejáveis.",
+        "skills": [
+          "Doutorado",
+          "Publicações"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Pesquisa científica",
+            "description": "Pesquisa científica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Doutorado em física"
+          }
+        ],
+        "competencies": [
+          "Doutorado"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Doutorado",
+            "start": 0,
+            "end": 9,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Publicações",
+            "start": 25,
+            "end": 36,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-036",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_alignment"
+      ],
+      "job": {
+        "title": "Analista de testes",
+        "description": "Testes automatizados são obrigatórios. Selenium é um diferencial.",
+        "skills": [
+          "Testes automatizados",
+          "Selenium"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Garantia de qualidade de software",
+            "description": "Garantia de qualidade de software"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "Testes automatizados"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Testes automatizados",
+            "start": 0,
+            "end": 20,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Selenium",
+            "start": 39,
+            "end": 47,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-037",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_mismatch"
+      ],
+      "job": {
+        "title": "Analista de testes",
+        "description": "Testes automatizados são obrigatórios. Selenium é um diferencial.",
+        "skills": [
+          "Testes automatizados",
+          "Selenium"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Nutrição clínica",
+            "description": "Nutrição clínica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Nutrição"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Testes automatizados",
+            "start": 0,
+            "end": 20,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Selenium",
+            "start": 39,
+            "end": 47,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-038",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "empty_evidence"
+      ],
+      "job": {
+        "title": "Assistente sem requisitos",
+        "description": "A equipe apresentará as atividades na entrevista.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [],
+        "education": [],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [],
+        "rationale": "No candidate evidence supports a relevant role relation."
+      }
+    },
+    {
+      "id": "pt-039",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "long_text"
+      ],
+      "job": {
+        "title": "Arquiteto de dados",
+        "description": "Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. Contexto da equipe: documentação e colaboração. SQL é obrigatório. Spark é desejável.",
+        "skills": [
+          "SQL",
+          "Spark"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Arquitetura de dados SQL",
+            "description": "Arquitetura de dados SQL"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "SQL",
+            "start": 4800,
+            "end": 4803,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Spark",
+            "start": 4819,
+            "end": 4824,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "pt-040",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Bibliotecário",
+        "description": "Catalogação é obrigatória. MARC é um diferencial.",
+        "skills": [
+          "Catalogação",
+          "MARC"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Catalogação de acervo",
+            "description": "Catalogação de acervo"
+          }
+        ],
+        "education": [
+          {
+            "title": "Biblioteconomia"
+          }
+        ],
+        "competencies": [
+          "Catalogação"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Catalogação",
+            "start": 0,
+            "end": 11,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "MARC",
+            "start": 27,
+            "end": 31,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "en-001",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "explicit_required_preferred"
+      ],
+      "job": {
+        "title": "Backend developer",
+        "description": "Python is required. SQL is preferred.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Python API development",
+            "description": "Python API development"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Python",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "SQL",
+            "start": 20,
+            "end": 23,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "en-002",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "regulated_profession"
+      ],
+      "job": {
+        "title": "Nurse",
+        "description": "Nursing registration is required. ICU experience is a bonus.",
+        "skills": [
+          "Nursing registration",
+          "ICU"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Hospital nursing",
+            "description": "Hospital nursing"
+          }
+        ],
+        "education": [
+          {
+            "title": "Nursing"
+          }
+        ],
+        "competencies": [
+          "Nursing registration"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Nursing registration",
+            "start": 0,
+            "end": 20,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "ICU",
+            "start": 34,
+            "end": 37,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "en-003",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "negation"
+      ],
+      "job": {
+        "title": "Designer",
+        "description": "Figma is required. Photoshop is not required.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Database administration",
+            "description": "Database administration"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 19,
+            "end": 28,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "en-004",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "uncertainty"
+      ],
+      "job": {
+        "title": "Data analyst",
+        "description": "SQL is required. Python might be useful.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "SQL data analysis",
+            "description": "SQL data analysis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Statistics"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "SQL",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 17,
+            "end": 23,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Conditional wording does not establish requirement strength."
+      }
+    },
+    {
+      "id": "en-005",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "conflict"
+      ],
+      "job": {
+        "title": "Systems analyst",
+        "description": "Java is mandatory. Java is optional; the conflicting sections remain unresolved.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Java systems analysis",
+            "description": "Java systems analysis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": [
+          "Java"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Java",
+            "start": 0,
+            "end": 4,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Unresolved contradictory statements do not establish requirement strength."
+      }
+    },
+    {
+      "id": "en-006",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "seniority"
+      ],
+      "job": {
+        "title": "Senior developer",
+        "description": "Go is required. Senior experience is required.",
+        "skills": [
+          "Go",
+          "Senior"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Junior graphic design",
+            "description": "Junior graphic design"
+          }
+        ],
+        "education": [
+          {
+            "title": "Design"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Go",
+            "start": 0,
+            "end": 2,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Senior",
+            "start": 16,
+            "end": 22,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "en-007",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "no_required"
+      ],
+      "job": {
+        "title": "Project manager",
+        "description": "Scrum is preferred. PMP is a nice-to-have.",
+        "skills": [
+          "Scrum",
+          "PMP"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Project management",
+            "description": "Project management"
+          }
+        ],
+        "education": [
+          {
+            "title": "Business"
+          }
+        ],
+        "competencies": [
+          "Scrum"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Scrum",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "PREFERRED"
+          },
+          {
+            "text": "PMP",
+            "start": 20,
+            "end": 23,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "en-008",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "empty_evidence"
+      ],
+      "job": {
+        "title": "Unspecified assistant",
+        "description": "Responsibilities will be discussed later.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [],
+        "education": [],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [],
+        "rationale": "No candidate evidence supports a relevant role relation."
+      }
+    },
+    {
+      "id": "en-009",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "long_text"
+      ],
+      "job": {
+        "title": "Data architect",
+        "description": "Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. Team context: documentation and collaboration. SQL is required. Spark is preferred.",
+        "skills": [
+          "SQL",
+          "Spark"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Pastry preparation",
+            "description": "Pastry preparation"
+          }
+        ],
+        "education": [
+          {
+            "title": "Culinary arts"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "SQL",
+            "start": 4700,
+            "end": 4703,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Spark",
+            "start": 4717,
+            "end": 4722,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    },
+    {
+      "id": "en-010",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Electrician",
+        "description": "Electrical installation is required. Python is not necessary.",
+        "skills": [
+          "Electrical installation"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Electrical maintenance",
+            "description": "Electrical maintenance"
+          }
+        ],
+        "education": [
+          {
+            "title": "Electrical technology"
+          }
+        ],
+        "competencies": [
+          "Electrical installation"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Electrical installation",
+            "start": 0,
+            "end": 23,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 37,
+            "end": 43,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Explicit wording determines requirement strength; candidate profession determines role relevance."
+      }
+    }
+  ]
+}
