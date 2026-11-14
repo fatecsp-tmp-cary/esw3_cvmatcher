@@ -101,3 +101,9 @@ best-effort exact-count rule in ADR-013; this is not an immutable snapshot proof
 or evidence of source usage/retention rights. Operator configuration, bounded
 requests and invalid/partial scan protection are in the
 [source-adapter policy](source-adapters.md).
+
+## Second-source interview outcome
+
+[ADR-023](../architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md)
+defers second-source research/selection (#127) and adapter implementation (#128).
+APiBR remains the only selected MVP source; source rights verification remains open.

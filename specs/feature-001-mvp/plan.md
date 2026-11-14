@@ -46,3 +46,8 @@ Record measured verification before marking implementation complete. No release 
 
 Follow [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md). Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
 Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
+
+## Deferred external deployment and source expansion
+
+Follow [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md). Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+Record measured verification before marking implementation complete. No release or merge is approved by this documentation.

@@ -230,3 +230,9 @@ Use a separate lower-case ASCII projection, Portuguese and English stemming, and
 Authority: [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
 
 Only explicit REQUIRED concepts enter the ADR-021 threshold: all below three, otherwise max(3, ceil(70% of N)). Exact/approved-alias evidence alone satisfies it. All exclusions remain off; this is not a replacement for evaluation gates.
+
+## Deferred external deployment and source expansion
+
+Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
+
+External hosting/HTTPS deployment and second-source research/selection remain deferred. Local pre-production and APiBR remain the authorized scope.
