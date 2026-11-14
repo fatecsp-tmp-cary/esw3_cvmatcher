@@ -1,6 +1,6 @@
 # Policy-updated calibration and former-held-out copies
 
-Authority: [ADR-014](../../../architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+Authority: [ADR-018](../../../architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md).
 
 Use [gold.json](gold.json) for the policy-updated evaluator and [changes.json](changes.json)
 for every case-level edit and source hash. [source-reviewed-gold.json](source-reviewed-gold.json)

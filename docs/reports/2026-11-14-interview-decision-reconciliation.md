@@ -34,3 +34,13 @@ fast-forward branch updates. Later branches also inherit the previously publishe
 extraction correction and evaluation evidence from #170/#178; this change introduces
 no new production implementation of ADR-019 through ADR-022. The test append
 conflicts were reconciled by retaining both existing regression groups.
+
+## Verification
+
+The reconciled latest stack passed **851 unit/API/PostgreSQL/integration tests**,
+with one external CPU benchmark deselected. Ruff lint/format and full mypy
+(69 source files) passed. All current documentation path targets were checked;
+there are 23 unique canonical ADR identifiers, plus the historical extraction
+redirect. The frozen extraction evidence SHA-256 inventory remains unchanged.
+These checks validate the dependency integration and documentation consistency;
+they do not claim the newly selected policies are implemented or release-approved.
