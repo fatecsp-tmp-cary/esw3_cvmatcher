@@ -1,0 +1,149 @@
+[
+  {
+    "id": 910001,
+    "number": 101,
+    "created_at": "2026-10-01T12:00:00Z",
+    "updated_at": "2026-10-02T08:30:00Z",
+    "url": "https://github.com/example-org/vagas/issues/101",
+    "title": "[Remoto] Pessoa Desenvolvedora Backend Java - Empresa Sintética",
+    "comments": 0,
+    "keywords": ["Remoto"],
+    "user": {
+      "id": 1,
+      "login": "synthetic-poster",
+      "avatar_url": "https://example.invalid/avatar.png",
+      "url": "https://github.com/synthetic-poster"
+    },
+    "labels": [
+      {"name": "Backend", "type": "APIBr", "color": "b4fca0"},
+      {"name": "Brasil", "type": "APIBr", "color": "aa6464"},
+      {"name": "Nacional", "type": "APIBr", "color": "649b64"},
+      {"name": "Backend-jobs", "type": "topic", "color": "746464"},
+      {"name": "Remote-jobs", "type": "topic", "color": "646464"},
+      {"name": "Trabalho-remoto", "type": "topic", "color": "646464"},
+      {"name": "CLT", "type": "label", "color": "ededed"},
+      {"name": "Sênior", "type": "label", "color": "ededed"},
+      {"name": "Java", "type": "label", "color": "ededed"},
+      {"name": "Remoto", "type": "label", "color": "ededed"},
+      {"name": "PostgreSQL", "type": "label", "color": "ededed"},
+      {"name": "Docker", "type": "label", "color": "ededed"},
+      {"name": "AWS", "type": "label", "color": "ededed"},
+      {"name": "Spring", "type": "label", "color": "ededed"},
+      {"name": "Verificada", "type": "label", "color": "ededed"}
+    ],
+    "repository": {
+      "id": 10,
+      "name": "vagas",
+      "full_name": "example-org/vagas",
+      "description": "Synthetic repository used only by tests.",
+      "url": "https://github.com/example-org/vagas",
+      "organization": {"login": "example-org"}
+    },
+    "body": "## Descrição da vaga\nManter APIs REST em Java.\n## Requisitos\nJava e PostgreSQL."
+  },
+  {
+    "id": 910002,
+    "number": 102,
+    "created_at": "2026-10-03T09:00:00Z",
+    "updated_at": "2026-10-03T09:00:00Z",
+    "url": "https://github.com/example-org/vagas/issues/102",
+    "title": "Python engineer at Synthetic Co",
+    "comments": 2,
+    "keywords": [],
+    "user": {
+      "id": 2,
+      "login": "synthetic-recruiter",
+      "avatar_url": "https://example.invalid/avatar.png",
+      "url": "https://github.com/synthetic-recruiter"
+    },
+    "labels": [
+      {"name": "Backend", "type": "APIBr", "color": "b4fca0"},
+      {"name": "Level-sênior", "type": "label", "color": "ededed"},
+      {"name": "👴 Senior", "type": "label", "color": "ededed"},
+      {"name": "Lang-python", "type": "label", "color": "ededed"},
+      {"name": "🏢 Remoto", "type": "label", "color": "ededed"},
+      {"name": "💰 N/A", "type": "label", "color": "ededed"}
+    ],
+    "repository": {
+      "id": 10,
+      "name": "vagas",
+      "full_name": "example-org/vagas",
+      "description": "Synthetic repository used only by tests.",
+      "url": "https://github.com/example-org/vagas",
+      "organization": {"login": "example-org"}
+    },
+    "body": "### Description\nBuild data pipelines in Python."
+  },
+  {
+    "id": 910003,
+    "number": 103,
+    "created_at": "2026-10-04T10:00:00Z",
+    "updated_at": "2026-10-04T10:00:00Z",
+    "url": "https://github.com/example-org/vagas/issues/103",
+    "title": "[Remoto] Engenharia de Software (Rust)",
+    "comments": 0,
+    "keywords": ["Remoto"],
+    "user": {
+      "id": 3,
+      "login": "synthetic-poster",
+      "avatar_url": "https://example.invalid/avatar.png",
+      "url": "https://github.com/synthetic-poster"
+    },
+    "labels": [
+      {"name": "Rust", "type": "APIBr", "color": "b4fca0"},
+      {"name": "Vagas", "type": "topic", "color": "646464"},
+      {"name": "Alocado", "type": "label", "color": "ededed"},
+      {"name": "Remoto", "type": "label", "color": "ededed"},
+      {"name": "Presencial", "type": "label", "color": "ededed"},
+      {"name": "Híbrido", "type": "label", "color": "ededed"},
+      {"name": "Júnior", "type": "label", "color": "ededed"},
+      {"name": "Pleno", "type": "label", "color": "ededed"},
+      {"name": "Sênior", "type": "label", "color": "ededed"},
+      {"name": "Especialista", "type": "label", "color": "ededed"},
+      {"name": "CLT", "type": "label", "color": "ededed"},
+      {"name": "PJ", "type": "label", "color": "ededed"},
+      {"name": "🚦 Awaiting Triage", "type": "label", "color": "ededed"}
+    ],
+    "repository": {
+      "id": 11,
+      "name": "vagas",
+      "full_name": "example-rust/vagas",
+      "description": "Synthetic repository used only by tests.",
+      "url": "https://github.com/example-rust/vagas",
+      "organization": {"login": "example-rust"}
+    },
+    "body": "### Alocação\n- [ ] Alocado\n- [x] Remoto\n- [ ] Presencial\n- [ ] Híbrido\n### Nível\n- [ ] Júnior\n- [ ] Pleno\n- [x] Sênior\n- [x] Especialista"
+  },
+  {
+    "id": 910004,
+    "number": 104,
+    "created_at": "2026-10-05T11:00:00Z",
+    "updated_at": "2026-10-05T11:00:00Z",
+    "url": "https://github.com/example-boards/software-engineering/issues/104",
+    "title": "Software Engineer at Synthetic Boards",
+    "comments": 0,
+    "keywords": [],
+    "user": {
+      "id": 4,
+      "login": "synthetic-bot",
+      "avatar_url": "https://example.invalid/avatar.png",
+      "url": "https://github.com/synthetic-bot"
+    },
+    "labels": [
+      {"name": "Internacional", "type": "APIBr", "color": "649b64"},
+      {"name": "Remote-jobs", "type": "topic", "color": "646464"},
+      {"name": "Trabalho-remoto", "type": "topic", "color": "646464"},
+      {"name": "Java-dev", "type": "topic", "color": "646464"},
+      {"name": "Python", "type": "topic", "color": "646464"}
+    ],
+    "repository": {
+      "id": 12,
+      "name": "software-engineering",
+      "full_name": "example-boards/software-engineering",
+      "description": "Synthetic repository used only by tests.",
+      "url": "https://github.com/example-boards/software-engineering",
+      "organization": {"login": "example-boards"}
+    },
+    "body": "We are hiring a software engineer."
+  }
+]

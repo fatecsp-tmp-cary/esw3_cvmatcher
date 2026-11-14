@@ -9,6 +9,12 @@ boundaries. It is not a captured or independently verified APiBR response.
 Its ingestion test forbids network access and expects `DISCOVERED`, not `ACTIVE`.
 Live APiBR shape/completeness verification remains in issue #113.
 
+`apibr_v2_issues.json` is a synthetic fixture that mirrors the response shape
+observed from `GET /vagas/api/v2/issues` on 2026-11-12: typed label objects
+(`label`, `APIBr`, `topic`), title-derived `keywords`, and no `state`. All titles,
+bodies, users and repositories are invented; no source record is retained. It
+covers explicit, decorated, conflicting and topic-only label metadata.
+
 ## File Location
 `tests/resources/jobs_fixture.json`
 

@@ -12,6 +12,9 @@ Implementation below is distinct from release approval. #99 remains open.
   EXPIRED and stale rediscovery; no cross-source deduplication/geographic filtering.
 - Conservative APiBR ingestion, common asynchronous adapter, bounded retries and
   partial/failure handling. Unproven scans never establish absence.
+- APiBR label metadata maps to canonical seniority, work arrangement and skills
+  through exact shared aliases; repository topics, free text and conflicting
+  labels are never classified (#180).
 - PostgreSQL identity/source scheduling locks, bounded background cycles and
   reliable source-timestamp expiration.
 - Separate extraction state/evidence, content/config readiness, concurrent claims,

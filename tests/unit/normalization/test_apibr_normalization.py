@@ -4,7 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from src.normalization.jobs.apibr import normalize_apibr_job, normalize_keywords, normalize_text
+from src.domain.job import SeniorityLevel, WorkArrangement
+from src.normalization.jobs.apibr import (
+    normalize_apibr_job,
+    normalize_keywords,
+    normalize_text,
+    vacancy_labels,
+)
 
 
 def test_normalize_apibr_job():
@@ -148,3 +154,119 @@ def test_malformed_fields_raise_record_validation_errors(invalid_fields):
 )
 def test_preserves_markdown_autolinks_and_literal_type_arguments(body):
     assert normalize_apibr_job({"id": 1, "title": "Engineer", "body": body})["description"] == body
+
+
+def _live_shape_fixture() -> dict[int, dict]:
+    path = Path("tests/resources/apibr_v2_issues.json")
+    with open(path, encoding="utf-8") as fixture:
+        return {record["id"]: record for record in json.load(fixture)}
+
+
+@pytest.mark.parametrize(
+    ("record_id", "seniority", "arrangement", "skills"),
+    [
+        # Explicit typed labels; repository topics and unknown labels are not classified.
+        (
+            910001,
+            SeniorityLevel.SENIOR,
+            WorkArrangement.REMOTE,
+            ["AWS", "Docker", "Java", "PostgreSQL"],
+        ),
+        # Decorated and prefixed labels agree on one value each.
+        (910002, SeniorityLevel.SENIOR, WorkArrangement.REMOTE, ["Python"]),
+        # Every issue-form option arrives as a label: conflicting evidence stays unknown.
+        (910003, None, None, []),
+        # Only repository topics: nothing describes the vacancy itself.
+        (910004, None, None, []),
+    ],
+)
+def test_live_shape_labels_map_to_canonical_fields(record_id, seniority, arrangement, skills):
+    job = normalize_apibr_job(_live_shape_fixture()[record_id])
+
+    assert job["seniority_level"] == seniority
+    assert job["work_arrangement"] == arrangement
+    assert job["skills"] == skills
+    assert job["location"] is None
+    assert job["company"] is None
+
+
+def test_live_shape_keeps_every_label_name_as_keyword():
+    job = normalize_apibr_job(_live_shape_fixture()[910001])
+
+    assert job["keywords"][:3] == ["Backend", "Brasil", "Nacional"]
+    assert {"Backend-jobs", "Spring", "Verificada", "CLT"} <= set(job["keywords"])
+
+
+def test_repository_topics_are_not_vacancy_evidence():
+    labels = [
+        {"name": "Remoto", "type": "topic"},
+        {"name": "Sênior", "type": "topic"},
+        {"name": "Python", "type": "topic"},
+    ]
+    job = normalize_apibr_job({"id": 1, "title": "Developer", "labels": labels})
+
+    assert vacancy_labels({"labels": labels}) == []
+    assert job["work_arrangement"] is None
+    assert job["seniority_level"] is None
+    assert job["skills"] == []
+
+
+def test_untyped_string_labels_and_title_keywords_are_vacancy_evidence():
+    job = normalize_apibr_job(
+        {
+            "id": 1,
+            "title": "Developer",
+            "labels": ["Pleno", "node.js", "K8s"],
+            "keywords": ["Híbrido"],
+        }
+    )
+
+    assert job["seniority_level"] == SeniorityLevel.MID
+    assert job["work_arrangement"] == WorkArrangement.HYBRID
+    assert job["skills"] == ["Kubernetes", "Node.js"]
+
+
+@pytest.mark.parametrize(
+    "labels",
+    [
+        ["Remoto", "Presencial"],
+        ["Remoto/presencial"],
+        ["Home Office - Tempo Determinado"],
+        ["Alocado"],
+    ],
+)
+def test_conflicting_or_unrecognized_arrangement_stays_unknown(labels):
+    job = normalize_apibr_job({"id": 1, "title": "[Remoto] Developer", "labels": labels})
+
+    assert job["work_arrangement"] is None
+
+
+def test_free_text_is_never_interpreted_as_a_category_or_skill():
+    job = normalize_apibr_job(
+        {
+            "id": 1,
+            "title": "[Remoto] Senior Python Developer",
+            "body": "Vaga remota para pessoa sênior com Python e Docker.",
+        }
+    )
+
+    assert job["seniority_level"] is None
+    assert job["work_arrangement"] is None
+    assert job["skills"] == []
+
+
+def test_skills_are_deduplicated_and_independent_of_label_order():
+    labels = ["python", "Docker", "Python3", "Lang-python", "AWS"]
+    first = normalize_apibr_job({"id": 1, "title": "Developer", "labels": labels})
+    second = normalize_apibr_job({"id": 1, "title": "Developer", "labels": labels[::-1]})
+
+    assert first["skills"] == second["skills"] == ["AWS", "Docker", "Python"]
+
+
+@pytest.mark.parametrize("labels", [None, "Remoto", {"name": "Remoto"}, [None, 1, {}, {"name": 5}]])
+def test_malformed_label_metadata_yields_no_classification(labels):
+    job = normalize_apibr_job({"id": 1, "title": "Developer", "labels": labels})
+
+    assert job["seniority_level"] is None
+    assert job["work_arrangement"] is None
+    assert job["skills"] == []
