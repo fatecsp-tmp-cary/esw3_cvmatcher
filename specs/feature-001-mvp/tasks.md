@@ -9,7 +9,10 @@ Requirements and completion gates are in [spec](spec.md),
 - Shared production/mock preview request and ranked response, OpenAPI, limit, health and privacy-safe RFC 9457 errors.
 - Canonical job correction, source identity and four lifecycle states; section-preserving HTML cleanup. Raw remains null.
 - Deterministic normalized content hashing.
-- Source-specific upsert, content/vector invalidation and stale rediscovery; PostgreSQL persistence tests. Concurrent safety is pending.
+- Source-specific upsert, content/vector invalidation and stale rediscovery; PostgreSQL persistence tests. Concurrent identity writes use bounded, ordered
+  advisory-lock stripes; APiBR buffers observations before locking and retains
+  atomic scan rollback. Independent-connection regressions cover inserts,
+  lifecycle updates, reversed overlapping scans and unexpected write failure.
 - Sequential incomplete APiBR scans, unknown availability without GitHub requests, isolated malformed records, PARTIAL/FAILED run evidence and PostgreSQL regressions.
 - Portuguese weighted any-term FTS field/query/normalization decisions.
 - Skill taxonomy, job-skill and classified requirement persistence; population/extraction remain pending.
@@ -22,7 +25,7 @@ Requirements and completion gates are in [spec](spec.md),
 
 - [ ] Source payload/scan/usage evidence, shared interface and bounded retries;
       optional bounded availability verification. Real payload capture is pending.
-- [ ] Production concurrency, taxonomy population and requirement extraction.
+- [ ] Scheduler/source-run concurrency, taxonomy population and requirement extraction.
       Preserve source independence and uncertain evidence.
 - [ ] Lifecycle policies. Never infer absence from an unproven scan.
 - [ ] Model selection, metadata, semantic retrieval, scoring, model-change
@@ -50,3 +53,10 @@ for scope and limitations.
       future hard-exclusion scope, unnamed integration document and canonical
       correction/creation terminology. Exclusion implementation depends on a
       decision; this integration does not choose one.
+
+
+## PR #167 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr167-review.md) for
+GitHub/Codex findings, bounded-lock and independent-connection regressions,
+current-head checks and later-adapter integration requirements.

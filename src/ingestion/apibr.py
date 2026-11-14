@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session
 
-from src.ingestion.upsert import upsert_job
+from src.ingestion.upsert import lock_job_identities, upsert_job
 from src.normalization.jobs.apibr import normalize_apibr_job
 from src.persistence.job.job_source import JobSource
 from src.persistence.job.source_run import SourceRun
@@ -85,7 +85,10 @@ def ingest_apibr(
 
     The scan is always recorded as incomplete because the source scan has not
     been proven complete. Therefore it never marks absent jobs STALE. Polling
-    failures roll back all job updates. Rejected records produce a PARTIAL run;
+    failures roll back all job updates. Fetch and normalize the bounded scan
+    before taking identity locks, acquire the full lock set in global order,
+    then apply observations in source order in one atomic transaction.
+    Rejected records produce a PARTIAL run;
     errors contain counts or exception types, never source response text.
     """
     source = session.get(JobSource, source_id)
@@ -116,13 +119,25 @@ def ingest_apibr(
         "rejected": 0,
     }
     try:
+        observations = []
         for raw_issue in iter_apibr_issues(client):
             counts["found"] += 1
             try:
+                normalized, verified = _normalize_issue(raw_issue)
+            except ValueError:
+                counts["rejected"] += 1
+                continue
+            observations.append((normalized, verified, datetime.now(UTC)))
+
+        lock_job_identities(
+            session,
+            ((job["platform"], job["source_job_id"]) for job, _, _ in observations),
+        )
+        for normalized, verified, observed_at in observations:
+            try:
                 with session.begin_nested():
-                    normalized, verified = _normalize_issue(raw_issue)
                     outcome, expired, reactivated = upsert_job(
-                        session, source_id, normalized, datetime.now(UTC), verified
+                        session, source_id, normalized, observed_at, verified
                     )
                     session.flush()
             except (ValueError, DataError, IntegrityError):
