@@ -22,7 +22,9 @@ absence-based lifecycle changes remain separate policy/implementation work.
    lossless uncapped curriculum projection.
 6. Pinned local embeddings, job-only model/version metadata, versioned passage
    representation, semantic retrieval and model/extraction-change invalidation are
-   implemented. Complete production retrieval/scoring integration and empty-evidence
+   implemented. Deterministic semantic aggregation and final blend primitives are
+   implemented in #173, including count validation and available-section numeric
+   bounds. Complete production retrieval/scoring integration and empty-evidence
    behavior; validate calibration independently before release approval.
 7. Wire the production matching API and privacy, background work and bounded
    availability verification, lifecycle policies, packaging/operations, and

@@ -118,6 +118,8 @@ then aggregate with greater weight for more recent selected experiences. Combine
 that result with the highest semantic education score. Use existing education
 course/level fields; do not add a public description field. Fewer than three
 experiences use all available entries; missing sections never fabricate evidence.
+Normalize only available section weights, including extreme finite ratios.
+Retrieval-pool limits are positive integer counts, validated before SQL retrieval.
 Initial semantic mixing is 80% experience / 20% education; distinct recency
 groups use weights 1.5/1.25/1.0 with equal weight for equal recency. Calibration
 and reviewed-example validation remain pending; see
