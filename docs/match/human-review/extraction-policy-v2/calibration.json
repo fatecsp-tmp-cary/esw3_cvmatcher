@@ -1,0 +1,1201 @@
+{
+  "schema_version": "1.0",
+  "policy": "ADR-014-extraction-policy-2026-11-14",
+  "purpose": "calibration",
+  "new_independent_human_review": false,
+  "cases": [
+    {
+      "id": "pt-001",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "explicit_required_preferred"
+      ],
+      "job": {
+        "title": "Desenvolvedor backend",
+        "description": "Python é obrigatório. SQL é desejável.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento de APIs Python",
+            "description": "Desenvolvimento de APIs Python"
+          }
+        ],
+        "education": [
+          {
+            "title": "Sistemas de informação"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Python",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "SQL",
+            "start": 22,
+            "end": 25,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Candidate builds Python APIs and has an IS degree; matches backend role."
+      }
+    },
+    {
+      "id": "pt-003",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "explicit_preferred"
+      ],
+      "job": {
+        "title": "Contador",
+        "description": "CRC é requisito obrigatório. Excel é preferencial.",
+        "skills": [
+          "CRC",
+          "Excel"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Contabilidade fiscal",
+            "description": "Contabilidade fiscal"
+          }
+        ],
+        "education": [
+          {
+            "title": "Ciências contábeis"
+          }
+        ],
+        "competencies": [
+          "CRC"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "CRC",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Excel",
+            "start": 29,
+            "end": 34,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Fiscal accounting experience, accounting degree and CRC match the accountant role."
+      }
+    },
+    {
+      "id": "pt-004",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "negation"
+      ],
+      "job": {
+        "title": "Designer",
+        "description": "Figma é obrigatório. Photoshop não é exigido.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Design de interfaces",
+            "description": "Design de interfaces"
+          }
+        ],
+        "education": [
+          {
+            "title": "Design"
+          }
+        ],
+        "competencies": [
+          "Figma"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 21,
+            "end": 30,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-005",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "uncertainty"
+      ],
+      "job": {
+        "title": "Analista de dados",
+        "description": "SQL é obrigatório. Talvez Python seja útil.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Análise de dados SQL",
+            "description": "Análise de dados SQL"
+          }
+        ],
+        "education": [
+          {
+            "title": "Estatística"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "SQL",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 26,
+            "end": 32,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "SQL data analysis and statistics degree match the data analyst role.\nFinal reviewer-adjudicated notes: \"Talvez Python seja útil\" is hedged; read as optional added value (NICE_TO_HAVE)."
+      }
+    },
+    {
+      "id": "pt-007",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "language_negation"
+      ],
+      "job": {
+        "title": "Professor de inglês",
+        "description": "Inglês é obrigatório. Espanhol não é necessário.",
+        "skills": [
+          "Inglês"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Ensino de inglês",
+            "description": "Ensino de inglês"
+          }
+        ],
+        "education": [
+          {
+            "title": "Letras"
+          }
+        ],
+        "competencies": [
+          "Inglês"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Inglês",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Espanhol",
+            "start": 22,
+            "end": 30,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-008",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Cozinheiro",
+        "description": "Cozinha profissional é obrigatória. Panificação é desejável.",
+        "skills": [
+          "Cozinha profissional",
+          "Panificação"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Preparo de refeições",
+            "description": "Preparo de refeições"
+          }
+        ],
+        "education": [
+          {
+            "title": "Gastronomia"
+          }
+        ],
+        "competencies": [
+          "Cozinha profissional"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Cozinha profissional",
+            "start": 0,
+            "end": 20,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Panificação",
+            "start": 36,
+            "end": 47,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Meal preparation experience and gastronomy degree match cook role."
+      }
+    },
+    {
+      "id": "pt-009",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "safety_training"
+      ],
+      "job": {
+        "title": "Eletricista",
+        "description": "NR10 é obrigatório. NR35 é um diferencial.",
+        "skills": [
+          "NR10",
+          "NR35"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Manutenção elétrica",
+            "description": "Manutenção elétrica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Eletrotécnica"
+          }
+        ],
+        "competencies": [
+          "NR10"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "NR10",
+            "start": 0,
+            "end": 4,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "NR35",
+            "start": 20,
+            "end": 24,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-011",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "example_negation"
+      ],
+      "job": {
+        "title": "Desenvolvedor frontend",
+        "description": "React é obrigatório. Vue é apenas um exemplo, não um requisito.",
+        "skills": [
+          "React"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Atendimento em farmácia",
+            "description": "Atendimento em farmácia"
+          }
+        ],
+        "education": [
+          {
+            "title": "Farmácia"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "React",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Vue",
+            "start": 21,
+            "end": 24,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-012",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "uncertainty"
+      ],
+      "job": {
+        "title": "Farmacêutico",
+        "description": "CRF é obrigatório. Excel seria útil, mas não foi definido como requisito.",
+        "skills": [
+          "CRF"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Programação Java",
+            "description": "Programação Java"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "CRF",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Excel",
+            "start": 19,
+            "end": 24,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Java programming/computing background does not match pharmacist role; no pharmacy evidence.\nFinal reviewer-adjudicated notes: Excel \"seria útil, mas não foi definido como requisito\": NICE_TO_HAVE vs exclusion is a conflict in which we tent to the restrictive interpretation. CRF (REQUIRED) is in job.skills and is a clear requirement."
+      }
+    },
+    {
+      "id": "pt-013",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Motorista",
+        "description": "CNH D é obrigatória. Transporte escolar é preferencial.",
+        "skills": [
+          "CNH D",
+          "Transporte escolar"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Ilustração digital",
+            "description": "Ilustração digital"
+          }
+        ],
+        "education": [
+          {
+            "title": "Artes"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "CNH D",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Transporte escolar",
+            "start": 21,
+            "end": 39,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Digital illustration/arts background does not match driver role."
+      }
+    },
+    {
+      "id": "pt-014",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Analista financeiro",
+        "description": "Excel é obrigatório. Power BI é um diferencial.",
+        "skills": [
+          "Excel",
+          "Power BI"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Instalação hidráulica",
+            "description": "Instalação hidráulica"
+          }
+        ],
+        "education": [
+          {
+            "title": "Edificações"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Excel",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Power BI",
+            "start": 21,
+            "end": 29,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-015",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Técnico de laboratório",
+        "description": "Microscopia é obrigatória. PCR é desejável.",
+        "skills": [
+          "Microscopia",
+          "PCR"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Vendas de móveis",
+            "description": "Vendas de móveis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Microscopia",
+            "start": 0,
+            "end": 11,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "PCR",
+            "start": 27,
+            "end": 30,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Furniture sales and administration background does not match lab technician role."
+      }
+    },
+    {
+      "id": "pt-016",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "seniority"
+      ],
+      "job": {
+        "title": "Desenvolvedor sênior",
+        "description": "Java é obrigatório. Senioridade sênior é obrigatória.",
+        "skills": [
+          "Java",
+          "sênior"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Desenvolvimento Java sênior",
+            "description": "Desenvolvimento Java sênior"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computação"
+          }
+        ],
+        "competencies": [
+          "Java"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Java",
+            "start": 0,
+            "end": 4,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "sênior",
+            "start": 32,
+            "end": 38,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Senior Java development and computing degree match the senior developer role."
+      }
+    },
+    {
+      "id": "pt-018",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "certification"
+      ],
+      "job": {
+        "title": "Analista de segurança",
+        "description": "Linux é obrigatório. Certificação CISSP é desejável.",
+        "skills": [
+          "Linux",
+          "CISSP"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Segurança de servidores Linux",
+            "description": "Segurança de servidores Linux"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Linux"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Linux",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "CISSP",
+            "start": 34,
+            "end": 39,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Linux server security and networks education match security analyst role."
+      }
+    },
+    {
+      "id": "pt-027",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_mismatch"
+      ],
+      "job": {
+        "title": "Desenvolvedor backend",
+        "description": "Python é obrigatório. SQL é desejável.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Enfermagem hospitalar",
+            "description": "Enfermagem hospitalar"
+          }
+        ],
+        "education": [
+          {
+            "title": "Enfermagem"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Python",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "SQL",
+            "start": 22,
+            "end": 25,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Nursing experience and degree show no backend development evidence."
+      }
+    },
+    {
+      "id": "pt-029",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_mismatch"
+      ],
+      "job": {
+        "title": "Analista de dados",
+        "description": "SQL é obrigatório. Talvez Python seja útil.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Cozinha industrial",
+            "description": "Cozinha industrial"
+          }
+        ],
+        "education": [
+          {
+            "title": "Gastronomia"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "SQL",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 26,
+            "end": 32,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Industrial kitchen and gastronomy show no data analysis evidence.\nFinal reviewer-adjudicated notes: \"Talvez Python seja útil\" is hedged; read as optional added value (NICE_TO_HAVE)."
+      }
+    },
+    {
+      "id": "pt-030",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "role_mismatch"
+      ],
+      "job": {
+        "title": "Designer",
+        "description": "Figma é obrigatório. Photoshop não é exigido.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Manutenção de motores",
+            "description": "Manutenção de motores"
+          }
+        ],
+        "education": [
+          {
+            "title": "Mecânica"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 21,
+            "end": 30,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-032",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "conflict"
+      ],
+      "job": {
+        "title": "Analista de infraestrutura",
+        "description": "Docker é desejável. Docker é obrigatório segundo outra seção; confirmar com a equipe.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Administração de infraestrutura",
+            "description": "Administração de infraestrutura"
+          }
+        ],
+        "education": [
+          {
+            "title": "Redes"
+          }
+        ],
+        "competencies": [
+          "Docker"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Docker",
+            "start": 20,
+            "end": 26,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-033",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "uncertainty"
+      ],
+      "job": {
+        "title": "Assistente administrativo",
+        "description": "Excel pode vir a ser necessário após revisão da vaga.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Rotinas administrativas",
+            "description": "Rotinas administrativas"
+          }
+        ],
+        "education": [
+          {
+            "title": "Administração"
+          }
+        ],
+        "competencies": [
+          "Excel"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Excel",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Administrative routines and administration degree match the assistant role.\nFinal reviewer-adjudicated notes: \"Pode vir a ser necessário após revisão\" is contingent, not explicit mandatory language; unclear whether to annotate as an unclassified mention or exclude it. Treated it as a NICE_TO_HAVE requirement, but could be interpreted as a non-requirement mention."
+      }
+    },
+    {
+      "id": "pt-034",
+      "language": "pt",
+      "synthetic": true,
+      "tags": [
+        "negation_only"
+      ],
+      "job": {
+        "title": "Operador de caixa",
+        "description": "Não exigimos experiência com SAP.",
+        "skills": []
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Operação de caixa",
+            "description": "Operação de caixa"
+          }
+        ],
+        "education": [
+          {
+            "title": "Ensino médio"
+          }
+        ],
+        "competencies": [
+          "SAP"
+        ]
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "SAP",
+            "start": 29,
+            "end": 32,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "en-001",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "explicit_required_preferred"
+      ],
+      "job": {
+        "title": "Backend developer",
+        "description": "Python is required. SQL is preferred.",
+        "skills": [
+          "Python",
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Python API development",
+            "description": "Python API development"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": [
+          "Python"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Python",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "SQL",
+            "start": 20,
+            "end": 23,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Python API development and CS degree match backend role."
+      }
+    },
+    {
+      "id": "en-003",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "negation"
+      ],
+      "job": {
+        "title": "Designer",
+        "description": "Figma is required. Photoshop is not required.",
+        "skills": [
+          "Figma"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Database administration",
+            "description": "Database administration"
+          }
+        ],
+        "education": [
+          {
+            "title": "Computer science"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 19,
+            "end": 28,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "en-004",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "uncertainty"
+      ],
+      "job": {
+        "title": "Data analyst",
+        "description": "SQL is required. Python might be useful.",
+        "skills": [
+          "SQL"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "SQL data analysis",
+            "description": "SQL data analysis"
+          }
+        ],
+        "education": [
+          {
+            "title": "Statistics"
+          }
+        ],
+        "competencies": [
+          "SQL"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "SQL",
+            "start": 0,
+            "end": 3,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 17,
+            "end": 23,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "SQL data analysis and statistics degree match data analyst role.\nFinal reviewer-adjudicated notes: \"Python might be useful\" is hedged; read as optional added value (NICE_TO_HAVE)."
+      }
+    },
+    {
+      "id": "en-006",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "seniority"
+      ],
+      "job": {
+        "title": "Senior developer",
+        "description": "Go is required. Senior experience is required.",
+        "skills": [
+          "Go",
+          "Senior"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Junior graphic design",
+            "description": "Junior graphic design"
+          }
+        ],
+        "education": [
+          {
+            "title": "Design"
+          }
+        ],
+        "competencies": []
+      },
+      "expected": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Go",
+            "start": 0,
+            "end": 2,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Senior",
+            "start": 16,
+            "end": 22,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Junior graphic design/design degree shows no senior development evidence."
+      }
+    },
+    {
+      "id": "en-010",
+      "language": "en",
+      "synthetic": true,
+      "tags": [
+        "different_profession"
+      ],
+      "job": {
+        "title": "Electrician",
+        "description": "Electrical installation is required. Python is not necessary.",
+        "skills": [
+          "Electrical installation"
+        ]
+      },
+      "candidate": {
+        "experiences": [
+          {
+            "title": "Electrical maintenance",
+            "description": "Electrical maintenance"
+          }
+        ],
+        "education": [
+          {
+            "title": "Electrical technology"
+          }
+        ],
+        "competencies": [
+          "Electrical installation"
+        ]
+      },
+      "expected": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Electrical installation",
+            "start": 0,
+            "end": 23,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 37,
+            "end": 43,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    }
+  ]
+}

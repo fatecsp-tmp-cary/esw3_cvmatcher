@@ -84,3 +84,13 @@ The accepted targets are span precision 90%/recall 80%, mandatory precision
 95%/recall 80%, semantic role AUC 0.90 and accuracy 80%, each per language.
 Undefined metrics or absent positive support do not pass. None have passed on
 these still-unreviewed human packets.
+
+## Current policy-adjudicated copies (2026-11-14)
+
+The original blind packets above remain unchanged historical preparation inputs.
+The user supplied reviewed labels and subsequently approved ADR-014 extraction
+policy changes. Use the [versioned updated copies](extraction-policy-v2/README.md)
+and [measurement record](../../reports/2026-11-14-extraction-correction/README.md)
+for current calibration/regression work. The old held-out set was diagnosed and
+cannot grant independent acceptance after relabeling; a fresh blind review remains
+pending. Original labels, failures, reviewer provenance and case errors are retained.

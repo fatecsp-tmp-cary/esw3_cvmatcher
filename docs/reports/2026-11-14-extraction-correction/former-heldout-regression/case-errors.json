@@ -1,0 +1,80 @@
+[
+  {
+    "id": "pt-025",
+    "language": "pt",
+    "missing_requirements": [
+      [
+        0,
+        12,
+        "REQUIRED"
+      ]
+    ],
+    "unexpected_requirements": [],
+    "role_error": false,
+    "role_score": 63.76298790043829
+  },
+  {
+    "id": "pt-026",
+    "language": "pt",
+    "missing_requirements": [
+      [
+        0,
+        12,
+        "REQUIRED"
+      ]
+    ],
+    "unexpected_requirements": [],
+    "role_error": false,
+    "role_score": 44.07733077682461
+  },
+  {
+    "id": "pt-028",
+    "language": "pt",
+    "missing_requirements": [],
+    "unexpected_requirements": [],
+    "role_error": true,
+    "role_score": 51.31358195620121
+  },
+  {
+    "id": "pt-035",
+    "language": "pt",
+    "missing_requirements": [
+      [
+        25,
+        36,
+        "PREFERRED"
+      ]
+    ],
+    "unexpected_requirements": [],
+    "role_error": false,
+    "role_score": 62.917623949951306
+  },
+  {
+    "id": "pt-036",
+    "language": "pt",
+    "missing_requirements": [
+      [
+        0,
+        20,
+        "REQUIRED"
+      ]
+    ],
+    "unexpected_requirements": [],
+    "role_error": false,
+    "role_score": 54.91246021458816
+  },
+  {
+    "id": "pt-037",
+    "language": "pt",
+    "missing_requirements": [
+      [
+        0,
+        20,
+        "REQUIRED"
+      ]
+    ],
+    "unexpected_requirements": [],
+    "role_error": false,
+    "role_score": 49.363622372665375
+  }
+]
