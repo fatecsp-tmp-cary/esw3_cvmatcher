@@ -37,3 +37,5 @@ redirect. ADR-015/016 remain the accepted snapshot-absence/inactive-result
 decisions. ADR-017 remains the original field-evidence proposal. Frozen reports
 and machine policy identifiers keep their original bytes and are not new authority.
 New interview records 019–023 are added on their owning branches as listed below.
+
+- [ADR-022: Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) — accepted interview policy; implementation status is tracked separately.

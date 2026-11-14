@@ -36,3 +36,8 @@ Preserve old held-out labels/results and designate updated copies regression-onl
 Document numerical failures, new blind-review dependency and disabled exclusions.
 Implementation belongs to PR #170; downstream evaluation packets/evaluator wiring
 belong to PR #178. Verify combined behavior without merging either PR.
+
+## Bilingual search interview — issues #147/#159
+
+Follow [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md). Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
+Record measured verification before marking implementation complete. No release or merge is approved by this documentation.

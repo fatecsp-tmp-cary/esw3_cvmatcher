@@ -218,3 +218,9 @@ from requirement selection; background detections cannot become requirements.
 No canonical Job/public API change or new hard exclusion is permitted. Original
 reviewed evidence is preserved; policy-updated copies are calibration/regression
 material and cannot renew held-out independence.
+
+## Bilingual search interview — issues #147/#159
+
+Authority: [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
+
+Use a separate lower-case ASCII projection, Portuguese and English stemming, and bounded fuzzy fill-only retrieval under ADR-022. Original Unicode/display/span evidence stays intact. The current Portuguese FTS remains the implemented baseline until the planned change is verified.
