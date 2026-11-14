@@ -19,7 +19,7 @@ def test_search_uses_portuguese_fts_and_active_jobs():
     assert search_active_jobs(session, "engenheira de dados") == []
 
     sql = str(session.statement.compile(dialect=postgresql.dialect()))
-    assert "'portuguese'::regconfig" in sql
+    assert "'pg_catalog.portuguese'::regconfig" in sql
     assert "plainto_tsquery" in sql
     assert "setweight" in sql
     assert "concat_ws" not in sql

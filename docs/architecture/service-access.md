@@ -18,10 +18,9 @@ must share the same database for a service-wide quota. This does not change the
 curriculum DTOs, matching response or validation privacy policy.
 
 `create_app()` is a dependency-injection factory: tests may omit its limiter;
-production composition must supply the shared limiter, as the module entry point
-does. The local deterministic mock remains separate. Health and docs count
+production composition must supply the shared limiter. The module entry point supplies it. The local deterministic mock remains separate. Health and docs count
 against the global quota. No client/IP identity is stored by rate limiting.
 
-Implementation and independent-connection concurrency tests are present.
+Limiter implementation and independent-connection concurrency tests are present.
 HTTPS termination, production deployment and realistic load verification remain
 pending; the quota alone is not a throughput guarantee.
