@@ -1,0 +1,47 @@
+{
+  "owning_extraction_branch": {
+    "tests": 564,
+    "result": "passed",
+    "focused_unit_tests": 118,
+    "focused_integration_tests_initial": 12,
+    "extraction_mypy_files": 9
+  },
+  "combined_acceptance_tree": {
+    "tests": 742,
+    "external_benchmark_deselected": 1,
+    "result": "passed",
+    "mypy_files": 68,
+    "ruff": "passed"
+  },
+  "failed_runs_preserved": [
+    {
+      "suite": "combined v2",
+      "passed": 734,
+      "failed": 4,
+      "failures": [
+        "diferencial/diferenciais expected NICE_TO_HAVE under old policy",
+        "mixed cues expected null under old policy",
+        "plain Other section did not terminate scope"
+      ],
+      "resolution": "Updated policy assertions and explicit heading termination; preserved source policy decision"
+    },
+    {
+      "suite": "combined v3",
+      "passed": 741,
+      "failed": 1,
+      "failure": "Worker expected one raw occurrence; exact alias supplementation correctly recovered a separate requirement occurrence",
+      "resolution": "Assert both detection sources, classes and disabled exclusion"
+    },
+    {
+      "suite": "owning branch full mypy",
+      "result": "pre-existing failure",
+      "error": "src/matching/textual.py:12 _PORTUGUESE_CONFIG lacks type annotation",
+      "resolution": "Extraction-only mypy passes; downstream combined source passes full mypy; unrelated legacy FTS code unchanged"
+    }
+  ],
+  "candidate_data": "Only pre-existing synthetic evaluation inputs and scalar evidence are archived. No real candidate input or embeddings.",
+  "hard_exclusions_enabled": false,
+  "release_quality_approved": false,
+  "performance_measurement": false,
+  "fresh_independent_heldout_acceptance": "pending"
+}

@@ -182,3 +182,9 @@ remains `/models/extraction`. Retain the old directory for rollback instead of
 deleting/overwriting its manifest. The explicit preparation command reuses pinned
 local cache files when available; serving remains offline. Reprocess stored jobs
 under the new extraction version and confirm readiness before resuming matching.
+
+## Current external-scope decision
+
+[ADR-023](../architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md)
+keeps external deployment deferred. No provider/domain/budget or external deployment
+is authorized by this procedure. Local pre-production verification remains in scope.
