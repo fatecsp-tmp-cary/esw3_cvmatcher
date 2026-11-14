@@ -70,8 +70,13 @@ def test_only_successful_current_content_and_config_are_ready(db_engine, job_id)
     assert not ready(db_engine, job_id, "config-v2")
     with Session(db_engine) as session, session.begin():
         state = session.get(JobExtraction, job_id)
-        assert len(state.evidence) == 1
+        # Duplicate model output is removed; the exact alias detector recovers
+        # the separate description occurrence missed by the injected model.
+        assert len(state.evidence) == 2
         assert state.evidence[0]["requirement_class"] is None
+        assert state.evidence[1]["detection_source"] == "exact_alias"
+        assert state.evidence[1]["requirement_class"] == "REQUIRED"
+        assert not state.evidence[1]["exclusion_safe"]
         assert session.get(Job, job_id).status == JobStatus.ACTIVE
         session.get(Job, job_id).content_hash = "hash-v2"
     assert not ready(db_engine, job_id)
