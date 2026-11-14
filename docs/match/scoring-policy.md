@@ -73,3 +73,11 @@ A job skill list alone does not establish candidate skill evidence. When no
 explicit competencies or recognized skill mentions exist in the curriculum, omit
 the skills dimension rather than scoring unknown knowledge as zero. Explicit
 nonmatching skill evidence remains a comparable score-only dimension.
+
+## Accepted mandatory coverage (implementation pending)
+
+[ADR-021](../architecture/decisions/ADR-021-mandatory-coverage-score-only.md)
+records the user-selected exact-evidence coverage threshold. It is separate from
+mandatory-classification precision/recall and reviewed sample counts. No new blend
+weight or exclusion is authorized; the current ranking implementation below does
+not yet implement this coverage policy.

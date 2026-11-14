@@ -224,3 +224,9 @@ material and cannot renew held-out independence.
 Authority: [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
 
 Use a separate lower-case ASCII projection, Portuguese and English stemming, and bounded fuzzy fill-only retrieval under ADR-022. Original Unicode/display/span evidence stays intact. The current Portuguese FTS remains the implemented baseline until the planned change is verified.
+
+## Mandatory coverage interview — issue #120
+
+Authority: [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
+
+Only explicit REQUIRED concepts enter the ADR-021 threshold: all below three, otherwise max(3, ceil(70% of N)). Exact/approved-alias evidence alone satisfies it. All exclusions remain off; this is not a replacement for evaluation gates.
