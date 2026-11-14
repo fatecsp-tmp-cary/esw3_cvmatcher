@@ -1,0 +1,6 @@
+# Explicit loopback-only database exposure for local development tools.
+# Combine with docker-compose.yml; production never loads this overlay.
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"

@@ -85,3 +85,9 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 - [x] Record the user decision in [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
 - [ ] Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
+## Deferred external deployment and source expansion
+
+- [x] Record the user decision in [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
+- [ ] Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Usage: scripts/operations/backup PROJECT NEW_ARCHIVE
+set -euo pipefail
+[[ $# == 2 && $1 =~ ^[a-z0-9][a-z0-9_-]*$ ]] || { echo "Usage: backup PROJECT NEW_ARCHIVE" >&2; exit 2; }
+cd -- "$(dirname -- "$0")/../.."
+umask 077
+# noclobber preserves an existing archive; failures retain a visibly partial file.
+set -o noclobber
+docker compose --project-name "$1" -f docker-compose.yml -f docker-compose.production.yml exec -T postgres sh -c 'exec pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$2"

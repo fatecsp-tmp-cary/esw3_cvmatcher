@@ -41,3 +41,5 @@ New interview records 019–023 are added on their owning branches as listed bel
 - [ADR-022: Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) — accepted interview policy; implementation status is tracked separately.
 
 - [ADR-021: Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) — accepted interview policy; implementation status is tracked separately.
+
+- [ADR-023: External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) — accepted interview policy; implementation status is tracked separately.
