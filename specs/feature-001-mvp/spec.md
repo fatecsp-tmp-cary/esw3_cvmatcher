@@ -89,7 +89,9 @@ keywords, skills, normalized requirements, and location. Portuguese any-term FTS
 uses A title/skills, B company/keywords/normalized requirements and D
 description/location, PostgreSQL JSON text rendering and descending publication
 date then platform/source-ID ties under ADR-004/005. All retrieval paths require
-successful extraction for current content/configuration. Semantic job representation is title,
+successful extraction for current content/configuration. The implemented FTS
+helpers fail closed when readiness is omitted; production pipeline wiring is
+planned in #174–#175. Semantic job representation is title,
 normalized skills, current normalized requirement texts (sorted and deduplicated),
 relevant description, location string values in sorted-key order, and mode. Passage
 representation is part of the embedding policy identity; its changes require

@@ -14,8 +14,10 @@ absence-based lifecycle changes remain separate policy/implementation work.
    with pinned local extraction and ADR-018 clause-local score-only projection.
    Preserve sections and unknown/negated evidence. Keep exclusions disabled;
    production scheduling and independent quality acceptance remain pending.
-4. Define weighted Portuguese FTS, then implement its index and queries. Keep raw
-   rank distinct from final compatibility scores; evaluate English/accents.
+4. Weighted Portuguese FTS indexes and shared query expressions are implemented,
+   with explicit extraction readiness on both job and requirement paths. Keep raw
+   rank distinct from bounded textual/final compatibility scores. Production
+   pipeline wiring and ADR-022 bilingual/ASCII/fuzzy implementation remain pending.
 5. Category aliases, public response validation, and bounded
    lossless uncapped curriculum projection.
 6. Pinned local embeddings, job-only model/version metadata, versioned passage
