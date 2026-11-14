@@ -91,3 +91,8 @@ Record measured verification before marking implementation complete. No release 
 
 Follow [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md). Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.
 Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
+
+## Field-evidence interview — issue #196 / PR #197
+
+Follow [ADR-019](../../docs/architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md). Update #196 implementation/tests to ADR-019, retaining dotted-name boundaries, exact aliases, approved ordering/ties, checked body fallback, provenance-filtered skills, public DTO shape and score-only safety.
+Record measured verification before marking implementation complete. No release or merge is approved by this documentation.

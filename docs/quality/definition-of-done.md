@@ -35,3 +35,12 @@ The fixed matching regression dataset and explicit
 no-deduplication/no-geographic-filtering regressions are required for the MVP
 release when those components exist. See
 [acceptance](../../specs/feature-001-mvp/acceptance.md).
+
+## Interview policy and verification status
+
+The accepted policies in ADR-019 through ADR-022 require their own implementation
+and verification. Existing extraction/Compose/CI measurements do not establish
+compliance with title-first fields, filtered displayed skills, three-snapshot
+expiry, mandatory coverage or bilingual/fuzzy retrieval. ADR-023 keeps external
+deployment and second-source expansion deferred. Per-job 70% coverage is distinct
+from mandatory-classification precision/recall and evaluation sample sufficiency.

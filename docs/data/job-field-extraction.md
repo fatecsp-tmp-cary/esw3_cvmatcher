@@ -27,7 +27,8 @@ review is not a release quality gate; source labels are weak labels, not gold da
    become a mandatory exclusion. The current requirement-class enum has no UNKNOWN
    value; do not force uncertain output into it. Design any supporting evidence
    persistence separately before implementation.
-5. Prefer explicit structured source fields; retain conflicts as uncertain evidence
+5. For seniority/work arrangement, follow the field-specific title-first policy
+   in ADR-019 (implementation pending); other fields prefer explicit structured source fields; retain conflicts as uncertain evidence
    instead of overwriting source identity, lifecycle, dates or other verified facts.
    Extracted location must never drive geographic eligibility.
 6. Track extraction version independently of content hash. Define re-extraction and
@@ -108,8 +109,9 @@ examples before extracted mandatory requirements may cause candidate exclusion.
 This is mandatory-classification precision, not the entity model's confidence
 threshold and not a universal correctness guarantee. Unknown/conflicting context
 still cannot cause exclusion. The user also selected minimum **80% measured recall** for mandatory
-classification. Sample counts and field/span targets are resolved in ADR-012; threshold fitting
-awaits the reviewed calibration cases. Review labels independently
+classification. ADR-012 resolves case counts and field/span targets; additional mandatory-mention
+minimums remain deferred. Reviewed calibration and failed regression evidence
+exist in the correction report; independent post-change acceptance remains pending. Review labels independently
 of source weak labels and GLiNER predictions; report sample counts and PT/EN
 results alongside the combined 80% Portuguese / 20% English evaluation mix.
 

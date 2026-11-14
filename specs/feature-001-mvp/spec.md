@@ -64,8 +64,9 @@ complete snapshot; incremental absence and failed polls do not change status.
 For APiBR, one SNAPSHOT poll that qualifies under ADR-013 marks absent `ACTIVE`
 jobs of that source `STALE`
 ([ADR-015](../../docs/architecture/decisions/ADR-015-qualifying-snapshot-absence-marks-stale.md)).
-`STALE→EXPIRED` uses configured consecutive missing snapshots and/or maximum
-stale duration; either configured condition may expire a job. Reliable explicit
+`STALE→EXPIRED` is approved after three qualifying absence snapshots, including
+the first STALE transition; no age trigger is selected (ADR-020). Supporting
+counters and expiry implementation remain pending #145. Reliable explicit
 `source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.
 `EXPIRED` is terminal even if a source later reopens the record.
 Retain expired records; physical deletion is out of MVP.
@@ -255,3 +256,9 @@ External hosting/HTTPS deployment and second-source research/selection remain de
 Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
 
 The accepted expiration threshold is three qualifying absence snapshots, including the one that first marks STALE. No age-based threshold is selected. Bad scans do not advance the count; rediscovery resets it. Supporting counters remain outside canonical Job.
+
+## Field-evidence interview — issue #196 / PR #197
+
+Authority: [ADR-019](../../docs/architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md).
+
+Job field source priority is title > typed labels > named/checked body fields. Resolve title/selected-body values by the approved orders; conflicting labels may fall through to checked body options; specialist/coordinator ties use first occurrence. Add only exact affirmative non-conflicting extracted skills to displayed source skills. Current draft code still implements ADR-017 and requires correction.

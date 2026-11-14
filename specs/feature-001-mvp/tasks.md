@@ -86,7 +86,7 @@ and the reconciled production image build passed. See the
   verification. The optional verifier remains #153.
 - [x] Absence under accepted ADR-015 (#186): ACTIVE jobs missing from a qualifying
   SNAPSHOT poll become STALE and rediscovery reactivates them. STALE→EXPIRED
-  thresholds remain #145; sources default to INCREMENTAL, where absence is ignored.
+  threshold is now defined by ADR-020; count/expiry implementation remains #145; sources default to INCREMENTAL, where absence is ignored.
 - [x] Pre-reconciliation production image build and real pinned offline Compose
   smoke: migrations, synthetic ingestion, worker GLiNER/E5, deterministic API,
   database/API replacement durability and dump/restore into an empty project.
@@ -176,12 +176,20 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 
 ## Deferred external deployment and source expansion
 
+No deployment or second-source implementation is scheduled by this decision.
+
 - [x] Record the user decision in [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
-- [ ] Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+- [x] Confirm external deployment (#150) and second-source selection/adapter (#127/#128) are deferred; no provider, source or implementation was selected.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
 
 ## Stale expiration interview — issue #145
 
 - [x] Record the user decision in [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
 - [ ] Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
+## Field-evidence interview — issue #196 / PR #197
+
+- [x] Record the user decision in [ADR-019](../../docs/architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md).
+- [ ] Update #196 implementation/tests to ADR-019, retaining dotted-name boundaries, exact aliases, approved ordering/ties, checked body fallback, provenance-filtered skills, public DTO shape and score-only safety.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
