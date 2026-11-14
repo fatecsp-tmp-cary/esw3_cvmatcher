@@ -7,8 +7,6 @@ import json
 import os
 from pathlib import Path
 
-from huggingface_hub import snapshot_download
-
 # Usable as a standalone script without installing the local project.
 MODEL_ID = "intfloat/multilingual-e5-small"
 REVISION = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
@@ -20,6 +18,8 @@ def main() -> None:
     parser.add_argument("--manifest", type=Path, required=True)
     args = parser.parse_args()
     os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
+    from huggingface_hub import snapshot_download
+
     root = Path(
         snapshot_download(
             repo_id=MODEL_ID,

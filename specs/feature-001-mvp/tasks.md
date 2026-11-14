@@ -27,10 +27,16 @@ Requirements and completion gates are in [spec](spec.md),
   clause-local score-only projection. Versioned evidence, three-claim retry/lease
   recovery and readiness predicate are implemented. API retrieval gating/wiring
   remains planned in #172–#175; quality/release approval and exclusions stay disabled.
-- Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
+- Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; final score implementation remains planned.
 - Domain-enum seniority/mode aliases; missing/unknown values yield no category. APiBR uses first-recognized source-label precedence, retaining every keyword. Other categories remain text.
 - Ranked response validation tests for job identity, eligibility, match details and version metadata.
 - Uncapped public collections and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
+
+- Pinned offline E5 inference, complete token windows, job-only provenance,
+  bounded claims/retries, content/model/extraction invalidation and semantic
+  retrieval are implemented. Passages include normalized requirements and
+  deterministic locations under a versioned representation policy. Production
+  pipeline wiring and empirical calibration/release acceptance remain pending.
 
 ## Remaining MVP work
 
@@ -39,8 +45,8 @@ Requirements and completion gates are in [spec](spec.md),
 - [ ] Scheduler/source-run concurrency and production extraction scheduling/wiring.
       Preserve source independence and uncertain evidence.
 - [ ] Lifecycle policies. Never infer absence from an unproven scan.
-- [ ] Model selection, metadata, semantic retrieval, scoring, model-change
-      reprocessing and empty-evidence behavior; textual normalization/ranking,
+- [ ] Production retrieval/scoring integration, empty-evidence behavior and
+      textual normalization/ranking;
       a fixed regression fixture and vertical-slice validation.
 - [ ] API pipeline, anonymous global admission limiting (ADR-009/010), worker scheduling, source locking and
       operations; language/accent investigation.
@@ -116,3 +122,10 @@ integration remain separate work.
 See the [review record](../../docs/reports/2026-11-14-pr170-review.md) for actual
 GitHub/Codex review dispositions and current-head extraction checks. Existing
 correction/evaluation history above retains its original evidence scope.
+
+
+## PR #171 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr171-review.md) for
+GitHub/Codex dispositions, requirement-passage and location regressions, policy
+invalidation, telemetry import ordering and independent-connection claim checks.
