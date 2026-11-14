@@ -24,7 +24,8 @@ Structured CV → CandidateProfile → job sources → normalized jobs → lifec
 The MVP must accept structured CV JSON, implement at least one source, normalize
 to the canonical `Job`, maintain source identity and content hashes, handle
 source-specific lifecycle semantics and failures, expire/reactivate correctly,
-exclude expired jobs from active retrieval, use FTS and local semantic search,
+keep expired and other inactive jobs out of the active ranking group, use FTS
+and local semantic search,
 regenerate embeddings after content/model changes, and return deterministic
 `[0,100]` compatibility scores with versioned algorithm/model and supporting
 match information. Brazilian source priority does not permit geographic

@@ -1,4 +1,4 @@
-"""Deterministic active/readiness-gated PostgreSQL textual retrieval."""
+"""Deterministic status/readiness-gated PostgreSQL textual retrieval."""
 
 from dataclasses import dataclass
 
@@ -8,7 +8,7 @@ from sqlalchemy.sql.elements import ColumnElement
 
 from src.indexing.textual import any_term_query, job_search_document, requirement_search_document
 from src.normalization.candidate.curriculum import NormalizedCandidate
-from src.persistence.job.job import Job, JobStatus
+from src.persistence.job.job import ACTIVE_STATUSES, Job, JobStatus, status_predicate
 from src.persistence.job.skill import JobRequirement
 
 
@@ -36,7 +36,9 @@ class TextualMatch:
     score: float
 
 
-def _retrieval_statement(query_text, *, readiness, requirements, limit, bounded):
+def _retrieval_statement(
+    query_text, *, readiness, requirements, limit, bounded, statuses=ACTIVE_STATUSES
+):
     if not isinstance(query_text, str):
         raise TypeError("query must be text")
     if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
@@ -45,9 +47,10 @@ def _retrieval_statement(query_text, *, readiness, requirements, limit, bounded)
     requirement_document = requirement_search_document()
     query = any_term_query(query_text)
     gate = false() if readiness is None else readiness
+    status = status_predicate(statuses)
     job_matches = select(
         Job.id.label("job_id"), func.ts_rank_cd(document, query).label("rank")
-    ).where(Job.status == JobStatus.ACTIVE, gate, document.bool_op("@@")(query))
+    ).where(status, gate, document.bool_op("@@")(query))
     # Maximum avoids multiplying evidence by the number of requirement rows.
     requirement_matches = (
         select(
@@ -55,7 +58,7 @@ def _retrieval_statement(query_text, *, readiness, requirements, limit, bounded)
             func.max(func.ts_rank_cd(requirement_document, query)).label("rank"),
         )
         .join(Job, Job.id == JobRequirement.job_id)
-        .where(Job.status == JobStatus.ACTIVE, gate, requirement_document.bool_op("@@")(query))
+        .where(status, gate, requirement_document.bool_op("@@")(query))
         .group_by(JobRequirement.job_id)
     )
     matches = union_all(job_matches, requirement_matches).subquery()
@@ -86,15 +89,22 @@ def textual_statement(
     readiness: ColumnElement[bool] | None = None,
     requirements: ColumnElement | None = None,
     limit: int = 100,
+    statuses: tuple[JobStatus, ...] = ACTIVE_STATUSES,
 ) -> Select:
     """Select (Job, bounded score), with explicit successful-extraction readiness.
 
     Omitted readiness fails closed on job and requirement paths. Raw job rank
     plus maximum requirement-row rank is normalized as 100*r/(1+r). Callers may
-    append a Job.id pool predicate. Location never controls eligibility.
+    append a Job.id pool predicate. Location never controls eligibility. Only
+    the given status group is searched; the default is the active group.
     """
     return _retrieval_statement(
-        query_text, readiness=readiness, requirements=requirements, limit=limit, bounded=True
+        query_text,
+        readiness=readiness,
+        requirements=requirements,
+        limit=limit,
+        bounded=True,
+        statuses=statuses,
     )
 
 
@@ -129,6 +139,7 @@ def retrieve_textual(
     readiness: ColumnElement[bool] | None = None,
     requirements: ColumnElement | None = None,
     limit: int = 100,
+    statuses: tuple[JobStatus, ...] = ACTIVE_STATUSES,
 ) -> list[tuple[Job, float]]:
     """Run one request-scoped query; persist/log none of its candidate evidence."""
     statement = textual_statement(
@@ -136,5 +147,6 @@ def retrieve_textual(
         readiness=readiness,
         requirements=requirements,
         limit=limit,
+        statuses=statuses,
     )
     return [(job, float(score)) for job, score in session.execute(statement)]

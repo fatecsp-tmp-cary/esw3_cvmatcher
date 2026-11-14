@@ -10,7 +10,9 @@
   changes; do not merge records across sources.
 - Correctly distinguish incremental absence, successful complete snapshots,
   and polling failures; apply lifecycle transitions and timestamps safely.
-- Retain expired jobs and exclude them from active retrieval; allow stale-job
+- Retain expired jobs and keep them out of the active ranking group; inactive
+  jobs may only follow every active result, with `eligibility: false`
+  (ADR-016); allow stale-job
   reactivation and regenerate embeddings after content or model changes.
 - Provide PostgreSQL FTS and local PT/EN-capable semantic search, staged matching,
   deterministic versioned scores in `[0,100]`, and ranked REST recommendations.
@@ -57,7 +59,8 @@
   `score`, boolean `eligibility`, `matched_skills[]`, `missing_requirements[]`,
   `embedding_model`, and `algorithm_version`. The nested job contains a required
   stable positive integer `id` and the public descriptive fields listed in the
-  feature spec. Eligibility never represents geographic eligibility; detail
+  feature spec. Eligibility is `false` for a job that is not currently active
+  and never represents geographic eligibility; detail
   arrays are required and may be empty. The API response omits `curriculo_id`.
 - `GET /health` returns `{"status":"ok"}`.
 - Validation errors never echo submitted keys or values. Each rejected extra

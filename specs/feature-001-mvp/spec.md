@@ -77,7 +77,10 @@ hash updates the job, reindexes text, nulls its embedding, and schedules
 regeneration. Unchanged content is not updated. Model/version changes
 independently invalidate and regenerate embeddings.
 
-Only active jobs with successful extraction are eligible for matching retrieval.
+Only jobs with successful extraction enter matching retrieval. Active jobs are
+ranked first; jobs in any other status only fill the remaining positions after
+them, with `eligibility: false`
+([ADR-016](../../docs/architecture/decisions/ADR-016-inactive-jobs-complete-ranked-matches.md)).
 Extraction readiness is independent of availability; pending/failed extraction
 withholds jobs without changing lifecycle state. After three failed extraction
 attempts, alert the operator and require explicit retry. See
@@ -119,7 +122,8 @@ Default final score is `0.45 * textual + 0.35 * semantic + 0.20 * structured`;
 weights are configurable and component/final scores are `[0,100]`. Score means
 compatibility, not employment probability. Public match results include boolean
 `eligibility`, `matched_skills[]`, and `missing_requirements[]`; eligibility
-means matching eligibility, never geography. Detail arrays are required and may
+means matching eligibility, never geography: it is `false` for a job that is
+not currently active. Detail arrays are required and may
 be empty. Component scores may remain internal.
 
 The public API contract is documented in [acceptance](acceptance.md) and is

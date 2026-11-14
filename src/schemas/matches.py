@@ -35,7 +35,12 @@ class MatchResult(BaseModel):
     rank: int = Field(ge=1)
     job: MatchedJob
     score: float = Field(ge=0, le=100)
-    eligibility: bool = Field(description="Matching eligibility; never geographic eligibility.")
+    eligibility: bool = Field(
+        description=(
+            "Matching eligibility: false for a job that is not currently active. "
+            "Never geographic eligibility."
+        )
+    )
     matched_skills: list[str]
     missing_requirements: list[str]
     embedding_model: str
