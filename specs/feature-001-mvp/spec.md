@@ -206,3 +206,15 @@ The same immutable Sistema Currículo integration contract applies to deployed A
 Hosting remains provider-independent; verify actual host CPU, memory, storage and
 model requirements. A successful mock or database-only startup is not full-stack
 deployment verification.
+
+## Extraction correction policy (issue #116)
+
+[ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md)
+governs clause-local cue attribution, section fallback, negated-null and hedged
+NICE_TO_HAVE evidence, strongest-class consolidation with retained conflict flags,
+smallest meaningful exact Unicode spans, dedicated internal entity labels and
+bounded score-only typo matching on both job/candidate sides. Detection is separate
+from requirement selection; background detections cannot become requirements.
+No canonical Job/public API change or new hard exclusion is permitted. Original
+reviewed evidence is preserved; policy-updated copies are calibration/regression
+material and cannot renew held-out independence.
