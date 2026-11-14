@@ -77,8 +77,8 @@ The executor accepts `CurriculumRequest` and `limit`.
 Transient normalization is implemented by `normalize_curriculum` into an immutable
 `NormalizedCandidate`, preserving section order, all text, dates, proficiency,
 education level/status and projects, while excluding the UUID. This projection
-adds no collection/text caps and accepts empty sections. Production pipeline integration uses this projection; the legacy `CandidateProfile` is not used as a
-second public-input validator.
+adds no collection/text caps and accepts empty sections. Production pipeline integration must use this projection and is pending in stack
+PR #175; the legacy `CandidateProfile` must not become a second public-input validator.
 
 ## Implementation decisions
 
@@ -99,7 +99,7 @@ second public-input validator.
    policy; source usage/retention evidence remains #134. The earlier shape probe
    proves neither availability nor completeness. No hidden verifier is enabled
    and no unproven scan may mark absent jobs stale.
-2. The pinned multilingual E5 model/version and separate provenance are implemented
+2. The pinned multilingual E5 model/version and separate provenance are planned in stack PR #171
    (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
    the fixed canonical Job fields.
 3. ADR-012 defines conservative canonical language/employment mappings (#139).
@@ -137,9 +137,9 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   See scoring policy (planned in #173: `../../docs/match/scoring-policy.md`).
   Recency grouping uses initial weights **1.5 / 1.25 / 1.0**, with equal recency
   receiving equal weight. Similarity calibration and release validation remain
-  pending; the aggregation primitive is implemented and wired to pinned local inference, with provisional calibration.
+  pending; the aggregation primitive is planned in stack PR #173, with production inference wiring in #174–#175 and provisional calibration.
 - Pinned GLiNER revision/labels, provisional confidence, separate evidence storage
-  and bounded retry/reprocessing are implemented; see local GLiNER (planned in #170: `../../docs/data/local-gliner.md`).
+  and bounded retry/reprocessing are planned in stack PR #170; see local GLiNER (planned in #170: `../../docs/data/local-gliner.md`).
   Mandatory exclusion remains disabled until independently measured quality and
   sample sufficiency are approved.
 - Existing ADR-008 authority supersedes ADR-006 collection caps and any internal
@@ -162,8 +162,10 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   HTTPS, global rate-limit and database-access protections (authentication is
   intentionally absent under ADR-009).
 
-See [deployment behavior](spec.md#docker-compose-deployment). The pinned offline Compose smoke passed again after main reconciliation,
-including worker/API processing, replacement durability and backup/restore.
+See [deployment behavior](spec.md#docker-compose-deployment). The pinned offline Compose smoke is historical evidence from the original
+integration after main reconciliation, including worker/API processing, replacement
+durability and backup/restore. It has not been rerun for this branch; current-head
+Compose acceptance remains pending.
 Evidence and remaining release checks are tracked in [tasks](tasks.md).
 
 ## Implementation interview: readiness and performance
