@@ -17,7 +17,7 @@
  - 1.1.2.5 Estrutura Analítica do Projeto
 
 #### 1.1.3 Monitoramento do Projeto
- - 1.1.3.1 Indentificação dos indicadores de progresso
+ - 1.1.3.1 Identificação dos indicadores de progresso
  - 1.1.3.2 Planejamento de relatórios de acompanhamento
  - 1.1.3.3 Registro de bloqueios
  - 1.1.3.4 Registro de decisões
@@ -89,15 +89,15 @@
  - 2.1.1.1.1 Características das fontes registradas
  - 2.1.1.1.2 Restrições das fontes registradas
 
-##### 2.1.1.1 Pesquisa de fontes internacionais
- - 2.1.1.1.1 Características das fontes registradas
- - 2.1.1.1.2 Restrições das fontes registradas
+##### 2.1.1.2 Pesquisa de fontes internacionais
+ - 2.1.1.2.1 Características das fontes registradas
+ - 2.1.1.2.2 Restrições das fontes registradas
 
 #### 2.1.2 Viabilidade das Fontes
  - 2.1.2.1 Viabilidade técnica
  - 2.1.2.2 Viabilidade operacional
  - 2.1.2.3 Avaliação das restrições de uso
- - 2.1.2.4 Viabilidade de fontes estrageiras para vagas brasileiras
+ - 2.1.2.4 Viabilidade de fontes estrangeiras para vagas brasileiras
 
 #### 2.1.3 Seleção das Fontes
  - 2.1.3.1 Seleção de fontes para MVP
@@ -322,7 +322,7 @@
 #### 4.2.4 Segurança
  - 4.2.4.1 Credenciais externalizadas
  - 4.2.4.2 Proteção de *endpoints*
- - 4.2.4.3 Garantia de exclusão do dados de candidato de logs
+ - 4.2.4.3 Garantia de exclusão dos dados de candidato de logs
  - 4.2.4.4 *HTTPS* preparado para produção
 
 ### 4.3 Infraestrutura
