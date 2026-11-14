@@ -2,7 +2,10 @@
 
 Authority: [ADR-008](../architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md)
 and the implementation interview on 2026-11-11. This records policy decisions;
-production scoring is wired, while calibration and release approval remain provisional.
+the deterministic scoring primitives and request-scoped matching pipeline are
+implemented in this branch. Production API composition remains pending in stack
+PR #175; calibration and release
+approval remain provisional.
 
 ## Confirmed starting policy
 
@@ -12,6 +15,8 @@ production scoring is wired, while calibration and release approval remain provi
   not evidence that the coefficients are calibrated or release-approved.
 - Normalize over available sections: experience alone receives its full component
   score; education alone receives its full component score. Both absent yields zero.
+  Normalize configured weights over available sections only, including extreme
+  finite ratios; an absent section must never underflow available evidence.
 - Retain ADR-008 selection by semantic similarity before recency weighting, its
   recency/tie ordering and the existing final textual/semantic/structured blend.
   The final blend stays within [0,100], including floating-point rounding at
@@ -23,8 +28,17 @@ production scoring is wired, while calibration and release approval remain provi
   weights. Selection still takes the three highest semantic scores first.
 - The deterministic aggregation primitive is implemented in
   `src/matching/semantic.py`; its inputs must already be calibrated per-entry
-  scores in [0,100]. Production inference and API wiring are provided by `src/matching/pipeline.py` and `src/api/runtime.py`. Per-entry cosine calibration is explicit and provisional.
-  Its provisional policy version is `semantic-aggregation-v1-provisional`.
+  scores in [0,100]. `src/matching/pipeline.py` embeds and scores each available
+  experience/education entry and combines current textual/semantic candidates.
+  When both sections are absent it performs no semantic encoding or retrieval;
+  competencies/projects/languages may still retrieve actual textual evidence.
+  Production API composition in `src/api/runtime.py` remains planned in #175.
+  Per-entry cosine calibration is explicit and provisional.
+  Its provisional policy version is `semantic-aggregation-v2-provisional`; v2
+  corrects available-section normalization for extreme finite configured weights.
+  The default 80/20 weights, recency weights and final blend are unchanged.
+- Retrieval-pool limits must be positive integer counts; booleans, fractions and
+  nonfinite values are rejected before reaching SQL `LIMIT`.
 
 ## Performance target
 
@@ -34,7 +48,14 @@ The initial reference workload is 10 experiences, 5 education entries,
 latency, with models already loaded, and report the distribution and failures;
 do not silently redefine this as a component-only or percentile-only target.
 This benchmark does not introduce public collection caps or guarantee latency
-for every accepted request size. The opt-in offline reference passed on 2026-11-12: three complete warm requests took 2.157, 2.111 and 2.133 seconds with one CPU inference thread. Jobs were homogeneous synthetic records and entries repeated; this is a reference measurement, not general capacity or quality proof. See `tests/e2e/test_cpu_reference.py` and the current implementation validation report.
+for every accepted request size. Historical evidence from the original integration
+on 2026-11-12 recorded three complete warm requests at 2.157, 2.111 and 2.133
+seconds with one CPU inference thread. Jobs were homogeneous synthetic records
+and entries repeated. That measurement was not rerun at this branch head and does
+not validate the revised extraction/embedding policies or this scoring version.
+The opt-in `tests/e2e/test_cpu_reference.py` and its implementation report arrive
+in stack PR #178; they are absent at this step. Current-head end-to-end performance
+acceptance remains pending.
 
 ## Evaluation language mix
 

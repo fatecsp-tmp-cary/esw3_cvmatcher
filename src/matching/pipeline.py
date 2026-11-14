@@ -19,7 +19,12 @@ from src.extraction.service import ready_predicate as extraction_ready
 from src.extraction.taxonomy import _ALIASES, find_skills, normalize_skill
 from src.indexing.textual import TEXTUAL_VERSION
 from src.matching.ranking import RankingPolicy, SimilarityCalibration
-from src.matching.semantic import ExperienceScore, selected_experience_indices, semantic_score
+from src.matching.semantic import (
+    ExperienceScore,
+    SemanticPolicy,
+    selected_experience_indices,
+    semantic_score,
+)
 from src.matching.textual import candidate_query_text, retrieve_textual, textual_statement
 from src.normalization.candidate.curriculum import normalize_curriculum
 from src.persistence.job.job import Job, JobStatus
@@ -68,7 +73,8 @@ class MatchingPipeline:
             "extraction": self.extraction_version,
             "textual_policy": TEXTUAL_VERSION,
             "structured_policy": REQUIREMENTS_VERSION,
-            "semantic_policy": "semantic-aggregation-v1-provisional",
+            "semantic_policy": SemanticPolicy().version,
+            "retrieval_policy": "scored-evidence-final-readiness-v2",
         }
         digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()[:16]
         return f"{self.ranking.version}:{self.calibration.version}:{digest}"
@@ -108,9 +114,9 @@ class MatchingPipeline:
         education_texts = [f"{x.course}\n{x.level}" for x in candidate.education]
         texts = experience_texts + education_texts
         checkpoint()
-        vectors = self.encoder.encode_queries(texts or [query_text])
+        vectors = self.encoder.encode_queries(texts) if texts else []
         checkpoint()
-        if len(vectors) != len(texts or [query_text]):
+        if len(vectors) != len(texts):
             raise ValueError("Invalid embedding result count")
         from src.embeddings.encoder import normalized_vector
 
@@ -163,6 +169,11 @@ class MatchingPipeline:
                     )
                 )
             }
+            # A considered job needs evidence from a path that is still valid.
+            # Textual hits do not require a vector; semantic-only hits do.
+            jobs = [
+                job for job in jobs if job.id in text_scores or (texts and job.id in vector_jobs)
+            ]
             associated_skills: dict[int, set[str]] = {}
             for identifier, name in session.execute(
                 select(JobSkill.job_id, Skill.canonical_name)
