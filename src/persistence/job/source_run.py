@@ -11,6 +11,7 @@ from sqlalchemy import (
     false,
     text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.persistence.base import Base
@@ -53,6 +54,8 @@ class SourceRun(Base):
     )
 
     polling_mode: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    snapshot_evidence: Mapped[dict | None] = mapped_column(JSONB)
 
     duration_ms: Mapped[int | None] = mapped_column(Integer)
 
