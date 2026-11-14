@@ -62,7 +62,7 @@ the integrated tree; quality/calibration and source usage remain release gates.
 
 ## Issue #116 extraction correction
 
-Follow [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md):
+Follow [ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md):
 implement clause-local context and requirement projection, preserve raw detections,
 add explicit entity labels/span trimming and shared conservative typo support.
 Validate deterministic extraction tests and PostgreSQL publication before full
@@ -71,3 +71,18 @@ Preserve old held-out labels/results and designate updated copies regression-onl
 Document numerical failures, new blind-review dependency and disabled exclusions.
 Implementation belongs to PR #170; downstream evaluation packets/evaluator wiring
 belong to PR #178. Verify combined behavior without merging either PR.
+
+## Bilingual search interview — issues #147/#159
+
+Follow [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md). Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
+Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
+
+## Mandatory coverage interview — issue #120
+
+Follow [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md). Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
+Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
+
+## Deferred external deployment and source expansion
+
+Follow [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md). Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+Record measured verification before marking implementation complete. No release or merge is approved by this documentation.

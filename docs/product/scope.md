@@ -3,7 +3,7 @@
 ## In scope
 
 - Structured CV validation and normalization. Bounded spelling tolerance supports
-  scores under [ADR-014](../architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md);
+  scores under [ADR-018](../architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md);
   approximate matches do not establish canonical equivalence or exclusions.
 - Modular multi-source job ingestion, with at least one source for MVP.
 - Job normalization, source-specific identity, content-change detection,
@@ -28,3 +28,7 @@ crawling; sophisticated entity resolution or personalization.
 
 Implementation status and remaining work are tracked in
 [MVP tasks](../../specs/feature-001-mvp/tasks.md).
+
+External deployment and a second source remain deferred under
+[ADR-023](../architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
+Their optional future inclusion is not current implementation authorization.
