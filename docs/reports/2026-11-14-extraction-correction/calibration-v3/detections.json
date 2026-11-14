@@ -1,0 +1,1132 @@
+[
+  {
+    "id": "pt-001",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 22,
+        "end": 28,
+        "label": "language",
+        "confidence": 0.7101083397865295,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 22,
+        "detected_end": 28,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Python",
+        "canonical_skill": "Python"
+      },
+      {
+        "start": 44,
+        "end": 47,
+        "label": "database",
+        "confidence": 0.9702571034431458,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 44,
+        "detected_end": 47,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "SQL",
+        "canonical_skill": "SQL"
+      }
+    ]
+  },
+  {
+    "id": "pt-003",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 15,
+        "end": 36,
+        "label": "work experience requirement",
+        "confidence": 0.3108447790145874,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 15,
+        "detected_end": 36,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 38,
+        "end": 43,
+        "label": "database",
+        "confidence": 0.7030478119850159,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 38,
+        "detected_end": 43,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 9,
+        "end": 12,
+        "label": "professional license",
+        "confidence": 1.0,
+        "requirement_class": "REQUIRED",
+        "detection_source": "exact_alias",
+        "detected_start": 9,
+        "detected_end": 12,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "CRC",
+        "canonical_skill": "CRC"
+      }
+    ]
+  },
+  {
+    "id": "pt-004",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 9,
+        "end": 14,
+        "label": "tool",
+        "confidence": 0.7332437634468079,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 9,
+        "detected_end": 14,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 30,
+        "end": 39,
+        "label": "tool",
+        "confidence": 0.8717159628868103,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 30,
+        "detected_end": 39,
+        "negated": true,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "pt-005",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 18,
+        "end": 21,
+        "label": "database",
+        "confidence": 0.8449865579605103,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 18,
+        "detected_end": 21,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "SQL",
+        "canonical_skill": "SQL"
+      },
+      {
+        "start": 44,
+        "end": 50,
+        "label": "language",
+        "confidence": 0.8710026144981384,
+        "requirement_class": "NICE_TO_HAVE",
+        "detection_source": "model",
+        "detected_start": 44,
+        "detected_end": 50,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Python",
+        "canonical_skill": "Python"
+      }
+    ]
+  },
+  {
+    "id": "pt-007",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 0,
+        "end": 9,
+        "label": "education",
+        "confidence": 0.4422898292541504,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 0,
+        "detected_end": 9,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 13,
+        "end": 19,
+        "label": "language",
+        "confidence": 0.9596277475357056,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 13,
+        "detected_end": 19,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false,
+        "matched_skill": "English",
+        "canonical_skill": "English"
+      },
+      {
+        "start": 20,
+        "end": 26,
+        "label": "language",
+        "confidence": 0.9843611717224121,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 20,
+        "detected_end": 26,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "English",
+        "canonical_skill": "English"
+      },
+      {
+        "start": 42,
+        "end": 50,
+        "label": "language",
+        "confidence": 0.9737183451652527,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 42,
+        "detected_end": 50,
+        "negated": true,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Spanish",
+        "canonical_skill": "Spanish"
+      }
+    ]
+  },
+  {
+    "id": "pt-008",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 0,
+        "end": 10,
+        "label": "skill",
+        "confidence": 0.5244761109352112,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 0,
+        "detected_end": 10,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 11,
+        "end": 31,
+        "label": "skill",
+        "confidence": 0.3531704545021057,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 11,
+        "detected_end": 31,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 47,
+        "end": 58,
+        "label": "skill",
+        "confidence": 0.4713388681411743,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 47,
+        "detected_end": 58,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "pt-009",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 0,
+        "end": 11,
+        "label": "skill",
+        "confidence": 0.669269859790802,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 0,
+        "detected_end": 11,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 12,
+        "end": 16,
+        "label": "professional credential",
+        "confidence": 0.4114553928375244,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 12,
+        "detected_end": 16,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 32,
+        "end": 36,
+        "label": "professional credential",
+        "confidence": 0.45876240730285645,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 32,
+        "detected_end": 36,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "pt-011",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 23,
+        "end": 28,
+        "label": "framework",
+        "confidence": 0.9216174483299255,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 23,
+        "detected_end": 28,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "React",
+        "canonical_skill": "React"
+      },
+      {
+        "start": 44,
+        "end": 47,
+        "label": "framework",
+        "confidence": 0.9467799663543701,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 44,
+        "detected_end": 47,
+        "negated": true,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "pt-012",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 19,
+        "end": 30,
+        "label": "work experience requirement",
+        "confidence": 0.42711713910102844,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 19,
+        "detected_end": 30,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 32,
+        "end": 37,
+        "label": "database",
+        "confidence": 0.8242116570472717,
+        "requirement_class": "NICE_TO_HAVE",
+        "detection_source": "model",
+        "detected_start": 32,
+        "detected_end": 37,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 13,
+        "end": 16,
+        "label": "professional license",
+        "confidence": 1.0,
+        "requirement_class": "REQUIRED",
+        "detection_source": "exact_alias",
+        "detected_start": 13,
+        "detected_end": 16,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "CRF",
+        "canonical_skill": "CRF"
+      }
+    ]
+  },
+  {
+    "id": "pt-013",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 0,
+        "end": 9,
+        "label": "skill",
+        "confidence": 0.39886143803596497,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 0,
+        "detected_end": 9,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 31,
+        "end": 49,
+        "label": "education",
+        "confidence": 0.7878165245056152,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 31,
+        "detected_end": 49,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 10,
+        "end": 15,
+        "label": "professional license",
+        "confidence": 1.0,
+        "requirement_class": "REQUIRED",
+        "detection_source": "exact_alias",
+        "detected_start": 10,
+        "detected_end": 15,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "CNH D",
+        "canonical_skill": "CNH D"
+      }
+    ]
+  },
+  {
+    "id": "pt-014",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 0,
+        "end": 19,
+        "label": "skill",
+        "confidence": 0.44323837757110596,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 0,
+        "detected_end": 19,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 20,
+        "end": 25,
+        "label": "tool",
+        "confidence": 0.6063973307609558,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 20,
+        "detected_end": 25,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 41,
+        "end": 49,
+        "label": "tool",
+        "confidence": 0.6581503748893738,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 41,
+        "detected_end": 49,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "pt-015",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 23,
+        "end": 34,
+        "label": "skill",
+        "confidence": 0.35479703545570374,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 23,
+        "detected_end": 34,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 50,
+        "end": 53,
+        "label": "skill",
+        "confidence": 0.40476271510124207,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 50,
+        "detected_end": 53,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "pt-016",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 21,
+        "end": 25,
+        "label": "language",
+        "confidence": 0.9238832592964172,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 21,
+        "detected_end": 25,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Java",
+        "canonical_skill": "Java"
+      },
+      {
+        "start": 53,
+        "end": 59,
+        "label": "education",
+        "confidence": 0.6548659801483154,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 41,
+        "detected_end": 59,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 62,
+        "end": 73,
+        "label": "work experience requirement",
+        "confidence": 0.33114421367645264,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 62,
+        "detected_end": 73,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "pt-018",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 0,
+        "end": 21,
+        "label": "skill",
+        "confidence": 0.3240536153316498,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 0,
+        "detected_end": 21,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 22,
+        "end": 27,
+        "label": "language",
+        "confidence": 0.561573326587677,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 22,
+        "detected_end": 27,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 56,
+        "end": 61,
+        "label": "professional credential",
+        "confidence": 0.6222307085990906,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 56,
+        "detected_end": 61,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "CISSP",
+        "canonical_skill": "CISSP"
+      }
+    ]
+  },
+  {
+    "id": "pt-027",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 22,
+        "end": 28,
+        "label": "language",
+        "confidence": 0.7101083397865295,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 22,
+        "detected_end": 28,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Python",
+        "canonical_skill": "Python"
+      },
+      {
+        "start": 44,
+        "end": 47,
+        "label": "database",
+        "confidence": 0.9702571034431458,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 44,
+        "detected_end": 47,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "SQL",
+        "canonical_skill": "SQL"
+      }
+    ]
+  },
+  {
+    "id": "pt-029",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 18,
+        "end": 21,
+        "label": "database",
+        "confidence": 0.8449865579605103,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 18,
+        "detected_end": 21,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "SQL",
+        "canonical_skill": "SQL"
+      },
+      {
+        "start": 44,
+        "end": 50,
+        "label": "language",
+        "confidence": 0.8710026144981384,
+        "requirement_class": "NICE_TO_HAVE",
+        "detection_source": "model",
+        "detected_start": 44,
+        "detected_end": 50,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Python",
+        "canonical_skill": "Python"
+      }
+    ]
+  },
+  {
+    "id": "pt-030",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 9,
+        "end": 14,
+        "label": "tool",
+        "confidence": 0.7332437634468079,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 9,
+        "detected_end": 14,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 30,
+        "end": 39,
+        "label": "tool",
+        "confidence": 0.8717159628868103,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 30,
+        "detected_end": 39,
+        "negated": true,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "pt-032",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 27,
+        "end": 33,
+        "label": "framework",
+        "confidence": 0.7874066233634949,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 27,
+        "detected_end": 33,
+        "negated": false,
+        "conflicting": true,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false,
+        "matched_skill": "Docker",
+        "canonical_skill": "Docker"
+      },
+      {
+        "start": 47,
+        "end": 53,
+        "label": "framework",
+        "confidence": 0.8429756164550781,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 47,
+        "detected_end": 53,
+        "negated": false,
+        "conflicting": true,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Docker",
+        "canonical_skill": "Docker"
+      }
+    ]
+  },
+  {
+    "id": "pt-033",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 26,
+        "end": 31,
+        "label": "tool",
+        "confidence": 0.7448137402534485,
+        "requirement_class": "NICE_TO_HAVE",
+        "detection_source": "model",
+        "detected_start": 26,
+        "detected_end": 31,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "pt-034",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 0,
+        "end": 17,
+        "label": "skill",
+        "confidence": 0.4046952426433563,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 0,
+        "detected_end": 17,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 31,
+        "end": 42,
+        "label": "work experience requirement",
+        "confidence": 0.4745800793170929,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 31,
+        "detected_end": 42,
+        "negated": true,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 47,
+        "end": 50,
+        "label": "database",
+        "confidence": 0.7906444072723389,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 47,
+        "detected_end": 50,
+        "negated": true,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "en-001",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 18,
+        "end": 24,
+        "label": "language",
+        "confidence": 0.5321314930915833,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 18,
+        "detected_end": 24,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Python",
+        "canonical_skill": "Python"
+      },
+      {
+        "start": 38,
+        "end": 41,
+        "label": "database",
+        "confidence": 0.9722878932952881,
+        "requirement_class": "PREFERRED",
+        "detection_source": "model",
+        "detected_start": 38,
+        "detected_end": 41,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "SQL",
+        "canonical_skill": "SQL"
+      }
+    ]
+  },
+  {
+    "id": "en-003",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 9,
+        "end": 14,
+        "label": "tool",
+        "confidence": 0.7487062215805054,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 9,
+        "detected_end": 14,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 28,
+        "end": 37,
+        "label": "tool",
+        "confidence": 0.9078744053840637,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 28,
+        "detected_end": 37,
+        "negated": true,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "en-004",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 0,
+        "end": 12,
+        "label": "tool",
+        "confidence": 0.3822605013847351,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 0,
+        "detected_end": 12,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 13,
+        "end": 16,
+        "label": "database",
+        "confidence": 0.7178221344947815,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 13,
+        "detected_end": 16,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "SQL",
+        "canonical_skill": "SQL"
+      },
+      {
+        "start": 30,
+        "end": 36,
+        "label": "language",
+        "confidence": 0.9058352708816528,
+        "requirement_class": "NICE_TO_HAVE",
+        "detection_source": "model",
+        "detected_start": 30,
+        "detected_end": 36,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Python",
+        "canonical_skill": "Python"
+      }
+    ]
+  },
+  {
+    "id": "en-006",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 17,
+        "end": 19,
+        "label": "framework",
+        "confidence": 0.5045594573020935,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 17,
+        "detected_end": 19,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Go",
+        "canonical_skill": "Go"
+      },
+      {
+        "start": 33,
+        "end": 39,
+        "label": "work experience requirement",
+        "confidence": 0.7767139077186584,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 33,
+        "detected_end": 50,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      }
+    ]
+  },
+  {
+    "id": "en-010",
+    "offset_origin": "title + newline + description",
+    "evidence": [
+      {
+        "start": 0,
+        "end": 11,
+        "label": "skill",
+        "confidence": 0.5445115566253662,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 0,
+        "detected_end": 11,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": false,
+        "exclusion_safe": false
+      },
+      {
+        "start": 12,
+        "end": 35,
+        "label": "education",
+        "confidence": 0.35022687911987305,
+        "requirement_class": "REQUIRED",
+        "detection_source": "model",
+        "detected_start": 12,
+        "detected_end": 35,
+        "negated": false,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false
+      },
+      {
+        "start": 49,
+        "end": 55,
+        "label": "language",
+        "confidence": 0.8950703144073486,
+        "requirement_class": null,
+        "detection_source": "model",
+        "detected_start": 49,
+        "detected_end": 55,
+        "negated": true,
+        "conflicting": false,
+        "approximate_match": false,
+        "requirement_selected": true,
+        "exclusion_safe": false,
+        "matched_skill": "Python",
+        "canonical_skill": "Python"
+      }
+    ]
+  }
+]
