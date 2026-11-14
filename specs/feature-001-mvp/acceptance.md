@@ -96,9 +96,11 @@ second public-input validator.
 
 1. A live shape probe observed state-free APiBR records. The later ADR-013/count
    probe establishes the approved best-effort completeness
-   policy; source usage/retention evidence remains #134. The earlier shape probe
-   proves neither availability nor completeness. No hidden verifier is enabled
-   and no unproven scan may mark absent jobs stale.
+   policy; source usage/retention evidence remains #134. Accepted ADR-014 treats
+   presence in the open-vacancy listing of the source as availability evidence,
+   so listed jobs are ACTIVE. No hidden verifier is enabled, a job that leaves
+   the listing is not deactivated (#145), and no unproven scan may mark absent
+   jobs stale.
 2. The pinned multilingual E5 model/version and separate provenance are implemented
    (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
    the fixed canonical Job fields.

@@ -6,7 +6,8 @@ evidence that APiBR supplies those fields.
 
 `apibr_issues.json` is a small synthetic fixture for state-free records. It deliberately omits `state` and uses HTML section
 boundaries. It is not a captured or independently verified APiBR response.
-Its ingestion test forbids network access and expects `DISCOVERED`, not `ACTIVE`.
+Its ingestion test forbids network access and expects `ACTIVE` under ADR-014:
+presence in the listing is the availability evidence, without any per-job request.
 Live APiBR shape/completeness verification remains in issue #113.
 
 `apibr_v2_issues.json` is a synthetic fixture that mirrors the response shape

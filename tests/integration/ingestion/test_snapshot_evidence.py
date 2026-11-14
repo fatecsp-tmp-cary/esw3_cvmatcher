@@ -60,8 +60,8 @@ def test_complete_and_incomplete_counts_do_not_invent_availability_or_absence(db
     assert run.jobs_absent == run.jobs_marked_stale == 0
     assert session.get(Job, previous.id).status == JobStatus.ACTIVE
     assert session.scalars(select(Job.status).where(Job.source_job_id != "missing")).all() == [
-        JobStatus.DISCOVERED,
-        JobStatus.DISCOVERED,
+        JobStatus.ACTIVE,
+        JobStatus.ACTIVE,
     ]
     incomplete = ingest_apibr(session, source.id, Client(expected=3))
     assert incomplete.status == "SUCCEEDED" and incomplete.snapshot_complete is False

@@ -209,11 +209,11 @@ def test_state_free_fixture_never_triggers_availability_requests(session, monkey
     result = ingest_apibr(session, 1, _Pages(issues, []))
     job = session.scalar(select(Job))
     assert result.jobs_created == len(issues)
-    assert job.status == JobStatus.DISCOVERED
-    assert job.last_verified_at is None
+    assert job.status == JobStatus.ACTIVE
+    assert job.last_verified_at is not None
 
 
-def test_missing_state_preserves_existing_availability_and_verification(session):
+def test_state_free_reobservation_keeps_job_active_and_advances_verification(session):
     ingest_apibr(session, 1, _Pages([_issue(1)], []))
     job = session.scalar(select(Job))
     verified_at = job.last_verified_at
@@ -221,7 +221,28 @@ def test_missing_state_preserves_existing_availability_and_verification(session)
     issue.pop("state")
     ingest_apibr(session, 1, _Pages([issue], []))
     assert job.status == JobStatus.ACTIVE
-    assert job.last_verified_at == verified_at
+    assert job.last_verified_at > verified_at
+
+
+def test_previously_discovered_job_becomes_active_when_listed_again(session):
+    session.add(
+        Job(
+            source_id=1,
+            platform="apibr",
+            source_job_id="1",
+            title="Developer",
+            status=JobStatus.DISCOVERED,
+        )
+    )
+    session.commit()
+    issue = _issue(1)
+    issue.pop("state")
+
+    ingest_apibr(session, 1, _Pages([issue], []))
+    job = session.scalar(select(Job).where(Job.source_job_id == "1"))
+
+    assert job.status == JobStatus.ACTIVE
+    assert job.last_verified_at is not None
 
 
 @pytest.mark.parametrize(

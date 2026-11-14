@@ -224,15 +224,10 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         "currency": None,
         "job_url": job_url,
         "publication_date": _normalize_publication_date(raw_job.get("created_at")),
-        # APiBR aggregates GitHub issues; a closed issue is no longer an
-        # available job even if it remains present in the scan.
-        "status": (
-            "ACTIVE"
-            if raw_job.get("state") == "open"
-            else "EXPIRED"
-            if raw_job.get("state") == "closed"
-            else "DISCOVERED"
-        ),
+        # APiBR publishes its listing as open vacancies, so presence in it is
+        # open evidence (ADR-014). A record explicitly marked closed is no
+        # longer an available job even if it remains present in the scan.
+        "status": "EXPIRED" if raw_job.get("state") == "closed" else "ACTIVE",
         "last_verified_at": None,
         # The source payload is retained only when its terms permit it.
         "raw": None,

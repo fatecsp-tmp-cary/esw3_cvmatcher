@@ -75,11 +75,12 @@ limitations. Absence-driven transitions remain separate #145 work. The source id
 decision is settled: enforce unique `(platform, source_job_id)` and reject
 missing or blank source identifiers. See the
 [MVP acceptance clarifications](../../specs/feature-001-mvp/acceptance.md).
-APiBR aggregates GitHub issues: `state=open` normalizes to `ACTIVE`, and
-`state=closed` normalizes to `EXPIRED`.
-Missing state leaves new jobs `DISCOVERED`; ingestion performs no GitHub
-availability requests. Existing availability and verification timestamps are
-retained when evidence is absent. Malformed records are rejected individually
+APiBR aggregates GitHub issues and publishes its listing as open vacancies.
+Under accepted
+[ADR-014](../architecture/decisions/ADR-014-apibr-listing-presence-is-open-evidence.md),
+a listed record normalizes to `ACTIVE` and a successful observation advances
+verification; `state=closed` normalizes to `EXPIRED`. Ingestion performs no GitHub
+availability requests. Malformed records are rejected individually
 and valid records commit as `PARTIAL`; network/pagination failure rolls back
 job changes and records `FAILED`. Incremental and nonqualifying scans remain
 incomplete; even qualifying scans do not invent job availability. See
@@ -96,7 +97,8 @@ The [aggregate count probe](../reports/2026-11-12-apibr-count-attestation.json)
 observed 728 distinct IDs, an empty terminal page, zero duplicates/rejections and
 unchanged healthy body-dataset count/update signatures before/after pagination.
 No raw responses, poster details or source text were retained. All records lacked
-explicit state and therefore remain DISCOVERED. The user adopted the stricter
+explicit state; at that time they remained DISCOVERED, and ADR-014 later made
+listed records ACTIVE. The user adopted the stricter
 best-effort exact-count rule in ADR-013; this is not an immutable snapshot proof
 or evidence of source usage/retention rights. Operator configuration, bounded
 requests and invalid/partial scan protection are in the

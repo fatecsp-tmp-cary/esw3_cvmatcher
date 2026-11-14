@@ -155,7 +155,7 @@ async def test_async_scan_is_sequential_and_preserves_raw_malformed_records():
     ] == [["1"], ["2"], ["3"]]
     assert adapter.normalize(records[0])["status"] == "ACTIVE"
     assert adapter.normalize(records[2])["status"] == "EXPIRED"
-    assert adapter.normalize({"id": 3, "title": "Python"})["status"] == "DISCOVERED"
+    assert adapter.normalize({"id": 3, "title": "Python"})["status"] == "ACTIVE"
 
 
 async def test_async_scan_does_not_prefetch_pages():
