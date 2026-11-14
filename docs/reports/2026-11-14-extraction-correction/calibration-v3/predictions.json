@@ -1,0 +1,437 @@
+{
+  "schema_version": "1.0",
+  "predictions": [
+    {
+      "id": "pt-001",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 6,
+          "text": "Python",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 22,
+          "end": 25,
+          "text": "SQL",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 65.5768155026399
+    },
+    {
+      "id": "pt-003",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 3,
+          "text": "CRC",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 29,
+          "end": 34,
+          "text": "Excel",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 61.146612689187805
+    },
+    {
+      "id": "pt-004",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Figma",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 21,
+          "end": 30,
+          "text": "Photoshop",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 52.66489394596158
+    },
+    {
+      "id": "pt-005",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 3,
+          "text": "SQL",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 26,
+          "end": 32,
+          "text": "Python",
+          "requirement_class": "NICE_TO_HAVE"
+        }
+      ],
+      "role_score": 68.25053916559033
+    },
+    {
+      "id": "pt-007",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 6,
+          "text": "Inglês",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 22,
+          "end": 30,
+          "text": "Espanhol",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 62.81976745968901
+    },
+    {
+      "id": "pt-008",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 20,
+          "text": "Cozinha profissional",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 36,
+          "end": 47,
+          "text": "Panificação",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 61.71802663241124
+    },
+    {
+      "id": "pt-009",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 4,
+          "text": "NR10",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 20,
+          "end": 24,
+          "text": "NR35",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 61.65031942117484
+    },
+    {
+      "id": "pt-011",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "React",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 21,
+          "end": 24,
+          "text": "Vue",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 49.04398498072243
+    },
+    {
+      "id": "pt-012",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 3,
+          "text": "CRF",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 19,
+          "end": 24,
+          "text": "Excel",
+          "requirement_class": "NICE_TO_HAVE"
+        }
+      ],
+      "role_score": 54.33902775748006
+    },
+    {
+      "id": "pt-013",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "CNH D",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 21,
+          "end": 39,
+          "text": "Transporte escolar",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 46.16780313780246
+    },
+    {
+      "id": "pt-014",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Excel",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 21,
+          "end": 29,
+          "text": "Power BI",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 49.445580519626745
+    },
+    {
+      "id": "pt-015",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 11,
+          "text": "Microscopia",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 27,
+          "end": 30,
+          "text": "PCR",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 46.62104190845788
+    },
+    {
+      "id": "pt-016",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 4,
+          "text": "Java",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 32,
+          "end": 38,
+          "text": "sênior",
+          "requirement_class": "REQUIRED"
+        }
+      ],
+      "role_score": 73.19773725521908
+    },
+    {
+      "id": "pt-018",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Linux",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 34,
+          "end": 39,
+          "text": "CISSP",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 68.98476882598133
+    },
+    {
+      "id": "pt-027",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 6,
+          "text": "Python",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 22,
+          "end": 25,
+          "text": "SQL",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 53.332114264937175
+    },
+    {
+      "id": "pt-029",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 3,
+          "text": "SQL",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 26,
+          "end": 32,
+          "text": "Python",
+          "requirement_class": "NICE_TO_HAVE"
+        }
+      ],
+      "role_score": 48.469660028687656
+    },
+    {
+      "id": "pt-030",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Figma",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 21,
+          "end": 30,
+          "text": "Photoshop",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 50.81431703381071
+    },
+    {
+      "id": "pt-032",
+      "requirements": [
+        {
+          "start": 20,
+          "end": 26,
+          "text": "Docker",
+          "requirement_class": "REQUIRED"
+        }
+      ],
+      "role_score": 60.72408416852623
+    },
+    {
+      "id": "pt-033",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Excel",
+          "requirement_class": "NICE_TO_HAVE"
+        }
+      ],
+      "role_score": 55.15369910249954
+    },
+    {
+      "id": "pt-034",
+      "requirements": [
+        {
+          "start": 29,
+          "end": 32,
+          "text": "SAP",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 61.79102474905393
+    },
+    {
+      "id": "en-001",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 6,
+          "text": "Python",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 20,
+          "end": 23,
+          "text": "SQL",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 54.59950817423188
+    },
+    {
+      "id": "en-003",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Figma",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 19,
+          "end": 28,
+          "text": "Photoshop",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 30.459405860870767
+    },
+    {
+      "id": "en-004",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 3,
+          "text": "SQL",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 17,
+          "end": 23,
+          "text": "Python",
+          "requirement_class": "NICE_TO_HAVE"
+        }
+      ],
+      "role_score": 54.81993362180276
+    },
+    {
+      "id": "en-006",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 2,
+          "text": "Go",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 16,
+          "end": 22,
+          "text": "Senior",
+          "requirement_class": "REQUIRED"
+        }
+      ],
+      "role_score": 40.87707383753152
+    },
+    {
+      "id": "en-010",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 23,
+          "text": "Electrical installation",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 37,
+          "end": 43,
+          "text": "Python",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 51.06763236705947
+    }
+  ]
+}

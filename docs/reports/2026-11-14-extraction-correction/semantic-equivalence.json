@@ -1,0 +1,391 @@
+{
+  "model_version": "intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3:5c3f0ac86047711128e95842afa0700b87efef3e51af032c153841abf768bba7",
+  "script_sha256": "0c0e320570218921e841ced333ce51d181004506c78ecb4e2779aa7ee9205ae4",
+  "torch_version": "2.9.1+cpu",
+  "cpu_threads": 1,
+  "metric": "raw cosine of normalized vectors; no score calibration",
+  "automatic_canonicalization_enabled": false,
+  "limitations": "Small user-requested diagnostic. Related tools are not aliases. No acceptance threshold fitted.",
+  "results": [
+    {
+      "template": "bare",
+      "left": "C",
+      "right": "C#",
+      "relation": "distinct",
+      "query_query": 0.9110246481984312,
+      "passage_passage": 0.8889078365017742,
+      "query_passage": 0.8748588975423399,
+      "reverse_query_passage": 0.8878860240954879
+    },
+    {
+      "template": "bare",
+      "left": "C",
+      "right": "R",
+      "relation": "distinct",
+      "query_query": 0.8867604561547351,
+      "passage_passage": 0.9152014005691003,
+      "query_passage": 0.8787300024815418,
+      "reverse_query_passage": 0.8806835511683659
+    },
+    {
+      "template": "bare",
+      "left": "Java",
+      "right": "JavaScript",
+      "relation": "distinct",
+      "query_query": 0.9239115234186615,
+      "passage_passage": 0.9512008550565365,
+      "query_passage": 0.8808181448165153,
+      "reverse_query_passage": 0.8855436026960937
+    },
+    {
+      "template": "bare",
+      "left": "Ruby",
+      "right": "Rails",
+      "relation": "related",
+      "query_query": 0.8937141914532808,
+      "passage_passage": 0.9186667987857882,
+      "query_passage": 0.8707895040551415,
+      "reverse_query_passage": 0.8624655666460791
+    },
+    {
+      "template": "bare",
+      "left": "PHP",
+      "right": "WordPress",
+      "relation": "related",
+      "query_query": 0.9285656021897596,
+      "passage_passage": 0.9601119759512207,
+      "query_passage": 0.887496523006262,
+      "reverse_query_passage": 0.8945121615897154
+    },
+    {
+      "template": "bare",
+      "left": "JavaScript",
+      "right": "JS",
+      "relation": "alias",
+      "query_query": 0.949451681988948,
+      "passage_passage": 0.9208072897771692,
+      "query_passage": 0.9215404327683193,
+      "reverse_query_passage": 0.8864663212261524
+    },
+    {
+      "template": "bare",
+      "left": "C#",
+      "right": "C sharp",
+      "relation": "alias",
+      "query_query": 0.8821128734634078,
+      "passage_passage": 0.8990981443463966,
+      "query_passage": 0.8698822713177937,
+      "reverse_query_passage": 0.8523991914327146
+    },
+    {
+      "template": "bare",
+      "left": "PostgreSQL",
+      "right": "Postgres",
+      "relation": "alias",
+      "query_query": 0.9817883333387066,
+      "passage_passage": 0.9834212158463111,
+      "query_passage": 0.9247852086137237,
+      "reverse_query_passage": 0.9158037645817799
+    },
+    {
+      "template": "bare",
+      "left": "C",
+      "right": "C",
+      "relation": "identity",
+      "query_query": 1.0,
+      "passage_passage": 1.0,
+      "query_passage": 0.9459486292492806,
+      "reverse_query_passage": 0.9459486292492806
+    },
+    {
+      "template": "english",
+      "left": "C",
+      "right": "C#",
+      "relation": "distinct",
+      "query_query": 0.9558516003551427,
+      "passage_passage": 0.964272932223859,
+      "query_passage": 0.9287442714652131,
+      "reverse_query_passage": 0.9286782635383604
+    },
+    {
+      "template": "english",
+      "left": "C",
+      "right": "R",
+      "relation": "distinct",
+      "query_query": 0.9396492147234877,
+      "passage_passage": 0.9498018402238249,
+      "query_passage": 0.9125032452886085,
+      "reverse_query_passage": 0.9072374210084909
+    },
+    {
+      "template": "english",
+      "left": "Java",
+      "right": "JavaScript",
+      "relation": "distinct",
+      "query_query": 0.963017753148278,
+      "passage_passage": 0.9693958378073863,
+      "query_passage": 0.9262578936726448,
+      "reverse_query_passage": 0.9182231125942907
+    },
+    {
+      "template": "english",
+      "left": "Ruby",
+      "right": "Rails",
+      "relation": "related",
+      "query_query": 0.9417966325999112,
+      "passage_passage": 0.9563296464153943,
+      "query_passage": 0.9088025713298852,
+      "reverse_query_passage": 0.9050842161885118
+    },
+    {
+      "template": "english",
+      "left": "PHP",
+      "right": "WordPress",
+      "relation": "related",
+      "query_query": 0.9495386070514248,
+      "passage_passage": 0.951753100019983,
+      "query_passage": 0.9111431120823383,
+      "reverse_query_passage": 0.9061676215672834
+    },
+    {
+      "template": "english",
+      "left": "JavaScript",
+      "right": "JS",
+      "relation": "alias",
+      "query_query": 0.9831345810899178,
+      "passage_passage": 0.9843566649154064,
+      "query_passage": 0.938593355580555,
+      "reverse_query_passage": 0.9466615238164805
+    },
+    {
+      "template": "english",
+      "left": "C#",
+      "right": "C sharp",
+      "relation": "alias",
+      "query_query": 0.9354692630784496,
+      "passage_passage": 0.9536283173344092,
+      "query_passage": 0.9128658686566733,
+      "reverse_query_passage": 0.9085726154450545
+    },
+    {
+      "template": "english",
+      "left": "PostgreSQL",
+      "right": "Postgres",
+      "relation": "alias",
+      "query_query": 0.9876873432354318,
+      "passage_passage": 0.9849736600084731,
+      "query_passage": 0.949407703770739,
+      "reverse_query_passage": 0.9372518880389998
+    },
+    {
+      "template": "english",
+      "left": "C",
+      "right": "C",
+      "relation": "identity",
+      "query_query": 0.9999999999999999,
+      "passage_passage": 1.0000000000000002,
+      "query_passage": 0.9631198551324122,
+      "reverse_query_passage": 0.9631198551324122
+    },
+    {
+      "template": "portuguese",
+      "left": "C",
+      "right": "C#",
+      "relation": "distinct",
+      "query_query": 0.9678139505412878,
+      "passage_passage": 0.977417995272876,
+      "query_passage": 0.9561077250079149,
+      "reverse_query_passage": 0.9495151811534315
+    },
+    {
+      "template": "portuguese",
+      "left": "C",
+      "right": "R",
+      "relation": "distinct",
+      "query_query": 0.952444888628616,
+      "passage_passage": 0.9624295795867284,
+      "query_passage": 0.938875987045178,
+      "reverse_query_passage": 0.9340762147116545
+    },
+    {
+      "template": "portuguese",
+      "left": "Java",
+      "right": "JavaScript",
+      "relation": "distinct",
+      "query_query": 0.9694273684935203,
+      "passage_passage": 0.9740633941165467,
+      "query_passage": 0.945527039604367,
+      "reverse_query_passage": 0.9402762267553867
+    },
+    {
+      "template": "portuguese",
+      "left": "Ruby",
+      "right": "Rails",
+      "relation": "related",
+      "query_query": 0.9590520189386115,
+      "passage_passage": 0.9692717968880317,
+      "query_passage": 0.9430059496460472,
+      "reverse_query_passage": 0.9424430049818558
+    },
+    {
+      "template": "portuguese",
+      "left": "PHP",
+      "right": "WordPress",
+      "relation": "related",
+      "query_query": 0.9580012978777394,
+      "passage_passage": 0.9616131722388814,
+      "query_passage": 0.9340563981463779,
+      "reverse_query_passage": 0.932613127981963
+    },
+    {
+      "template": "portuguese",
+      "left": "JavaScript",
+      "right": "JS",
+      "relation": "alias",
+      "query_query": 0.986197441318216,
+      "passage_passage": 0.9862211073825118,
+      "query_passage": 0.9548818198619332,
+      "reverse_query_passage": 0.9623269756575105
+    },
+    {
+      "template": "portuguese",
+      "left": "C#",
+      "right": "C sharp",
+      "relation": "alias",
+      "query_query": 0.956608299437112,
+      "passage_passage": 0.9684903837011521,
+      "query_passage": 0.943484351940932,
+      "reverse_query_passage": 0.9468177883958515
+    },
+    {
+      "template": "portuguese",
+      "left": "PostgreSQL",
+      "right": "Postgres",
+      "relation": "alias",
+      "query_query": 0.985600023752878,
+      "passage_passage": 0.9888759325849723,
+      "query_passage": 0.9635029516864134,
+      "reverse_query_passage": 0.9616588032998308
+    },
+    {
+      "template": "portuguese",
+      "left": "C",
+      "right": "C",
+      "relation": "identity",
+      "query_query": 0.9999999999999999,
+      "passage_passage": 1.0,
+      "query_passage": 0.9781639457542691,
+      "reverse_query_passage": 0.9781639457542691
+    }
+  ],
+  "summaries": [
+    {
+      "template": "bare",
+      "mode": "query_query",
+      "distinct_max": 0.9239115234186615,
+      "related_min": 0.8937141914532808,
+      "alias_min": 0.8821128734634078,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "bare",
+      "mode": "passage_passage",
+      "distinct_max": 0.9512008550565365,
+      "related_min": 0.9186667987857882,
+      "alias_min": 0.8990981443463966,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "bare",
+      "mode": "query_passage",
+      "distinct_max": 0.8808181448165153,
+      "related_min": 0.8707895040551415,
+      "alias_min": 0.8698822713177937,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "bare",
+      "mode": "reverse_query_passage",
+      "distinct_max": 0.8878860240954879,
+      "related_min": 0.8624655666460791,
+      "alias_min": 0.8523991914327146,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "english",
+      "mode": "query_query",
+      "distinct_max": 0.963017753148278,
+      "related_min": 0.9417966325999112,
+      "alias_min": 0.9354692630784496,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "english",
+      "mode": "passage_passage",
+      "distinct_max": 0.9693958378073863,
+      "related_min": 0.951753100019983,
+      "alias_min": 0.9536283173344092,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "english",
+      "mode": "query_passage",
+      "distinct_max": 0.9287442714652131,
+      "related_min": 0.9088025713298852,
+      "alias_min": 0.9128658686566733,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "english",
+      "mode": "reverse_query_passage",
+      "distinct_max": 0.9286782635383604,
+      "related_min": 0.9050842161885118,
+      "alias_min": 0.9085726154450545,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "portuguese",
+      "mode": "query_query",
+      "distinct_max": 0.9694273684935203,
+      "related_min": 0.9580012978777394,
+      "alias_min": 0.956608299437112,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "portuguese",
+      "mode": "passage_passage",
+      "distinct_max": 0.977417995272876,
+      "related_min": 0.9616131722388814,
+      "alias_min": 0.9684903837011521,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "portuguese",
+      "mode": "query_passage",
+      "distinct_max": 0.9561077250079149,
+      "related_min": 0.9340563981463779,
+      "alias_min": 0.943484351940932,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    },
+    {
+      "template": "portuguese",
+      "mode": "reverse_query_passage",
+      "distinct_max": 0.9495151811534315,
+      "related_min": 0.932613127981963,
+      "alias_min": 0.9468177883958515,
+      "separates_distinct_from_related": false,
+      "separates_distinct_from_aliases": false
+    }
+  ]
+}

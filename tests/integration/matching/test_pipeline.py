@@ -339,3 +339,34 @@ def test_result_skills_combine_stored_and_extracted_skills_without_changing_the_
     assert matches[0]["job"]["skills"] == ["PostgreSQL", "Python"]
     with Session(db_engine) as session:
         assert session.get(Job, job_id).skills == ["PostgreSQL"]
+
+
+def test_typo_support_on_both_sides_keeps_exclusions_disabled_and_candidate_private(
+    populated, caplog
+):
+    from src.extraction.persistence import persist_requirements
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    sessions, encoder, identities = populated
+    with sessions() as session, session.begin():
+        for identifier in identities[:2]:
+            job = session.get(Job, identifier)
+            job.skills = []
+            job.description = "Pyhton required."
+            text = job.title + "\n" + job.description
+            start = text.rindex("Pyhton")
+            rows = [SpanEvidence(start, start + 6, "skill", 0.9).serialize(text)]
+            persist_requirements(session, job, rows, text)
+            assert rows[0]["approximate_match"] and not rows[0]["exclusion_safe"]
+    body = curriculum()
+    for entry in body["experiencias"]:
+        entry["cargo"] = "Pythom Developer"
+        entry["descricao"] = "Pythom PostgreSQL"
+    body["competencias"] = [{"descricao": "Pythom", "nivel": "avançado"}]
+    result = MatchingPipeline(sessions, encoder, VERSION)(
+        CurriculumRequest.model_validate(body), 10
+    )
+    assert len(result.matches) == 2
+    assert all("python" in row.matched_skills for row in result.matches)
+    assert all(row.eligibility and row.missing_requirements == [] for row in result.matches)
+    assert "Pythom" not in caplog.text and body["curriculo_id"] not in caplog.text

@@ -146,3 +146,14 @@ false regardless of a mathematical gate result. Freeze/version fitted calibratio
 using calibration cases only before held-out measurement; never fit to held-out
 labels. The current packets are still unreviewed and no passing human quality
 or fitted calibration is claimed.
+
+## Extraction-policy correction (2026-11-14)
+
+[ADR-018](../architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md)
+supersedes old negation/conflict conventions for current extraction. Keep the
+original synthetic/reviewed evidence unchanged and use the
+[policy-updated copies](human-review/extraction-policy-v2/README.md). Human source
+review and assistant policy adjudication are separate provenance. The evaluator
+now prevents a diagnosed/reused held-out partition from reporting independent
+quality measurement or held-out acceptance, even for perfect oracle predictions.
+See [separate PT/EN measurements and remaining gates](../reports/2026-11-14-extraction-correction/README.md).

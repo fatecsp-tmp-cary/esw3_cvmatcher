@@ -4,10 +4,10 @@ from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 
 from src.extraction.classification import annotate_spans
-from src.extraction.taxonomy import _ALIASES
+from src.extraction.taxonomy import _ALIASES, CATEGORIES, VERSION
 from src.persistence.job.skill import JobRequirement, JobSkill, Skill
 
-SEED_VERSION = "project-explicit-aliases-v1"
+SEED_VERSION = VERSION
 SEED_PROVENANCE = "Project-maintained explicit aliases in src/extraction/taxonomy.py"
 
 
@@ -20,13 +20,15 @@ def seed_taxonomy(session):
         # project seed owns its canonical names and additive aliases only.
         session.execute(
             insert(Skill)
-            .values(canonical_name=name, aliases=aliases, category="technology")
+            .values(
+                canonical_name=name, aliases=aliases, category=CATEGORIES.get(name, "technology")
+            )
             .on_conflict_do_nothing(index_elements=[Skill.canonical_name])
         )
         skill = session.scalar(select(Skill).where(Skill.canonical_name == name).with_for_update())
         skill.aliases = sorted(set(skill.aliases or []) | set(aliases))
         if skill.category is None:
-            skill.category = "technology"
+            skill.category = CATEGORIES.get(name, "technology")
     session.flush()
 
 
@@ -36,20 +38,21 @@ def persist_requirements(session, job, evidence, text):
     session.execute(delete(JobRequirement).where(JobRequirement.job_id == job.id))
     session.execute(delete(JobSkill).where(JobSkill.job_id == job.id))
     skills = {s.canonical_name: s.id for s in session.scalars(select(Skill))}
-    annotate_spans(text, evidence)
+    selected = annotate_spans(text, evidence)
     associated = set()
     seen = set()
-    for item in evidence:
+    for item in selected:
         value = text[item["start"] : item["end"]]
         name = item.get("canonical_skill")
+        scoring_name = item.get("matched_skill")
         concept = name or value.casefold().strip()
         strength = item["requirement_class"]
-        if name:
-            item["canonical_skill"] = name
-            # Negated/uncertain occurrences remain spans, not positive skills.
-            if strength is not None and skills[name] not in associated:
-                session.add(JobSkill(job_id=job.id, skill_id=skills[name]))
-                associated.add(skills[name])
+        # JobSkill associations support scores only. Approximate matches retain
+        # provenance in extraction evidence and never gain a canonical requirement
+        # FK or modify aliases. There is no candidate data in these job records.
+        if scoring_name and strength is not None and skills[scoring_name] not in associated:
+            session.add(JobSkill(job_id=job.id, skill_id=skills[scoring_name]))
+            associated.add(skills[scoring_name])
         if strength is not None and (concept, strength) not in seen:
             session.add(
                 JobRequirement(
