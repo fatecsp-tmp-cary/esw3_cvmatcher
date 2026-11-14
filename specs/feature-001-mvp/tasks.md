@@ -53,7 +53,7 @@ for scope and limitations.
 
 ## Issue #116 extraction correction — 2026-11-14
 
-Policy authority: [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md).
 
 - [x] Interview and record user decisions before dependent implementation.
 - [x] Implement clause-local strengths, negated-null/hedged optional evidence,
