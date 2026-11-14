@@ -53,7 +53,7 @@ for scope and limitations.
 
 ## Issue #116 extraction correction — 2026-11-14
 
-Policy authority: [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md).
 
 - [x] Interview and record user decisions before dependent implementation.
 - [x] Implement clause-local strengths, negated-null/hedged optional evidence,
@@ -73,3 +73,15 @@ Policy authority: [ADR-014](../../docs/architecture/decisions/ADR-014-extraction
       Reused held-out labels are regression evidence, not renewed independence.
 - [ ] Define minimum mandatory-mention support if future exclusions are proposed.
       All new exclusions remain disabled; no release/merge approval is implied.
+
+## Bilingual search interview — issues #147/#159
+
+- [x] Record the user decision in [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
+- [ ] Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
+## Mandatory coverage interview — issue #120
+
+- [x] Record the user decision in [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
+- [ ] Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
