@@ -29,6 +29,69 @@ Stop using `docker compose -f docker-compose.yml -f docker-compose.dev.yml down`
 Retain named volumes; see [deployment and recovery](docs/operations/deployment.md)
 for production composition, model preparation and backup procedures.
 
+## Run the complete stack
+
+This is the short path from a checkout to a ranked `POST /matches` response with
+the real pipeline. The authoritative procedure, limits and recovery steps are in
+[deployment](docs/operations/deployment.md) and [worker](docs/operations/worker.md).
+
+1. Create a private `.env` in the repository root. The stack reaches PostgreSQL
+   through the Compose network, so the URL uses host `postgres`:
+
+   ```text
+   POSTGRES_PASSWORD=<choose-a-password>
+   DATABASE_URL=postgresql://cvmatch:<the-same-password>@postgres:5432/cvmatch
+   ```
+
+2. Build the image and prepare the pinned local models. Preparation is the only
+   step that downloads anything; serving is offline.
+
+   ```bash
+   docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml build api
+   docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml --profile prepare run --rm model-init
+   docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml --profile prepare run --rm prepare-extraction
+   docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml --profile prepare run --rm prepare-embeddings
+   ```
+
+3. Start PostgreSQL, apply migrations and register the job source once:
+
+   ```bash
+   docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml up -d postgres migrate
+   docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml run --rm worker python -m src.worker.sources register apibr --polling-mode SNAPSHOT
+   ```
+
+4. Start the worker and the API, then check readiness:
+
+   ```bash
+   docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml up -d worker api
+   curl --fail http://127.0.0.1:8000/health
+   ```
+
+5. Request matches with the synthetic example curriculum:
+
+   ```bash
+   curl http://127.0.0.1:8000/matches \
+     --header 'Content-Type: application/json' \
+     --data @examples/mock_api/curriculum.json
+   ```
+
+What to expect:
+
+- The worker polls the source when it starts and then daily at 08:00
+  `America/Sao_Paulo`; see the [worker schedule](docs/operations/worker.md#daily-schedule-and-poll-on-start).
+- A job is matched only after its extraction and embedding succeed. On the
+  one-CPU Compose limit, a local run measured about 25 seconds of extraction per
+  job, so the first backlog of several hundred jobs takes hours. `/matches`
+  returns an empty list until the first jobs are ready.
+- The first `/health` call after a start loads the models and can take longer
+  than later calls. Call it once before demonstrating the API.
+- The API runs one matching request at a time and admits 60 requests per rolling
+  minute; excess requests receive `503` or `429`. See
+  [production API admission](#production-api-admission).
+- Set `CVMATCHER_API_PORT` in `.env` to publish the API on another loopback port.
+
+Stop the stack with `docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml down`; named database and model volumes are kept.
+
 ## Runnable API mock
 
 The deterministic mock server lets API consumers try the implemented curriculum
