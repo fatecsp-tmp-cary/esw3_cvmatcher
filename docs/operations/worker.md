@@ -33,6 +33,26 @@ fixed safe error categories. Existing ingestion still owns per-run evidence and
 its rollback/PARTIAL semantics. Logs contain numeric source IDs and fixed status
 values, never source/job text or exception messages.
 
+### Daily schedule and poll on start
+
+Two optional worker settings change when sources are polled; without them the
+interval behavior above is unchanged:
+
+- `CVMATCHER_SOURCE_DAILY_AT` (`HH:MM`, 24-hour) with `CVMATCHER_SOURCE_TIMEZONE`
+  (IANA name, default `UTC`): after each poll, `next_run_at` is the next
+  occurrence of that local time instead of completion plus `polling_interval`.
+- `CVMATCHER_SOURCE_POLL_ON_START=1`: the first cycle of the long-running worker
+  polls every enabled source even when it is not due yet. A source whose
+  `last_run_at` is newer than ten minutes is skipped, so a restart loop cannot
+  repeatedly request the source. `python -m src.worker --once` never forces a poll.
+
+Invalid values fail worker startup with the fixed `worker_configuration_unavailable`
+category. The source lock still prevents overlapping polls. The production
+Compose file sets poll on start and `08:00` `America/Sao_Paulo`; override the
+three variables in the private environment file to change them. For APiBR the
+poll is also the availability check under
+[ADR-014](../architecture/decisions/ADR-014-apibr-listing-presence-is-open-evidence.md).
+
 ## Processing and operations
 
 `BackgroundWorker(scheduler, sessions, extraction_worker, config_version, ...)`

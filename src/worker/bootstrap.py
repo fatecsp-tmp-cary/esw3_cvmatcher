@@ -1,7 +1,10 @@
 """Production worker composition using pinned offline models and PostgreSQL."""
 
 import os
+from collections.abc import Mapping
 from datetime import UTC, datetime
+from typing import Any
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import or_, select
 
@@ -15,7 +18,7 @@ from src.persistence.database import create_db_engine, create_session_factory
 from src.persistence.embedding import JobEmbedding
 from src.persistence.job.job import Job, JobStatus
 from src.worker.runtime import BackgroundWorker
-from src.worker.scheduler import SourceScheduler
+from src.worker.scheduler import SourceScheduler, parse_daily_time
 
 
 class EmbeddingMaintenance:
@@ -58,7 +61,29 @@ class EmbeddingMaintenance:
         return processed
 
 
+def source_schedule(environ: Mapping[str, str]) -> dict[str, Any]:
+    """Read the optional daily polling time, time zone and poll-on-start flag.
+
+    Invalid values raise, so the worker fails closed instead of guessing a schedule.
+    """
+    daily = environ.get("CVMATCHER_SOURCE_DAILY_AT", "").strip()
+    zone = environ.get("CVMATCHER_SOURCE_TIMEZONE", "").strip() or "UTC"
+    flag = environ.get("CVMATCHER_SOURCE_POLL_ON_START", "").strip() or "0"
+    if flag not in ("0", "1"):
+        raise ValueError("CVMATCHER_SOURCE_POLL_ON_START must be 0 or 1")
+    try:
+        timezone = ZoneInfo(zone)
+    except Exception:
+        raise ValueError("CVMATCHER_SOURCE_TIMEZONE must be an IANA time zone") from None
+    return {
+        "daily_at": parse_daily_time(daily) if daily else None,
+        "timezone": timezone,
+        "poll_on_start": flag == "1",
+    }
+
+
 def create_default_worker() -> BackgroundWorker:
+    schedule = source_schedule(os.environ)
     directory = os.environ["CVMATCHER_EXTRACTION_DIRECTORY"]
     if not directory.strip():
         raise ValueError("Prepared extraction directory is required")
@@ -74,7 +99,12 @@ def create_default_worker() -> BackgroundWorker:
             return expire_source_timestamps(session, now=datetime.now(UTC))
 
     return BackgroundWorker(
-        SourceScheduler(engine, sessions),
+        SourceScheduler(
+            engine,
+            sessions,
+            daily_at=schedule["daily_at"],
+            timezone=schedule["timezone"],
+        ),
         sessions,
         ExtractionWorker(sessions, extractor, EXTRACTION_VERSION),
         EXTRACTION_VERSION,
@@ -82,4 +112,5 @@ def create_default_worker() -> BackgroundWorker:
             sessions, EmbeddingWorker(sessions, encoder, EXTRACTION_VERSION)
         ),
         expiration_hook=expire,
+        poll_on_start=schedule["poll_on_start"],
     )

@@ -16,7 +16,8 @@ Implementation below is distinct from release approval. #99 remains open.
   through exact shared aliases; repository topics, free text and conflicting
   labels are never classified (#180).
 - PostgreSQL identity/source scheduling locks, bounded background cycles and
-  reliable source-timestamp expiration.
+  reliable source-timestamp expiration. Optional poll on worker start and a
+  configured daily local polling time, 08:00 America/Sao_Paulo in Compose (#184).
 - Separate extraction state/evidence, content/config readiness, concurrent claims,
   three-attempt failure and explicit retry. Failed jobs are withheld from matching.
 - Pinned offline local GLiNER inference with token-aware full-text coverage,

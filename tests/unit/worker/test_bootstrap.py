@@ -1,3 +1,4 @@
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -169,3 +170,51 @@ def test_compose_default_postgres_image_uses_accepted_immutable_digest():
     documentation = Path("docs/operations/deployment.md").read_text()
     assert accepted_image in documentation
     assert "mutable tags do not satisfy deployment acceptance" in documentation
+
+
+def test_source_schedule_defaults_to_interval_polling_without_start_poll():
+    schedule = bootstrap.source_schedule({})
+
+    assert schedule["daily_at"] is None
+    assert schedule["poll_on_start"] is False
+    assert str(schedule["timezone"]) == "UTC"
+
+
+def test_source_schedule_reads_daily_time_zone_and_start_poll():
+    schedule = bootstrap.source_schedule(
+        {
+            "CVMATCHER_SOURCE_DAILY_AT": "08:00",
+            "CVMATCHER_SOURCE_TIMEZONE": "America/Sao_Paulo",
+            "CVMATCHER_SOURCE_POLL_ON_START": "1",
+        }
+    )
+
+    assert (schedule["daily_at"].hour, schedule["daily_at"].minute) == (8, 0)
+    assert str(schedule["timezone"]) == "America/Sao_Paulo"
+    assert schedule["poll_on_start"] is True
+
+
+@pytest.mark.parametrize(
+    "environ",
+    [
+        {"CVMATCHER_SOURCE_DAILY_AT": "8am"},
+        {"CVMATCHER_SOURCE_TIMEZONE": "Mars/Olympus"},
+        {"CVMATCHER_SOURCE_POLL_ON_START": "yes"},
+    ],
+)
+def test_invalid_source_schedule_fails_closed(environ, monkeypatch, caplog):
+    with pytest.raises(ValueError):
+        bootstrap.source_schedule(environ)
+    monkeypatch.setenv("CVMATCHER_EXTRACTION_DIRECTORY", "/prepared/extraction")
+    for name, value in environ.items():
+        monkeypatch.setenv(name, value)
+    assert main(["--once"]) == 1
+    assert "worker_configuration_unavailable" in caplog.text
+
+
+def test_production_compose_polls_on_start_and_daily_at_eight():
+    compose = Path("docker-compose.production.yml").read_text(encoding="utf-8")
+
+    assert "CVMATCHER_SOURCE_POLL_ON_START: ${CVMATCHER_SOURCE_POLL_ON_START:-1}" in compose
+    assert "CVMATCHER_SOURCE_DAILY_AT: ${CVMATCHER_SOURCE_DAILY_AT:-08:00}" in compose
+    assert "CVMATCHER_SOURCE_TIMEZONE: ${CVMATCHER_SOURCE_TIMEZONE:-America/Sao_Paulo}" in compose

@@ -39,6 +39,7 @@ class BackgroundWorker:
         expiration_hook: Callable[[], object] | None = None,
         max_extractions_per_cycle: int = 100,
         enqueue_batch_size: int = 100,
+        poll_on_start: bool = False,
     ) -> None:
         if not config_version or config_version != extraction_worker.config_version:
             raise ValueError("worker and extractor configuration versions must agree")
@@ -53,6 +54,7 @@ class BackgroundWorker:
         self.expiration_hook = expiration_hook
         self.max_extractions_per_cycle = max_extractions_per_cycle
         self.enqueue_batch_size = enqueue_batch_size
+        self.poll_on_start = bool(poll_on_start)
 
     def enqueue_missing(self) -> int:
         """Never reset FAILED/current work; new content/config must reprocess."""
@@ -83,7 +85,7 @@ class BackgroundWorker:
         with self.sessions() as session, session.begin():
             enqueue(session, job_id, self.config_version, retry=True)
 
-    def run_once(self, *, now: datetime | None = None) -> CycleResult:
+    def run_once(self, *, now: datetime | None = None, force_poll: bool = False) -> CycleResult:
         errors = []
 
         def stage(name, operation, default):
@@ -98,7 +100,12 @@ class BackgroundWorker:
                 )
                 return default
 
-        polls = stage("source_poll", lambda: self.scheduler.run_due(now=now), ())
+        def poll():
+            if force_poll:
+                return self.scheduler.run_due(now=now, force=True)
+            return self.scheduler.run_due(now=now)
+
+        polls = stage("source_poll", poll, ())
         if self.expiration_hook is not None:
             stage("expiration", self.expiration_hook, None)
         enqueued = stage("enqueue", self.enqueue_missing, 0)
@@ -117,6 +124,12 @@ class BackgroundWorker:
     def run_forever(self, stop: Event, *, poll_seconds: float = 5.0) -> None:
         if not math.isfinite(poll_seconds) or poll_seconds <= 0:
             raise ValueError("worker polling delay must be finite and positive")
+        # Only the first cycle of a long-running worker may poll before a source is due.
+        force_poll = self.poll_on_start
         while not stop.is_set():
-            self.run_once()
+            if force_poll:
+                self.run_once(force_poll=True)
+                force_poll = False
+            else:
+                self.run_once()
             stop.wait(poll_seconds)
