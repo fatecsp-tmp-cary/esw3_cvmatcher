@@ -284,3 +284,9 @@ Implement/version per-job coverage and its boundary/evidence tests without chang
 Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
 
 Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+
+## Stale expiration interview — issue #145
+
+Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
+
+Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.

@@ -241,3 +241,9 @@ Only explicit REQUIRED concepts enter the ADR-021 threshold: all below three, ot
 Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
 
 External hosting/HTTPS deployment and second-source research/selection remain deferred. Local pre-production and APiBR remain the authorized scope.
+
+## Stale expiration interview — issue #145
+
+Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
+
+The accepted expiration threshold is three qualifying absence snapshots, including the one that first marks STALE. No age-based threshold is selected. Bad scans do not advance the count; rediscovery resets it. Supporting counters remain outside canonical Job.

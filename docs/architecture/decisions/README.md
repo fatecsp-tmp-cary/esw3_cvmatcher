@@ -38,3 +38,5 @@ superseded by later ADRs; do not rewrite their rationale or status history.
 - [ADR-021: Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) — accepted interview policy; implementation status is tracked separately.
 
 - [ADR-023: External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) — accepted interview policy; implementation status is tracked separately.
+
+- [ADR-020: Three qualifying absence snapshots expire stale jobs](ADR-020-three-snapshot-stale-expiration.md) — accepted interview policy; implementation status is tracked separately.
