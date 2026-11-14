@@ -104,7 +104,8 @@ second public-input validator.
    so listed jobs are ACTIVE. No hidden verifier is enabled. Under accepted
    ADR-015, a job absent from a qualifying SNAPSHOT poll becomes STALE; no
    incremental, partial, failed or non-qualifying scan may mark absent jobs
-   stale, and STALE→EXPIRED thresholds remain #145.
+   stale. ADR-020 selects three qualifying absent snapshots for STALE→EXPIRED;
+   counter/expiry implementation remains #145.
 2. The pinned multilingual E5 model/version and separate provenance are implemented
    (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
    the fixed canonical Job fields.
@@ -293,3 +294,9 @@ Retain external deployment (#150) and second-source selection/adapter (#127/#128
 Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
 
 Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.
+
+## Field-evidence interview — issue #196 / PR #197
+
+Authority: [ADR-019](../../docs/architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md).
+
+Update #196 implementation/tests to ADR-019, retaining dotted-name boundaries, exact aliases, approved ordering/ties, checked body fallback, provenance-filtered skills, public DTO shape and score-only safety.

@@ -14,7 +14,9 @@ Live APiBR shape/completeness verification remains in issue #113.
 observed from `GET /vagas/api/v2/issues` on 2026-11-12: typed label objects
 (`label`, `APIBr`, `topic`), title-derived `keywords`, and no `state`. All titles,
 bodies, users and repositories are invented; no source record is retained. It
-covers explicit, decorated, conflicting and topic-only label metadata.
+covers explicit, decorated, conflicting and topic-only label metadata, an issue
+form whose checked options are in the body, an inline `Nível:` body field and a
+title with the only evidence.
 
 ## File Location
 `tests/resources/jobs_fixture.json`

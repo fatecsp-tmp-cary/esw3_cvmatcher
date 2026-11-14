@@ -288,6 +288,59 @@ def test_only_inactive_ready_jobs_are_returned_as_ineligible(db_engine, grouped)
     assert [match["rank"] for match in matches] == [1, 2, 3, 4, 5]
 
 
+@pytest.fixture
+def enriched(db_engine):
+    """One ready job whose stored skills lack a skill the worker associates."""
+    with Session(db_engine) as session, session.begin():
+        source = JobSource(name=f"enriched-{uuid4()}", type="api", polling_mode="INCREMENTAL")
+        session.add(source)
+        session.flush()
+        source_id = source.id
+        job = Job(
+            source_id=source_id,
+            platform="a-enriched",
+            source_job_id="1",
+            title="Backend Developer",
+            description="Requisitos: Python",
+            skills=["PostgreSQL"],
+            content_hash="synthetic-content-v1",
+            status=JobStatus.ACTIVE,
+        )
+        session.add(job)
+        session.flush()
+        job_id = job.id
+        enqueue(session, job_id, VERSION)
+    encoder = Encoder()
+
+    def sessions():
+        return Session(db_engine)
+
+    assert ExtractionWorker(sessions, Extractor(), VERSION).process_once()
+    with Session(db_engine) as session, session.begin():
+        enqueue_embedding(session, job_id, encoder.config, VERSION)
+    assert EmbeddingWorker(sessions, encoder, VERSION).process_once()
+    try:
+        yield sessions, encoder, job_id
+    finally:
+        with Session(db_engine) as session, session.begin():
+            session.execute(delete(Job).where(Job.source_id == source_id))
+            session.execute(delete(JobSource).where(JobSource.id == source_id))
+
+
+def test_result_skills_combine_stored_and_extracted_skills_without_changing_the_job(
+    db_engine, enriched
+):
+    sessions, encoder, job_id = enriched
+    pipeline = MatchingPipeline(sessions, encoder, VERSION)
+    with TestClient(create_app(pipeline, rate_limiter=GlobalRateLimiter(db_engine))) as client:
+        matches = client.post("/matches", json=curriculum()).json()["matches"]
+
+    assert [match["job"]["id"] for match in matches] == [job_id]
+    assert matches[0]["job"]["skills"] == ["PostgreSQL", "Python"]
+    with Session(db_engine) as session:
+        assert session.get(Job, job_id).skills == ["PostgreSQL"]
+
+
 def test_typo_support_on_both_sides_keeps_exclusions_disabled_and_candidate_private(
     populated, caplog
 ):

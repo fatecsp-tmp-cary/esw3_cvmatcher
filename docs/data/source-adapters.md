@@ -70,7 +70,7 @@ The worker invokes the bounded synchronous ingestion compatibility path; the
 common async adapter is available independently. Live calls remain optional and
 excluded from CI.
 
-## Label metadata field mapping
+## Current field-mapping implementation (awaiting ADR-019 correction)
 
 Observed on 2026-11-12, `GET /vagas/api/v2/issues` returns each label as an object
 with `name`, `type` and `color`, plus a title-derived `keywords` string array. The
@@ -81,22 +81,33 @@ explicit metadata to canonical fields:
 | Canonical field | Source evidence | Rule |
 | --- | --- | --- |
 | `keywords` | every label name | Unchanged: all names are kept, including topics. |
-| `seniority_level` | non-topic labels and `keywords` | Shared seniority aliases; exactly one distinct value, otherwise empty. |
-| `work_arrangement` | non-topic labels and `keywords` | Shared work-arrangement aliases; exactly one distinct value, otherwise empty. |
+| `seniority_level` | non-topic labels and `keywords`, then explicit body fields, then the title | Shared seniority aliases; exactly one distinct value per evidence level, in that order. |
+| `work_arrangement` | non-topic labels and `keywords`, then explicit body fields, then the title | Shared work-arrangement aliases; exactly one distinct value per evidence level, in that order. |
 | `skills` | non-topic labels and `keywords` | Names recognized by the shared skill aliases, deduplicated and sorted. |
 
 Repository topics describe the aggregated repository, not the vacancy, and are
 never classified. Leading decorative symbols and the explicit `Level-`/`Lang-`
 prefixes used by some repositories are removed before the exact alias lookup.
-Title and description text are never interpreted here: extraction of
-requirements from text remains the separate
+The current draft implementation uses the former proposal ([ADR-017](../architecture/decisions/ADR-017-job-field-evidence-order-and-extracted-skills.md)):
+typed labels first, then explicit body fields, then a single recognizable
+word of the title. The first of labels and body fields with exactly one
+distinct value wins; explicit but conflicting evidence leaves the field empty
+and the title is not consulted. A body field is an inline `Nível: pleno` or
+`Localização: Remoto` line, or a `Nível`/`Alocação`/`Modalidade`/`Local`
+heading followed by options, where unchecked `[ ]` options are ignored. The
+title is used only when nothing explicit produced a value and it holds exactly
+one distinct value; `Pleno/Sênior` or `Remote.com` stay unknown. Prose is never
+interpreted, and extraction of requirements from text remains the separate
 [job field extraction](job-field-extraction.md) stage. Conflicting labels, such
-as an issue form that publishes every option, leave the field empty rather than
-choosing a value. `Alocado` has no agreed canonical arrangement and stays a
+as an issue form that publishes every option, resolve only through its checked
+body options. `Alocado` has no agreed canonical arrangement and stays a
 keyword only. `company`, `location` and `salary` have no structured source field
 and remain empty. Work arrangement is descriptive and is never used for
 geographic eligibility. Skill recall is bounded by the shared alias list in
 `src/extraction/taxonomy.py`; unrecognized technology labels remain keywords.
+The current draft also displays extraction-associated skills without the
+provenance filtering now required by ADR-019. That implementation must be corrected
+before approval; stored canonical skills must remain unchanged.
 
 These fields are part of the job content hash, so a mapping change re-queues
 stored jobs for extraction and embedding. The deterministic
@@ -123,9 +134,19 @@ responses. Async cancellation/truncation cannot publish completed attestation.
 
 This is explicitly best effort: timestamp/count equality cannot rule out concurrent
 rewrites. It does not establish source permissions, job openness, raw retention
-rights or the #145 stale-expiry thresholds. Accepted
+rights or implementation of the #145 stale-expiry counters. ADR-020 now defines
+the accepted count-only threshold. Accepted
 [ADR-015](../architecture/decisions/ADR-015-qualifying-snapshot-absence-marks-stale.md)
 marks ACTIVE jobs absent from a qualifying snapshot STALE. Confirmed observations remain source-
 specific; listed state-free records are ACTIVE under ADR-014. The bounded live
 count probe
 is in the [aggregate evidence](../reports/2026-11-12-apibr-count-attestation.json).
+
+## Accepted field policy supersedes the draft proposal
+
+[ADR-019](../architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md)
+is current authority for title > label > named-body evidence, restrictive mapped
+value order and exact/affirmative/non-conflicting displayed extraction skills.
+ADR-017 remains the original proposal. The current normalizer still uses its old
+labels/body/title and unique-value rules; correction and tests remain pending.
+An association row alone cannot prove that an extracted skill is safe to display.

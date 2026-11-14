@@ -31,6 +31,20 @@ from src.schemas.matches import MatchedJob, MatchesResponse, MatchResult
 logger = logging.getLogger(__name__)
 
 
+def displayed_skills(own: list[str] | None, extracted: dict[str, str]) -> list[str] | None:
+    """Union of the job's own skills and the skills the worker associated with it.
+
+    Deduplicated by normalized name and ordered deterministically. The job's own
+    spelling wins; without any skill the stored value is returned unchanged.
+    """
+    merged = {normalize_skill(skill): skill for skill in own or [] if skill.strip()}
+    for key, name in extracted.items():
+        merged.setdefault(key, name)
+    if not merged:
+        return own
+    return sorted(merged.values(), key=lambda value: (value.casefold(), value))
+
+
 class QueryEncoder(Protocol):
     config: EmbeddingConfig
 
@@ -174,12 +188,14 @@ class MatchingPipeline:
                     )
                 }
                 associated_skills: dict[int, set[str]] = {}
+                extracted_names: dict[int, dict[str, str]] = {}
                 for identifier, name in session.execute(
                     select(JobSkill.job_id, Skill.canonical_name)
                     .join(Skill, Skill.id == JobSkill.skill_id)
                     .where(JobSkill.job_id.in_(pool))
                 ):
                     associated_skills.setdefault(identifier, set()).add(normalize_skill(name))
+                    extracted_names.setdefault(identifier, {})[normalize_skill(name)] = name
                 requirements: dict[int, list[str]] = {}
                 for identifier, text in session.execute(
                     select(JobRequirement.job_id, JobRequirement.text).where(
@@ -241,6 +257,9 @@ class MatchingPipeline:
                 )
                 for score, job, matched_skills in scored[: limit - len(matches)]:
                     payload = {name: getattr(job, name) for name in MatchedJob.model_fields}
+                    payload["skills"] = displayed_skills(
+                        job.skills, extracted_names.get(job.id, {})
+                    )
                     matches.append(
                         MatchResult(
                             rank=len(matches) + 1,

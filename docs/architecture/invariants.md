@@ -49,3 +49,8 @@ fields, authoritative aliases or candidate retention boundaries.
 Search projections under [ADR-022](decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md)
 never replace canonical/display Unicode or original extraction-offset coordinates.
 Fuzzy retrieval remains supporting score/retrieval evidence, not canonical equivalence.
+
+The field-specific title precedence and provenance-filtered displayed skill union
+are governed by [ADR-019](decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md).
+Canonical/public field shapes and candidate privacy stay fixed; accepted policy
+must not be confused with the still-pending implementation of that policy.

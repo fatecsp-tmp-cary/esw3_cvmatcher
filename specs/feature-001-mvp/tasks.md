@@ -14,7 +14,9 @@ Implementation below is distinct from release approval. #99 remains open.
   partial/failure handling. Unproven scans never establish absence.
 - APiBR label metadata maps to canonical seniority, work arrangement and skills
   through exact shared aliases; repository topics, free text and conflicting
-  labels are never classified (#180).
+  labels are never classified (#180). Proposed ADR-017 (#196, draft) adds explicit
+  body fields and a lone title word as weaker evidence, and shows extracted skills
+  in results; its status is pending review.
 - PostgreSQL identity/source scheduling locks, bounded background cycles and
   reliable source-timestamp expiration. Optional poll on worker start and a
   configured daily local polling time, 08:00 America/Sao_Paulo in Compose (#184).
@@ -23,7 +25,7 @@ Implementation below is distinct from release approval. #99 remains open.
   three-attempt failure and explicit retry. Failed jobs are withheld from matching.
 - Pinned offline local GLiNER inference with token-aware full-text coverage,
   validated offsets/deduplication and conservative explicit skill aliases.
-  Mandatory classifications remain disabled pending measured quality approval.
+  Explicit requirement classes support scores; mandatory exclusions remain disabled pending measured quality approval.
 - Weighted Portuguese any-term FTS and bound queries reconciled with ADR-004/005
   weights/fields, JSON text rendering and publication-date/identity ties, with
   current extraction readiness on every retrieval path. Both migration histories
@@ -84,7 +86,7 @@ and the reconciled production image build passed. See the
   verification. The optional verifier remains #153.
 - [x] Absence under accepted ADR-015 (#186): ACTIVE jobs missing from a qualifying
   SNAPSHOT poll become STALE and rediscovery reactivates them. STALE→EXPIRED
-  thresholds remain #145; sources default to INCREMENTAL, where absence is ignored.
+  threshold is now defined by ADR-020; count/expiry implementation remains #145; sources default to INCREMENTAL, where absence is ignored.
 - [x] Pre-reconciliation production image build and real pinned offline Compose
   smoke: migrations, synthetic ingestion, worker GLiNER/E5, deterministic API,
   database/API replacement durability and dump/restore into an empty project.
@@ -174,12 +176,20 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 
 ## Deferred external deployment and source expansion
 
+No deployment or second-source implementation is scheduled by this decision.
+
 - [x] Record the user decision in [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
-- [ ] Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+- [x] Confirm external deployment (#150) and second-source selection/adapter (#127/#128) are deferred; no provider, source or implementation was selected.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
 
 ## Stale expiration interview — issue #145
 
 - [x] Record the user decision in [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
 - [ ] Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
+## Field-evidence interview — issue #196 / PR #197
+
+- [x] Record the user decision in [ADR-019](../../docs/architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md).
+- [ ] Update #196 implementation/tests to ADR-019, retaining dotted-name boundaries, exact aliases, approved ordering/ties, checked body fallback, provenance-filtered skills, public DTO shape and score-only safety.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.

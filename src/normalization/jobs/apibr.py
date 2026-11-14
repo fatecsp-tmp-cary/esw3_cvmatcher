@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from collections.abc import Callable
 from datetime import UTC, datetime
 from html import escape
 from html.parser import HTMLParser
@@ -12,6 +13,15 @@ from src.extraction.taxonomy import canonical_skill
 # explicit "Level-"/"Lang-" prefixes ("Level-sênior", "Lang-python").
 _LABEL_DECORATION = re.compile(r"^[^\w.#+]+")
 _LABEL_PREFIX = re.compile(r"^(?:level|lang)[-_ ]+", re.IGNORECASE)
+
+# Explicit job-body fields: "Nível: pleno" or a "### Alocação" heading followed by
+# options. Only exact shared aliases are mapped, as for labels.
+_SENIORITY_SECTIONS = ("N[ií]vel", "Senioridade")
+_ARRANGEMENT_SECTIONS = ("Aloca[cç][aã]o", "Modalidade", "Local(?:iza[cç][aã]o)?")
+_SECTION_FOLLOWING_LINES = 6
+_SECTION_VALUE_LENGTH = 40
+# Words keep inner dots so "Remote.com" or "Node.js" are one token, not "Remote".
+_TITLE_TOKEN = re.compile(r"[\w-]+(?:\.\w+)*")
 
 
 class _HTMLTextParser(HTMLParser):
@@ -154,9 +164,61 @@ def vacancy_labels(raw_job: dict[str, Any]) -> list[str]:
     return names
 
 
-def _only(values: set[Any]) -> Any | None:
-    """Return the single explicit value; missing or conflicting evidence is unknown."""
-    return next(iter(values)) if len(values) == 1 else None
+def section_values(description: str | None, names: tuple[str, ...]) -> list[str]:
+    """Return the values of explicit body fields such as ``Nível: pleno``.
+
+    Accepts an inline ``Name: value`` line and a ``Name`` heading followed by
+    options, where an unchecked ``[ ]`` option is ignored. Free prose is never read.
+    """
+    if not description:
+        return []
+    alternatives = "|".join(names)
+    inline = re.compile(rf"^[\W_]*(?:{alternatives})\s*:\s*(\S.*)$", re.IGNORECASE)
+    heading = re.compile(rf"^[\W_]*(?:{alternatives})\s*:?\s*$", re.IGNORECASE)
+    lines = description.splitlines()
+    values: list[str] = []
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if match := inline.match(stripped):
+            values.append(match[1].strip(" *_"))
+        elif heading.match(stripped):
+            for following in lines[index + 1 : index + 1 + _SECTION_FOLLOWING_LINES]:
+                option = following.strip()
+                # Stop at the next heading or the next "Field: value" line.
+                if not option or option.startswith("#") or ":" in option:
+                    break
+                if re.match(r"^[-*]\s*\[ \]", option):
+                    continue
+                option = re.sub(r"^[-*]\s*(?:\[[xX]\])?\s*", "", option).strip(" *_")
+                if option and len(option) <= _SECTION_VALUE_LENGTH:
+                    values.append(option)
+    return values
+
+
+def categorize(
+    normalize: Callable[[str | None], Any],
+    labels: list[str],
+    section_texts: list[str],
+    title: str,
+) -> Any | None:
+    """Map one category from the strongest available evidence.
+
+    Order: typed labels, then explicit body sections; the first with exactly one
+    distinct value wins. If explicit evidence exists but conflicts, the value is
+    unknown. A single recognizable title word is used only when no explicit label
+    or section produced any value.
+    """
+    from_labels = {value for text in labels if (value := normalize(text)) is not None}
+    from_sections = {value for text in section_texts if (value := normalize(text)) is not None}
+    for evidence in (from_labels, from_sections):
+        if len(evidence) == 1:
+            return next(iter(evidence))
+    if from_labels or from_sections:
+        return None
+    from_title = {
+        value for token in _TITLE_TOKEN.findall(title) if (value := normalize(token)) is not None
+    }
+    return next(iter(from_title)) if len(from_title) == 1 else None
 
 
 def _normalize_publication_date(value: Any) -> datetime | None:
@@ -196,13 +258,19 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
 
     keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
 
-    # Only exact shared aliases are mapped. Free text is never interpreted, and
-    # conflicting labels (for example every option of an issue form) stay unknown.
+    # Only exact shared aliases are mapped and prose is never interpreted. Labels,
+    # explicit body sections and a lone title word are used in that order (ADR-017).
     labels = vacancy_labels(raw_job)
-    seniority = {level for name in labels if (level := normalize_seniority(name)) is not None}
-    arrangement = {
-        mode for name in labels if (mode := normalize_work_arrangement(name)) is not None
-    }
+    description = normalize_text(raw_job.get("body"), preserve_sections=True)
+    seniority = categorize(
+        normalize_seniority, labels, section_values(description, _SENIORITY_SECTIONS), title
+    )
+    arrangement = categorize(
+        normalize_work_arrangement,
+        labels,
+        section_values(description, _ARRANGEMENT_SECTIONS),
+        title,
+    )
     skills = sorted(
         {skill for name in labels if (skill := canonical_skill(name)) is not None},
         key=str.casefold,
@@ -214,12 +282,12 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         "source_expires_at": None,
         "company": None,
         "title": title,
-        "description": normalize_text(raw_job.get("body"), preserve_sections=True),
+        "description": description,
         "keywords": keywords,
         "skills": skills,
         "location": None,
-        "work_arrangement": _only(arrangement),
-        "seniority_level": _only(seniority),
+        "work_arrangement": arrangement,
+        "seniority_level": seniority,
         "salary": None,
         "currency": None,
         "job_url": job_url,

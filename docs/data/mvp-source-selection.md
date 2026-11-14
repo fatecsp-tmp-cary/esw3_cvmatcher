@@ -51,7 +51,7 @@ InHire, Solides, Trampos.co, and Quero Vagas Tech were also evaluated and are no
 6. Jobs absent from a successful complete snapshot may be marked `STALE`; the
    APiBR scan must qualify under accepted ADR-013 before relying on coverage.
    Accepted ADR-015 marks ACTIVE jobs absent from a qualifying snapshot STALE;
-   the separate stale-expiration thresholds remain #145.
+   ADR-020 defines three-snapshot stale expiration; its counters/implementation remain #145.
 
 This approach avoids relying on real-time webhooks and keeps the dataset up to date through scheduled polling.
 

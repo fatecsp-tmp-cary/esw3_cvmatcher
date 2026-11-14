@@ -47,7 +47,7 @@ assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
 matching, and section detection complement the selected local GLiNER job-field
 extraction strategy. Follow [the extraction plan](../../docs/data/job-field-extraction.md)
 for evidence, confidence, contextual requirement classification, model versioning
-and failure handling. Pinned offline extraction and bounded job-state processing are implemented; mandatory classification remains disabled pending measured quality approval. PostgreSQL FTS handles DB-level
+and failure handling. Pinned offline extraction and bounded job-state processing are implemented; mandatory exclusions remain disabled pending measured quality approval. PostgreSQL FTS handles DB-level
 tokenization, stemming, and ranking.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
@@ -150,7 +150,11 @@ The response is `MatchesResponse {matches: MatchResult[]}`. Each result contains
 `missing_requirements`, `embedding_model`, and `algorithm_version`. The nested
 job contains `id` (the stable positive integer persisted job ID), `company`, `title`, `description`, `keywords`, `location`,
 `work_arrangement`, `seniority_level`, `skills`, `salary`, `currency`,
-`job_url`, and `publication_date`. The public contract omits `curriculo_id`
+`job_url`, and `publication_date`. The `skills` of a result are the job's own
+skills plus the skills the worker associated with it from explicit requirement
+contexts
+([ADR-017](../../docs/architecture/decisions/ADR-017-job-field-evidence-order-and-extracted-skills.md)).
+The public contract omits `curriculo_id`
 and internal component scores. Ranking order is represented by
 array order and `rank`. `GET /health` returns `{"status":"ok"}`. FastAPI
 publishes the OpenAPI schema and Swagger UI.
@@ -252,3 +256,9 @@ External hosting/HTTPS deployment and second-source research/selection remain de
 Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
 
 The accepted expiration threshold is three qualifying absence snapshots, including the one that first marks STALE. No age-based threshold is selected. Bad scans do not advance the count; rediscovery resets it. Supporting counters remain outside canonical Job.
+
+## Field-evidence interview — issue #196 / PR #197
+
+Authority: [ADR-019](../../docs/architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md).
+
+Job field source priority is title > typed labels > named/checked body fields. Resolve title/selected-body values by the approved orders; conflicting labels may fall through to checked body options; specialist/coordinator ties use first occurrence. Add only exact affirmative non-conflicting extracted skills to displayed source skills. Current draft code still implements ADR-017 and requires correction.
