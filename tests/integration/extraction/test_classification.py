@@ -52,7 +52,7 @@ def test_classified_generation_preserves_canonical_content_and_replaces_associat
     ).all() == ["JavaScript"]
 
 
-def test_conflicting_requirement_strengths_remain_unclassified(db_session):
+def test_conflicting_requirement_strengths_keep_strongest_with_unsafe_flag(db_session):
     session = db_session
     source = JobSource(name="conflict-fixture", type="api", polling_mode="INCREMENTAL")
     session.add(source)
@@ -64,8 +64,32 @@ def test_conflicting_requirement_strengths_remain_unclassified(db_session):
     starts = [text.index("Python"), text.rindex("Python")]
     evidence = [SpanEvidence(start, start + 6, "skill", 0.9).serialize(text) for start in starts]
     persist_requirements(session, job, evidence, text)
-    assert all(item["requirement_class"] is None for item in evidence)
-    assert (
-        session.scalars(select(JobRequirement.id).where(JobRequirement.job_id == job.id)).all()
-        == []
-    )
+    assert all(item["conflicting"] and not item["exclusion_safe"] for item in evidence)
+    assert [item["requirement_class"] for item in evidence] == ["REQUIRED", "NICE_TO_HAVE"]
+    rows = session.scalars(select(JobRequirement).where(JobRequirement.job_id == job.id)).all()
+    assert len(rows) == 1 and rows[0].requirement_class.value == "REQUIRED"
+
+
+def test_approximate_evidence_is_score_only_and_negation_retains_no_association(db_session):
+    session = db_session
+    source = JobSource(name="approximate-fixture", type="api", polling_mode="INCREMENTAL")
+    session.add(source)
+    session.flush()
+    job = Job(source_id=source.id, platform="fixture", source_job_id="approximate", title="Role")
+    session.add(job)
+    session.flush()
+    text = "Pyhton required. Java is not required."
+    evidence = [
+        SpanEvidence(text.index(name), text.index(name) + len(name), "skill", 0.9).serialize(text)
+        for name in ("Pyhton", "Java")
+    ]
+    persist_requirements(session, job, evidence, text)
+    (row,) = session.scalars(select(JobRequirement).where(JobRequirement.job_id == job.id)).all()
+    assert row.text == "Pyhton" and row.skill_id is None
+    assert evidence[0]["approximate_match"] and not evidence[0]["exclusion_safe"]
+    assert evidence[1]["requirement_class"] is None and evidence[1]["negated"]
+    assert session.scalars(
+        select(Skill.canonical_name).join(JobSkill).where(JobSkill.job_id == job.id)
+    ).all() == ["Python"]
+    seed = session.scalar(select(Skill).where(Skill.canonical_name == "Python"))
+    assert "pyhton" not in seed.aliases
