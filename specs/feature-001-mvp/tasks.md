@@ -13,7 +13,11 @@ Requirements and completion gates are in [spec](spec.md),
   advisory-lock stripes; APiBR buffers observations before locking and retains
   atomic scan rollback. Independent-connection regressions cover inserts,
   lifecycle updates, reversed overlapping scans and unexpected write failure.
-- Sequential incomplete APiBR scans, unknown availability without GitHub requests, isolated malformed records, PARTIAL/FAILED run evidence and PostgreSQL regressions.
+- Bounded sequential APiBR scans and sync/async source adapters with retry policy;
+  unknown availability without GitHub requests, isolated malformed records,
+  PARTIAL/FAILED evidence and PostgreSQL regressions. Explicit SNAPSHOT mode uses
+  ADR-013 best-effort health/count attestation; all remote calls finish before
+  identity locking and persistence rejection invalidates qualification.
 - Portuguese weighted any-term FTS field/query/normalization decisions.
 - Skill taxonomy, job-skill and classified requirement persistence; population/extraction remain pending.
 - Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
@@ -23,7 +27,7 @@ Requirements and completion gates are in [spec](spec.md),
 
 ## Remaining MVP work
 
-- [ ] Source payload/scan/usage evidence, shared interface and bounded retries;
+- [ ] Source usage/permission evidence and worker integration of the async interface;
       optional bounded availability verification. Real payload capture is pending.
 - [ ] Scheduler/source-run concurrency, taxonomy population and requirement extraction.
       Preserve source independence and uncertain evidence.
@@ -60,3 +64,10 @@ for scope and limitations.
 See the [review record](../../docs/reports/2026-11-14-pr167-review.md) for
 GitHub/Codex findings, bounded-lock and independent-connection regressions,
 current-head checks and later-adapter integration requirements.
+
+
+## PR #168 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr168-review.md) for
+category-label regression fixes, network-free identity-locking integration,
+review dispositions and current-head verification.

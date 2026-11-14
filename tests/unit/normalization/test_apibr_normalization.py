@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from src.domain.job import SeniorityLevel, WorkArrangement
 from src.normalization.jobs.apibr import normalize_apibr_job, normalize_keywords, normalize_text
-from src.persistence.job.job import WorkArrangement
 
 
 def test_normalize_apibr_job():
@@ -50,7 +50,6 @@ def test_normalize_apibr_job():
     assert normalized["location"] is None
     assert isinstance(normalized["publication_date"], datetime)
     assert normalized["publication_date"].tzinfo == UTC
-    assert normalized["work_arrangement"] == WorkArrangement.REMOTE
     assert isinstance(normalized["keywords"], list)
     assert isinstance(normalized["skills"], list)
 
@@ -141,15 +140,35 @@ def test_malformed_fields_raise_record_validation_errors(invalid_fields):
 
 
 @pytest.mark.parametrize(
-    ("labels", "seniority", "arrangement"),
+    "body",
     [
-        (["junior", "senior", "remoto", "presencial"], "JUNIOR", "REMOTE"),
-        (["presencial", "remoto", "senior", "junior"], "SENIOR", "ON_SITE"),
-        (["unknown", "híbrido", "pleno", "senior", "remoto"], "MID", "HYBRID"),
+        "Apply at <https://example.org/apply>",
+        "Required: Java List<T> and C++ vector<int>",
+        "Literal <DomainType>value</DomainType> and <T/>",
     ],
 )
-def test_first_recognized_source_label_wins_for_each_category(labels, seniority, arrangement):
-    job = normalize_apibr_job({"id": 123, "title": "Developer", "labels": labels})
-    assert job["seniority_level"] == seniority
-    assert job["work_arrangement"] == arrangement
-    assert job["keywords"] == labels
+def test_preserves_markdown_autolinks_and_literal_type_arguments(body):
+    assert normalize_apibr_job({"id": 1, "title": "Engineer", "body": body})["description"] == body
+
+
+@pytest.mark.parametrize(
+    ("labels", "mode", "level"),
+    [
+        (
+            ["Python", "Remoto", "Híbrido", "Júnior", "Sênior"],
+            WorkArrangement.REMOTE,
+            SeniorityLevel.JUNIOR,
+        ),
+        (
+            [{"name": "Híbrido"}, {"name": "Remoto"}, {"name": "Pleno"}],
+            WorkArrangement.HYBRID,
+            SeniorityLevel.MID,
+        ),
+        (["Python", "Unknown"], None, None),
+    ],
+)
+def test_source_labels_keep_first_recognized_categories_and_all_keywords(labels, mode, level):
+    job = normalize_apibr_job({"id": 1, "title": "Developer", "labels": labels})
+    assert job["work_arrangement"] == mode
+    assert job["seniority_level"] == level
+    assert job["keywords"] == normalize_keywords(labels)

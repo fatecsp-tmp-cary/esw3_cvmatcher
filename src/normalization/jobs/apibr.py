@@ -1,12 +1,11 @@
+import re
 import unicodedata
 from datetime import UTC, datetime
+from html import escape
 from html.parser import HTMLParser
 from typing import Any
 
-from src.normalization.candidate.categories import (
-    normalize_seniority,
-    normalize_work_arrangement,
-)
+from src.domain.categories import normalize_seniority, normalize_work_arrangement
 
 
 class _HTMLTextParser(HTMLParser):
@@ -53,6 +52,50 @@ def normalize_text(text: str | None, *, preserve_sections: bool = False) -> str 
     """Normalize Unicode composition and whitespace while preserving display text."""
     if not isinstance(text, str) or not text.strip():
         return None
+    # Unknown angle-bracket constructs are literal Markdown/plain text, such
+    # as autolinks and generic types. Escape before HTMLParser can discard them.
+    html_tags = _HTMLTextParser._BLOCK_TAGS | {
+        "a",
+        "abbr",
+        "b",
+        "body",
+        "caption",
+        "cite",
+        "code",
+        "dd",
+        "del",
+        "dl",
+        "dt",
+        "em",
+        "figure",
+        "figcaption",
+        "head",
+        "html",
+        "i",
+        "img",
+        "input",
+        "ins",
+        "label",
+        "mark",
+        "script",
+        "small",
+        "span",
+        "strong",
+        "style",
+        "sub",
+        "sup",
+        "tbody",
+        "thead",
+        "title",
+        "u",
+        "s",
+        "wbr",
+    }
+    text = re.sub(
+        r"</?([A-Za-z][A-Za-z0-9:-]*)[^<>]*>",
+        lambda match: match[0] if match[1].casefold() in html_tags else escape(match[0]),
+        text,
+    )
     parser = _HTMLTextParser()
     parser.feed(text)
     parser.close()
@@ -116,11 +159,11 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
 
     keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
     work_arrangement = next(
-        (value for keyword in keywords if (value := normalize_work_arrangement(keyword))),
+        (mode for keyword in keywords if (mode := normalize_work_arrangement(keyword))),
         None,
     )
     seniority_level = next(
-        (value for keyword in keywords if (value := normalize_seniority(keyword))),
+        (level for keyword in keywords if (level := normalize_seniority(keyword))),
         None,
     )
 
