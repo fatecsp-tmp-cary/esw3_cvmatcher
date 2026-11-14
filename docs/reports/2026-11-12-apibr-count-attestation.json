@@ -1,0 +1,45 @@
+{
+  "observed_at": "2026-11-12T12:55:56.655624+00:00",
+  "raw_retained": false,
+  "max_pages": 16,
+  "page_size": 100,
+  "hypothesis_only": true,
+  "snapshot_complete": false,
+  "absence_transitions_enabled": false,
+  "before": {
+    "service_status": "healthy",
+    "dataset_status": "healthy",
+    "records": 728,
+    "last_updated": "2026-11-12T08:29:29-03:00",
+    "from_backup": false
+  },
+  "after": {
+    "service_status": "healthy",
+    "dataset_status": "healthy",
+    "records": 728,
+    "last_updated": "2026-11-12T08:29:29-03:00",
+    "from_backup": false
+  },
+  "page_counts": [
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    28,
+    0
+  ],
+  "terminal_empty_page": true,
+  "rows": 728,
+  "distinct_ids": 728,
+  "duplicates": 0,
+  "normalization_rejections": 0,
+  "observed_availability_counts": {
+    "DISCOVERED": 728
+  },
+  "ids_digest": "a4099725c48ba09074f167af4e0644aa50fb8f9ddb3b129c2e759f561f07cc21",
+  "health_signature_unchanged": true,
+  "exact_count_match": true
+}

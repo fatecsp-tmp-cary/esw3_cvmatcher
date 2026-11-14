@@ -1,11 +1,11 @@
 import pytest
 
+from src.domain.job import SeniorityLevel, WorkArrangement
 from src.normalization.candidate.categories import (
     normalize_candidate_categories,
     normalize_seniority,
     normalize_work_arrangement,
 )
-from src.persistence.job.job import SeniorityLevel, WorkArrangement
 from src.schemas.candidate.profile import CandidateProfile
 
 
@@ -22,6 +22,8 @@ from src.schemas.candidate.profile import CandidateProfile
         ("coordenador(a)", SeniorityLevel.COORDINATOR),
         ("coordenadora", SeniorityLevel.COORDINATOR),
         ("executive", None),
+        ("junior/senior", None),
+        ("senior developer", None),
         (None, None),
     ],
 )
@@ -38,6 +40,8 @@ def test_normalize_seniority(value, expected):
         ("on-site", WorkArrangement.ON_SITE),
         ("presencial", WorkArrangement.ON_SITE),
         ("field work", None),
+        ("remote/on-site", None),
+        ("São Paulo", None),
         (None, None),
     ],
 )

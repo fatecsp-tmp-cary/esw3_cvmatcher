@@ -48,30 +48,6 @@ def test_empty_preview_sections_are_valid(client) -> None:
     assert client.post("/matches", json=payload).status_code == 200
 
 
-@pytest.mark.parametrize(
-    ("section", "maximum"),
-    [
-        ("formacoes", 20),
-        ("experiencias", 50),
-        ("projetos", 50),
-        ("competencias", 200),
-        ("idiomas", 20),
-    ],
-)
-def test_collection_caps_are_shared_and_privacy_safe(client, section, maximum, caplog):
-    payload = deepcopy(SOURCE_PREVIEW)
-    payload[section] *= maximum
-    assert client.post("/matches", json=payload).status_code == 200
-    payload[section].append(payload[section][0])
-    response = client.post("/matches", json=payload)
-    assert response.status_code == 422
-    assert response.headers["content-type"] == "application/problem+json"
-    assert response.json()["errors"][0]["loc"] == ["body", section]
-    assert SOURCE_PREVIEW["curriculo_id"] not in response.text + caplog.text
-    schemas = client.get("/openapi.json").json()["components"]["schemas"]
-    assert schemas["CurriculumRequest"]["properties"][section]["maxItems"] == maximum
-
-
 @pytest.mark.parametrize("section", ["formacoes", "experiencias"])
 def test_period_accepts_null_end_and_rejects_reversed_dates(client, section) -> None:
     payload = deepcopy(SOURCE_PREVIEW)

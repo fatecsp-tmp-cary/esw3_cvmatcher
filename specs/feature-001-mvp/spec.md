@@ -2,35 +2,18 @@
 
 ## Behavior
 
-The service receives an already structured CV, validates and normalizes it to a
-request-scoped `CandidateProfile`, ingests normalized source-specific jobs,
+The required service behavior is to receive an already structured CV, validate and normalize it to a
+request-scoped `NormalizedCandidate`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
-jobs through `POST /matches`. CV parsing is external. `GET /health` is optional; when implemented, it must return the contract specified below.
+jobs through `POST /matches`. Production normalization/pipeline wiring is pending
+in stack PR #175; this branch implements the projection and contract. CV parsing
+is external. `GET /health` is optional.
 
-Candidate profile fields:
-
-```text
-skills[], competencies[], job_titles[], occupations[], experience[], education[],
-certifications[], academic_projects[], languages[], locations[], seniority,
-years_experience, preferences
-```
-
-Candidate `seniority` text maps to the existing `SeniorityLevel` values:
-`intern`/`internship`/`estágio` → `INTERN`; `junior`/`jr`/`júnior` →
-`JUNIOR`; `mid`/`middle`/`mid-level`/`pleno` → `MID`; `senior`/`sr`/`sênior`
-→ `SENIOR`; `specialist`/`especialista` → `SPECIALIST`; and
-`coordinator`/`coordenador(a)` → `COORDINATOR`. Candidate preference modes map
-`remote`/`remoto`/`home office`/`teletrabalho` → `REMOTE`;
-`hybrid`/`híbrido` → `HYBRID`; and `on-site`/`onsite`/`presencial` →
-`ON_SITE`. Matching is case- and accent-insensitive for these aliases. Missing
-or unknown values normalize to no category and must not cause hard exclusion.
-For APiBR jobs with multiple recognized seniority or work-arrangement labels,
-select the first recognized value in source order for each category independently.
-Retain every normalized label in keywords, including conflicting alternatives.
-Language proficiency and employment type have no canonical job fields or enums
-yet; keep them as schema-validated free text. They may contribute descriptive
-matching evidence, but cannot drive hard exclusion until a canonical mapping is
-defined.
+The public five-section contract is defined in [acceptance](acceptance.md#resolved-api-contract).
+Its lossless transient projection preserves all sections without the UUID or
+additional caps. The legacy internal `CandidateProfile` remains a separate API;
+it must not reject valid public input through superseded internal bounds. See
+[ADR-011](../../docs/architecture/decisions/ADR-011-main-integration-compatibility.md).
 
 The `Job` fields are defined in the [architecture overview](../../docs/architecture/overview.md).
 `platform + source_job_id` is unique source identity, not
@@ -61,15 +44,11 @@ to NFC and whitespace within each line; other display text collapses whitespace.
 Keep `raw` null until retention rights are established. Requirement classes are `REQUIRED`,
 `PREFERRED`, and `NICE_TO_HAVE`; detected skills must not automatically be
 assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
-matching, and section detection are proposed. PostgreSQL FTS uses Portuguese tokenization/stemming for documents and plain-text
-queries. [ADR-005](../../docs/architecture/decisions/ADR-005-weighted-any-term-fts.md)
-selects any-term queries and PostgreSQL weights A (1.0) for title/skills,
-B (0.4) for company/keywords/requirements, and D (0.1) for description/location.
-JSON fields use PostgreSQL text rendering. Index/runtime expressions must match
-and use immutable functions. Treat query quotes/operators as data; preserve
-already parsed lexemes when forming the OR query. English stemming and accent-
-insensitive matching are not guaranteed. Location remains descriptive retrieval
-text, never a separate geographic compatibility score or eligibility filter.
+matching, and section detection complement the selected local GLiNER job-field
+extraction strategy. Follow the extraction plan (planned in #170: `../../docs/data/job-field-extraction.md`)
+for evidence, confidence, contextual requirement classification, model versioning
+and failure handling. Pinned offline extraction and bounded job-state processing are planned in stack PR #170; mandatory classification remains disabled pending measured quality approval. PostgreSQL FTS handles DB-level
+tokenization, stemming, and ranking.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
 `parent_skill_id`, `aliases`); candidate-side taxonomy processing is transient.
@@ -94,8 +73,16 @@ hash updates the job, reindexes text, nulls its embedding, and schedules
 regeneration. Unchanged content is not updated. Model/version changes
 independently invalidate and regenerate embeddings.
 
-Only active jobs are in active retrieval. FTS covers title, company, description, keywords,
-skills, normalized requirements, and location. Semantic job representation is title,
+Only active jobs with successful extraction are eligible for matching retrieval.
+Extraction readiness is independent of availability; pending/failed extraction
+withholds jobs without changing lifecycle state. After three failed extraction
+attempts, alert the operator and require explicit retry. See
+extraction policy (planned in #170: `../../docs/data/job-field-extraction.md`). FTS covers title, company, description,
+keywords, skills, normalized requirements, and location. Portuguese any-term FTS
+uses A title/skills, B company/keywords/normalized requirements and D
+description/location, PostgreSQL JSON text rendering and descending publication
+date then platform/source-ID ties under ADR-004/005. All retrieval paths require
+successful extraction for current content/configuration. Semantic job representation is title,
 normalized skills, requirements, relevant description, location, and mode.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job
@@ -111,6 +98,19 @@ employment-type, and language scores; (5) combine normalized components. No
 geographic filtering/scoring. Uncertain extraction should preferably affect
 scoring rather than exclusion.
 
+The semantic component follows
+[ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md):
+evaluate each experience title/description and each education entry independently
+against each job. Select the three highest semantic experience scores per job,
+then aggregate with greater weight for more recent selected experiences. Combine
+that result with the highest semantic education score. Use existing education
+course/level fields; do not add a public description field. Fewer than three
+experiences use all available entries; missing sections never fabricate evidence.
+Initial semantic mixing is 80% experience / 20% education; distinct recency
+groups use weights 1.5/1.25/1.0 with equal weight for equal recency. Calibration
+and reviewed-example validation remain pending; see
+scoring policy (planned in #173: `../../docs/match/scoring-policy.md`).
+
 Default final score is `0.45 * textual + 0.35 * semantic + 0.20 * structured`;
 weights are configurable and component/final scores are `[0,100]`. Score means
 compatibility, not employment probability. Public match results include boolean
@@ -118,15 +118,15 @@ compatibility, not employment probability. Public match results include boolean
 means matching eligibility, never geography. Detail arrays are required and may
 be empty. Component scores may remain internal.
 
-The public API contract is documented in [acceptance](acceptance.md).
+The public API contract is documented in [acceptance](acceptance.md) and is
+immutable. Extraction, normalization and scoring changes must preserve its field
+names, types, requiredness, validation limits, dates/nulls, query, response and
+error semantics. Future incompatible changes require a separately versioned,
+explicitly approved contract; internal adapters absorb model changes.
 `POST /matches` accepts the matching sections of the implemented Sistema
 Currículo preview: `curriculo_id`, `formacoes`, `experiencias`, `projetos`,
 `competencias`, and `idiomas`. All arrays are required and may be empty. Items
-have no IDs; only `curriculo_id` is a UUID. Service collection caps are
-20 education entries, 50 experiences, 50 projects, 200 competencies and 20
-languages. Empty sections remain valid. The transient adapter preserves every
-matching section, education/competency level and source date without carrying
-the UUID, inventing evidence, or imposing stricter internal text limits. Education and experience use
+have no IDs; only `curriculo_id` is a UUID. Education and experience use
 required `inicio` and nullable `fim` calendar dates. Education has a level and source status vocabulary;
 competency descriptions and language/competency levels are text. Project
 technologies are a string. Validation follows the source domain as specified
@@ -174,11 +174,37 @@ Worker handles polling, normalization, expiration, indexing, embedding, and
 model-change reprocessing. Scheduler may be bundled or separate. Embedding work
 is asynchronous and does not block ingestion/API requests. Record matching
 duration. Credentials use environment/secrets; production uses HTTPS, restricted
-DB access, data minimization, relevant LGPD principles, and authentication for
-public candidate-data endpoints.
+DB access, data minimization, relevant LGPD principles, and an open API with no authentication.
+A PostgreSQL-coordinated global rolling limit admits at most 60 HTTP requests
+per minute; excess returns privacy-safe 429. See
+[ADR-010](../../docs/architecture/decisions/ADR-010-preproduction-and-minute-rate-limit.md).
 
 Local Compose includes PostgreSQL+pgvector, API, worker; local model is cached
 in a persistent volume. Deployment stays provider-independent, prefers free
 tiers/open-source/GitHub Actions, and verifies persistent PostgreSQL, pgvector,
 scheduling, background processing, inference, and actual free-tier limits at
 deployment time.
+
+## Docker Compose deployment
+
+Docker Compose is the required packaging and execution path for local use and
+single-host deployment. Provide the production API, background worker/scheduler
+(bundled or separate under the existing architecture), and PostgreSQL+pgvector.
+The standalone mock API is a development aid and does not satisfy this requirement.
+
+Persist PostgreSQL data and cached local models, including selected embedding
+and GLiNER artifacts, across container replacement. Supply environment-specific
+configuration and credentials outside images and version control. Document model
+preparation, schema migration ordering, database readiness and application/model
+readiness so requests are not served against an incompatible or unready stack.
+Keep background polling/extraction/indexing functional under Compose.
+
+Provide a reproducible operator procedure for build/start, migrations, readiness
+checks, update, restart, shutdown without volume loss, backup/restore and recovery
+from failed startup or migration. Preserve production HTTPS, the global
+60-requests/minute admission limit, restricted database access and candidate-data
+privacy requirements. Authentication is intentionally absent under ADR-009.
+The same immutable Sistema Currículo integration contract applies to deployed APIs.
+Hosting remains provider-independent; verify actual host CPU, memory, storage and
+model requirements. A successful mock or database-only startup is not full-stack
+deployment verification.
