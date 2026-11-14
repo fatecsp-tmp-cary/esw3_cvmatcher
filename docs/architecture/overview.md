@@ -63,8 +63,9 @@ preserving the public integration contract. See
 The implementation interview requires successful extraction before jobs enter
 any matching path. Extraction readiness is supporting state separate from
 canonical availability; failures must not change lifecycle. The semantic
-aggregation primitive and its provisional coefficients are planned in stack PR #173
-(`src/matching/semantic.py` and `../match/scoring-policy.md`). Pinned local GLiNER extraction, versioned evidence and bounded claim/retry
+aggregation primitive is implemented in `src/matching/semantic.py`, using the
+provisional coefficients documented in [scoring policy](../match/scoring-policy.md).
+Pinned local GLiNER extraction, versioned evidence and bounded claim/retry
 processing are implemented in #170. Pinned local embedding inference, job-only
 provenance and semantic retrieval are implemented in #171; production executor
 wiring remains planned in #175. Embedding passages include normalized requirement

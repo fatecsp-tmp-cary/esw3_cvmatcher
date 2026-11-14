@@ -22,7 +22,9 @@ absence-based lifecycle changes remain separate policy/implementation work.
    lossless uncapped curriculum projection.
 6. Pinned local embeddings, job-only model/version metadata, versioned passage
    representation, semantic retrieval and model/extraction-change invalidation are
-   implemented. Complete production retrieval/scoring integration and empty-evidence
+   implemented. Deterministic semantic aggregation and final blend primitives are
+   implemented in #173, including count validation and available-section numeric
+   bounds. Complete production retrieval/scoring integration and empty-evidence
    behavior; validate calibration independently before release approval.
 7. Wire the production matching API and privacy, background work and bounded
    availability verification, lifecycle policies, packaging/operations, and
@@ -46,4 +48,9 @@ belong to PR #178. Verify combined behavior without merging either PR.
 ## Bilingual search interview — issues #147/#159
 
 Follow [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md). Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
+Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
+
+## Mandatory coverage interview — issue #120
+
+Follow [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md). Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
 Record measured verification before marking implementation complete. No release or merge is approved by this documentation.

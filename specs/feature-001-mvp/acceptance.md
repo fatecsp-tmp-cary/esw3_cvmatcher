@@ -134,10 +134,11 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
 
 - The implementation interview selected initial semantic mixing weights of
   **80% experience / 20% education**, subject to validation on reviewed examples.
-  See scoring policy (planned in #173: `../../docs/match/scoring-policy.md`).
+  See [scoring policy](../../docs/match/scoring-policy.md).
   Recency grouping uses initial weights **1.5 / 1.25 / 1.0**, with equal recency
   receiving equal weight. Similarity calibration and release validation remain
-  pending; the aggregation primitive is planned in stack PR #173, with production inference wiring in #174–#175 and provisional calibration.
+  pending; the deterministic aggregation primitive is implemented in #173, with production
+  inference wiring still pending in #174–#175 and provisional calibration.
 - Pinned GLiNER revision/labels, provisional confidence, separate evidence storage
   and bounded retry/reprocessing are implemented; see [local GLiNER](../../docs/data/local-gliner.md).
   Mandatory exclusion remains disabled until independently measured quality and
@@ -272,6 +273,12 @@ Authority: [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-s
 
 Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
 
+## Mandatory coverage interview — issue #120
+
+Authority: [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
+
+Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
+
 ## Concurrent source-identity persistence
 
 - Concurrent inserts/updates preserve unique platform/source identity, content
@@ -304,3 +311,12 @@ Independent-connection tests must preserve skip-locked claims without locking Jo
 rows, and preparation must set telemetry configuration before importing the hub.
 Current-head verification is recorded in the
 [PR #171 review](../../docs/reports/2026-11-14-pr171-review.md).
+
+
+## PR #173 scoring regressions
+
+Ranking configuration rejects non-integer and nonpositive retrieval counts before
+SQL retrieval. Semantic aggregation normalizes over available sections even for
+extreme positive finite weight ratios; a missing section cannot erase the other
+section's evidence. Defaults and final blend remain unchanged. See the
+[review record](../../docs/reports/2026-11-14-pr173-review.md).

@@ -39,3 +39,5 @@ and machine policy identifiers keep their original bytes and are not new authori
 New interview records 019–023 are added on their owning branches as listed below.
 
 - [ADR-022: Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) — accepted interview policy; implementation status is tracked separately.
+
+- [ADR-021: Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) — accepted interview policy; implementation status is tracked separately.

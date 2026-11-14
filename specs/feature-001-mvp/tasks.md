@@ -30,8 +30,9 @@ Requirements and completion gates are in [spec](spec.md),
   #174–#175. Quality/release approval and exclusions stay disabled.
 - Immutable weighted FTS indexes and active-only any-term/requirement retrieval
   with fail-closed extraction readiness, bounded textual components and stable
-  ties are implemented. Legacy retrieval retains raw rank; final compatibility
-  scoring and production pipeline integration remain planned.
+  ties are implemented. Legacy retrieval retains raw rank. Deterministic final
+  compatibility primitives, versioned calibration and semantic aggregation are
+  implemented in #173; production pipeline integration remains planned.
 - Domain-enum seniority/mode aliases; missing/unknown values yield no category. APiBR uses first-recognized source-label precedence, retaining every keyword. Other categories remain text.
 - Ranked response validation tests for job identity, eligibility, match details and version metadata.
 - Uncapped public collections and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
@@ -104,6 +105,12 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 - [ ] Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
 
+## Mandatory coverage interview — issue #120
+
+- [x] Record the user decision in [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
+- [ ] Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
 ## PR #167 incremental verification
 
 See the [review record](../../docs/reports/2026-11-14-pr167-review.md) for
@@ -145,3 +152,11 @@ invalidation, telemetry import ordering and independent-connection claim checks.
 See the [review record](../../docs/reports/2026-11-14-pr172-review.md) for
 GitHub/Codex dispositions, post-merge FTS/index checks and the limited accented
 JSON-prefix observations. ADR-022 policy remains accepted but unimplemented.
+
+
+## PR #173 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr173-review.md) for both
+review dispositions, retrieval-count validation, available-section normalization
+and current-head checks. ADR-021 mandatory coverage is accepted but remains
+unimplemented; no new exclusion, blend weight or release approval is introduced.

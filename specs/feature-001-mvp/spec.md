@@ -118,10 +118,12 @@ then aggregate with greater weight for more recent selected experiences. Combine
 that result with the highest semantic education score. Use existing education
 course/level fields; do not add a public description field. Fewer than three
 experiences use all available entries; missing sections never fabricate evidence.
+Normalize only available section weights, including extreme finite ratios.
+Retrieval-pool limits are positive integer counts, validated before SQL retrieval.
 Initial semantic mixing is 80% experience / 20% education; distinct recency
 groups use weights 1.5/1.25/1.0 with equal weight for equal recency. Calibration
 and reviewed-example validation remain pending; see
-scoring policy (planned in #173: `../../docs/match/scoring-policy.md`).
+[scoring policy](../../docs/match/scoring-policy.md).
 
 Default final score is `0.45 * textual + 0.35 * semantic + 0.20 * structured`;
 weights are configurable and component/final scores are `[0,100]`. Score means
@@ -248,3 +250,9 @@ material and cannot renew held-out independence.
 Authority: [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
 
 Use a separate lower-case ASCII projection, Portuguese and English stemming, and bounded fuzzy fill-only retrieval under ADR-022. Original Unicode/display/span evidence stays intact. The current Portuguese FTS remains the implemented baseline until the planned change is verified.
+
+## Mandatory coverage interview — issue #120
+
+Authority: [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
+
+Only explicit REQUIRED concepts enter the ADR-021 threshold: all below three, otherwise max(3, ceil(70% of N)). Exact/approved-alias evidence alone satisfies it. All exclusions remain off; this is not a replacement for evaluation gates.
