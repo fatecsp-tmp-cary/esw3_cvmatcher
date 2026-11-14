@@ -99,7 +99,7 @@ PR #175; the legacy `CandidateProfile` must not become a second public-input val
    policy; source usage/retention evidence remains #134. The earlier shape probe
    proves neither availability nor completeness. No hidden verifier is enabled
    and no unproven scan may mark absent jobs stale.
-2. The pinned multilingual E5 model/version and separate provenance are planned in stack PR #171
+2. The pinned multilingual E5 model/version and separate provenance are implemented in stack PR #171
    (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
    the fixed canonical Job fields.
 3. ADR-012 defines conservative canonical language/employment mappings (#139).
@@ -288,3 +288,14 @@ history and first/last observation plus verification timestamps, and remains
 terminal when ingestion runs concurrently. Ambiguous expiry/clock representations
 are rejected. A partial due-time index agrees with migrated PostgreSQL metadata.
 See the [PR #169 review](../../docs/reports/2026-11-14-pr169-review.md).
+
+
+## PR #171 embedding maintenance acceptance
+
+Equivalent normalized location objects must produce identical passages despite
+JSON key insertion order. Current normalized requirements participate in passages;
+changed extraction/model/passage-policy versions invalidate prior vectors.
+Independent-connection tests must preserve skip-locked claims without locking Job
+rows, and preparation must set telemetry configuration before importing the hub.
+Current-head verification is recorded in the
+[PR #171 review](../../docs/reports/2026-11-14-pr171-review.md).

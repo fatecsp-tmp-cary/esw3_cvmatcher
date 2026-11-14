@@ -18,8 +18,10 @@ absence-based lifecycle changes remain separate policy/implementation work.
    rank distinct from final compatibility scores; evaluate English/accents.
 5. Category aliases, public response validation, and bounded
    lossless uncapped curriculum projection.
-6. Complete model/version metadata, vectors, retrieval and scoring,
-   model-change reprocessing, and empty-evidence behavior.
+6. Pinned local embeddings, job-only model/version metadata, versioned passage
+   representation, semantic retrieval and model/extraction-change invalidation are
+   implemented. Complete production retrieval/scoring integration and empty-evidence
+   behavior; validate calibration independently before release approval.
 7. Wire the production matching API and privacy, background work and bounded
    availability verification, lifecycle policies, packaging/operations, and
    release regressions. Complete the initial textual matching slice.

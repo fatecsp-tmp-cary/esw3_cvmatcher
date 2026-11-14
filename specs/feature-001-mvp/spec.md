@@ -90,7 +90,10 @@ uses A title/skills, B company/keywords/normalized requirements and D
 description/location, PostgreSQL JSON text rendering and descending publication
 date then platform/source-ID ties under ADR-004/005. All retrieval paths require
 successful extraction for current content/configuration. Semantic job representation is title,
-normalized skills, requirements, relevant description, location, and mode.
+normalized skills, current normalized requirement texts (sorted and deduplicated),
+relevant description, location string values in sorted-key order, and mode. Passage
+representation is part of the embedding policy identity; its changes require
+regeneration even when source content is unchanged.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job
 embeddings in pgvector; candidate embeddings stay in memory. Jobs without a
