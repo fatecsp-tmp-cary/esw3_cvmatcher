@@ -16,7 +16,7 @@ Requirements and completion gates are in [spec](spec.md),
 - Immutable weighted FTS indexes, active-only any-term/requirement retrieval and stable ties; no semantic or final score implementation.
 - Domain-enum seniority/mode aliases; missing/unknown values yield no category. APiBR uses first-recognized source-label precedence, retaining every keyword. Other categories remain text.
 - Ranked response validation tests for job identity, eligibility, match details and version metadata.
-- Public collection caps and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
+- Uncapped public collections and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
 
 ## Remaining MVP work
 
@@ -28,7 +28,7 @@ Requirements and completion gates are in [spec](spec.md),
 - [ ] Model selection, metadata, semantic retrieval, scoring, model-change
       reprocessing and empty-evidence behavior; textual normalization/ranking,
       a fixed regression fixture and vertical-slice validation.
-- [ ] API pipeline, authentication, worker scheduling, source locking and
+- [ ] API pipeline, anonymous global admission limiting (ADR-009/010), worker scheduling, source locking and
       operations; language/accent investigation.
 - [ ] Release coverage and the initial textual matching slice.
 - [ ] Additional-source selection/adapter, separate from the at-least-one-source

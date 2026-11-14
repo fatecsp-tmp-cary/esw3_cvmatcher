@@ -2,10 +2,12 @@
 
 ## Behavior
 
-The service receives an already structured CV, validates and normalizes it to a
+The required service behavior is to receive an already structured CV, validate and normalize it to a
 request-scoped `NormalizedCandidate`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
-jobs through `POST /matches`. CV parsing is external. `GET /health` is optional.
+jobs through `POST /matches`. Production normalization/pipeline wiring is pending
+in stack PR #175; this branch implements the projection and contract. CV parsing
+is external. `GET /health` is optional.
 
 The public five-section contract is defined in [acceptance](acceptance.md#resolved-api-contract).
 Its lossless transient projection preserves all sections without the UUID or
@@ -45,7 +47,7 @@ assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
 matching, and section detection complement the selected local GLiNER job-field
 extraction strategy. Follow the extraction plan (planned in #170: `../../docs/data/job-field-extraction.md`)
 for evidence, confidence, contextual requirement classification, model versioning
-and failure handling. Pinned offline extraction and bounded job-state processing are implemented; mandatory classification remains disabled pending measured quality approval. PostgreSQL FTS handles DB-level
+and failure handling. Pinned offline extraction and bounded job-state processing are planned in stack PR #170; mandatory classification remains disabled pending measured quality approval. PostgreSQL FTS handles DB-level
 tokenization, stemming, and ranking.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
