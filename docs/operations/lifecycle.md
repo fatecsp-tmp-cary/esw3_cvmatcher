@@ -17,3 +17,11 @@ is independent: failures withhold matching readiness without changing availabili
 The scoped test helper probes PostgreSQL over TCP, so its temporary initialization
 server on a Unix socket cannot produce a false ready signal. It creates and
 removes only its uniquely labelled disposable test container.
+
+## Accepted absence expiration threshold (implementation pending)
+
+[ADR-020](../architecture/decisions/ADR-020-three-snapshot-stale-expiration.md)
+resolves #145: three qualifying absent snapshots, counting the first STALE transition;
+no age threshold. Bad scans do not increment; confirmed rediscovery resets the count.
+Current one-snapshot STALE and reliable timestamp expiry remain as implemented;
+three-snapshot EXPIRED counters and tests still need implementation.

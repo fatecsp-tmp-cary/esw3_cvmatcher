@@ -115,17 +115,17 @@ remaining native/runtime acceptance gaps are not application release evidence.
 ADR-012 records the user's 2026-11-12 interview decisions. The original #164 and
 #94 remain reference-only drafts; the replacement PRs are merge candidates in
 dependency order. Budget, mapping, classification and evaluation-policy changes
-are implemented and tested against each issue. Human annotations, calibration fitting
-and held-out quality results remain pending; do not mark these done from policy
-approval alone. Local deployment acceptance is distinct from external #150.
+are implemented and tested against each issue. Original human annotations, calibration fitting and measured outcomes are complete.
+Quality acceptance remains failed; policy-updated copies do not renew held-out
+independence. See the extraction correction below for the current evidence. Local deployment acceptance is distinct from external #150.
 
 - [x] Resolve the #125 snapshot-coverage clarification through accepted ADR-013;
   implement/regress qualifying and rejected best-effort count attestations.
   Availability and #145 absence/expiration policy remain separate.
 
-- [ ] User annotates the frozen calibration/held-out packets, then calibrated
-  models are evaluated against the accepted numerical gates. This is an external
-  input/evidence requirement, not a completed policy or implementation decision.
+- [x] User annotated the original frozen calibration/held-out packets; reviewed
+  results and subsequent policy adjudications are preserved in the correction
+  evidence below. Independent post-correction acceptance remains pending.
 
 Final completion verification: **658 passed, 1 external benchmark deselected**.
 At the final scoring version, the actual CPU reference failed once with a
@@ -134,3 +134,50 @@ observations; the repeat is not a guarantee of stable latency. The outlier cause
 remains unestablished.
 See [completion evidence](../../docs/reports/2026-11-12-issue-completion.md) for
 static checks, per-step tests, Compose/recovery scope and remaining human gates.
+
+## Issue #116 extraction correction — 2026-11-14
+
+Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md).
+
+- [x] Interview and record user decisions before dependent implementation.
+- [x] Implement clause-local strengths, negated-null/hedged optional evidence,
+      strongest-occurrence consolidation with retained conflict flags, selection
+      separate from detection, section/background handling and exact span trimming.
+- [x] Add dedicated credential/license/language/certification labels and version
+      bounded score-only typo support shared by job/candidate matching.
+- [x] Test approved semantic equivalence examples; scalar thresholds do not separate
+      related pairs from all distinct languages. Automatic merging remains disabled.
+- [x] Complete focused PostgreSQL and full relevant test verification; see
+      [correction evidence](../../docs/reports/2026-11-14-extraction-correction.md).
+- [x] Update calibration/old-held-out copies with case-level policy provenance on
+      evaluation PR #178; preserve originals and historical failures.
+- [x] Run calibration only; freeze extraction version, calibration and cutoff;
+      preserve PT/EN metrics, failed gates and case errors.
+- [ ] Obtain a fresh independently reviewed held-out set for future acceptance.
+      Reused held-out labels are regression evidence, not renewed independence.
+- [ ] Define minimum mandatory-mention support if future exclusions are proposed.
+      All new exclusions remain disabled; no release/merge approval is implied.
+
+## Bilingual search interview — issues #147/#159
+
+- [x] Record the user decision in [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
+- [ ] Implement and compare the approved separate projection, bilingual retrieval and fuzzy fallback; verify readiness, symbol distinctions, original offsets, group priority, limits and index/rebuild impact. No current implementation completion is claimed.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
+## Mandatory coverage interview — issue #120
+
+- [x] Record the user decision in [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md).
+- [ ] Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
+## Deferred external deployment and source expansion
+
+- [x] Record the user decision in [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
+- [ ] Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
+## Stale expiration interview — issue #145
+
+- [x] Record the user decision in [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
+- [ ] Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.

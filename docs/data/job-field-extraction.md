@@ -22,7 +22,8 @@ review is not a release quality gate; source labels are weak labels, not gold da
    shared aliases/taxonomy. Deduplicate overlapping predictions within a job only.
    Never merge jobs across sources or fabricate missing field values.
 4. Determine REQUIRED, PREFERRED or NICE_TO_HAVE from explicit contextual evidence.
-   Unclear/conflicting wording stays unclassified supporting evidence and cannot
+   Unknown/ambiguous/negated wording stays unclassified. Conflicting strengths use
+   the strongest occurrence with an unsafe conflict flag under ADR-018 and cannot
    become a mandatory exclusion. The current requirement-class enum has no UNKNOWN
    value; do not force uncertain output into it. Design any supporting evidence
    persistence separately before implementation.
@@ -125,8 +126,8 @@ These decisions do not convert the existing failed synthetic run into a pass.
 ## Context classes and shared taxonomy
 
 `src/extraction/classification.py` classifies local GLiNER spans only from explicit
-PT/EN sentence or immediate section-heading cues. Negation, contradictory cues
-and conflicting strengths stay unclassified. Presence or confidence alone never
+PT/EN sentence or immediate section-heading cues. Negation remains null; hedges are NICE_TO_HAVE. Contradictory cues
+and conflicting occurrences retain the strongest strength with conflict flags under ADR-018. Presence or confidence alone never
 establishes a required skill. `src/extraction/persistence.py` atomically replaces
 current JobRequirement/JobSkill associations with successful claim completion.
 The versioned project-maintained alias seed has canonical technology names,
@@ -137,3 +138,28 @@ matching uses the same explicit aliases transiently. The extraction-version hash
 includes classification and seed versions, forcing unchanged-content reprocessing
 when those policies change. Canonical Job content/hash is not mutated by these
 supporting associations. Mandatory exclusions remain disabled pending review.
+
+## Corrected extraction policy
+
+[ADR-018](../architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md)
+is the authority for clause-local classification, smallest meaningful spans,
+strongest occurrence consolidation and bounded typo support. `annotate_spans`
+annotates every detection in place and returns only selected requirements. Raw
+evidence retains original detection offsets, occurrence classes, negation,
+conflict, approximation and selection flags. `exclusion_safe` is always false.
+Negated mentions remain null; background detections remain inspectable without
+becoming requirements. Exact aliases are authoritative; approximate matches
+produce score-only associations, never canonical requirement FKs or new aliases.
+All candidate lookup remains transient. Dedicated model labels are professional
+credential/license, language and certification, in addition to existing labels.
+These policy changes are hashed into extraction version/provenance and require
+re-extraction of unchanged jobs before readiness and downstream publication.
+
+Updated calibration/old-held-out labels are versioned policy adjudications; original
+reviewed evidence and failed results remain historical. The old held-out cases
+have been diagnosed and are no longer independent acceptance evidence.
+
+Exact project aliases also supplement model detections, with explicit source
+provenance. They do not infer strength and do not replace local GLiNER. Cue-only
+spans are not meaningful entities. This follows the feature's existing dictionary
+complement policy; neither source fields nor the canonical schema change.
