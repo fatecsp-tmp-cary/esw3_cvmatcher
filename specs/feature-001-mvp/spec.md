@@ -63,7 +63,11 @@ States: `DISCOVERED`, `ACTIVE`, `STALE`, `EXPIRED`. Allowed transitions:
 complete snapshot; incremental absence and failed polls do not change status.
 `STALE→EXPIRED` uses configured consecutive missing snapshots and/or maximum
 stale duration; either configured condition may expire a job. Reliable explicit
-`source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.
+`source_expires_at` may expire immediately. Adapters must normalize this only
+from a supported reliable upstream expiry field as a timezone-aware datetime,
+without fallback dates; APiBR currently emits null. The explicit-expiry sweep
+coordinates with all bounded ingestion stripes before changing rows, preserving
+observation/verification timestamps and terminal expiration. Rediscovery reactivates stale jobs.
 `EXPIRED` is terminal even if a source later reopens the record.
 Retain expired records; physical deletion is out of MVP.
 

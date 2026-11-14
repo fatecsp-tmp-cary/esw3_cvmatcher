@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from src.ingestion.apibr import ingest_apibr
 from src.ingestion.upsert import upsert_job
+from src.lifecycle.expiration import expire_source_timestamps
 from src.persistence.job.job import Job, JobStatus
 from src.persistence.job.job_source import JobSource
 from src.persistence.job.source_run import SourceRun
@@ -198,3 +199,56 @@ def test_batch_write_failure_rolls_back_prior_records(db_engine, committed_sourc
         run = session.scalar(select(SourceRun).where(SourceRun.source_id == committed_source))
         assert run.status == "FAILED"
         assert run.jobs_created == 0
+
+
+@pytest.mark.parametrize("first_actor", ["sweep", "upsert"])
+def test_expiry_sweep_and_stale_reactivation_serialize_without_reopening(
+    db_engine, committed_source, first_actor
+):
+    now = datetime.now(UTC)
+    normalized = {**_job(committed_source, status="STALE"), "source_expires_at": now}
+    with Session(db_engine) as session:
+        upsert_job(session, committed_source, normalized, now, True)
+        session.commit()
+    attempted = Event()
+
+    def act(session, actor):
+        if actor == "sweep":
+            return expire_source_timestamps(session, now=now)
+        return upsert_job(session, committed_source, {**normalized, "status": "ACTIVE"}, now, True)
+
+    def compete(actor):
+        with Session(db_engine) as session:
+            # Retain a pre-sweep ORM identity to verify populate_existing too.
+            old = session.scalar(select(Job).where(Job.source_id == committed_source))
+            assert old.status == JobStatus.STALE
+            attempted.set()
+            result = act(session, actor)
+            session.commit()
+            return result
+
+    other_actor = "upsert" if first_actor == "sweep" else "sweep"
+    with ThreadPoolExecutor(max_workers=1) as executor, Session(db_engine) as first:
+        act(first, first_actor)
+        first.flush()
+        if first_actor == "sweep":
+            assert (
+                first.scalar(
+                    text(
+                        "SELECT count(*) FROM pg_locks "
+                        "WHERE locktype = 'advisory' AND pid = pg_backend_pid()"
+                    )
+                )
+                == 256
+            )
+        future = executor.submit(compete, other_actor)
+        try:
+            assert attempted.wait(timeout=5)
+        finally:
+            first.commit()
+        future.result(timeout=15)
+    with Session(db_engine) as session:
+        assert (
+            session.scalar(select(Job.status).where(Job.source_id == committed_source))
+            == JobStatus.EXPIRED
+        )

@@ -256,3 +256,12 @@ qualifying/incomplete attestations and these conservative lifecycle protections.
 
 These incremental regressions are recorded in the
 [PR #167 review](../../docs/reports/2026-11-14-pr167-review.md).
+
+
+## Explicit source-timestamp expiration
+
+Due reliable source expiry expires nonterminal records once, preserves retained
+history and first/last observation plus verification timestamps, and remains
+terminal when ingestion runs concurrently. Ambiguous expiry/clock representations
+are rejected. A partial due-time index agrees with migrated PostgreSQL metadata.
+See the [PR #169 review](../../docs/reports/2026-11-14-pr169-review.md).
