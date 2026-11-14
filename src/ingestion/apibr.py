@@ -11,6 +11,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session
 
@@ -18,6 +19,7 @@ from src.ingestion.adapters import PollingMode, RetryPolicy, SourceError
 from src.ingestion.completeness import SnapshotAttestation
 from src.ingestion.upsert import upsert_job
 from src.normalization.jobs.apibr import normalize_apibr_job
+from src.persistence.job.job import Job, JobStatus
 from src.persistence.job.job_source import JobSource
 from src.persistence.job.source_run import SourceRun
 
@@ -248,6 +250,32 @@ class APiBRRunResult:
     jobs_expired: int
     jobs_reactivated: int
     jobs_rejected: int
+    jobs_absent: int = 0
+    jobs_marked_stale: int = 0
+
+
+def _mark_absent_stale(session: Session, source_id: int, scan_started: datetime) -> tuple[int, int]:
+    """Mark this source's ACTIVE jobs not observed since ``scan_started`` as STALE.
+
+    Callers must have established a qualifying snapshot (ADR-015). Returns the
+    non-expired absent job count and the number newly marked STALE.
+    """
+    absent = (
+        Job.source_id == source_id,
+        Job.platform == "apibr",
+        Job.last_seen_at < scan_started,
+    )
+    absent_count = session.scalar(
+        select(func.count()).select_from(Job).where(*absent, Job.status != JobStatus.EXPIRED)
+    )
+    marked = session.execute(
+        update(Job)
+        .where(*absent, Job.status == JobStatus.ACTIVE)
+        .values(status=JobStatus.STALE)
+        .returning(Job.id)
+        .execution_options(synchronize_session=False)
+    ).all()
+    return int(absent_count or 0), len(marked)
 
 
 def _normalize_issue(raw: Any) -> tuple[dict[str, Any], bool]:
@@ -287,6 +315,9 @@ def ingest_apibr(
     assert run is not None
     run_id = run.id
     timer_started = time.perf_counter()
+    # Observations use the real clock, so absence is measured against it as well.
+    scan_started = datetime.now(UTC)
+    absent = marked_stale = 0
 
     counts = {
         "found": 0,
@@ -331,6 +362,9 @@ def ingest_apibr(
                 terminal_empty=True,
             )
             run.snapshot_complete = status == "SUCCEEDED" and run.snapshot_evidence["qualified"]
+            if run.snapshot_complete:
+                # Only a qualifying snapshot makes absence meaningful (ADR-015).
+                absent, marked_stale = _mark_absent_stale(session, source_id, scan_started)
         run.status = status
         run.finished_at = finished_at
         run.duration_ms = int((time.perf_counter() - timer_started) * 1000)
@@ -342,8 +376,8 @@ def ingest_apibr(
         run.jobs_reactivated = counts["reactivated"]
         run.jobs_rejected = counts["rejected"]
         run.errors = f"RejectedRecords:{counts['rejected']}" if counts["rejected"] else None
-        run.jobs_absent = 0
-        run.jobs_marked_stale = 0
+        run.jobs_absent = absent
+        run.jobs_marked_stale = marked_stale
         source.last_run_at = started_at
         if status == "SUCCEEDED":
             source.last_success_at = finished_at
@@ -351,6 +385,7 @@ def ingest_apibr(
         session.commit()
     except Exception as error:
         session.rollback()
+        absent = marked_stale = 0
         failed_at = datetime.now(UTC)
         run = session.get(SourceRun, run_id)
         source = session.get(JobSource, source_id)
@@ -383,4 +418,6 @@ def ingest_apibr(
         jobs_expired=counts["expired"],
         jobs_reactivated=counts["reactivated"],
         jobs_rejected=counts["rejected"],
+        jobs_absent=absent,
+        jobs_marked_stale=marked_stale,
     )

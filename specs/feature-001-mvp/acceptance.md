@@ -98,9 +98,10 @@ second public-input validator.
    probe establishes the approved best-effort completeness
    policy; source usage/retention evidence remains #134. Accepted ADR-014 treats
    presence in the open-vacancy listing of the source as availability evidence,
-   so listed jobs are ACTIVE. No hidden verifier is enabled, a job that leaves
-   the listing is not deactivated (#145), and no unproven scan may mark absent
-   jobs stale.
+   so listed jobs are ACTIVE. No hidden verifier is enabled. Under accepted
+   ADR-015, a job absent from a qualifying SNAPSHOT poll becomes STALE; no
+   incremental, partial, failed or non-qualifying scan may mark absent jobs
+   stale, and STALE→EXPIRED thresholds remain #145.
 2. The pinned multilingual E5 model/version and separate provenance are implemented
    (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
    the fixed canonical Job fields.
@@ -283,3 +284,9 @@ Implement/version per-job coverage and its boundary/evidence tests without chang
 Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
 
 Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+
+## Stale expiration interview — issue #145
+
+Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
+
+Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.

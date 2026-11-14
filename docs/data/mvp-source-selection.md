@@ -50,8 +50,8 @@ InHire, Solides, Trampos.co, and Quero Vagas Tech were also evaluated and are no
 5. Upsert each job record using its surrogate primary key and enforce unique source identity with `(platform, source_job_id)`. Reject source records with missing or blank identifiers; identifiers from different platforms remain independent.
 6. Jobs absent from a successful complete snapshot may be marked `STALE`; the
    APiBR scan must qualify under accepted ADR-013 before relying on coverage.
-   The separate absence/stale-expiration policy remains #145 and is not enabled
-   by attestation alone.
+   Accepted ADR-015 marks ACTIVE jobs absent from a qualifying snapshot STALE;
+   the separate stale-expiration thresholds remain #145.
 
 This approach avoids relying on real-time webhooks and keeps the dataset up to date through scheduled polling.
 
@@ -71,7 +71,9 @@ This approach avoids relying on real-time webhooks and keeps the dataset up to d
 The scan proposal alone does not establish completeness. Accepted
 [ADR-013](../architecture/decisions/ADR-013-best-effort-apibr-snapshot-attestation.md)
 adds explicit SNAPSHOT health/count attestation, with documented concurrent-rewrite
-limitations. Absence-driven transitions remain separate #145 work. The source identity
+limitations. Accepted
+[ADR-015](../architecture/decisions/ADR-015-qualifying-snapshot-absence-marks-stale.md)
+enables ACTIVE→STALE for a qualifying snapshot; stale expiration remains #145. The source identity
 decision is settled: enforce unique `(platform, source_job_id)` and reject
 missing or blank source identifiers. See the
 [MVP acceptance clarifications](../../specs/feature-001-mvp/acceptance.md).

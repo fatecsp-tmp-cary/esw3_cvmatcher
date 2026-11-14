@@ -78,8 +78,10 @@ and the reconciled production image build passed. See the
   remain disabled.
 - [x] APiBR availability under accepted ADR-014 (#181): presence in the
   open-vacancy listing of the source makes a job ACTIVE and advances
-  verification. Deactivating jobs that leave the listing remains #145; the
-  optional verifier remains #153.
+  verification. The optional verifier remains #153.
+- [x] Absence under accepted ADR-015 (#186): ACTIVE jobs missing from a qualifying
+  SNAPSHOT poll become STALE and rediscovery reactivates them. STALE→EXPIRED
+  thresholds remain #145; sources default to INCREMENTAL, where absence is ignored.
 - [x] Pre-reconciliation production image build and real pinned offline Compose
   smoke: migrations, synthetic ingestion, worker GLiNER/E5, deterministic API,
   database/API replacement durability and dump/restore into an empty project.
@@ -171,4 +173,10 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 
 - [x] Record the user decision in [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
 - [ ] Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
+## Stale expiration interview — issue #145
+
+- [x] Record the user decision in [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
+- [ ] Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.

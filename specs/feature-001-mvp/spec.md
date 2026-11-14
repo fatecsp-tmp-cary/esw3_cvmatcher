@@ -61,8 +61,12 @@ States: `DISCOVERED`, `ACTIVE`, `STALE`, `EXPIRED`. Allowed transitions:
 `DISCOVERED→ACTIVE`, `DISCOVERED→EXPIRED`, `ACTIVE→STALE`, `ACTIVE→EXPIRED`,
 `STALE→ACTIVE`, `STALE→EXPIRED`. `STALE` means absence from a successful
 complete snapshot; incremental absence and failed polls do not change status.
-`STALE→EXPIRED` uses configured consecutive missing snapshots and/or maximum
-stale duration; either configured condition may expire a job. Reliable explicit
+For APiBR, one SNAPSHOT poll that qualifies under ADR-013 marks absent `ACTIVE`
+jobs of that source `STALE`
+([ADR-015](../../docs/architecture/decisions/ADR-015-qualifying-snapshot-absence-marks-stale.md)).
+`STALE→EXPIRED` is approved after three qualifying absence snapshots, including
+the first STALE transition; no age trigger is selected (ADR-020). Supporting
+counters and expiry implementation remain pending #145. Reliable explicit
 `source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.
 `EXPIRED` is terminal even if a source later reopens the record.
 Retain expired records; physical deletion is out of MVP.
@@ -238,3 +242,9 @@ Only explicit REQUIRED concepts enter the ADR-021 threshold: all below three, ot
 Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
 
 External hosting/HTTPS deployment and second-source research/selection remain deferred. Local pre-production and APiBR remain the authorized scope.
+
+## Stale expiration interview — issue #145
+
+Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
+
+The accepted expiration threshold is three qualifying absence snapshots, including the one that first marks STALE. No age-based threshold is selected. Bad scans do not advance the count; rediscovery resets it. Supporting counters remain outside canonical Job.
