@@ -38,7 +38,7 @@ versioned, explicitly approved interface. See
 [ADR-008](decisions/ADR-008-extraction-contract-and-semantic-evidence.md).
 
 Extraction detection, classification and requirement selection are distinct under
-[ADR-014](decisions/ADR-014-extraction-context-and-approximate-evidence.md).
+[ADR-018](decisions/ADR-018-extraction-context-and-approximate-evidence.md).
 Keep exact Unicode evidence offsets, negation/conflict/approximation provenance
 and disabled exclusions. Approximation never changes canonical Job/public API
 fields, authoritative aliases or candidate retention boundaries.

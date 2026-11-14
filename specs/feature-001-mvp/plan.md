@@ -27,7 +27,7 @@ and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).
 
 ## Issue #116 extraction correction
 
-Follow [ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md):
+Follow [ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md):
 implement clause-local context and requirement projection, preserve raw detections,
 add explicit entity labels/span trimming and shared conservative typo support.
 Validate deterministic extraction tests and PostgreSQL publication before full

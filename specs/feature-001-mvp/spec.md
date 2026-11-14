@@ -209,7 +209,7 @@ deployment verification.
 
 ## Extraction correction policy (issue #116)
 
-[ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md)
+[ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md)
 governs clause-local cue attribution, section fallback, negated-null and hedged
 NICE_TO_HAVE evidence, strongest-class consolidation with retained conflict flags,
 smallest meaningful exact Unicode spans, dedicated internal entity labels and
