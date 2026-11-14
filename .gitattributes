@@ -1,0 +1,18 @@
+# Keep LF line endings in the repository and in every working tree, so shell
+# scripts, hashed requirement locks and files copied into the Linux image are
+# identical on Windows, macOS and Linux.
+* text=auto eol=lf
+
+# Binary formats are never converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.safetensors binary
+*.bin binary
+*.onnx binary
+*.dump binary
