@@ -1,0 +1,387 @@
+{
+  "schema_version": "1.0",
+  "predictions": [
+    {
+      "id": "pt-002",
+      "requirements": [
+        {
+          "start": 9,
+          "end": 14,
+          "text": "COREN",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 45,
+          "end": 48,
+          "text": "UTI",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 67.82384276900949
+    },
+    {
+      "id": "pt-006",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 7,
+          "text": "AutoCAD",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 23,
+          "end": 28,
+          "text": "Revit",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 61.296088358477505
+    },
+    {
+      "id": "pt-010",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 3,
+          "text": "OAB",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 19,
+          "end": 25,
+          "text": "Inglês",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 60.356024850463314
+    },
+    {
+      "id": "pt-017",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 10,
+          "text": "JavaScript",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 38,
+          "end": 44,
+          "text": "sênior",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 70.82762023175937
+    },
+    {
+      "id": "pt-019",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 6,
+          "text": "TCP/IP",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 22,
+          "end": 32,
+          "text": "Kubernetes",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 60.59892176662085
+    },
+    {
+      "id": "pt-020",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 3,
+          "text": "C++",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 19,
+          "end": 23,
+          "text": "Rust",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 64.20593462537248
+    },
+    {
+      "id": "pt-021",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 7,
+          "text": "Windows",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 23,
+          "end": 28,
+          "text": "Linux",
+          "requirement_class": null
+        }
+      ],
+      "role_score": 61.55422357880035
+    },
+    {
+      "id": "pt-022",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Scrum",
+          "requirement_class": "PREFERRED"
+        },
+        {
+          "start": 19,
+          "end": 22,
+          "text": "PMP",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 61.29860417997306
+    },
+    {
+      "id": "pt-023",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 11,
+          "text": "Atendimento",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 27,
+          "end": 33,
+          "text": "Inglês",
+          "requirement_class": "NICE_TO_HAVE"
+        }
+      ],
+      "role_score": 69.02900608716274
+    },
+    {
+      "id": "pt-024",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 7,
+          "text": "Francês",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 23,
+          "end": 29,
+          "text": "Alemão",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 64.74781884024364
+    },
+    {
+      "id": "pt-025",
+      "requirements": [
+        {
+          "start": 28,
+          "end": 46,
+          "text": "Folha de pagamento",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 63.76298790043829
+    },
+    {
+      "id": "pt-026",
+      "requirements": [
+        {
+          "start": 28,
+          "end": 46,
+          "text": "Folha de pagamento",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 44.07733077682461
+    },
+    {
+      "id": "pt-028",
+      "requirements": [
+        {
+          "start": 9,
+          "end": 14,
+          "text": "COREN",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 45,
+          "end": 48,
+          "text": "UTI",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 51.31358195620121
+    },
+    {
+      "id": "pt-031",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 6,
+          "text": "Python",
+          "requirement_class": "REQUIRED"
+        }
+      ],
+      "role_score": 68.14211679604507
+    },
+    {
+      "id": "pt-035",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 9,
+          "text": "Doutorado",
+          "requirement_class": "REQUIRED"
+        }
+      ],
+      "role_score": 62.917623949951306
+    },
+    {
+      "id": "pt-036",
+      "requirements": [
+        {
+          "start": 39,
+          "end": 47,
+          "text": "Selenium",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 54.91246021458816
+    },
+    {
+      "id": "pt-037",
+      "requirements": [
+        {
+          "start": 39,
+          "end": 47,
+          "text": "Selenium",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 49.363622372665375
+    },
+    {
+      "id": "pt-038",
+      "requirements": [],
+      "role_score": 0.0
+    },
+    {
+      "id": "pt-039",
+      "requirements": [
+        {
+          "start": 4800,
+          "end": 4803,
+          "text": "SQL",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 4819,
+          "end": 4824,
+          "text": "Spark",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 60.476206943693214
+    },
+    {
+      "id": "pt-040",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 11,
+          "text": "Catalogação",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 27,
+          "end": 31,
+          "text": "MARC",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 68.24502630568256
+    },
+    {
+      "id": "en-002",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 20,
+          "text": "Nursing registration",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 34,
+          "end": 37,
+          "text": "ICU",
+          "requirement_class": "NICE_TO_HAVE"
+        }
+      ],
+      "role_score": 56.077503198201704
+    },
+    {
+      "id": "en-005",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 4,
+          "text": "Java",
+          "requirement_class": "REQUIRED"
+        }
+      ],
+      "role_score": 56.1935557373014
+    },
+    {
+      "id": "en-007",
+      "requirements": [
+        {
+          "start": 0,
+          "end": 5,
+          "text": "Scrum",
+          "requirement_class": "PREFERRED"
+        },
+        {
+          "start": 20,
+          "end": 23,
+          "text": "PMP",
+          "requirement_class": "NICE_TO_HAVE"
+        }
+      ],
+      "role_score": 53.837766324900784
+    },
+    {
+      "id": "en-008",
+      "requirements": [],
+      "role_score": 0.0
+    },
+    {
+      "id": "en-009",
+      "requirements": [
+        {
+          "start": 4700,
+          "end": 4703,
+          "text": "SQL",
+          "requirement_class": "REQUIRED"
+        },
+        {
+          "start": 4717,
+          "end": 4722,
+          "text": "Spark",
+          "requirement_class": "PREFERRED"
+        }
+      ],
+      "role_score": 41.452862076818874
+    }
+  ]
+}

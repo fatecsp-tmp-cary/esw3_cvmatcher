@@ -1,0 +1,502 @@
+{
+  "policy": "ADR-014-extraction-policy-2026-11-14",
+  "source_sha256": "3c69f994bb0443fbbf18c370713134fa9faf976a8ca2b192474319ad47149093",
+  "source_unchanged": true,
+  "changes": [
+    {
+      "id": "pt-004",
+      "before": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Interface design experience and design degree match the designer role.\nFinal reviewer-adjudicated notes: Negated/non-requirement mention(s) excluded from requirements by convention: Photoshop (não é exigido)."
+      },
+      "after": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 21,
+            "end": 30,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-007",
+      "before": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Inglês",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "English teaching experience and Letras degree match English teacher role.\nFinal reviewer-adjudicated notes: Negated/non-requirement mention(s) excluded from requirements by convention: Espanhol (não é necessário)."
+      },
+      "after": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Inglês",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Espanhol",
+            "start": 22,
+            "end": 30,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-009",
+      "before": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "NR10",
+            "start": 0,
+            "end": 4,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "NR35",
+            "start": 20,
+            "end": 24,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Electrical maintenance and electrotechnics match electrician role."
+      },
+      "after": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "NR10",
+            "start": 0,
+            "end": 4,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "NR35",
+            "start": 20,
+            "end": 24,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-011",
+      "before": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "React",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Pharmacy service experience and pharmacy degree show no frontend development evidence.\nFinal reviewer-adjudicated notes: Negated/non-requirement mention(s) excluded from requirements by convention: Vue (apenas um exemplo, não um requisito)."
+      },
+      "after": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "React",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Vue",
+            "start": 21,
+            "end": 24,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-014",
+      "before": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Excel",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Power BI",
+            "start": 21,
+            "end": 29,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Hydraulic installation and building-works education do not match financial analyst role."
+      },
+      "after": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Excel",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Power BI",
+            "start": 21,
+            "end": 29,
+            "requirement_class": "PREFERRED"
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-017",
+      "before": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "JavaScript",
+            "start": 0,
+            "end": 10,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Junior JavaScript development and computing degree match the junior developer role.\nFinal reviewer-adjudicated notes: Negated/non-requirement mention(s) excluded from requirements by convention: experiência sênior (não é exigida)."
+      },
+      "after": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "JavaScript",
+            "start": 0,
+            "end": 10,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "sênior",
+            "start": 38,
+            "end": 44,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-021",
+      "before": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Windows",
+            "start": 0,
+            "end": 7,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Windows support and networks education match support analyst role.\nFinal reviewer-adjudicated notes: Negated/non-requirement mention(s) excluded from requirements by convention: Linux (não é obrigatório)."
+      },
+      "after": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Windows",
+            "start": 0,
+            "end": 7,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Linux",
+            "start": 23,
+            "end": 28,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-030",
+      "before": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Engine maintenance and mechanics show no design evidence.\nFinal reviewer-adjudicated notes: Negated/non-requirement mention(s) excluded from requirements by convention: Photoshop (não é exigido)."
+      },
+      "after": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 21,
+            "end": 30,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-031",
+      "before": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Python",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 22,
+            "end": 28,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Systems analysis with Python and computing degree match the role.\nFinal reviewer-adjudicated notes: Python stated both mandatory and not mandatory; description says the team did not resolve it. Mandatory marked as REQUIRED and non-mandatory as unclassified (null)."
+      },
+      "after": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Python",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-032",
+      "before": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Docker",
+            "start": 0,
+            "end": 6,
+            "requirement_class": "PREFERRED"
+          },
+          {
+            "text": "Docker",
+            "start": 20,
+            "end": 26,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Infrastructure administration and networks education match the role.\nFinal reviewer-adjudicated notes: Docker is \"desejável\" in one sentence and \"obrigatório segundo outra seção\" in the next. conflict treated as each having a separate requirement span, one PREFERRED and one REQUIRED."
+      },
+      "after": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Docker",
+            "start": 20,
+            "end": 26,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-034",
+      "before": {
+        "role_relation": "irrelevant",
+        "requirements": [],
+        "rationale": "Cash-register operation experience matches the cashier role.\nFinal reviewer-adjudicated notes: Negated/non-requirement mention(s) excluded from requirements by convention: SAP (não exigimos). Description has no affirmative requirement."
+      },
+      "after": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "SAP",
+            "start": 29,
+            "end": 32,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "pt-038",
+      "before": {
+        "role_relation": "irrelevant",
+        "requirements": [],
+        "rationale": "Candidate has no experiences, education or competencies, and job states no requirements; no evidence either way.\nFinal reviewer-adjudicated notes: Since the job description names have no requirement (affirmatively checked), and the candidate has no experiences, education or competencies, there is no evidence either way to mark this role as irrelevant, so it is relevant by default."
+      },
+      "after": {
+        "role_relation": "irrelevant",
+        "requirements": [],
+        "rationale": "User policy: empty candidate evidence is irrelevant for role scoring; absence of job requirements does not establish relevance. Original rationale is retained in the source reviewed evidence."
+      }
+    },
+    {
+      "id": "en-003",
+      "before": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 19,
+            "end": 28,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Database administration/CS shows no design evidence.\nFinal reviewer-adjudicated notes: Negated/non-requirement mention(s) excluded from requirements by convention: Photoshop (is not required)."
+      },
+      "after": {
+        "role_relation": "irrelevant",
+        "requirements": [
+          {
+            "text": "Figma",
+            "start": 0,
+            "end": 5,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Photoshop",
+            "start": 19,
+            "end": 28,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "en-005",
+      "before": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Java",
+            "start": 0,
+            "end": 4,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Java",
+            "start": 19,
+            "end": 23,
+            "requirement_class": "NICE_TO_HAVE"
+          }
+        ],
+        "rationale": "Java systems analysis and CS degree match the role.\nFinal reviewer-adjudicated notes: Java stated both mandatory and optional; sections declared unresolved. Mandatory marked as REQUIRED and optional as NICE_TO_HAVE."
+      },
+      "after": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Java",
+            "start": 0,
+            "end": 4,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    },
+    {
+      "id": "en-008",
+      "before": {
+        "role_relation": "irrelevant",
+        "requirements": [],
+        "rationale": "Candidate has no experiences, education or competencies, and job states no requirements; no evidence either way.\nFinal reviewer-adjudicated notes: Since the job description names no requirement (affirmatively checked), there are no requirements to match against the candidate's experiences, education or competencies. The candidate has no experiences, education or competencies, so there is no evidence either way to mark this role as irrelevant, so it is relevant by default."
+      },
+      "after": {
+        "role_relation": "irrelevant",
+        "requirements": [],
+        "rationale": "User policy: empty candidate evidence is irrelevant for role scoring; absence of job requirements does not establish relevance. Original rationale is retained in the source reviewed evidence."
+      }
+    },
+    {
+      "id": "en-010",
+      "before": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Electrical installation",
+            "start": 0,
+            "end": 23,
+            "requirement_class": "REQUIRED"
+          }
+        ],
+        "rationale": "Electrical maintenance and electrical technology match electrician role.\nFinal reviewer-adjudicated notes: Negated/non-requirement mention(s) excluded from requirements by convention: Python (is not necessary)."
+      },
+      "after": {
+        "role_relation": "relevant",
+        "requirements": [
+          {
+            "text": "Electrical installation",
+            "start": 0,
+            "end": 23,
+            "requirement_class": "REQUIRED"
+          },
+          {
+            "text": "Python",
+            "start": 37,
+            "end": 43,
+            "requirement_class": null
+          }
+        ],
+        "rationale": "Original independent rationale and annotations are retained in the source. User-authorized ADR-014 policy adjudication: retain negated mentions as null, diferencial as PREFERRED, hedges as NICE_TO_HAVE, smallest entities, and strongest actual occurrence for repeated concepts. This update is not a new independent review."
+      }
+    }
+  ],
+  "script_sha256": "4166bc08430bf4d309aa334c2bdc2c8896218abe4825a5cdd23b16d084571680",
+  "new_independent_human_review": false
+}

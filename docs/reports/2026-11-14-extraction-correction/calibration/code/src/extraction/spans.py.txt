@@ -1,0 +1,27 @@
+"""Trim grammatical wrappers while retaining exact original Unicode offsets."""
+
+import re
+
+VERSION = "smallest-meaningful-entity-v2"
+PREFIX = re.compile(
+    r"^(?:(?:registro(?:\s+profissional)?|certifica[cç][aã]o|certification)\s+(?:em\s+|in\s+)?|"
+    r"(?:experi[eê]ncia|experience)\s+(?:(?:em|com|in|with)\s+)?)",
+    re.I,
+)
+SUFFIX = re.compile(r"\s+(?:experience|skills?)$", re.I)
+
+
+def entity_bounds(text: str, start: int, end: int) -> tuple[int, int]:
+    # Never normalize or search a different string to obtain original offsets.
+    while start < end and text[start].isspace():
+        start += 1
+    while end > start and (text[end - 1].isspace() or text[end - 1] in ",;:"):
+        end -= 1
+    value = text[start:end]
+    prefix = PREFIX.match(value)
+    if prefix and prefix.end() < len(value):
+        start += prefix.end()
+    suffix = SUFFIX.search(text[start:end])
+    if suffix and suffix.start() > 0:
+        end = start + suffix.start()
+    return start, end
