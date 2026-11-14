@@ -23,7 +23,7 @@ review is not a release quality gate; source labels are weak labels, not gold da
    Never merge jobs across sources or fabricate missing field values.
 4. Determine REQUIRED, PREFERRED or NICE_TO_HAVE from explicit contextual evidence.
    Unknown/ambiguous/negated wording stays unclassified. Conflicting strengths use
-   the strongest occurrence with an unsafe conflict flag under ADR-014 and cannot
+   the strongest occurrence with an unsafe conflict flag under ADR-018 and cannot
    become a mandatory exclusion. The current requirement-class enum has no UNKNOWN
    value; do not force uncertain output into it. Design any supporting evidence
    persistence separately before implementation.
@@ -127,7 +127,7 @@ These decisions do not convert the existing failed synthetic run into a pass.
 
 `src/extraction/classification.py` classifies local GLiNER spans only from explicit
 PT/EN sentence or immediate section-heading cues. Negation remains null; hedges are NICE_TO_HAVE. Contradictory cues
-and conflicting occurrences retain the strongest strength with conflict flags under ADR-014. Presence or confidence alone never
+and conflicting occurrences retain the strongest strength with conflict flags under ADR-018. Presence or confidence alone never
 establishes a required skill. `src/extraction/persistence.py` atomically replaces
 current JobRequirement/JobSkill associations with successful claim completion.
 The versioned project-maintained alias seed has canonical technology names,
@@ -141,7 +141,7 @@ supporting associations. Mandatory exclusions remain disabled pending review.
 
 ## Corrected extraction policy
 
-[ADR-014](../architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md)
+[ADR-018](../architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md)
 is the authority for clause-local classification, smallest meaningful spans,
 strongest occurrence consolidation and bounded typo support. `annotate_spans`
 annotates every detection in place and returns only selected requirements. Raw

@@ -27,4 +27,15 @@ superseded by later ADRs; do not rewrite their rationale or status history.
 
 - [ADR-013: Best-effort APiBR snapshot attestation](ADR-013-best-effort-apibr-snapshot-attestation.md) — accepted conditional source-health/count completeness, without availability or absence-driven expiry.
 
-- [ADR-014: Clause-local extraction and approximate score evidence](ADR-014-extraction-context-and-approximate-evidence.md) — accepted 2026-11-14 interview; score-only, strongest occurrence, typo support and reused-set evaluation limitations.
+- [ADR-018: Clause-local extraction and approximate score evidence](ADR-018-extraction-context-and-approximate-evidence.md) — accepted 2026-11-14 interview; score-only, strongest occurrence, typo support and reused-set evaluation limitations.
+
+## Identifier provenance
+
+ADR-014 denotes APiBR availability on the later source stack; ADR-018 denotes
+the extraction interview. The former extraction ADR-014 path is a historical
+redirect. ADR-015/016 remain the accepted snapshot-absence/inactive-result
+decisions. ADR-017 remains the original field-evidence proposal. Frozen reports
+and machine policy identifiers keep their original bytes and are not new authority.
+New interview records 019–023 are added on their owning branches as listed below.
+
+- [ADR-022: Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) — accepted interview policy; implementation status is tracked separately.

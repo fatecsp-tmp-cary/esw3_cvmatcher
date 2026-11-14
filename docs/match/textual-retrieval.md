@@ -68,3 +68,12 @@ rank combination, readiness, publication ties and immutable expression indexing;
 they require parent-run database validation. Migration/ORM registration and
 algorithm-version integration belong to the parent; this scope does not claim
 index installation, PostgreSQL execution or production performance.
+
+## Accepted next retrieval policy (not implemented)
+
+[ADR-022](../architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md)
+accepts a separate lowercase ASCII search projection, PT/EN stemming and fuzzy
+fill-only fallback when ordinary combined retrieval cannot fill the request.
+Canonical Unicode and extraction offsets remain unchanged. Technical projection,
+threshold and index alternatives require measured comparison under #147/#159;
+existing Portuguese queries/indexes below describe the current implementation.

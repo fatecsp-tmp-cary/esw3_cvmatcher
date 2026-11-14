@@ -209,7 +209,7 @@ deployment verification.
 
 ## Extraction correction policy (issue #116)
 
-[ADR-014](../../docs/architecture/decisions/ADR-014-extraction-context-and-approximate-evidence.md)
+[ADR-018](../../docs/architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md)
 governs clause-local cue attribution, section fallback, negated-null and hedged
 NICE_TO_HAVE evidence, strongest-class consolidation with retained conflict flags,
 smallest meaningful exact Unicode spans, dedicated internal entity labels and
@@ -218,3 +218,9 @@ from requirement selection; background detections cannot become requirements.
 No canonical Job/public API change or new hard exclusion is permitted. Original
 reviewed evidence is preserved; policy-updated copies are calibration/regression
 material and cannot renew held-out independence.
+
+## Bilingual search interview — issues #147/#159
+
+Authority: [ADR-022](../../docs/architecture/decisions/ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md).
+
+Use a separate lower-case ASCII projection, Portuguese and English stemming, and bounded fuzzy fill-only retrieval under ADR-022. Original Unicode/display/span evidence stays intact. The current Portuguese FTS remains the implemented baseline until the planned change is verified.
