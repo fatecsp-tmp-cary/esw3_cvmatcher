@@ -10,7 +10,9 @@ explicitly rather than inventing identities. `fetch_jobs()` asynchronously yield
 raw records unchanged, including malformed individual records: ingestion remains
 responsible for rejecting those independently. Synchronous `normalize(record)`
 uses the existing APiBR normalizer, preserving source identity, explicit availability
-and null raw retention. `fetch_job(id)` scans APiBR pages until the ID is found or
+and null raw retention. Recognized category labels retain the accepted first-label
+precedence for work arrangement and seniority, while every normalized label stays
+in `keywords`. Unknown labels do not invent categories. `fetch_job(id)` scans APiBR pages until the ID is found or
 an empty page is observed. APiBR has no verified single-record endpoint here; this
 operation can be expensive. Prefer `fetch_jobs()` for polling. No method silently
 requests GitHub job URLs or verifies availability elsewhere.
@@ -85,6 +87,13 @@ invalidates completeness. Unsupported clients/missing health and incremental
 configurations never qualify. SourceRun.snapshot_evidence stores only bounded
 counts/signatures/policy flags in JSONB migration b1e006, not IDs, authors or raw
 responses. Async cancellation/truncation cannot publish completed attestation.
+
+Synchronous ingestion captures both health signatures and all remote pages before
+acquiring the bounded, ordered identity-lock stripes. It then applies buffered
+observations in source order within one transaction. Persistence-phase rejections
+update the stored evidence's rejection count and invalidate qualification without
+another remote call. Network failure leaves job changes rolled back; a rejected
+record still permits valid observations to commit as PARTIAL.
 
 This is explicitly best effort: timestamp/count equality cannot rule out concurrent
 rewrites. It does not establish source permissions, job openness, raw retention

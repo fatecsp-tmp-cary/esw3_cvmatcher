@@ -5,6 +5,8 @@ from html import escape
 from html.parser import HTMLParser
 from typing import Any
 
+from src.domain.categories import normalize_seniority, normalize_work_arrangement
+
 
 class _HTMLTextParser(HTMLParser):
     _BLOCK_TAGS = {
@@ -156,6 +158,14 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("APiBR issue has an invalid job URL")
 
     keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
+    work_arrangement = next(
+        (mode for keyword in keywords if (mode := normalize_work_arrangement(keyword))),
+        None,
+    )
+    seniority_level = next(
+        (level for keyword in keywords if (level := normalize_seniority(keyword))),
+        None,
+    )
 
     return {
         "platform": "apibr",
@@ -167,8 +177,8 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         "keywords": keywords,
         "skills": [],
         "location": None,
-        "work_arrangement": None,
-        "seniority_level": None,
+        "work_arrangement": work_arrangement,
+        "seniority_level": seniority_level,
         "salary": None,
         "currency": None,
         "job_url": job_url,

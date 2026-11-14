@@ -7,6 +7,7 @@ from dataclasses import dataclass
 MODEL_ID = "intfloat/multilingual-e5-small"
 MODEL_REVISION = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
 DIMENSIONS = 384
+JOB_TEXT_VERSION = "title-skills-requirements-description-sorted-location-mode-v2"
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,6 +38,7 @@ class EmbeddingConfig:
             "query_prefix": "query: ",
             "passage_prefix": "passage: ",
             "normalization": "l2-each-window-and-aggregate",
+            "job_text": JOB_TEXT_VERSION,
         }
         encoded = json.dumps(policy, sort_keys=True, separators=(",", ":")).encode()
         return hashlib.sha256(encoded).hexdigest()

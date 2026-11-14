@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from src.ingestion.adapters import PollingMode, RetryPolicy, SourceError
 from src.ingestion.completeness import SnapshotAttestation
-from src.ingestion.upsert import upsert_job
+from src.ingestion.upsert import lock_job_identities, upsert_job
 from src.normalization.jobs.apibr import normalize_apibr_job
 from src.persistence.job.job_source import JobSource
 from src.persistence.job.source_run import SourceRun
@@ -266,7 +266,10 @@ def ingest_apibr(
 
     SNAPSHOT configurations may attest the approved best-effort health/count
     conditions. Absence-based lifecycle changes remain disabled. Polling
-    failures roll back all job updates. Rejected records produce a PARTIAL run;
+    failures roll back all job updates. Fetch and normalize the bounded scan
+    and finish remote attestation before taking identity locks. Acquire the full
+    lock set in global order, then apply observations in source order within one
+    atomic transaction. Rejected records produce a PARTIAL run;
     errors contain counts or exception types, never source response text.
     """
     source = session.get(JobSource, source_id)
@@ -301,15 +304,32 @@ def ingest_apibr(
     try:
         if attestation is not None:
             attestation.begin()
+        observations = []
         for raw_issue in iter_apibr_issues(client):
             counts["found"] += 1
             if attestation is not None:
                 attestation.observe(raw_issue)
             try:
+                normalized, verified = _normalize_issue(raw_issue)
+            except ValueError:
+                counts["rejected"] += 1
+                continue
+            observations.append((normalized, verified, datetime.now(UTC)))
+
+        evidence = (
+            attestation.finish(rejections=counts["rejected"], terminal_empty=True)
+            if attestation is not None
+            else None
+        )
+        lock_job_identities(
+            session,
+            ((job["platform"], job["source_job_id"]) for job, _, _ in observations),
+        )
+        for normalized, verified, observed_at in observations:
+            try:
                 with session.begin_nested():
-                    normalized, verified = _normalize_issue(raw_issue)
                     outcome, expired, reactivated = upsert_job(
-                        session, source_id, normalized, datetime.now(UTC), verified
+                        session, source_id, normalized, observed_at, verified
                     )
                     session.flush()
             except (ValueError, DataError, IntegrityError):
@@ -325,12 +345,13 @@ def ingest_apibr(
         if run is None or source is None:
             raise RuntimeError("Source execution state is unavailable")
         status = "PARTIAL" if counts["rejected"] else "SUCCEEDED"
-        if attestation is not None:
-            run.snapshot_evidence = attestation.finish(
-                rejections=counts["rejected"],
-                terminal_empty=True,
-            )
-            run.snapshot_complete = status == "SUCCEEDED" and run.snapshot_evidence["qualified"]
+        if evidence is not None:
+            # Persistence can reject additional records after remote evidence is
+            # captured. Such a run must never qualify as a complete snapshot.
+            evidence["rejections"] = counts["rejected"]
+            evidence["qualified"] = bool(evidence["qualified"] and not counts["rejected"])
+            run.snapshot_evidence = evidence
+            run.snapshot_complete = status == "SUCCEEDED" and evidence["qualified"]
         run.status = status
         run.finished_at = finished_at
         run.duration_ms = int((time.perf_counter() - timer_started) * 1000)

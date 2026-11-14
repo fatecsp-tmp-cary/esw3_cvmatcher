@@ -25,7 +25,8 @@ safetensors artifacts, records file SHA-256 hashes, and uses no authenticated
 model token or remote custom code. It does not run inference. Model artifacts
 and the local manifest are operational files, never repository inputs. The API
 and worker use `local_files_only=True` and `trust_remote_code=False`; preparation
-is never invoked implicitly. Serving may additionally set `HF_HUB_OFFLINE=1`,
+is never invoked implicitly. Preparation sets `HF_HUB_DISABLE_TELEMETRY` before
+importing the hub library so the library reads it during initialization. Serving may additionally set `HF_HUB_OFFLINE=1`,
 `TRANSFORMERS_OFFLINE=1`, and `HF_HUB_DISABLE_TELEMETRY=1`.
 
 `LocalEmbeddingEncoder(EmbeddingConfig(cache_directory=...))` exposes
@@ -48,7 +49,7 @@ inference windows, not the public request size or overall tokenization memory.
 No new public collection caps are introduced.
 
 The model version combines the pinned repository revision and a SHA-256 of the
-window/aggregation/prefix/dimension policy. Cache location and batching do not
+window/aggregation/prefix/dimension and job-passage representation policy. Cache location and batching do not
 change this version. Content hash, model/policy version and extraction version
 are stored independently, so unchanged source text is regenerated after policy
 or model changes. Stop workers before configuration changes; use the accepted
@@ -57,7 +58,20 @@ extraction_version)` performs invalidation in the caller's transaction. Repeated
 same-version enqueue does not reset failed or running work; `retry=True` is an
 explicit operator action.
 
-`EmbeddingWorker` claims with PostgreSQL `FOR UPDATE SKIP LOCKED`, commits before
+The job passage includes title, explicit skills, sorted unique normalized requirement
+texts from the current successful extraction, full cleaned description, location
+string values in sorted-key order, and work arrangement. Requirements are read
+only after current extraction readiness is established, and publication rechecks
+that generation's content hash and extraction version. Reprocessing after an
+extraction-version change invalidates the embedding separately from source content.
+Equivalent location objects produce the same passage regardless of insertion order.
+The revised passage policy changes the model/policy identity, so existing vectors
+must be re-enqueued under the new identity before becoming semantically ready.
+This does not change canonical Job fields or authorize mandatory exclusions.
+
+`EmbeddingWorker` locks only embedding metadata with PostgreSQL
+`FOR UPDATE OF job_embeddings SKIP LOCKED`; its ordinary Job read does not
+request a row lock. It commits before
 inference, and publishes only under the current token, lease, content and model
 configuration. Claims expire after five minutes and consume the same three-attempt
 budget when reclaimed. Failed inference/invalid results use 30/60-second backoff;

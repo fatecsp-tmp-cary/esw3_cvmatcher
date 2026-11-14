@@ -12,6 +12,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy import (
     Enum as SQLAlchemyEnum,
@@ -41,6 +42,13 @@ class Job(Base):
         ),
         Index("ix_jobs_publication_date", "publication_date"),
         Index("ix_jobs_source_id", "source_id"),
+        Index(
+            "ix_jobs_due_source_expiry",
+            "source_expires_at",
+            postgresql_where=text(
+                "source_expires_at IS NOT NULL AND status IN ('DISCOVERED', 'ACTIVE', 'STALE')"
+            ),
+        ),
     )
 
     id: Mapped[int] = mapped_column(
