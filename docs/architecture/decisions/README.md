@@ -32,3 +32,14 @@ superseded by later ADRs; do not rewrite their rationale or status history.
 - [ADR-015: Absence from a qualifying APiBR snapshot marks jobs STALE](ADR-015-qualifying-snapshot-absence-marks-stale.md) — enables `ACTIVE→STALE` for sources explicitly configured as SNAPSHOT; `STALE→EXPIRED` thresholds remain #145.
 
 - [ADR-016: Inactive jobs complete the ranked matches after active jobs](ADR-016-inactive-jobs-complete-ranked-matches.md) — supersedes active-only retrieval: other statuses only fill remaining positions, with `eligibility: false`.
+
+
+- [ADR-018: Clause-local extraction and approximate score evidence](ADR-018-extraction-context-and-approximate-evidence.md) — accepted 2026-11-14 interview; score-only, strongest occurrence, typo support and reused-set evaluation limitations.
+
+- [ADR-022: Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) — accepted interview policy; implementation status is tracked separately.
+
+- [ADR-021: Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) — accepted interview policy; implementation status is tracked separately.
+
+- [ADR-023: External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) — accepted interview policy; implementation status is tracked separately.
+
+- [ADR-020: Three qualifying absence snapshots expire stale jobs](ADR-020-three-snapshot-stale-expiration.md) — accepted interview policy; implementation status is tracked separately.
