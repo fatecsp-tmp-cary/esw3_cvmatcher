@@ -26,3 +26,5 @@ superseded by later ADRs; do not rewrite their rationale or status history.
 - [ADR-012: Issue completion and reviewed evaluation](ADR-012-issue-completion-and-evaluation-policy.md) — accepted interview decisions for request budgets, conservative mappings, evaluation and local deployment scope.
 
 - [ADR-013: Best-effort APiBR snapshot attestation](ADR-013-best-effort-apibr-snapshot-attestation.md) — accepted conditional source-health/count completeness, without availability or absence-driven expiry.
+
+- [ADR-014: Clause-local extraction and approximate score evidence](ADR-014-extraction-context-and-approximate-evidence.md) — accepted 2026-11-14 interview; score-only, strongest occurrence, typo support and reused-set evaluation limitations.
