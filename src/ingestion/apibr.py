@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from src.ingestion.adapters import PollingMode, RetryPolicy, SourceError
 from src.ingestion.completeness import SnapshotAttestation
-from src.ingestion.upsert import lock_job_identities, upsert_job
+from src.ingestion.upsert import lock_all_job_identities, lock_job_identities, upsert_job
 from src.normalization.jobs.apibr import normalize_apibr_job
 from src.persistence.job.job import Job, JobStatus
 from src.persistence.job.job_source import JobSource
@@ -258,7 +258,8 @@ def _mark_absent_stale(session: Session, source_id: int, scan_started: datetime)
     """Mark this source's ACTIVE jobs not observed since ``scan_started`` as STALE.
 
     Callers must have established a qualifying snapshot (ADR-015). Returns the
-    non-expired absent job count and the number newly marked STALE.
+    non-expired absent job count and the number newly marked STALE. The complete
+    identity-stripe set must already be held before any observation is written.
     """
     absent = (
         Job.source_id == source_id,
@@ -293,7 +294,7 @@ def ingest_apibr(
     """Persist valid records, rejecting malformed jobs in isolated savepoints.
 
     SNAPSHOT configurations may attest the approved best-effort health/count
-    conditions. Absence-based lifecycle changes remain disabled. Polling
+    conditions. Only a qualifying successful snapshot may mark absent jobs STALE. Polling
     failures roll back all job updates. Fetch and normalize the bounded scan
     and finish remote attestation before taking identity locks. Acquire the full
     lock set in global order, then apply observations in source order within one
@@ -352,10 +353,17 @@ def ingest_apibr(
             if attestation is not None
             else None
         )
-        lock_job_identities(
-            session,
-            ((job["platform"], job["source_job_id"]) for job, _, _ in observations),
-        )
+        if evidence is not None and evidence["qualified"]:
+            # A qualifying snapshot can update absent identities as well as those
+            # observed. Acquire the complete bounded set before any row writes;
+            # expanding an observed-only subset later would invert lock order.
+            # Every remote request has already completed above.
+            lock_all_job_identities(session)
+        else:
+            lock_job_identities(
+                session,
+                ((job["platform"], job["source_job_id"]) for job, _, _ in observations),
+            )
         for normalized, verified, observed_at in observations:
             try:
                 with session.begin_nested():
