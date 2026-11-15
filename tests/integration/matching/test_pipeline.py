@@ -370,3 +370,50 @@ def test_typo_support_on_both_sides_keeps_exclusions_disabled_and_candidate_priv
     assert all("python" in row.matched_skills for row in result.matches)
     assert all(row.eligibility and row.missing_requirements == [] for row in result.matches)
     assert "Pythom" not in caplog.text and body["curriculo_id"] not in caplog.text
+
+
+@pytest.mark.parametrize(
+    "override",
+    [
+        {"approximate_match": True},
+        {"negated": True},
+        {"conflicting": True},
+        {"requirement_class": None},
+        {"canonical_skill": None},
+    ],
+)
+def test_untrusted_extracted_skills_stay_score_only(enriched, override):
+    from src.persistence.extraction import JobExtraction
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    sessions, encoder, job_id = enriched
+    with sessions() as session, session.begin():
+        state = session.get(JobExtraction, job_id)
+        state.evidence = [{**row, **override} for row in state.evidence]
+        job = session.get(Job, job_id)
+        before = job.skills[:], job.content_hash
+    result = MatchingPipeline(sessions, encoder, VERSION)(
+        CurriculumRequest.model_validate(curriculum()), 10
+    )
+    (match,) = result.matches
+    assert match.job.skills == ["PostgreSQL"]
+    # The existing association remains score support and is not deleted or hidden.
+    assert "python" in match.matched_skills
+    with sessions() as session:
+        job = session.get(Job, job_id)
+        assert (job.skills, job.content_hash) == before
+
+
+def test_missing_retained_provenance_does_not_authorize_display(enriched):
+    from src.persistence.extraction import JobExtraction
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    sessions, encoder, job_id = enriched
+    with sessions() as session, session.begin():
+        session.get(JobExtraction, job_id).evidence = None
+    result = MatchingPipeline(sessions, encoder, VERSION)(
+        CurriculumRequest.model_validate(curriculum()), 10
+    )
+    (match,) = result.matches
+    assert match.job.skills == ["PostgreSQL"]
+    assert "python" in match.matched_skills

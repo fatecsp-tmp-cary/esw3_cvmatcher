@@ -7,6 +7,7 @@ from html.parser import HTMLParser
 from typing import Any
 
 from src.domain.categories import normalize_seniority, normalize_work_arrangement
+from src.domain.job import SeniorityLevel, WorkArrangement
 from src.extraction.taxonomy import canonical_skill
 
 # Aggregated repositories decorate labels with leading symbols ("🏢 Remoto") or
@@ -22,6 +23,19 @@ _SECTION_FOLLOWING_LINES = 6
 _SECTION_VALUE_LENGTH = 40
 # Words keep inner dots so "Remote.com" or "Node.js" are one token, not "Remote".
 _TITLE_TOKEN = re.compile(r"[\w-]+(?:\.\w+)*")
+_SENIORITY_ORDER = {
+    SeniorityLevel.INTERN: 0,
+    SeniorityLevel.JUNIOR: 1,
+    SeniorityLevel.MID: 2,
+    SeniorityLevel.SENIOR: 3,
+    SeniorityLevel.SPECIALIST: 4,
+    SeniorityLevel.COORDINATOR: 4,
+}
+_ARRANGEMENT_ORDER = {
+    WorkArrangement.REMOTE: 0,
+    WorkArrangement.HYBRID: 1,
+    WorkArrangement.ON_SITE: 2,
+}
 
 
 class _HTMLTextParser(HTMLParser):
@@ -200,25 +214,25 @@ def categorize(
     labels: list[str],
     section_texts: list[str],
     title: str,
+    order: dict[Any, int],
 ) -> Any | None:
     """Map one category from the strongest available evidence.
 
-    Order: typed labels, then explicit body sections; the first with exactly one
-    distinct value wins. If explicit evidence exists but conflicts, the value is
-    unknown. A single recognizable title word is used only when no explicit label
-    or section produced any value.
+    ADR-019: title, usable typed labels, then explicit body fields. Title/body
+    values use the approved restrictive order; max preserves the first occurrence
+    for equal-ranked specialist/coordinator values. Conflicting labels are unusable
+    and may fall back to body evidence.
     """
-    from_labels = {value for text in labels if (value := normalize(text)) is not None}
-    from_sections = {value for text in section_texts if (value := normalize(text)) is not None}
-    for evidence in (from_labels, from_sections):
-        if len(evidence) == 1:
-            return next(iter(evidence))
-    if from_labels or from_sections:
-        return None
-    from_title = {
+    from_title = [
         value for token in _TITLE_TOKEN.findall(title) if (value := normalize(token)) is not None
-    }
-    return next(iter(from_title)) if len(from_title) == 1 else None
+    ]
+    if from_title:
+        return max(from_title, key=order.__getitem__)
+    from_labels = {value for text in labels if (value := normalize(text)) is not None}
+    if len(from_labels) == 1:
+        return next(iter(from_labels))
+    from_sections = [value for text in section_texts if (value := normalize(text)) is not None]
+    return max(from_sections, key=order.__getitem__) if from_sections else None
 
 
 def _normalize_publication_date(value: Any) -> datetime | None:
@@ -258,18 +272,23 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
 
     keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
 
-    # Only exact shared aliases are mapped and prose is never interpreted. Labels,
-    # explicit body sections and a lone title word are used in that order (ADR-017).
+    # Only exact shared aliases are mapped and prose is never interpreted.
+    # ADR-019 gives title evidence priority, then usable labels and named fields.
     labels = vacancy_labels(raw_job)
     description = normalize_text(raw_job.get("body"), preserve_sections=True)
     seniority = categorize(
-        normalize_seniority, labels, section_values(description, _SENIORITY_SECTIONS), title
+        normalize_seniority,
+        labels,
+        section_values(description, _SENIORITY_SECTIONS),
+        title,
+        _SENIORITY_ORDER,
     )
     arrangement = categorize(
         normalize_work_arrangement,
         labels,
         section_values(description, _ARRANGEMENT_SECTIONS),
         title,
+        _ARRANGEMENT_ORDER,
     )
     skills = sorted(
         {skill for name in labels if (skill := canonical_skill(name)) is not None},

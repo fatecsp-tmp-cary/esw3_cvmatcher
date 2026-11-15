@@ -43,7 +43,7 @@ def test_inline_body_fields_fill_both_categories():
     assert result["work_arrangement"] == WorkArrangement.REMOTE
 
 
-def test_checked_form_options_resolve_arrangement_but_not_conflicting_levels():
+def test_title_wins_over_checked_options_and_conflicting_labels():
     body = (
         "### Alocação\n- [ ] Alocado\n- [x] Remoto\n- [ ] Presencial\n"
         "### Nível\n- [ ] Júnior\n- [x] Sênior\n- [x] Especialista"
@@ -53,19 +53,18 @@ def test_checked_form_options_resolve_arrangement_but_not_conflicting_levels():
     result = job(title="[Remoto] Senior Developer", labels=labels, body=body)
 
     assert result["work_arrangement"] == WorkArrangement.REMOTE
-    # Explicit evidence exists but conflicts: the title must not break the tie.
-    assert result["seniority_level"] is None
+    assert result["seniority_level"] == SeniorityLevel.SENIOR
 
 
-def test_labels_take_precedence_over_body_sections_and_title():
+def test_title_takes_precedence_over_labels_and_body_sections():
     result = job(
         title="[Presencial] Senior Developer",
         labels=["Pleno", "Remoto"],
         body="Nível: sênior\nLocalização: Híbrido",
     )
 
-    assert result["seniority_level"] == SeniorityLevel.MID
-    assert result["work_arrangement"] == WorkArrangement.REMOTE
+    assert result["seniority_level"] == SeniorityLevel.SENIOR
+    assert result["work_arrangement"] == WorkArrangement.ON_SITE
 
 
 def test_body_section_is_used_when_labels_have_no_value():
@@ -86,28 +85,30 @@ def test_body_section_is_used_when_labels_have_no_value():
             WorkArrangement.REMOTE,
         ),
         ("Estágio em Desenvolvimento - Híbrido", SeniorityLevel.INTERN, WorkArrangement.HYBRID),
-        # More than one distinct value in the title is ambiguous.
-        ("Desenvolvedor Pleno/Sênior [Remoto ou Presencial]", None, None),
-        ("Júnior ou Pleno", None, None),
+        # Multiple title values use the accepted restrictive ordering.
+        (
+            "Desenvolvedor Pleno/Sênior [Remoto ou Presencial]",
+            SeniorityLevel.SENIOR,
+            WorkArrangement.ON_SITE,
+        ),
+        ("Júnior ou Pleno", SeniorityLevel.MID, None),
         # A dotted name is one token, not the word it starts with.
         ("Software Engineer at Remote.com", None, None),
         ("Engineer (Remote-first company)", None, None),
         ("Desenvolvedor Java", None, None),
     ],
 )
-def test_a_single_recognizable_title_word_is_used_when_nothing_explicit_exists(
-    title, seniority, arrangement
-):
+def test_title_words_resolve_by_the_accepted_order(title, seniority, arrangement):
     result = job(title=title)
 
     assert result["seniority_level"] == seniority
     assert result["work_arrangement"] == arrangement
 
 
-def test_title_word_is_ignored_when_explicit_evidence_conflicts():
+def test_title_word_wins_when_explicit_evidence_conflicts():
     result = job(title="[Remoto] Developer", labels=["Remoto", "Presencial"])
 
-    assert result["work_arrangement"] is None
+    assert result["work_arrangement"] == WorkArrangement.REMOTE
 
 
 def test_unrecognized_explicit_evidence_does_not_block_the_title():
@@ -127,3 +128,56 @@ def test_enrichment_does_not_change_skills_company_location_or_salary():
     assert result["company"] is None
     assert result["location"] is None
     assert result["salary"] is None
+
+
+@pytest.mark.parametrize(
+    ("title", "expected"),
+    [
+        ("Estágio Júnior Pleno Sênior Especialista", SeniorityLevel.SPECIALIST),
+        ("Coordenador Especialista", SeniorityLevel.COORDINATOR),
+        ("Especialista Coordenador", SeniorityLevel.SPECIALIST),
+        ("Junior Developer", SeniorityLevel.JUNIOR),
+    ],
+)
+def test_title_seniority_order_and_equal_rank_occurrence(title, expected):
+    result = job(title=title, labels=["Senior"], body="Nível: pleno")
+    assert result["seniority_level"] == expected
+
+
+@pytest.mark.parametrize(
+    ("body", "seniority", "arrangement"),
+    [
+        ("Nível: pleno\nNível: sênior", SeniorityLevel.SENIOR, None),
+        ("Nível\n- [x] Coordenador\n- [x] Especialista", SeniorityLevel.COORDINATOR, None),
+        ("Nível\n- [x] Especialista\n- [x] Coordenador", SeniorityLevel.SPECIALIST, None),
+        ("Alocação\n- [x] Remoto\n- [x] Presencial", None, WorkArrangement.ON_SITE),
+        ("Alocação\n- [ ] Presencial\n- [x] Remoto", None, WorkArrangement.REMOTE),
+    ],
+)
+def test_checked_body_values_resolve_when_labels_are_unusable(body, seniority, arrangement):
+    result = job(labels=["Pleno", "Sênior", "Remoto", "Presencial"], body=body)
+    assert result["seniority_level"] == seniority
+    assert result["work_arrangement"] == arrangement
+
+
+def test_usable_label_still_wins_over_a_different_body_value():
+    result = job(labels=["Pleno", "Remoto"], body="Nível: sênior\nLocal: Presencial")
+    assert result["seniority_level"] == SeniorityLevel.MID
+    assert result["work_arrangement"] == WorkArrangement.REMOTE
+
+
+@pytest.mark.parametrize(
+    ("field", "old_value"),
+    [
+        ("seniority_level", SeniorityLevel.SENIOR),
+        ("work_arrangement", WorkArrangement.ON_SITE),
+    ],
+)
+def test_changed_category_mapping_invalidates_hash_for_the_same_source_text(field, old_value):
+    from src.ingestion.hashing import content_hash
+
+    after = job(title="Junior Developer [Remoto]", labels=["Senior", "Presencial"])
+    before = {**after, field: old_value}  # Same source under the superseded label-first rule.
+    assert after["seniority_level"] == SeniorityLevel.JUNIOR
+    assert after["work_arrangement"] == WorkArrangement.REMOTE
+    assert content_hash(before) != content_hash(after)

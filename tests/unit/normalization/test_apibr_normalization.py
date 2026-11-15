@@ -182,7 +182,7 @@ def _live_shape_fixture() -> dict[int, dict]:
         # Decorated and prefixed labels agree on one value each.
         (910002, SeniorityLevel.SENIOR, WorkArrangement.REMOTE, ["Python"]),
         # Every issue-form option arrives as a label; only the checked body options resolve.
-        (910003, None, WorkArrangement.REMOTE, []),
+        (910003, SeniorityLevel.SPECIALIST, WorkArrangement.REMOTE, []),
         # Only repository topics and a title without category words.
         (910004, None, None, []),
         # No label or section: a lone word of the title is the only evidence.

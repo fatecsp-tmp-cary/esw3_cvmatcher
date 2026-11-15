@@ -22,6 +22,7 @@ from src.matching.ranking import RankingPolicy, SimilarityCalibration
 from src.matching.semantic import ExperienceScore, selected_experience_indices, semantic_score
 from src.matching.textual import candidate_query_text, retrieve_textual, textual_statement
 from src.normalization.candidate.curriculum import normalize_curriculum
+from src.persistence.extraction import JobExtraction
 from src.persistence.job.job import ACTIVE_STATUSES, INACTIVE_STATUSES, Job, status_predicate
 from src.persistence.job.skill import JobRequirement, JobSkill, Skill
 from src.processing import ProcessingUnavailable, checkpoint
@@ -29,6 +30,26 @@ from src.schemas.candidate.curriculum import CurriculumRequest
 from src.schemas.matches import MatchedJob, MatchesResponse, MatchResult
 
 logger = logging.getLogger(__name__)
+DISPLAYED_SKILLS_VERSION = "exact-affirmative-nonconflicting-v1"
+
+
+def trusted_extracted_skills(evidence: list[dict[str, object]] | None) -> set[str]:
+    """Names supported by exact, affirmative, unambiguous extraction evidence.
+
+    Missing provenance is unknown. Score-only JobSkill associations are not proof
+    of display trust, and remain independent from this response-only projection.
+    """
+    return {
+        normalize_skill(name)
+        for row in evidence or []
+        if isinstance(row, dict)
+        and isinstance(name := row.get("canonical_skill"), str)
+        and name.strip()
+        and row.get("requirement_class") in {"REQUIRED", "PREFERRED", "NICE_TO_HAVE"}
+        and row.get("approximate_match") is False
+        and row.get("negated") is False
+        and row.get("conflicting") is False
+    }
 
 
 def displayed_skills(own: list[str] | None, extracted: dict[str, str]) -> list[str] | None:
@@ -83,6 +104,7 @@ class MatchingPipeline:
             "textual_policy": TEXTUAL_VERSION,
             "structured_policy": REQUIREMENTS_VERSION,
             "semantic_policy": "semantic-aggregation-v1-provisional",
+            "displayed_skills_policy": DISPLAYED_SKILLS_VERSION,
         }
         digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()[:16]
         return f"{self.ranking.version}:{self.calibration.version}:{digest}"
@@ -189,13 +211,27 @@ class MatchingPipeline:
                 }
                 associated_skills: dict[int, set[str]] = {}
                 extracted_names: dict[int, dict[str, str]] = {}
+                trusted_names = {
+                    identifier: trusted_extracted_skills(evidence)
+                    for identifier, evidence in session.execute(
+                        select(JobExtraction.job_id, JobExtraction.evidence)
+                        .join(Job, Job.id == JobExtraction.job_id)
+                        .where(
+                            JobExtraction.job_id.in_(pool),
+                            JobExtraction.status == "SUCCEEDED",
+                            JobExtraction.content_hash == Job.content_hash,
+                            JobExtraction.config_version == self.extraction_version,
+                        )
+                    )
+                }
                 for identifier, name in session.execute(
                     select(JobSkill.job_id, Skill.canonical_name)
                     .join(Skill, Skill.id == JobSkill.skill_id)
                     .where(JobSkill.job_id.in_(pool))
                 ):
                     associated_skills.setdefault(identifier, set()).add(normalize_skill(name))
-                    extracted_names.setdefault(identifier, {})[normalize_skill(name)] = name
+                    if normalize_skill(name) in trusted_names.get(identifier, set()):
+                        extracted_names.setdefault(identifier, {})[normalize_skill(name)] = name
                 requirements: dict[int, list[str]] = {}
                 for identifier, text in session.execute(
                     select(JobRequirement.job_id, JobRequirement.text).where(
