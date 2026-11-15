@@ -53,6 +53,27 @@ must use this shape (the illustrative span matches pt-001):
 }
 ```
 
+Every fixture must declare its provenance before evaluation, including when
+`--fixtures` overrides the default. Agent-reviewed fixtures require an identified
+reviewer, labels authored before model outputs and explicit unreviewed/unmeasured
+flags. Human-reviewed fixtures require a source SHA-256, a reviewer and
+timezone-aware timestamp for every case, and complete, disjoint calibration and
+held-out partitions containing 20 PT/5 EN each. These checks validate declared
+metadata, not a reviewer's identity or the quality of a model. Input fixtures
+cannot declare release measurement or approval as already achieved.
+
+Policy-adjudicated copies must retain their explicit regression-only independence
+flags. Omitting those flags cannot restore held-out independence. A valid report
+always leaves release approval false; oracle round trips are evaluator tests.
+Legacy promoted gold remains valid regression input, but missing independence
+flags default to false. Current-policy measurement requires explicit
+`heldout_independent: true`,
+`labels_independently_reviewed_after_policy_change: true` and
+`independence_policy: "ADR-018"`. The known reused source corpus remains
+ineligible for independent acceptance even if adjudication metadata is removed or
+those assertions are added. A fresh declaration is not authenticated evidence;
+fresh review and actual acceptance measurements remain separate work.
+
 Scores must be finite in [0,100]. Unknown/duplicate IDs, duplicate spans,
 incorrect offsets and vocabulary fail validation. Missing cases are allowed and
 explicitly listed. Each provided case must supply both fields; an empty
@@ -73,8 +94,8 @@ accuracy (fixed score cutoff 50). Never present partial AUC as complete quality.
 The synthetic mandatory gate requires complete prediction coverage, precision
 >=95% and recall >=80%, separately for each reported group. These are the
 [acceptance targets](../../specs/feature-001-mvp/acceptance.md), not a claim they
-have passed. Minimum release sample sizes, calibration and human review remain
-unresolved. The CLI exits 0 for a valid report regardless of gate result and 2
+have passed. Fresh independent post-correction acceptance and any additional
+mandatory-mention support remain unresolved. The CLI exits 0 for a valid report regardless of gate result and 2
 for invalid input. Primary owns model inference and scoring integration; this
 change provides neither. External predictions should contain synthetic data only;
 the CLI prints aggregate metrics and stable missing IDs, never candidate text.
@@ -118,9 +139,11 @@ embeddings remain transient. Existing outputs are not overwritten.
 
 At the user's request, a [blind human review packet](human-review/README.md)
 contains the same 40 PT/10 EN synthetic inputs with source hash and pending
-annotations. Existing agent labels, hint tags and model outputs are omitted.
-It has not been human-reviewed and is not a release gold set; validation,
-adjudication, sample sufficiency and held-out calibration decisions remain.
+annotation templates. Existing agent labels, hint tags and model outputs are omitted.
+The preparation files remain unchanged historical templates. The user subsequently
+supplied original reviewed labels; these and policy-adjudicated copies are retained
+in the correction evidence below. Fresh independent post-correction acceptance
+remains pending; the old templates do not mean original human annotation is absent.
 
 ## Human-reviewed partition evaluation
 
@@ -144,8 +167,9 @@ fail the relevant targets. Human review flags require per-case provenance; only
 the held-out partition can report held-out targets met. Release approval remains
 false regardless of a mathematical gate result. Freeze/version fitted calibration
 using calibration cases only before held-out measurement; never fit to held-out
-labels. The current packets are still unreviewed and no passing human quality
-or fitted calibration is claimed.
+labels. Original human annotations and later calibration measurements exist, but
+they do not provide passing independent acceptance for the corrected runtime.
+The reused held-out set is regression evidence; a fresh blind set remains pending.
 
 ## Extraction-policy correction (2026-11-14)
 

@@ -296,3 +296,89 @@ def test_failed_poller_cannot_commit_staged_job_changes(db_engine, records, outc
     assert scheduler(db_engine, {name: poll}).run_due(now=NOW)[0].status == "FAILED"
     with Session(db_engine) as session:
         assert session.scalar(select(Job.id).where(Job.source_id == identifier)) is None
+
+
+@pytest.mark.parametrize("existing_state", [False, True])
+def test_expired_retry_rejects_without_creating_or_resetting_work(
+    db_engine, records, existing_state
+):
+    source_id, _ = records(enabled=False)
+    with Session(db_engine) as session, session.begin():
+        job = Job(
+            source_id=source_id,
+            platform="synthetic",
+            source_job_id="expired-retry",
+            title="Terminal job",
+            status=JobStatus.EXPIRED,
+            content_hash="current-hash",
+        )
+        session.add(job)
+        session.flush()
+        job_id = job.id
+        if existing_state:
+            session.add(
+                JobExtraction(
+                    job_id=job_id,
+                    content_hash="previous-hash",
+                    config_version="previous-version",
+                    status="FAILED",
+                    attempts=3,
+                    error_code="inference_error",
+                    updated_at=NOW,
+                )
+            )
+    with pytest.raises(ValueError, match="non-expired"):
+        background(db_engine).retry_extraction(job_id)
+    with Session(db_engine) as session:
+        assert session.get(Job, job_id).status is JobStatus.EXPIRED
+        state = session.get(JobExtraction, job_id)
+        if not existing_state:
+            assert state is None
+        else:
+            assert (state.content_hash, state.config_version, state.status, state.attempts) == (
+                "previous-hash",
+                "previous-version",
+                "FAILED",
+                3,
+            )
+            assert state.error_code == "inference_error" and state.updated_at == NOW
+
+
+def test_retry_holds_job_lock_through_extraction_reset(db_engine, records, monkeypatch):
+    from sqlalchemy import text, update
+    from sqlalchemy.exc import OperationalError
+
+    from src.worker import runtime
+
+    source_id, _ = records(enabled=False)
+    with Session(db_engine) as session, session.begin():
+        job = Job(
+            source_id=source_id,
+            platform="synthetic",
+            source_job_id="retry-lock",
+            title="Current job",
+            status=JobStatus.ACTIVE,
+            content_hash="current-hash",
+        )
+        session.add(job)
+        session.flush()
+        job_id = job.id
+    original = runtime.enqueue
+
+    def checked_enqueue(session, identity, version, *, retry):
+        # Expiration cannot slip between the terminal-status check and enqueue.
+        with (
+            pytest.raises(OperationalError) as failure,
+            Session(db_engine) as competing,
+            competing.begin(),
+        ):
+            competing.execute(text("SET LOCAL lock_timeout = '100ms'"))
+            competing.execute(update(Job).where(Job.id == identity).values(status="EXPIRED"))
+        assert failure.value.orig.sqlstate == "55P03"
+        original(session, identity, version, retry=retry)
+
+    monkeypatch.setattr(runtime, "enqueue", checked_enqueue)
+    background(db_engine).retry_extraction(job_id)
+    with Session(db_engine) as session:
+        assert session.get(Job, job_id).status is JobStatus.ACTIVE
+        assert session.get(JobExtraction, job_id).status == "PENDING"

@@ -2,7 +2,7 @@
 
 import json
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
@@ -16,6 +16,7 @@ from src.embeddings.encoder import LocalEmbeddingEncoder, normalized_vector
 from src.extraction.service import ready_predicate as extraction_ready
 from src.persistence.embedding import JobEmbedding
 from src.persistence.job.job import Job, JobStatus
+from src.persistence.job.skill import JobRequirement
 
 logger = logging.getLogger(__name__)
 
@@ -107,8 +108,8 @@ def enqueue(
         state.error_code = None
 
 
-def job_text(job: Job) -> str:
-    """Job-only semantic representation; source text already includes requirements.
+def job_text(job: Job, requirements: Iterable[str] = ()) -> str:
+    """Job-only semantic representation including current normalized requirements.
 
     The full cleaned description is retained. Explicit skills, location and mode
     are descriptive text, never a geographic eligibility decision.
@@ -116,10 +117,11 @@ def job_text(job: Job) -> str:
     fields = [job.title]
     if job.skills:
         fields.append("\n".join(job.skills))
+    fields.extend(sorted(set(requirements)))
     if job.description:
         fields.append(job.description)
     if job.location:
-        fields.extend(value for value in job.location.values() if isinstance(value, str))
+        fields.extend(value for _, value in sorted(job.location.items()) if isinstance(value, str))
     if job.work_arrangement:
         fields.append(job.work_arrangement.value)
     return "\n".join(fields)
@@ -202,7 +204,12 @@ class EmbeddingWorker:
                 state.model_version,
                 state.extraction_version,
                 state.claim_token,
-                job_text(job),
+                job_text(
+                    job,
+                    session.scalars(
+                        select(JobRequirement.text).where(JobRequirement.job_id == job.id)
+                    ),
+                ),
             )
 
     def finish(
