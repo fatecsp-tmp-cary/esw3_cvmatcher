@@ -282,3 +282,9 @@ retain the #174 boundary regressions and compare contrasting job geography/modes
 under identical deterministic role evidence. See the
 [review record](../../docs/reports/2026-11-15-pr178-review.md) for current checks.
 ADR-020/021/022 implementation remains explicitly deferred to follow-ups.
+
+## PR #179 incremental verification
+
+All-base locked CI is implemented. The review/restack push exercises a real
+non-main-base synchronization; record its exact-head checks separately from
+historical results. See [review scope](../../docs/reports/2026-11-15-pr179-review.md).
