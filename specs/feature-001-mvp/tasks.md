@@ -293,3 +293,13 @@ ADR-020/021/022 implementation remains explicitly deferred to follow-ups.
 All-base locked CI is implemented. The review/restack push exercises a real
 non-main-base synchronization; record its exact-head checks separately from
 historical results. See [review scope](../../docs/reports/2026-11-15-pr179-review.md).
+
+
+## PR #182 incremental verification
+
+Issue #180's explicit vacancy-label agreement rule supersedes #168's earlier
+first-label behavior. Typed topic exclusion, equivalent/conflicting aliases and
+keyword retention are implemented; title-first/display policy, mandatory coverage
+and bilingual/fuzzy retrieval remain separate user-deferred follow-ups.
+See the [review record](../../docs/reports/2026-11-15-pr182-review.md) for both
+review dispositions, parent reconciliation and current-head checks.

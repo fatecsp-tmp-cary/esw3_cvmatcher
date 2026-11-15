@@ -270,3 +270,20 @@ def test_malformed_label_metadata_yields_no_classification(labels):
     assert job["seniority_level"] is None
     assert job["work_arrangement"] is None
     assert job["skills"] == []
+
+
+@pytest.mark.parametrize(
+    ("labels", "mode", "level"),
+    [
+        (["Python", "Remoto", "Híbrido", "Júnior", "Sênior"], None, None),
+        ([{"name": "Híbrido"}, {"name": "Remoto"}, {"name": "Pleno"}], None, SeniorityLevel.MID),
+        (["Remoto", "remote", "Júnior", "jr"], WorkArrangement.REMOTE, SeniorityLevel.JUNIOR),
+        (["Python", "Unknown"], None, None),
+    ],
+)
+def test_issue180_alias_agreement_supersedes_first_label_and_retains_keywords(labels, mode, level):
+    for ordered in (labels, labels[::-1]):
+        job = normalize_apibr_job({"id": 1, "title": "Developer", "labels": ordered})
+        assert job["work_arrangement"] == mode
+        assert job["seniority_level"] == level
+        assert job["keywords"] == normalize_keywords(ordered)

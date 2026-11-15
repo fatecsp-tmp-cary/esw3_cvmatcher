@@ -395,3 +395,20 @@ modes. Both remain eligible with equal scores under identical deterministic
 vectors. Descriptive location/mode in actual semantic representations remains
 permitted. Current verification is recorded in the
 [PR #178 review](../../docs/reports/2026-11-15-pr178-review.md).
+
+
+## APiBR vacancy label mapping verification
+
+- Issue #180 supersedes #168's first-recognized-label rule: conflicting vacancy
+  category aliases yield null regardless of their order; equivalent aliases
+  agree on the same canonical category. Missing/unknown values stay null.
+- Typed repository topics cannot supply canonical categories or skills. Exact
+  vacancy aliases, supported decorations/prefixes and title-derived source
+  keywords map without interpreting free title/body text.
+- Keep all source label names as keywords and deduplicate/sort recognized skills.
+  Category/skill changes use ordinary content-hash invalidation without changing
+  the canonical Job or public curriculum contract.
+
+Authority is the [feature contract](spec.md#apibr-vacancy-label-mapping).
+Current scoped evidence is recorded in the
+[PR #182 review](../../docs/reports/2026-11-15-pr182-review.md).
