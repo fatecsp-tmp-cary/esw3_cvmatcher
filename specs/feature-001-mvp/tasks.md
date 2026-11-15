@@ -172,7 +172,6 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 - [ ] Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
 
-## Deferred external deployment and source expansion
 
 - [x] Record the user decision in [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
 - [ ] Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
@@ -190,3 +189,70 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
       user selected current extraction and embedding readiness for every returned
       job; recorded in ADR-024, preserving ADR-016.
 - [ ] Implement and verify the all-result readiness gate in both status groups.
+
+
+## PR #167 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr167-review.md) for
+GitHub/Codex findings, bounded-lock and independent-connection regressions,
+current-head checks and later-adapter integration requirements.
+
+
+## PR #168 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr168-review.md) for
+category-label regression fixes, network-free identity-locking integration,
+review dispositions and current-head verification.
+
+
+## PR #169 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr169-review.md) for
+concurrent sweep/upsert coordination, reliable-field preconditions, index
+migration and regression verification. Absence/stale-age policies and scheduler
+integration remain separate work.
+
+
+## PR #170 incremental review verification
+
+See the [review record](../../docs/reports/2026-11-14-pr170-review.md) for actual
+GitHub/Codex review dispositions and current-head extraction checks. Existing
+correction/evaluation history above retains its original evidence scope.
+
+
+## PR #171 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr171-review.md) for
+GitHub/Codex dispositions, requirement-passage and location regressions, policy
+invalidation, telemetry import ordering and independent-connection claim checks.
+
+
+## PR #172 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr172-review.md) for
+GitHub/Codex dispositions, post-merge FTS/index checks and the limited accented
+JSON-prefix observations. ADR-022 policy remains accepted but unimplemented.
+
+
+## PR #173 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr173-review.md) for both
+review dispositions, retrieval-count validation, available-section normalization
+and current-head checks. ADR-021 mandatory coverage is accepted but remains
+unimplemented; no new exclusion, blend weight or release approval is introduced.
+
+## PR #174 incremental verification
+
+Request-scoped pipeline union, current-evidence rechecks and deterministic scoring
+are implemented. Fake-encoder PostgreSQL regressions cover empty/competency-only
+input, deduplication, stale/inactive provenance, invalid vectors/counts, stable
+ordering and privacy/geography invariants. See the
+[review record](../../docs/reports/2026-11-14-pr174-review.md) for actual results.
+
+## PR #177 incremental verification
+
+Compose packaging and recovery tooling are implemented. Local host database
+instructions select the development overlay for startup/status/shutdown and
+custom ports; production keeps the database unexposed. Current-head configuration
+and review evidence are recorded in [the review report](../../docs/reports/2026-11-15-pr177-review.md).
+Operational/model/quality release acceptance remains separate.
