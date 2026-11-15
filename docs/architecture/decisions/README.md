@@ -43,3 +43,5 @@ superseded by later ADRs; do not rewrite their rationale or status history.
 - [ADR-023: External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) — accepted interview policy; implementation status is tracked separately.
 
 - [ADR-020: Three qualifying absence snapshots expire stale jobs](ADR-020-three-snapshot-stale-expiration.md) — accepted interview policy; implementation status is tracked separately.
+
+- [ADR-024: Current extraction and embeddings for every returned job](ADR-024-all-result-extraction-and-embedding-readiness.md)

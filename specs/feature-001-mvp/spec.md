@@ -252,3 +252,11 @@ External hosting/HTTPS deployment and second-source research/selection remain de
 Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
 
 The accepted expiration threshold is three qualifying absence snapshots, including the one that first marks STALE. No age-based threshold is selected. Bad scans do not advance the count; rediscovery resets it. Supporting counters remain outside canonical Job.
+
+## Resolved clarification: all-result readiness (PR #195 review)
+
+[ADR-024](../../docs/architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md)
+resolves the ADR-016/issue #194 conflict: every returned job requires current
+successful extraction and a valid current embedding, in both active and inactive
+groups, including textual retrieval. Implementation and verification are tracked
+in the tasks; the decision alone is not evidence of implementation.

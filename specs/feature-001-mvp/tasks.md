@@ -183,3 +183,10 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 - [x] Record the user decision in [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md).
 - [ ] Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+
+## PR #195 review clarification
+
+- [x] Resolve the [all-result readiness conflict](spec.md#resolved-clarification-all-result-readiness-pr-195-review):
+      user selected current extraction and embedding readiness for every returned
+      job; recorded in ADR-024, preserving ADR-016.
+- [ ] Implement and verify the all-result readiness gate in both status groups.
