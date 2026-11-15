@@ -14,7 +14,7 @@ from src.lifecycle.expiration import expire_source_timestamps
 from src.persistence.database import create_db_engine, create_session_factory
 from src.persistence.embedding import JobEmbedding
 from src.persistence.job.job import Job, JobStatus
-from src.worker.runtime import BackgroundWorker
+from src.worker.runtime import BackgroundWorker, retry_extraction
 from src.worker.scheduler import SourceScheduler
 
 
@@ -56,6 +56,15 @@ class EmbeddingMaintenance:
                 break
             processed += 1
         return processed
+
+
+def retry_default_extraction(job_id: int) -> None:
+    """Perform the explicit recovery operation with database dependencies only."""
+    engine = create_db_engine()
+    try:
+        retry_extraction(create_session_factory(engine), job_id, EXTRACTION_VERSION)
+    finally:
+        engine.dispose()
 
 
 def create_default_worker() -> BackgroundWorker:

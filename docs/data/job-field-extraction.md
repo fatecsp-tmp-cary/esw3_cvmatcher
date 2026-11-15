@@ -25,8 +25,8 @@ review is not a release quality gate; source labels are weak labels, not gold da
    Unknown/ambiguous/negated wording stays unclassified. Conflicting strengths use
    the strongest occurrence with an unsafe conflict flag under ADR-018 and cannot
    become a mandatory exclusion. The current requirement-class enum has no UNKNOWN
-   value; do not force uncertain output into it. Design any supporting evidence
-   persistence separately before implementation.
+   value; do not force uncertain output into it. Supporting evidence is persisted
+   separately in versioned job extraction state, preserving the canonical Job.
 5. Prefer explicit structured source fields; retain conflicts as uncertain evidence
    instead of overwriting source identity, lifecycle, dates or other verified facts.
    Extracted location must never drive geographic eligibility.
@@ -163,3 +163,23 @@ Exact project aliases also supplement model detections, with explicit source
 provenance. They do not infer strength and do not replace local GLiNER. Cue-only
 spans are not meaningful entities. This follows the feature's existing dictionary
 complement policy; neither source fields nor the canonical schema change.
+
+
+## PR #170 review corrections
+
+Clause-local negation also covers an omitted predicate: “Python required, but not
+Java” and “Python obrigatório, mas não Java” retain Java as detected null evidence
+without a positive requirement/skill association. “Not only” and “não só” retain
+their affirmative meaning. Known headings with inline content, such as
+“Benefits: health insurance”, terminate requirement scope; inline requirement
+headings supply fallback strength. Sentence-local team-context labels do not
+suppress an explicit later requirement on the same line.
+
+These deterministic corrections version classification as
+`clause-strongest-negation-hedge-conflict-v4` and context as
+`sentence-clause-sections-v3`, changing `EXTRACTION_VERSION`. Apply the existing
+stop/reprepare/reprocess/restart procedure before using corrected artifacts.
+Frozen annotation copies, calibration outputs and prior failures remain unchanged;
+those results do not calibrate this revised runtime. Exclusions and release
+approval remain disabled. See the
+[review record](../reports/2026-11-14-pr170-review.md).
