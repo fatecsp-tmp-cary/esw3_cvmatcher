@@ -2,10 +2,12 @@
 
 ## Behavior
 
-The service receives an already structured CV, validates and normalizes it to a
+The required service behavior is to receive an already structured CV, validate and normalize it to a
 request-scoped `NormalizedCandidate`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
-jobs through `POST /matches`. CV parsing is external. `GET /health` is optional.
+jobs through `POST /matches`. The request-scoped normalization/retrieval/scoring
+pipeline and lazy production API composition are implemented in #175. CV parsing
+is external. `GET /health` is optional.
 
 The public five-section contract is defined in [acceptance](acceptance.md#resolved-api-contract).
 Its lossless transient projection preserves all sections without the UUID or
@@ -45,7 +47,10 @@ assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
 matching, and section detection complement the selected local GLiNER job-field
 extraction strategy. Follow [the extraction plan](../../docs/data/job-field-extraction.md)
 for evidence, confidence, contextual requirement classification, model versioning
-and failure handling. Pinned offline extraction and bounded job-state processing are implemented; mandatory classification remains disabled pending measured quality approval. PostgreSQL FTS handles DB-level
+and failure handling. Pinned offline extraction and bounded job-state processing are implemented in
+stack PR #170, including clause-local score-only requirement classification under
+ADR-018. Mandatory exclusions remain disabled pending independent quality
+approval; production API wiring is implemented in #175. PostgreSQL FTS handles DB-level
 tokenization, stemming, and ranking.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
@@ -61,7 +66,11 @@ States: `DISCOVERED`, `ACTIVE`, `STALE`, `EXPIRED`. Allowed transitions:
 complete snapshot; incremental absence and failed polls do not change status.
 `STALE→EXPIRED` uses configured consecutive missing snapshots and/or maximum
 stale duration; either configured condition may expire a job. Reliable explicit
-`source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.
+`source_expires_at` may expire immediately. Adapters must normalize this only
+from a supported reliable upstream expiry field as a timezone-aware datetime,
+without fallback dates; APiBR currently emits null. The explicit-expiry sweep
+coordinates with all bounded ingestion stripes before changing rows, preserving
+observation/verification timestamps and terminal expiration. Rediscovery reactivates stale jobs.
 `EXPIRED` is terminal even if a source later reopens the record.
 Retain expired records; physical deletion is out of MVP.
 
@@ -80,8 +89,17 @@ keywords, skills, normalized requirements, and location. Portuguese any-term FTS
 uses A title/skills, B company/keywords/normalized requirements and D
 description/location, PostgreSQL JSON text rendering and descending publication
 date then platform/source-ID ties under ADR-004/005. All retrieval paths require
-successful extraction for current content/configuration. Semantic job representation is title,
-normalized skills, requirements, relevant description, location, and mode.
+successful extraction for current content/configuration. The implemented FTS
+helpers fail closed when readiness is omitted. The request-scoped pipeline
+supplies current extraction readiness, unions considered candidates, then rechecks
+active state and final evidence. A candidate remains only if it has current textual
+evidence or available experience/education queries and a current valid embedding.
+Textual matches may remain without a vector. Projects/competencies/languages alone
+do not trigger semantic retrieval. Production API composition is implemented in #175. Semantic job representation is title,
+normalized skills, current normalized requirement texts (sorted and deduplicated),
+relevant description, location string values in sorted-key order, and mode. Passage
+representation is part of the embedding policy identity; its changes require
+regeneration even when source content is unchanged.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job
 embeddings in pgvector; candidate embeddings stay in memory. Jobs without a
@@ -104,6 +122,8 @@ then aggregate with greater weight for more recent selected experiences. Combine
 that result with the highest semantic education score. Use existing education
 course/level fields; do not add a public description field. Fewer than three
 experiences use all available entries; missing sections never fabricate evidence.
+Normalize only available section weights, including extreme finite ratios.
+Retrieval-pool limits are positive integer counts, validated before SQL retrieval.
 Initial semantic mixing is 80% experience / 20% education; distinct recency
 groups use weights 1.5/1.25/1.0 with equal weight for equal recency. Calibration
 and reviewed-example validation remain pending; see
@@ -167,6 +187,23 @@ failures. Scheduler flow: lock source → poll/fetch → validate → normalize 
 upsert → lifecycle update → schedule indexing/embedding. Distinguish found,
 created, updated, unchanged, and absent-from-complete-snapshot. PostgreSQL locks
 prevent overlapping same-source runs/conflicting lifecycle operations.
+
+Implemented source-identity upserts use 256 bounded PostgreSQL advisory-lock
+stripes shared by all writers. APiBR fetches and normalizes the scan before
+identity locking, acquires the complete stripe set in ascending order, then
+applies observations in source order with per-record rejection savepoints and
+one outer commit. Fetch/pagination or unexpected write failure leaves no job
+changes. Other multi-record callers must acquire their full stripe set before
+writing; no remote I/O may run while identity locks are held. Stripe collisions
+may serialize unrelated identities without merging their records. The implemented
+`SourceScheduler` separately holds per-source session advisory locks on an
+independent connection across polling commits. Bounded worker cycles coordinate
+source polling, reliable expiry, extraction and embedding maintenance.
+
+Explicit extraction retry is database-only: lock and refresh the stored job,
+reject missing/EXPIRED IDs without changing extraction state, then reset eligible
+work using the configured extraction version in the same transaction. Prepared
+model artifacts are required for processing, not for this recovery operation.
 
 Worker handles polling, normalization, expiration, indexing, embedding, and
 model-change reprocessing. Scheduler may be bundled or separate. Embedding work
@@ -236,3 +273,11 @@ Only explicit REQUIRED concepts enter the ADR-021 threshold: all below three, ot
 Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
 
 External hosting/HTTPS deployment and second-source research/selection remain deferred. Local pre-production and APiBR remain the authorized scope.
+
+## Compose implementation status at PR #177
+
+The production API/worker/database composition, pinned model preparation,
+persistent volumes and recovery scripts are implemented. Local host database
+tools require the explicit development port overlay; production does not publish
+the database. See [deployment](../../docs/operations/deployment.md) for the
+procedure. Static configuration checks are not deployment or quality acceptance.

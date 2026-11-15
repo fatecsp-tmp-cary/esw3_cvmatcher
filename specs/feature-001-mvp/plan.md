@@ -2,27 +2,39 @@
 
 The product implementation sequence remains source evidence → canonical data →
 normalization/ingestion/lifecycle → indexes → matching → API wiring → operations.
-Best-effort source completeness follows accepted ADR-013; absence-based lifecycle changes
-require proof of a complete scan.
+Explicit SNAPSHOT configurations use accepted best-effort ADR-013 attestation;
+absence-based lifecycle changes remain separate policy/implementation work.
 
-1. Apply ADR-013 count/health attestation for explicit SNAPSHOT configurations;
-   verify remaining APiBR usage/retention evidence (#134) and keep unsupported scans incomplete
-   until proven. Implement the shared interface and bounded retries (#133/#135).
+1. Verify remaining APiBR usage/permission evidence. Shared source adapters,
+   bounded retries and explicit best-effort snapshot attestation are implemented.
 2. Canonical persistence and source identity, hashing, source-specific upsert,
-   and conservative partial-safe ingestion. Concurrent upsert
-   and source locking remain #136/#142; scheduling remains #143.
-3. Shared taxonomy persistence, seed and classified requirements (#137/#138).
-   Preserve description sections and unknown extraction semantics.
-4. Reconcile index/queries with accepted ADR-004/005 weights, JSON text rendering,
-   publication-date/identity ties and current extraction readiness on all paths. Keep raw
-   rank distinct from final compatibility scores; evaluate English/accents #147.
-5. Retain category aliases, taxonomy persistence and public response validation;
-   preserve both projection APIs and remove superseded internal caps under ADR-011.
-6. Complete model/version metadata, vectors, retrieval and scoring (#26/#118–#120),
-   model-change reprocessing (#141), and empty-evidence behavior (#152).
-7. Wire the production API (#121), open access/rate limiting/privacy (#122; ADR-009), background work
-   (#123/#144/#153), lifecycle policies (#117/#145/#146), packaging/operations
-   (#124/#148–#151), and release regressions (#125). Keep #99 open.
+   and conservative partial-safe ingestion. Concurrent upserts and explicit-source
+   expiry sweeps share bounded ordered stripes. Bounded source scheduling with
+   independent-connection per-source locks is implemented in #176.
+3. Shared taxonomy persistence, seed and classified requirements are implemented
+   with pinned local extraction and ADR-018 clause-local score-only projection.
+   Preserve sections and unknown/negated evidence. Keep exclusions disabled;
+   production scheduling is implemented in #176; independent quality acceptance
+   remains pending.
+4. Weighted Portuguese FTS indexes and shared query expressions are implemented,
+   with explicit extraction readiness on both job and requirement paths. Keep raw
+   rank distinct from bounded textual/final compatibility scores. Production
+   API composition is implemented in #175; ADR-022 bilingual/ASCII/fuzzy remains
+   a tracked follow-up.
+5. Category aliases, public response validation, and bounded
+   lossless uncapped curriculum projection.
+6. Pinned local embeddings, job-only model/version metadata, versioned passage
+   representation, semantic retrieval and model/extraction-change invalidation are
+   implemented. Deterministic semantic aggregation and final blend primitives are
+   implemented in #173, including count validation and available-section numeric
+   bounds. Request-scoped combined retrieval/scoring, empty-input handling and
+   final readiness/evidence rechecks are implemented in #174. API composition
+   is implemented in #175; validate calibration independently before release approval.
+7. Production matching API and privacy-safe readiness/error composition are
+   implemented in #175. Bounded background processing and database-only explicit
+   retry are implemented in #176. Complete bounded availability verification,
+   lifecycle policies and release regressions. Compose packaging/recovery tooling
+   is implemented in #177; current-head operational acceptance remains separate.
 
 Current implementation status is in [tasks](tasks.md); requirements
 and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).
@@ -86,3 +98,13 @@ Record measured verification before marking implementation complete. No release 
 
 Follow [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md). Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
 Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
+
+
+## Current evaluation verification
+
+PR #178 validates declared provenance and retains both pipeline-boundary and
+background-to-API synthetic regressions. Original human annotations/calibration
+measurements are preserved, while policy-reused held-out cases remain regression
+evidence. Fresh independent acceptance is still required for the revised runtime.
+The current review does not rerun historical model/CPU/Compose acceptance or
+implement the explicitly deferred ADR-020/021/022 follow-ups.
