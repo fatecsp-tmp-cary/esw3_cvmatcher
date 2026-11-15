@@ -66,7 +66,7 @@ was deselected), and mypy passed all 60 source files. After independent review,
 the primary integrated a bounded-score regression and strengthened the dependency
 checker; 171 API/worker/ranking tests and 10 checker tests passed. Ruff lint/format
 and the reconciled production image build passed. See the
-[current validation report](../../docs/reports/2026-11-12-mvp-validation.md).
+[historical validation report](../../docs/reports/2026-11-12-mvp-validation.md).
 
 ## Remaining current-head work
 
@@ -80,11 +80,16 @@ and the reconciled production image build passed. See the
 - [ ] Current-head Compose deployment/recovery acceptance; packaging and recovery
       tooling are implemented in #177;
       language/accent investigation remains a tracked follow-up.
-- [ ] Release coverage and the initial textual matching slice.
+- [ ] Fresh independent quality/retrieval acceptance beyond implemented synthetic
+      regression coverage; do not treat the working matching slice as missing.
 - [ ] Additional-source selection/adapter, separate from the at-least-one-source
       MVP acceptance minimum.
 
 ## Historical measurements and release work
+
+The model, CPU and Compose measurements below predate the current review fixes.
+They are preserved historical results, not reruns of this head or acceptance of
+its revised extraction, embedding-passage and semantic policy versions.
 
 - [x] Actual cached offline GLiNER/E5 CPU execution demonstrated on synthetic text.
 - [x] Complete warm CPU reference: 10 experiences, 5 education entries, 10,000
@@ -99,8 +104,10 @@ and the reconciled production image build passed. See the
   exclusions remain disabled. These are agent-reviewed synthetic examples, not
   human-reviewed labels or release calibration.
 - [x] Prepare the existing 40 PT/10 EN cases for blind human review, as requested.
-  See the [packet and instructions](../../docs/match/human-review/README.md); all
-  reviews are pending and no approval flags changed.
+  See the [packet and instructions](../../docs/match/human-review/README.md).
+  Templates remain historical; the original human annotations were subsequently
+  supplied. Policy-updated copies and reused held-out cases do not establish
+  fresh independent acceptance; release approval remains false.
 - [ ] Independently reviewed PT/EN quality/calibration and sample sufficiency
   approval. At least 95% precision and 80% recall are required before mandatory
   extraction can exclude candidates; unclassified evidence never hard-excludes.
@@ -155,7 +162,7 @@ independence. See the extraction correction below for the current evidence. Loca
   results and subsequent policy adjudications are preserved in the correction
   evidence below. Independent post-correction acceptance remains pending.
 
-Final completion verification: **658 passed, 1 external benchmark deselected**.
+Historical completion verification: **658 passed, 1 external benchmark deselected**.
 At the final scoring version, the actual CPU reference failed once with a
 20.718-second outlier, then passed at 3.514/3.398/3.484 seconds. Retain both
 observations; the repeat is not a guarantee of stable latency. The outlier cause
@@ -264,3 +271,14 @@ instructions select the development overlay for startup/status/shutdown and
 custom ports; production keeps the database unexposed. Current-head configuration
 and review evidence are recorded in [the review report](../../docs/reports/2026-11-15-pr177-review.md).
 Operational/model/quality release acceptance remains separate.
+
+
+## PR #178 incremental verification
+
+Declared fixture provenance is validated before dataset/quality flags are derived.
+Original human labels and policy-adjudicated copies remain preserved; reused
+held-out evidence cannot grant independent acceptance. Integrated acceptance tests
+retain the #174 boundary regressions and compare contrasting job geography/modes
+under identical deterministic role evidence. See the
+[review record](../../docs/reports/2026-11-15-pr178-review.md) for current checks.
+ADR-020/021/022 implementation remains explicitly deferred to follow-ups.

@@ -374,3 +374,24 @@ database port in production and loopback-only exposure in development. README
 commands must select the overlay consistently. Packaging is implemented; actual
 model/Compose/recovery and independent quality acceptance require their own
 evidence. See [review scope](../../docs/reports/2026-11-15-pr177-review.md).
+
+## Evaluation provenance and integrated regressions
+
+Fixture evaluation rejects missing, malformed or contradictory declared review
+provenance before reporting dataset or quality status. Human review metadata must
+cover every case with identified, timestamped reviewers and complete disjoint
+20 PT/5 EN calibration/held-out partitions. Policy-adjudicated copies retain
+their regression-only flags; validation cannot renew held-out independence.
+Legacy gold with missing independence flags remains regression input, not fresh
+measurement. Independent current-policy status requires explicit ADR-018 review
+attestation and both independence flags; the known reused source corpus cannot
+regain independence by removing adjudication metadata.
+Release approval remains false. These checks verify declared metadata, not
+reviewer authentication or model quality.
+
+Integrated background-to-API regressions retain independent source records and
+compare otherwise identical role evidence with contrasting job locations/work
+modes. Both remain eligible with equal scores under identical deterministic
+vectors. Descriptive location/mode in actual semantic representations remains
+permitted. Current verification is recorded in the
+[PR #178 review](../../docs/reports/2026-11-15-pr178-review.md).

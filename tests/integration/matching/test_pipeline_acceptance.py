@@ -10,7 +10,9 @@ from sqlalchemy.orm import Session
 
 from src.api.app import CURRICULUM_EXAMPLE, create_app
 from src.api.rate_limit import GlobalRateLimiter
+from src.domain.job import WorkArrangement
 from src.embeddings.config import EmbeddingConfig
+from src.embeddings.encoder import EmbeddingUnavailableError
 from src.embeddings.service import EmbeddingWorker
 from src.embeddings.service import enqueue as enqueue_embedding
 from src.extraction.contracts import SpanEvidence
@@ -52,6 +54,14 @@ def populated(db_engine):
         session.add(source)
         session.flush()
         source_id = source.id
+        locations = {
+            "a-independent": {"city": "São Paulo", "country": "BR"},
+            "b-independent": {"city": "Tokyo", "country": "JP"},
+        }
+        arrangements = {
+            "a-independent": WorkArrangement.REMOTE,
+            "b-independent": WorkArrangement.ON_SITE,
+        }
         for platform, status in (
             ("a-independent", JobStatus.ACTIVE),
             ("b-independent", JobStatus.ACTIVE),
@@ -65,7 +75,8 @@ def populated(db_engine):
                 title="Python Developer",
                 description="Desenvolvimento Python e PostgreSQL",
                 skills=["Python", "PostgreSQL"],
-                location={"city": "Lisboa", "country": "PT"},
+                location=locations.get(platform, {"city": "Lisboa", "country": "PT"}),
+                work_arrangement=arrangements.get(platform),
                 content_hash="synthetic-content-v1",
                 status=status,
             )
@@ -124,8 +135,12 @@ def test_background_to_api_ranking_is_repeatable_private_and_source_independent(
     assert all(match["matched_skills"] == ["postgresql", "python"] for match in matches)
     assert all(match["missing_requirements"] == [] for match in matches)
     assert all(match["embedding_model"] == encoder.model_version for match in matches)
-    # Identical jobs from two platforms stay separate, including foreign location.
-    assert matches[0]["job"]["location"]["country"] == "PT"
+    # With otherwise identical role evidence and deterministic vectors, location
+    # and work mode neither exclude either source nor add a score-only geo bonus.
+    # Actual semantic representations may still contain these descriptive fields.
+    assert [match["job"]["location"]["country"] for match in matches] == ["BR", "JP"]
+    assert [match["job"]["work_arrangement"] for match in matches] == ["REMOTE", "ON_SITE"]
+    assert matches[0]["score"] == matches[1]["score"]
     assert body["curriculo_id"] not in first.text + caplog.text
     assert body["experiencias"][0]["descricao"] not in caplog.text
     assert all("candidate" not in name for name in inspect(db_engine).get_table_names())
@@ -165,7 +180,7 @@ def test_inference_failure_is_privacy_safe_and_does_not_mutate_job_data(populate
     sessions, encoder, identities = populated
 
     def broken(_texts):
-        raise RuntimeError("private candidate text and secret dependency detail")
+        raise EmbeddingUnavailableError("private candidate text and secret dependency detail")
 
     encoder.encode_queries = broken
     monkeypatch.setattr(
