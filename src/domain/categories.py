@@ -45,6 +45,11 @@ _WORK_ARRANGEMENT_ALIASES = {
     "presencial": WorkArrangement.ON_SITE,
 }
 
+# Title matching is bounded by the vocabulary, including its multiword aliases.
+MAX_CATEGORY_ALIAS_WORDS = max(
+    len(alias.split()) for alias in (*_SENIORITY_ALIASES, *_WORK_ARRANGEMENT_ALIASES)
+)
+
 
 def normalize_seniority(value: str | None) -> SeniorityLevel | None:
     """Return the canonical seniority or ``None`` for missing/unknown text."""

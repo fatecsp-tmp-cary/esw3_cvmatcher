@@ -181,3 +181,49 @@ def test_changed_category_mapping_invalidates_hash_for_the_same_source_text(fiel
     assert after["seniority_level"] == SeniorityLevel.JUNIOR
     assert after["work_arrangement"] == WorkArrangement.REMOTE
     assert content_hash(before) != content_hash(after)
+
+
+@pytest.mark.parametrize(
+    ("title", "label", "expected"),
+    [
+        ("Developer home office", "Presencial", WorkArrangement.REMOTE),
+        ("Developer HOME OFFICE", "Presencial", WorkArrangement.REMOTE),
+        ("Developer home\t office", "Presencial", WorkArrangement.REMOTE),
+        ("Developer on site", "Remoto", WorkArrangement.ON_SITE),
+        ("Home office Developer on site", "Remoto", WorkArrangement.ON_SITE),
+        ("On site Developer home office", "Remoto", WorkArrangement.ON_SITE),
+    ],
+)
+def test_multiword_title_aliases_override_conflicting_labels(title, label, expected):
+    assert job(title=title, labels=[label])["work_arrangement"] == expected
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Developer home/office",
+        "Developer home, office",
+        "Developer home - office",
+        "Developer home developer office",
+        "Developer home.office",
+        "Developer home office.com",
+        "Developer home-office.com",
+        "Developer home office-first",
+    ],
+)
+def test_home_office_phrase_cannot_cross_punctuation_or_dotted_names(title):
+    assert job(title=title, labels=["Presencial"])["work_arrangement"] == WorkArrangement.ON_SITE
+
+
+@pytest.mark.parametrize(
+    "title",
+    ["Developer on/site", "Developer on, site", "Developer on.site", "Developer on site.com"],
+)
+def test_on_site_phrase_cannot_cross_punctuation_or_dotted_names(title):
+    assert job(title=title, labels=["Remoto"])["work_arrangement"] == WorkArrangement.REMOTE
+
+
+def test_shared_multiword_seniority_alias_also_overrides_labels():
+    assert (
+        job(title="Mid level Engineer", labels=["Senior"])["seniority_level"] == SeniorityLevel.MID
+    )

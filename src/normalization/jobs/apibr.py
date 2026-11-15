@@ -6,7 +6,11 @@ from html import escape
 from html.parser import HTMLParser
 from typing import Any
 
-from src.domain.categories import normalize_seniority, normalize_work_arrangement
+from src.domain.categories import (
+    MAX_CATEGORY_ALIAS_WORDS,
+    normalize_seniority,
+    normalize_work_arrangement,
+)
 from src.domain.job import SeniorityLevel, WorkArrangement
 from src.extraction.taxonomy import canonical_skill
 
@@ -223,9 +227,14 @@ def categorize(
     for equal-ranked specialist/coordinator values. Conflicting labels are unusable
     and may fall back to body evidence.
     """
-    from_title = [
-        value for token in _TITLE_TOKEN.findall(title) if (value := normalize(token)) is not None
-    ]
+    from_title = []
+    tokens = list(_TITLE_TOKEN.finditer(title))
+    for index, first in enumerate(tokens):
+        for end in range(index, min(len(tokens), index + MAX_CATEGORY_ALIAS_WORDS)):
+            if end > index and not title[tokens[end - 1].end() : tokens[end].start()].isspace():
+                break  # Multiword aliases may cross whitespace, never punctuation or slashes.
+            if (value := normalize(title[first.start() : tokens[end].end()])) is not None:
+                from_title.append(value)
     if from_title:
         return max(from_title, key=order.__getitem__)
     from_labels = {value for text in labels if (value := normalize(text)) is not None}
