@@ -18,7 +18,7 @@ Since each job API returns different JSON structures, all data collected by the 
 | `id` | Internal identifier | Stable identifier assigned by CV-Match. | `0012345` |
 | `source_job_id` | String | Unique identifier originally provided by the platform | `"MOaYsJOw"` or `"12577603"` |
 | `platform` | String | Name of the platform/API from which the data was collected | `"apibr"` |
-| `source_expires_at` | Timestamp or null | Explicit expiration supplied by the source. Missing value does not mean expired. | `"2026-12-31T23:59:59Z"` |
+| `source_expires_at` | Timestamp or null | Reliable explicit upstream expiration, normalized as a timezone-aware datetime; no observation/publication/fallback substitution. APiBR emits null. Missing value does not mean expired. | `"2026-12-31T23:59:59Z"` |
 | `title` | String | Cleaned and formatted job title | `"Mid-Level Data Analyst"` |
 | `company` | String | Name of the hiring company or career page | `"Globo"`, `"Archer Daniels"` |
 | `description` | Text | Cleaned descriptive text from the posting | `"Responsible for data modeling..."` |

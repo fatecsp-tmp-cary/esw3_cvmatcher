@@ -8,6 +8,10 @@ from typing import Any
 from src.embeddings.config import DIMENSIONS, MODEL_ID, MODEL_REVISION, EmbeddingConfig
 
 
+class EmbeddingUnavailableError(Exception):
+    """A required local embedding package or pinned model artifact is unavailable."""
+
+
 def normalized_vector(values: Sequence[float]) -> list[float]:
     if len(values) != DIMENSIONS:
         raise ValueError("Invalid embedding dimensions")
@@ -40,16 +44,19 @@ class LocalEmbeddingEncoder:
 
     def _load(self):
         if self._model is None:
-            from sentence_transformers import SentenceTransformer
+            try:
+                from sentence_transformers import SentenceTransformer
 
-            self._model = SentenceTransformer(
-                MODEL_ID,
-                revision=MODEL_REVISION,
-                cache_folder=self.config.cache_directory,
-                device="cpu",
-                local_files_only=True,
-                trust_remote_code=False,
-            )
+                self._model = SentenceTransformer(
+                    MODEL_ID,
+                    revision=MODEL_REVISION,
+                    cache_folder=self.config.cache_directory,
+                    device="cpu",
+                    local_files_only=True,
+                    trust_remote_code=False,
+                )
+            except (ImportError, OSError):
+                raise EmbeddingUnavailableError from None
         self._model.to("cpu")
         self._model.eval()
         return self._model
@@ -67,7 +74,10 @@ class LocalEmbeddingEncoder:
             raise ValueError("Embedding input must contain nonempty text entries")
         if not texts:
             return []
-        import torch
+        try:
+            import torch
+        except ImportError:
+            raise EmbeddingUnavailableError from None
 
         with self._lock:
             model = self._load()
