@@ -81,8 +81,14 @@ Missing state leaves new jobs `DISCOVERED`; ingestion performs no GitHub
 availability requests. Existing availability and verification timestamps are
 retained when evidence is absent. Malformed records are rejected individually
 and valid records commit as `PARTIAL`; network/pagination failure rolls back
-job changes and records `FAILED`. Incremental and nonqualifying scans remain
-incomplete; even qualifying scans do not invent job availability. See
+job changes and records `FAILED`. Fetch and normalize all pages and finish remote
+snapshot attestation before locking job identities. Acquire at most 256 PostgreSQL
+advisory stripes in ascending order, then apply buffered observations in original
+order within the outer transaction. This avoids remote waits under identity locks
+and opposite-order batch deadlocks; stripe collisions only serialize unrelated
+records. Final persistence rejections also invalidate snapshot qualification.
+Incremental and nonqualifying scans remain incomplete; even qualifying scans do
+not invent job availability. See
 [ADR-003](../architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md).
 
 The captured fixture is a GitHub issue, not a confirmed APiBR

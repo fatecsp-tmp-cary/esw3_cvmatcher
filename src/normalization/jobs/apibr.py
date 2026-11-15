@@ -195,7 +195,6 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("APiBR issue has an invalid job URL")
 
     keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
-
     # Only exact shared aliases are mapped. Free text is never interpreted, and
     # conflicting labels (for example every option of an issue form) stay unknown.
     labels = vacancy_labels(raw_job)

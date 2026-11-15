@@ -6,36 +6,61 @@ Implementation below is distinct from release approval. #99 remains open.
 
 ## Implemented and reconciled with main
 
-- Frozen Sistema Currículo request/query/response contract, lossless transient
-  normalization, empty sections, OpenAPI and privacy-safe errors.
-- Canonical jobs, platform/source identity, normalized content hashes, terminal
-  EXPIRED and stale rediscovery; no cross-source deduplication/geographic filtering.
-- Conservative APiBR ingestion, common asynchronous adapter, bounded retries and
-  partial/failure handling. Unproven scans never establish absence.
-- APiBR label metadata maps to canonical seniority, work arrangement and skills
-  through exact shared aliases; repository topics, free text and conflicting
-  labels are never classified (#180).
-- PostgreSQL identity/source scheduling locks, bounded background cycles and
-  reliable source-timestamp expiration.
-- Separate extraction state/evidence, content/config readiness, concurrent claims,
-  three-attempt failure and explicit retry. Failed jobs are withheld from matching.
-- Pinned offline local GLiNER inference with token-aware full-text coverage,
-  validated offsets/deduplication and conservative explicit skill aliases.
-  Mandatory classifications remain disabled pending measured quality approval.
-- Weighted Portuguese any-term FTS and bound queries reconciled with ADR-004/005
-  weights/fields, JSON text rendering and publication-date/identity ties, with
-  current extraction readiness on every retrieval path. Both migration histories
-  merge at b1e004; b1e005 rebuilds all three matching FTS indexes.
-- Main taxonomy persistence and category aliases retained; both projection APIs
-  remain compatible without superseded internal caps (ADR-011).
-- Pinned local multilingual E5 encoder with full token windows, normalized vectors,
-  separate provenance, bounded job maintenance and exact pgvector retrieval.
-- Production matching executor: per-entry experience/education inference,
-  top-three relevance before recency, best education, available-section 80/20
-  semantic aggregation and final 0.45/0.35/0.20 blend. Scores/configurations are
-  versioned; cosine calibration remains explicitly provisional.
-- PostgreSQL-coordinated global rolling 60-requests/minute admission, all HTTP
-  paths, safe 429/Retry-After:60 and fail-closed 503; no authentication or CORS.
+- Shared production/mock preview request and ranked response, OpenAPI, limit, health and privacy-safe RFC 9457 errors.
+- Canonical job correction, source identity and four lifecycle states; section-preserving HTML cleanup. Raw remains null.
+- Deterministic normalized content hashing.
+- Reliable explicit-source timestamp expiration with bounded ingestion-stripe
+  coordination, indexed due-time selection and unchanged observation/verification
+  timestamps. APiBR supplies no supported source expiry and emits null.
+- Source-specific upsert, content/vector invalidation and stale rediscovery; PostgreSQL persistence tests. Concurrent identity writes use bounded, ordered
+  advisory-lock stripes; APiBR buffers observations before locking and retains
+  atomic scan rollback. Independent-connection regressions cover inserts,
+  lifecycle updates, reversed overlapping scans and unexpected write failure.
+- Bounded sequential APiBR scans and sync/async source adapters with retry policy;
+  unknown availability without GitHub requests, isolated malformed records,
+  PARTIAL/FAILED evidence and PostgreSQL regressions. Explicit SNAPSHOT mode uses
+  ADR-013 best-effort health/count attestation; all remote calls finish before
+  identity locking and persistence rejection invalidates qualification.
+- Portuguese weighted any-term FTS field/query/normalization decisions.
+- Skill taxonomy, explicit project-alias seed, job-skill and classified requirement
+  persistence; local pinned GLiNER, exact-alias supplemental detection and ADR-018
+  clause-local score-only projection. Versioned evidence, three-claim retry/lease
+  recovery and readiness predicate are implemented. FTS helpers require explicit
+  extraction readiness. Request-scoped pipeline wiring is implemented in #174;
+  production API composition is implemented in #175. Quality/release approval and exclusions stay disabled.
+- Immutable weighted FTS indexes and active-only any-term/requirement retrieval
+  with fail-closed extraction readiness, bounded textual components and stable
+  ties are implemented. Legacy retrieval retains raw rank. Deterministic final
+  compatibility primitives, versioned calibration and semantic aggregation are
+  implemented in #173 and integrated into the request-scoped pipeline in #174.
+- Domain-enum seniority/mode aliases; missing/unknown values yield no category.
+  APiBR issue #180 mapping requires one distinct vacancy-level category; conflicting
+  evidence stays unknown, repository topics are ignored, and all source label
+  names remain keywords. This intentionally supersedes the earlier #168
+  first-recognized-label behavior. Exact shared skill aliases are deduplicated
+  and sorted; title/body inference remains separate.
+- Ranked response validation tests for job identity, eligibility, match details and version metadata.
+- Uncapped public collections and a transient adapter preserving every source section/date/level, accepting empty sections and omitting the UUID.
+
+- Pinned offline E5 inference, complete token windows, job-only provenance,
+  bounded claims/retries, content/model/extraction invalidation and semantic
+  retrieval are implemented. Passages include normalized requirements and
+  deterministic locations under a versioned representation policy. Production
+  API composition is implemented in #175; empirical calibration/release acceptance
+  remain pending.
+
+- Production API executor and database/model readiness composition are implemented
+  lazily with the existing anonymous/global-quota policy. Known dependency failures
+  use 503; unexpected application errors use the privacy-safe 500 path. Production
+  boundary/factory regressions are recorded in the
+  [PR #175 review](../../docs/reports/2026-11-15-pr175-review.md).
+
+- Bounded production worker cycles and per-source scheduling use PostgreSQL
+  coordination across polling commits. Extraction/embedding maintenance preserves
+  failed current work until explicit retry. Database-only retry locks/refetches
+  the job and rejects missing/EXPIRED IDs without changing prior state. See the
+  [PR #176 review](../../docs/reports/2026-11-15-pr176-review.md).
+
 - Independent agent-reviewed synthetic fixtures: 40 Portuguese/10 English;
   exact-span/class metrics, per-language reporting and missing-prediction handling.
 - Integrated synthetic background-to-API regressions for readiness, source
@@ -46,9 +71,30 @@ was deselected), and mypy passed all 60 source files. After independent review,
 the primary integrated a bounded-score regression and strengthened the dependency
 checker; 171 API/worker/ranking tests and 10 checker tests passed. Ruff lint/format
 and the reconciled production image build passed. See the
-[current validation report](../../docs/reports/2026-11-12-mvp-validation.md).
+[historical validation report](../../docs/reports/2026-11-12-mvp-validation.md).
 
-## Measurements and release work
+## Remaining current-head work
+
+- [ ] Source usage/permission evidence and worker integration of the async interface;
+      optional bounded availability verification. Real payload capture is pending.
+- [ ] Complete operational acceptance beyond bounded source scheduling and
+      extraction/embedding wiring. Preserve source independence and uncertain evidence.
+- [ ] Lifecycle policies. Never infer absence from an unproven scan.
+- [ ] ADR-022 textual normalization/retrieval changes, a fixed
+      release regression fixture and vertical-slice acceptance validation.
+- [ ] Current-head Compose deployment/recovery acceptance; packaging and recovery
+      tooling are implemented in #177;
+      language/accent investigation remains a tracked follow-up.
+- [ ] Fresh independent quality/retrieval acceptance beyond implemented synthetic
+      regression coverage; do not treat the working matching slice as missing.
+- [ ] Additional-source selection/adapter, separate from the at-least-one-source
+      MVP acceptance minimum.
+
+## Historical measurements and release work
+
+The model, CPU and Compose measurements below predate the current review fixes.
+They are preserved historical results, not reruns of this head or acceptance of
+its revised extraction, embedding-passage and semantic policy versions.
 
 - [x] Actual cached offline GLiNER/E5 CPU execution demonstrated on synthetic text.
 - [x] Complete warm CPU reference: 10 experiences, 5 education entries, 10,000
@@ -63,8 +109,10 @@ and the reconciled production image build passed. See the
   exclusions remain disabled. These are agent-reviewed synthetic examples, not
   human-reviewed labels or release calibration.
 - [x] Prepare the existing 40 PT/10 EN cases for blind human review, as requested.
-  See the [packet and instructions](../../docs/match/human-review/README.md); all
-  reviews are pending and no approval flags changed.
+  See the [packet and instructions](../../docs/match/human-review/README.md).
+  Templates remain historical; the original human annotations were subsequently
+  supplied. Policy-updated copies and reused held-out cases do not establish
+  fresh independent acceptance; release approval remains false.
 - [ ] Independently reviewed PT/EN quality/calibration and sample sufficiency
   approval. At least 95% precision and 80% recall are required before mandatory
   extraction can exclude candidates; unclassified evidence never hard-excludes.
@@ -119,7 +167,7 @@ independence. See the extraction correction below for the current evidence. Loca
   results and subsequent policy adjudications are preserved in the correction
   evidence below. Independent post-correction acceptance remains pending.
 
-Final completion verification: **658 passed, 1 external benchmark deselected**.
+Historical completion verification: **658 passed, 1 external benchmark deselected**.
 At the final scoring version, the actual CPU reference failed once with a
 20.718-second outlier, then passed at 3.514/3.398/3.484 seconds. Retain both
 observations; the repeat is not a guarantee of stable latency. The outlier cause
@@ -162,8 +210,86 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 - [ ] Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
 
-## Deferred external deployment and source expansion
 
-- [x] Record the user decision in [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
-- [ ] Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
-- [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
+## PR #167 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr167-review.md) for
+GitHub/Codex findings, bounded-lock and independent-connection regressions,
+current-head checks and later-adapter integration requirements.
+
+
+## PR #168 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr168-review.md) for
+category-label regression fixes, network-free identity-locking integration,
+review dispositions and current-head verification.
+
+
+## PR #169 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr169-review.md) for
+concurrent sweep/upsert coordination, reliable-field preconditions, index
+migration and regression verification. Absence/stale-age policies and scheduler
+integration remain separate work.
+
+
+## PR #170 incremental review verification
+
+See the [review record](../../docs/reports/2026-11-14-pr170-review.md) for actual
+GitHub/Codex review dispositions and current-head extraction checks. Existing
+correction/evaluation history above retains its original evidence scope.
+
+
+## PR #171 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr171-review.md) for
+GitHub/Codex dispositions, requirement-passage and location regressions, policy
+invalidation, telemetry import ordering and independent-connection claim checks.
+
+
+## PR #172 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr172-review.md) for
+GitHub/Codex dispositions, post-merge FTS/index checks and the limited accented
+JSON-prefix observations. ADR-022 policy remains accepted but unimplemented.
+
+
+## PR #173 incremental verification
+
+See the [review record](../../docs/reports/2026-11-14-pr173-review.md) for both
+review dispositions, retrieval-count validation, available-section normalization
+and current-head checks. ADR-021 mandatory coverage is accepted but remains
+unimplemented; no new exclusion, blend weight or release approval is introduced.
+
+## PR #174 incremental verification
+
+Request-scoped pipeline union, current-evidence rechecks and deterministic scoring
+are implemented. Fake-encoder PostgreSQL regressions cover empty/competency-only
+input, deduplication, stale/inactive provenance, invalid vectors/counts, stable
+ordering and privacy/geography invariants. See the
+[review record](../../docs/reports/2026-11-14-pr174-review.md) for actual results.
+
+## PR #177 incremental verification
+
+Compose packaging and recovery tooling are implemented. Local host database
+instructions select the development overlay for startup/status/shutdown and
+custom ports; production keeps the database unexposed. Current-head configuration
+and review evidence are recorded in [the review report](../../docs/reports/2026-11-15-pr177-review.md).
+Operational/model/quality release acceptance remains separate.
+
+
+## PR #178 incremental verification
+
+Declared fixture provenance is validated before dataset/quality flags are derived.
+Original human labels and policy-adjudicated copies remain preserved; reused
+held-out evidence cannot grant independent acceptance. Integrated acceptance tests
+retain the #174 boundary regressions and compare contrasting job geography/modes
+under identical deterministic role evidence. See the
+[review record](../../docs/reports/2026-11-15-pr178-review.md) for current checks.
+ADR-020/021/022 implementation remains explicitly deferred to follow-ups.
+
+## PR #179 incremental verification
+
+All-base locked CI is implemented. The review/restack push exercises a real
+non-main-base synchronization; record its exact-head checks separately from
+historical results. See [review scope](../../docs/reports/2026-11-15-pr179-review.md).
