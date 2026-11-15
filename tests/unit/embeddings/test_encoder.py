@@ -148,3 +148,45 @@ def test_serving_load_is_pinned_offline_and_disallows_remote_code(monkeypatch):
         )
     ]
     assert model.training is False and model.device == "cpu"
+
+
+@pytest.mark.parametrize("error", [ModuleNotFoundError("private"), OSError("private")])
+def test_missing_local_model_dependency_has_typed_failure(monkeypatch, error):
+    import sys
+    from types import SimpleNamespace
+
+    from src.embeddings.encoder import EmbeddingUnavailableError
+
+    def load(*args, **kwargs):
+        raise error
+
+    monkeypatch.setitem(
+        sys.modules, "sentence_transformers", SimpleNamespace(SentenceTransformer=load)
+    )
+    with pytest.raises(EmbeddingUnavailableError) as caught:
+        LocalEmbeddingEncoder()._load()
+    assert str(caught.value) == ""
+
+
+def test_model_loader_programming_error_is_not_an_outage(monkeypatch):
+    import sys
+    from types import SimpleNamespace
+
+    def load(*args, **kwargs):
+        raise ValueError("invalid model result")
+
+    monkeypatch.setitem(
+        sys.modules, "sentence_transformers", SimpleNamespace(SentenceTransformer=load)
+    )
+    with pytest.raises(ValueError, match="invalid model result"):
+        LocalEmbeddingEncoder()._load()
+
+
+def test_missing_torch_dependency_has_typed_failure(monkeypatch):
+    import sys
+
+    from src.embeddings.encoder import EmbeddingUnavailableError
+
+    monkeypatch.setitem(sys.modules, "torch", None)
+    with pytest.raises(EmbeddingUnavailableError):
+        LocalEmbeddingEncoder(model=Model()).encode_queries(["Python"])

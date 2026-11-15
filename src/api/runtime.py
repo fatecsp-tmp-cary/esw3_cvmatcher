@@ -4,12 +4,30 @@ import os
 from functools import lru_cache
 from threading import Lock
 
+from sqlalchemy.exc import (
+    ArgumentError,
+    DisconnectionError,
+    InterfaceError,
+    OperationalError,
+)
+from sqlalchemy.exc import (
+    TimeoutError as DatabaseTimeoutError,
+)
+
 from src.api.errors import DependencyUnavailableError
-from src.processing import ProcessingUnavailable, checkpoint
+from src.embeddings.encoder import EmbeddingUnavailableError
+from src.processing import checkpoint
 from src.schemas.candidate.curriculum import CurriculumRequest
 from src.schemas.matches import MatchesResponse
 
 _factory_lock = Lock()
+_DEPENDENCY_ERRORS = (
+    OperationalError,
+    InterfaceError,
+    DisconnectionError,
+    DatabaseTimeoutError,
+    EmbeddingUnavailableError,
+)
 
 
 @lru_cache(maxsize=1)
@@ -20,7 +38,15 @@ def _configured_pipeline():
     from src.matching.pipeline import MatchingPipeline
     from src.persistence.database import create_db_engine, create_session_factory
 
-    sessions = create_session_factory(create_db_engine())
+    if not os.environ.get("DATABASE_URL", "").strip():
+        raise DependencyUnavailableError
+    try:
+        engine = create_db_engine()
+    except (ArgumentError, ImportError):
+        # Invalid database configuration or a missing configured driver, only
+        # at composition. Query/programming failures must retain the 500 path.
+        raise DependencyUnavailableError from None
+    sessions = create_session_factory(engine)
     encoder = LocalEmbeddingEncoder(
         EmbeddingConfig(cache_directory=os.environ.get("CVMATCHER_EMBEDDING_CACHE"))
     )
@@ -38,11 +64,9 @@ def production_matches(request: CurriculumRequest, limit: int) -> MatchesRespons
         pipeline = get_pipeline()
         checkpoint()
         return pipeline(request, limit)
-    except ProcessingUnavailable:
-        # The HTTP boundary converts this fixed-category budget failure to 503.
-        raise
-    except Exception:
-        # Never expose DB URLs, model paths, submitted text or library exceptions.
+    except _DEPENDENCY_ERRORS:
+        # Only recognized outages use 503. Unexpected application failures reach
+        # the API's privacy-safe 500 handler, which retains type/source diagnostics.
         raise DependencyUnavailableError from None
 
 
@@ -56,5 +80,5 @@ def production_ready() -> None:
         with pipeline.sessions() as session:
             session.execute(select(JobExtraction.job_id).limit(1)).all()
         pipeline.encoder.encode_queries(["model readiness"])
-    except Exception:
+    except _DEPENDENCY_ERRORS:
         raise DependencyUnavailableError from None

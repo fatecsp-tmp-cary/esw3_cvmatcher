@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from src.ingestion.adapters import PollingMode, RetryPolicy, SourceError
 from src.ingestion.completeness import SnapshotAttestation
-from src.ingestion.upsert import upsert_job
+from src.ingestion.upsert import lock_all_job_identities, lock_job_identities, upsert_job
 from src.normalization.jobs.apibr import normalize_apibr_job
 from src.persistence.job.job import Job, JobStatus
 from src.persistence.job.job_source import JobSource
@@ -258,7 +258,8 @@ def _mark_absent_stale(session: Session, source_id: int, scan_started: datetime)
     """Mark this source's ACTIVE jobs not observed since ``scan_started`` as STALE.
 
     Callers must have established a qualifying snapshot (ADR-015). Returns the
-    non-expired absent job count and the number newly marked STALE.
+    non-expired absent job count and the number newly marked STALE. The complete
+    identity-stripe set must already be held before any observation is written.
     """
     absent = (
         Job.source_id == source_id,
@@ -293,8 +294,11 @@ def ingest_apibr(
     """Persist valid records, rejecting malformed jobs in isolated savepoints.
 
     SNAPSHOT configurations may attest the approved best-effort health/count
-    conditions. Absence-based lifecycle changes remain disabled. Polling
-    failures roll back all job updates. Rejected records produce a PARTIAL run;
+    conditions. Only a qualifying successful snapshot may mark absent jobs STALE. Polling
+    failures roll back all job updates. Fetch and normalize the bounded scan
+    and finish remote attestation before taking identity locks. Acquire the full
+    lock set in global order, then apply observations in source order within one
+    atomic transaction. Rejected records produce a PARTIAL run;
     errors contain counts or exception types, never source response text.
     """
     source = session.get(JobSource, source_id)
@@ -332,15 +336,39 @@ def ingest_apibr(
     try:
         if attestation is not None:
             attestation.begin()
+        observations = []
         for raw_issue in iter_apibr_issues(client):
             counts["found"] += 1
             if attestation is not None:
                 attestation.observe(raw_issue)
             try:
+                normalized, verified = _normalize_issue(raw_issue)
+            except ValueError:
+                counts["rejected"] += 1
+                continue
+            observations.append((normalized, verified, datetime.now(UTC)))
+
+        evidence = (
+            attestation.finish(rejections=counts["rejected"], terminal_empty=True)
+            if attestation is not None
+            else None
+        )
+        if evidence is not None and evidence["qualified"]:
+            # A qualifying snapshot can update absent identities as well as those
+            # observed. Acquire the complete bounded set before any row writes;
+            # expanding an observed-only subset later would invert lock order.
+            # Every remote request has already completed above.
+            lock_all_job_identities(session)
+        else:
+            lock_job_identities(
+                session,
+                ((job["platform"], job["source_job_id"]) for job, _, _ in observations),
+            )
+        for normalized, verified, observed_at in observations:
+            try:
                 with session.begin_nested():
-                    normalized, verified = _normalize_issue(raw_issue)
                     outcome, expired, reactivated = upsert_job(
-                        session, source_id, normalized, datetime.now(UTC), verified
+                        session, source_id, normalized, observed_at, verified
                     )
                     session.flush()
             except (ValueError, DataError, IntegrityError):
@@ -356,15 +384,16 @@ def ingest_apibr(
         if run is None or source is None:
             raise RuntimeError("Source execution state is unavailable")
         status = "PARTIAL" if counts["rejected"] else "SUCCEEDED"
-        if attestation is not None:
-            run.snapshot_evidence = attestation.finish(
-                rejections=counts["rejected"],
-                terminal_empty=True,
-            )
-            run.snapshot_complete = status == "SUCCEEDED" and run.snapshot_evidence["qualified"]
-            if run.snapshot_complete:
-                # Only a qualifying snapshot makes absence meaningful (ADR-015).
-                absent, marked_stale = _mark_absent_stale(session, source_id, scan_started)
+        if evidence is not None:
+            # Persistence can reject additional records after remote evidence is
+            # captured. Such a run must never qualify as a complete snapshot.
+            evidence["rejections"] = counts["rejected"]
+            evidence["qualified"] = bool(evidence["qualified"] and not counts["rejected"])
+            run.snapshot_evidence = evidence
+            run.snapshot_complete = status == "SUCCEEDED" and evidence["qualified"]
+        if run.snapshot_complete:
+            # Only a qualifying snapshot makes absence meaningful (ADR-015).
+            absent, marked_stale = _mark_absent_stale(session, source_id, scan_started)
         run.status = status
         run.finished_at = finished_at
         run.duration_ms = int((time.perf_counter() - timer_started) * 1000)
