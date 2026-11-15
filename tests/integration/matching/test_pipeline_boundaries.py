@@ -123,7 +123,7 @@ def test_empty_candidate_does_not_encode_or_open_a_session():
 
 def test_competency_only_uses_textual_evidence_without_semantic_fallback(setup):
     add, pipeline = setup
-    related = add("related", vector=None)
+    related = add("related")
     add("unrelated", title="Gardener")
     encoder = Encoder()
     result = pipeline(encoder)(request(skill="Python"), 10)
@@ -154,10 +154,12 @@ def test_union_deduplicates_and_stable_ties_preserve_privacy_and_geography(setup
 
 
 @pytest.mark.parametrize("state", [JobStatus.DISCOVERED, JobStatus.STALE, JobStatus.EXPIRED])
-def test_inactive_jobs_never_reach_final_response(setup, state):
+def test_ready_inactive_jobs_complete_the_response_as_ineligible(setup, state):
     add, pipeline = setup
-    add("inactive", status=state)
-    assert pipeline()(request(experience=True), 10).matches == []
+    job = add("inactive", status=state)
+    result = pipeline()(request(experience=True), 10)
+    assert [row.job.id for row in result.matches] == [job.id]
+    assert not result.matches[0].eligibility
 
 
 @pytest.mark.parametrize("invalid", ["extraction", "hash", "model", "dimension"])
@@ -184,6 +186,8 @@ def test_final_evidence_recheck_drops_stale_pool_hits(setup, monkeypatch, initia
 
     def invalidate(session, *args, **kwargs):
         rows = retrieve(session, *args, **kwargs)
+        if not rows:
+            return rows
         assert len(rows) == 1
         job = rows[0][0]
         # Simulate an update visible after candidate retrieval, before final checks.
@@ -196,21 +200,22 @@ def test_final_evidence_recheck_drops_stale_pool_hits(setup, monkeypatch, initia
     assert pipeline()(request(experience=True), 10).matches == []
 
 
-def test_final_textual_evidence_survives_embedding_invalidation(setup, monkeypatch):
+def test_final_textual_evidence_cannot_bypass_embedding_invalidation(setup, monkeypatch):
     add, pipeline = setup
-    job = add("textual")
+    add("textual")
     retrieve = module.retrieve_semantic
 
     def invalidate(session, *args, **kwargs):
         rows = retrieve(session, *args, **kwargs)
+        if not rows:
+            return rows
         rows[0][0].embedding = None
         session.flush()
         return rows
 
     monkeypatch.setattr(module, "retrieve_semantic", invalidate)
     result = pipeline()(request(experience=True), 10)
-    assert [row.job.id for row in result.matches] == [job.id]
-    assert result.matches[0].score > 0
+    assert result.matches == []
 
 
 @pytest.mark.parametrize(
@@ -230,6 +235,8 @@ def test_final_active_and_extraction_gate_reject_revoked_hits(setup, monkeypatch
 
     def invalidate(session, *args, **kwargs):
         rows = retrieve(session, *args, **kwargs)
+        if not rows:
+            return rows
         assert len(rows) == 1
         job = rows[0][0]
         if revoked == "availability":
@@ -240,4 +247,89 @@ def test_final_active_and_extraction_gate_reject_revoked_hits(setup, monkeypatch
         return rows
 
     monkeypatch.setattr(module, "retrieve_semantic", invalidate)
-    assert pipeline()(request(experience=True), 10).matches == []
+    result = pipeline()(request(experience=True), 10)
+    if revoked == "availability":
+        assert len(result.matches) == 1 and not result.matches[0].eligibility
+    else:
+        assert result.matches == []
+
+
+@pytest.mark.parametrize("state", list(JobStatus))
+@pytest.mark.parametrize(
+    "invalid",
+    [
+        "missing-vector",
+        "dimension",
+        "embedding-failed",
+        "embedding-pending",
+        "embedding-hash",
+        "model",
+        "embedding-extraction",
+        "extraction-failed",
+        "extraction-pending",
+        "extraction-hash",
+        "extraction-config",
+    ],
+)
+def test_textual_candidates_in_every_group_require_current_processing(
+    setup, db_session, state, invalid
+):
+    add, pipeline = setup
+    job = add("candidate", status=state)
+    extraction = db_session.get(JobExtraction, job.id)
+    embedding = db_session.get(JobEmbedding, job.id)
+    if invalid == "missing-vector":
+        job.embedding = None
+    elif invalid == "dimension":
+        job.embedding = [1.0, 0.0]
+    elif invalid == "embedding-failed":
+        embedding.status = "FAILED"
+    elif invalid == "embedding-pending":
+        embedding.status = "PENDING"
+    elif invalid == "embedding-hash":
+        embedding.content_hash = "obsolete"
+    elif invalid == "model":
+        embedding.model_version = "obsolete"
+    elif invalid == "embedding-extraction":
+        embedding.extraction_version = "obsolete"
+    elif invalid == "extraction-failed":
+        extraction.status = "FAILED"
+    elif invalid == "extraction-pending":
+        extraction.status = "PENDING"
+    elif invalid == "extraction-hash":
+        extraction.content_hash = "obsolete"
+    else:
+        extraction.config_version = "obsolete"
+    db_session.flush()
+    encoder = Encoder()
+    assert pipeline(encoder)(request(skill="Python"), 10).matches == []
+    assert encoder.calls == []
+
+
+@pytest.mark.parametrize("state", list(JobStatus))
+@pytest.mark.parametrize("revoked", ["vector", "embedding", "extraction"])
+def test_final_group_gate_withholds_processing_revoked_after_textual_retrieval(
+    setup, db_session, monkeypatch, state, revoked
+):
+    add, pipeline = setup
+    job = add("revoked", status=state)
+    retrieve = module.retrieve_textual
+    changed = False
+
+    def invalidate(session, *args, **kwargs):
+        nonlocal changed
+        rows = retrieve(session, *args, **kwargs)
+        if rows and not changed:
+            changed = True
+            if revoked == "vector":
+                session.get(Job, job.id).embedding = None
+            elif revoked == "embedding":
+                session.get(JobEmbedding, job.id).status = "FAILED"
+            else:
+                session.get(JobExtraction, job.id).status = "FAILED"
+            session.flush()
+        return rows
+
+    monkeypatch.setattr(module, "retrieve_textual", invalidate)
+    assert pipeline()(request(skill="Python"), 10).matches == []
+    assert changed

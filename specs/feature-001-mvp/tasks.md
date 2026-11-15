@@ -188,7 +188,12 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 - [x] Resolve the [all-result readiness conflict](spec.md#resolved-clarification-all-result-readiness-pr-195-review):
       user selected current extraction and embedding readiness for every returned
       job; recorded in ADR-024, preserving ADR-016.
-- [ ] Implement and verify the all-result readiness gate in both status groups.
+- [x] Implement the all-result readiness gate at retrieval and final checks in both
+      status groups, including textual-only candidates.
+- [x] Exclude prior result IDs before inactive textual/semantic retrieval limits;
+      independently committed active-to-inactive updates cannot duplicate a job.
+- [x] Verify missing/stale/failed processing and final invalidation for every status;
+      see the [PR #195 review](../../docs/reports/2026-11-15-pr195-review.md).
 
 
 ## PR #167 incremental verification

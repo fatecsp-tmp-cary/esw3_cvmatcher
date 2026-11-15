@@ -82,7 +82,8 @@ hash updates the job, reindexes text, nulls its embedding, and schedules
 regeneration. Unchanged content is not updated. Model/version changes
 independently invalidate and regenerate embeddings.
 
-Only jobs with successful extraction enter matching retrieval. Active jobs are
+Only jobs with current successful extraction and a valid current embedding enter
+production matching retrieval, including the textual path (ADR-024). Active jobs are
 ranked first; jobs in any other status only fill the remaining positions after
 them, with `eligibility: false`
 ([ADR-016](../../docs/architecture/decisions/ADR-016-inactive-jobs-complete-ranked-matches.md)).
@@ -96,10 +97,13 @@ description/location, PostgreSQL JSON text rendering and descending publication
 date then platform/source-ID ties under ADR-004/005. All retrieval paths require
 successful extraction for current content/configuration. The implemented FTS
 helpers fail closed when readiness is omitted. The request-scoped pipeline
-supplies current extraction readiness, unions considered candidates, then rechecks
-active state and final evidence. A candidate remains only if it has current textual
-evidence or available experience/education queries and a current valid embedding.
-Textual matches may remain without a vector. Projects/competencies/languages alone
+supplies combined current extraction/embedding readiness, unions considered
+candidates, then rechecks the selected status group, processing readiness and
+final evidence. A candidate remains only if both processing gates pass and it has
+current textual evidence or available experience/education semantic evidence.
+Textual matches cannot remain without a current vector. Already-returned IDs are
+excluded before either inactive retrieval LIMIT; a concurrent active-to-inactive
+transition cannot repeat a job or consume a remaining recommendation slot. Projects/competencies/languages alone
 do not trigger semantic retrieval. Production API composition is implemented in #175. Semantic job representation is title,
 normalized skills, current normalized requirement texts (sorted and deduplicated),
 relevant description, location string values in sorted-key order, and mode. Passage
@@ -108,7 +112,8 @@ regeneration even when source content is unchanged.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job
 embeddings in pgvector; candidate embeddings stay in memory. Jobs without a
-current valid embedding are excluded from semantic retrieval while missing.
+current valid embedding are excluded from all production matching retrieval
+while missing, including textual-only candidates (ADR-024).
 
 ## Matching and API
 
@@ -291,5 +296,7 @@ The accepted expiration threshold is three qualifying absence snapshots, includi
 [ADR-024](../../docs/architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md)
 resolves the ADR-016/issue #194 conflict: every returned job requires current
 successful extraction and a valid current embedding, in both active and inactive
-groups, including textual retrieval. Implementation and verification are tracked
-in the tasks; the decision alone is not evidence of implementation.
+groups, including textual retrieval. The pipeline now applies that combined
+predicate at retrieval and final rechecks. Per-group invalidation and independent
+status-transition regressions are recorded in the PR #195 review; acceptance of
+the decision alone is not release or model-quality approval.

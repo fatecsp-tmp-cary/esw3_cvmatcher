@@ -42,7 +42,11 @@ Every retrieval entry point requires an explicit SQL predicate proving current
 successful extraction to return jobs. Omitted `readiness` becomes SQL false in
 both job and requirement branches, including the legacy wrapper. Integrators
 must check current content hash and extraction configuration; pending, failed
-or obsolete extraction remains withheld. An explicit true predicate appears only
+or obsolete extraction remains withheld. Production matching supplies the combined
+current extraction/embedding predicate in both status groups under
+[ADR-024](../architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md). Textual
+matches cannot bypass embedding readiness; low-level FTS fixtures remain isolated
+from production processing. An explicit true predicate appears only
 in focused FTS fixtures. Only ACTIVE jobs pass by default; the pipeline searches
 the inactive status group separately under
 [ADR-016](../architecture/decisions/ADR-016-inactive-jobs-complete-ranked-matches.md).
@@ -73,8 +77,10 @@ PostgreSQL verification after merging predecessor fixes. Migrated index/ORM
 expression parity is tested. The request-scoped matching pipeline now combines
 these scores with semantic and structured evidence, and fingerprints retrieval
 and scoring policies in its algorithm version. It rechecks considered jobs for
-current textual or semantic evidence before returning them. API composition
-remains planned in #175; this is not production performance evidence.
+current textual or semantic evidence and current extraction/embedding provenance
+before returning them. Already-returned IDs are excluded before inactive retrieval
+limits. API composition is implemented in #175; this is not production performance
+evidence.
 
 The current JSON serializer escapes non-ASCII characters. The specific `Café`
 and `Paraná` regressions pass because Portuguese queries stem to `caf` and

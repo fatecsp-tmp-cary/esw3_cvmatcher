@@ -10,9 +10,10 @@ explicitly rather than inventing identities. `fetch_jobs()` asynchronously yield
 raw records unchanged, including malformed individual records: ingestion remains
 responsible for rejecting those independently. Synchronous `normalize(record)`
 uses the existing APiBR normalizer, preserving source identity, explicit availability
-and null raw retention. Recognized category labels retain the accepted first-label
-precedence for work arrangement and seniority, while every normalized label stays
-in `keywords`. Unknown labels do not invent categories. `fetch_job(id)` scans APiBR pages until the ID is found or
+and null raw retention. Issue #180 supersedes the earlier first-label precedence:
+only one distinct recognized vacancy-level category is mapped; conflicting labels
+remain unknown. Repository topics do not supply categories or skills. Every
+normalized label remains in `keywords`. `fetch_job(id)` scans APiBR pages until the ID is found or
 an empty page is observed. APiBR has no verified single-record endpoint here; this
 operation can be expensive. Prefer `fetch_jobs()` for polling. No method silently
 requests GitHub job URLs or verifies availability elsewhere.

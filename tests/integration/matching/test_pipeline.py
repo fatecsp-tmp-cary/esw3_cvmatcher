@@ -173,7 +173,7 @@ def test_inference_failure_is_privacy_safe_and_does_not_mutate_job_data(populate
     )
     with TestClient(create_app(runtime.production_matches)) as client:
         response = client.post("/matches", json=curriculum())
-    assert response.status_code == 503
+    assert response.status_code == 500
     assert "private candidate" not in response.text
     assert "secret" not in response.text
     with sessions() as session:
@@ -317,3 +317,44 @@ def test_typo_support_on_both_sides_keeps_exclusions_disabled_and_candidate_priv
     assert all("python" in row.matched_skills for row in result.matches)
     assert all(row.eligibility and row.missing_requirements == [] for row in result.matches)
     assert "Pythom" not in caplog.text and body["curriculo_id"] not in caplog.text
+
+
+@pytest.mark.parametrize("path", ["textual", "semantic"])
+def test_status_change_cannot_repeat_a_job_or_consume_the_next_group_limit(
+    grouped, monkeypatch, path
+):
+    from src.matching import pipeline as module
+    from src.matching.ranking import RankingPolicy
+    from src.persistence.job.job import INACTIVE_STATUSES
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    sessions, encoder, identities = grouped
+    target = identities["a-active"]
+    retrieve = module.retrieve_textual
+    changed = False
+
+    def transition(session, candidate, **kwargs):
+        nonlocal changed
+        if kwargs["statuses"] == INACTIVE_STATUSES and not changed:
+            # Independent committed writer between the active and inactive passes.
+            with sessions() as writer, writer.begin():
+                writer.get(Job, target).status = JobStatus.STALE
+            changed = True
+        return retrieve(session, candidate, **kwargs)
+
+    monkeypatch.setattr(module, "retrieve_textual", transition)
+    body = curriculum()
+    body["formacoes"] = body["projetos"] = body["idiomas"] = []
+    if path == "textual":
+        body["experiencias"] = []
+    else:
+        body["competencias"] = []
+        body["experiencias"][0]["cargo"] = "Unrelated vocabulary"
+        body["experiencias"][0]["descricao"] = "Distinct words"
+    response = MatchingPipeline(
+        sessions, encoder, VERSION, ranking=RankingPolicy(retrieval_limit=1)
+    )(CurriculumRequest.model_validate(body), 2)
+    assert changed
+    assert [row.job.id for row in response.matches] == [target, identities["b-stale"]]
+    assert [row.eligibility for row in response.matches] == [True, False]
+    assert [row.rank for row in response.matches] == [1, 2]

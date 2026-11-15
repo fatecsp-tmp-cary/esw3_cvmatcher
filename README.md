@@ -25,7 +25,7 @@ cvmatch; the development port defaults to 127.0.0.1:5432. Change POSTGRES_PORT
 and DATABASE_URL together when needed. Check readiness with the same two files
 and `compose ps`, or `psql "$DATABASE_URL" -c "select 1;"`.
 
-Stop using `docker compose -f docker-compose.yml -f docker-compose.dev.yml down`.
+Stop the local database with `docker compose -f docker-compose.yml -f docker-compose.dev.yml down`.
 Retain named volumes; see [deployment and recovery](docs/operations/deployment.md)
 for production composition, model preparation and backup procedures.
 
@@ -79,7 +79,8 @@ What to expect:
 
 - The worker polls the source when it starts and then daily at 08:00
   `America/Sao_Paulo`; see the [worker schedule](docs/operations/worker.md#daily-schedule-and-poll-on-start).
-- A job is matched only after its extraction and embedding succeed. On the
+- Every returned job, active or inactive, requires current successful extraction
+  and embedding provenance under [ADR-024](docs/architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md). On the
   one-CPU Compose limit, a local run measured about 25 seconds of extraction per
   job, so the first backlog of several hundred jobs takes hours. `/matches`
   returns an empty list until the first jobs are ready.

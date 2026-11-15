@@ -15,7 +15,6 @@ from src.domain.requirements import comparable_score
 from src.embeddings.config import EmbeddingConfig
 from src.embeddings.retrieval import retrieve_semantic
 from src.embeddings.service import ready_predicate as embedding_ready
-from src.extraction.service import ready_predicate as extraction_ready
 from src.extraction.taxonomy import _ALIASES, find_skills, normalize_skill
 from src.indexing.textual import TEXTUAL_VERSION
 from src.matching.ranking import RankingPolicy, SimilarityCalibration
@@ -74,7 +73,7 @@ class MatchingPipeline:
             "textual_policy": TEXTUAL_VERSION,
             "structured_policy": REQUIREMENTS_VERSION,
             "semantic_policy": SemanticPolicy().version,
-            "retrieval_policy": "scored-evidence-final-readiness-v2",
+            "retrieval_policy": "all-result-readiness-unique-status-groups-v3",
         }
         digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()[:16]
         return f"{self.ranking.version}:{self.calibration.version}:{digest}"
@@ -122,7 +121,7 @@ class MatchingPipeline:
 
         vectors = [normalized_vector(vector) for vector in vectors]
         config = self.encoder.config
-        gate = extraction_ready(self.extraction_version)
+        gate = embedding_ready(config, self.extraction_version)
         checkpoint()
         with self.sessions() as session:
             matches: list[MatchResult] = []
@@ -130,11 +129,15 @@ class MatchingPipeline:
             for statuses, eligible in ((ACTIVE_STATUSES, True), (INACTIVE_STATUSES, False)):
                 if len(matches) >= limit:
                     break
+                # Exclude prior results in SQL before either retrieval LIMIT.
+                # A concurrent status transition must not consume an inactive slot.
+                returned_ids = tuple(sorted(match.job.id for match in matches))
+                group_gate = gate & Job.id.not_in(returned_ids) if returned_ids else gate
                 pool: set[int] = set()
                 for job, _ in retrieve_textual(
                     session,
                     candidate,
-                    readiness=gate,
+                    readiness=group_gate,
                     limit=self.ranking.retrieval_limit,
                     statuses=statuses,
                 ):
@@ -149,6 +152,7 @@ class MatchingPipeline:
                         self.extraction_version,
                         limit=self.ranking.retrieval_limit,
                         statuses=statuses,
+                        exclude_ids=returned_ids,
                     ):
                         pool.add(job.id)
                 if not pool:
@@ -156,7 +160,7 @@ class MatchingPipeline:
                 checkpoint()
                 jobs = session.scalars(
                     select(Job)
-                    .where(Job.id.in_(sorted(pool)), status_predicate(statuses), gate)
+                    .where(Job.id.in_(sorted(pool)), status_predicate(statuses), group_gate)
                     .order_by(Job.platform, Job.source_job_id, Job.id)
                     .execution_options(populate_existing=True)
                 ).all()
@@ -165,7 +169,8 @@ class MatchingPipeline:
                     session.scalars(
                         select(Job.id).where(
                             Job.id.in_(sorted(pool)),
-                            embedding_ready(config, self.extraction_version),
+                            status_predicate(statuses),
+                            group_gate,
                         )
                     )
                 )
@@ -175,13 +180,16 @@ class MatchingPipeline:
                     job.id: float(score)
                     for job, score in session.execute(
                         textual_statement(
-                            query_text, readiness=gate, limit=len(pool), statuses=statuses
+                            query_text, readiness=group_gate, limit=len(pool), statuses=statuses
                         ).where(Job.id.in_(sorted(pool)))
                     )
                 }
-                # Keep the final evidence check introduced in the hybrid stage.
+                # ADR-024 requires both current extraction and vector provenance,
+                # even for textual-only candidates. Recheck after pool retrieval.
                 jobs = [
-                    job for job in jobs if job.id in text_scores or (texts and job.id in vector_jobs)
+                    job
+                    for job in jobs
+                    if job.id in vector_jobs and (job.id in text_scores or texts)
                 ]
                 associated_skills: dict[int, set[str]] = {}
                 for identifier, name in session.execute(

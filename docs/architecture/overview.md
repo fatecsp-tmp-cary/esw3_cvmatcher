@@ -66,8 +66,9 @@ experiences with recency weighting and the best education score per job, while
 preserving the public integration contract. See
 [ADR-008](decisions/ADR-008-extraction-contract-and-semantic-evidence.md).
 
-The implementation interview requires successful extraction before jobs enter
-any matching path. Extraction readiness is supporting state separate from
+[ADR-024](decisions/ADR-024-all-result-extraction-and-embedding-readiness.md) requires
+current successful extraction and embedding provenance before jobs enter any
+production matching path, including textual retrieval and both status groups. Extraction readiness is supporting state separate from
 canonical availability; failures must not change lifecycle. The semantic
 aggregation primitive is implemented in `src/matching/semantic.py`, using the
 provisional coefficients documented in [scoring policy](../match/scoring-policy.md).
@@ -81,7 +82,9 @@ JSON text rendering and publication-date/identity ties, with extraction
 readiness on job and requirement retrieval paths implemented in #172. The request-scoped pipeline in `src/matching/pipeline.py` now combines textual
 and semantic retrieval, rechecks readiness and computes deterministic final scores.
 Only experience/education entries supply semantic queries. A considered job must
-still have textual evidence or current semantic-vector evidence at the final
-check; valid textual hits do not require an embedding. The production ASGI entry point now composes this pipeline lazily in #175. Integrated database verification
+still have current textual or semantic evidence at the final check and pass both
+processing-readiness gates. Textual evidence cannot bypass embedding readiness.
+Active jobs precede inactive completion; previously returned IDs are excluded
+before the inactive retrieval limits to prevent duplicates during status changes. The production ASGI entry point now composes this pipeline lazily in #175. Integrated database verification
 under ADR-011 is historical evidence from the original integration, not this head.
 Taxonomy persistence and category aliases from main remain part of the system.

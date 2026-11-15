@@ -28,7 +28,10 @@ keep expired and other inactive jobs out of the active ranking group, use FTS
 and local semantic search,
 regenerate embeddings after content/model changes, and return deterministic
 `[0,100]` compatibility scores with versioned algorithm/model and supporting
-match information. Brazilian source priority does not permit geographic
+match information. Every returned job must have current successful extraction
+and valid current embedding provenance under
+[ADR-024](../architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md),
+including textual-only matches in either status group. Brazilian source priority does not permit geographic
 eligibility filtering.
 
 The fixed matching regression dataset and explicit

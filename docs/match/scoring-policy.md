@@ -30,7 +30,10 @@ Calibration remains provisional and release approval remains disabled.
   scores in [0,100]. `src/matching/pipeline.py` embeds and scores each available
   experience/education entry and combines current textual/semantic candidates.
   When both sections are absent it performs no semantic encoding or retrieval;
-  competencies/projects/languages may still retrieve actual textual evidence.
+  competencies/projects/languages may still retrieve actual textual evidence,
+  but every returned job must also have current successful extraction and embedding
+  provenance under [ADR-024](../architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md).
+  This job-readiness gate does not invent candidate semantic evidence.
   Production API composition in `src/api/runtime.py` is implemented in #175.
   Per-entry cosine calibration is explicit and provisional.
   Its provisional policy version is `semantic-aggregation-v2-provisional`; v2

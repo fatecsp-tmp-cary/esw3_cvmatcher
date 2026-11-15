@@ -179,7 +179,8 @@ Evidence and remaining release checks are tracked in [tasks](tasks.md).
 
 ## Implementation interview: readiness and performance
 
-- Withhold jobs from every matching path until extraction succeeds. Extraction
+- Withhold jobs from every production matching path until current extraction and
+  embedding succeed (ADR-024). Extraction
   failure is not an availability transition. After three failed attempts, record
   failure, emit a structured local error log and require explicit retry.
   No email/webhook alert integration is required. Details and remaining
@@ -334,11 +335,15 @@ section's evidence. Defaults and final blend remain unchanged. See the
 
 - Empty curricula return no matches before encoding or database access. Without
   experience/education, no semantic query is invented from other sections; actual
-  textual evidence remains eligible for textual/structured scoring.
-- Textual/semantic union deduplicates persisted job IDs. Only active jobs with
-  current extraction pass; semantic evidence also requires current model, content,
-  extraction and valid vector dimensions. Recheck final textual/vector evidence
-  so stale pool hits cannot become unscored recommendations.
+  textual evidence remains eligible for textual/structured scoring only when the
+  job has current successful extraction and embedding provenance under ADR-024.
+- Textual/semantic union deduplicates persisted job IDs. Active jobs rank first;
+  inactive jobs only fill remaining positions. Every result requires current
+  successful extraction and embedding provenance, including current model, content,
+  extraction version and valid vector dimensions. Recheck final textual/vector
+  evidence so stale pool hits cannot become unscored recommendations. Exclude
+  already-returned IDs before inactive retrieval limits, including during a
+  concurrent active-to-inactive transition.
 - Invalid encoder counts/vectors fail explicitly. Final scores/order/ranks remain
   deterministic; candidate identity/content stay out of logs and responses, and
   contrasting job locations/modes never create geographic eligibility exclusions.

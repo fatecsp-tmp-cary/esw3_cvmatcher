@@ -17,7 +17,8 @@ absence-based lifecycle changes remain separate policy/implementation work.
    production scheduling is implemented in #176; independent quality acceptance
    remains pending.
 4. Weighted Portuguese FTS indexes and shared query expressions are implemented,
-   with explicit extraction readiness on both job and requirement paths. Keep raw
+   with explicit readiness on both job and requirement paths. Production matching
+   now supplies combined current extraction/embedding readiness under ADR-024. Keep raw
    rank distinct from bounded textual/final compatibility scores. Production
    API composition is implemented in #175; ADR-022 bilingual/ASCII/fuzzy remains
    a tracked follow-up.
@@ -28,7 +29,9 @@ absence-based lifecycle changes remain separate policy/implementation work.
    implemented. Deterministic semantic aggregation and final blend primitives are
    implemented in #173, including count validation and available-section numeric
    bounds. Request-scoped combined retrieval/scoring, empty-input handling and
-   final readiness/evidence rechecks are implemented in #174. API composition
+   final readiness/evidence rechecks are implemented in #174 and tightened for
+   every result under ADR-024 in #195. Returned IDs are excluded before the inactive
+   group's retrieval limits. API composition
    is implemented in #175; validate calibration independently before release approval.
 7. Production matching API and privacy-safe readiness/error composition are
    implemented in #175. Bounded background processing and database-only explicit
