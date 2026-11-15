@@ -6,7 +6,7 @@ The required service behavior is to receive an already structured CV, validate a
 request-scoped `NormalizedCandidate`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
 jobs through `POST /matches`. The request-scoped normalization/retrieval/scoring
-pipeline is implemented; production API composition is pending in stack PR #175. CV parsing
+pipeline and lazy production API composition are implemented in #175. CV parsing
 is external. `GET /health` is optional.
 
 The public five-section contract is defined in [acceptance](acceptance.md#resolved-api-contract).
@@ -50,7 +50,7 @@ for evidence, confidence, contextual requirement classification, model versionin
 and failure handling. Pinned offline extraction and bounded job-state processing are implemented in
 stack PR #170, including clause-local score-only requirement classification under
 ADR-018. Mandatory exclusions remain disabled pending independent quality
-approval; production API wiring is deferred to #175. PostgreSQL FTS handles DB-level
+approval; production API wiring is implemented in #175. PostgreSQL FTS handles DB-level
 tokenization, stemming, and ranking.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
@@ -95,7 +95,7 @@ supplies current extraction readiness, unions considered candidates, then rechec
 active state and final evidence. A candidate remains only if it has current textual
 evidence or available experience/education queries and a current valid embedding.
 Textual matches may remain without a vector. Projects/competencies/languages alone
-do not trigger semantic retrieval. Production API composition is planned in #175. Semantic job representation is title,
+do not trigger semantic retrieval. Production API composition is implemented in #175. Semantic job representation is title,
 normalized skills, current normalized requirement texts (sorted and deduplicated),
 relevant description, location string values in sorted-key order, and mode. Passage
 representation is part of the embedding policy identity; its changes require

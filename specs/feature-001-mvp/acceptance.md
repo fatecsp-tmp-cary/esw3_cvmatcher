@@ -78,7 +78,7 @@ Transient normalization is implemented by `normalize_curriculum` into an immutab
 `NormalizedCandidate`, preserving section order, all text, dates, proficiency,
 education level/status and projects, while excluding the UUID. This projection
 adds no collection/text caps and accepts empty sections. The matching pipeline
-uses this projection; production API composition remains pending in stack PR #175.
+uses this projection and is composed by the production API in #175.
 The legacy `CandidateProfile` must not become a second public-input validator.
 
 ## Implementation decisions
@@ -140,7 +140,7 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   receiving equal weight. Similarity calibration and release validation remain
   pending; the deterministic aggregation primitive is implemented in #173 and
   request-scoped inference/retrieval/scoring in #174. Production API composition
-  remains pending in #175 and calibration remains provisional.
+  is implemented in #175 and calibration remains provisional.
 - Pinned GLiNER revision/labels, provisional confidence, separate evidence storage
   and bounded retry/reprocessing are implemented; see [local GLiNER](../../docs/data/local-gliner.md).
   Mandatory exclusion remains disabled until independently measured quality and
@@ -337,4 +337,21 @@ section's evidence. Defaults and final blend remain unchanged. See the
   contrasting job locations/modes never create geographic eligibility exclusions.
 
 See the [PR #174 review](../../docs/reports/2026-11-14-pr174-review.md) for scoped
-verification. Production API composition and release acceptance remain pending.
+verification. Production API composition is implemented in #175; release acceptance remains pending.
+
+
+## Production API composition verification
+
+- The module application runs the production executor with successful/empty
+  stubbed-pipeline results while preserving the curriculum contract and limit.
+- Recognized database/model outages return sanitized 503 responses; unexpected
+  application errors return sanitized 500 responses with type/source diagnostics.
+  Neither path echoes candidate or library exception values.
+- Health invokes both database and model readiness, distinguishing dependency
+  outages from programming errors. Missing database configuration fails closed.
+- Lazy factory composition uses the configured session factory, local model cache
+  and extraction version and reuses the resulting pipeline.
+
+Current scoped evidence is in the
+[PR #175 review](../../docs/reports/2026-11-15-pr175-review.md). These boundary
+regressions do not constitute independent model-quality or deployment acceptance.

@@ -27,7 +27,7 @@ Requirements and completion gates are in [spec](spec.md),
   clause-local score-only projection. Versioned evidence, three-claim retry/lease
   recovery and readiness predicate are implemented. FTS helpers require explicit
   extraction readiness. Request-scoped pipeline wiring is implemented in #174;
-  production API composition remains planned in #175. Quality/release approval and exclusions stay disabled.
+  production API composition is implemented in #175. Quality/release approval and exclusions stay disabled.
 - Immutable weighted FTS indexes and active-only any-term/requirement retrieval
   with fail-closed extraction readiness, bounded textual components and stable
   ties are implemented. Legacy retrieval retains raw rank. Deterministic final
@@ -41,7 +41,14 @@ Requirements and completion gates are in [spec](spec.md),
   bounded claims/retries, content/model/extraction invalidation and semantic
   retrieval are implemented. Passages include normalized requirements and
   deterministic locations under a versioned representation policy. Production
-  API composition and empirical calibration/release acceptance remain pending.
+  API composition is implemented in #175; empirical calibration/release acceptance
+  remain pending.
+
+- Production API executor and database/model readiness composition are implemented
+  lazily with the existing anonymous/global-quota policy. Known dependency failures
+  use 503; unexpected application errors use the privacy-safe 500 path. Production
+  boundary/factory regressions are recorded in the
+  [PR #175 review](../../docs/reports/2026-11-15-pr175-review.md).
 
 ## Remaining MVP work
 
@@ -50,9 +57,9 @@ Requirements and completion gates are in [spec](spec.md),
 - [ ] Scheduler/source-run concurrency and production extraction scheduling/wiring.
       Preserve source independence and uncertain evidence.
 - [ ] Lifecycle policies. Never infer absence from an unproven scan.
-- [ ] API composition, ADR-022 textual normalization/retrieval changes, a fixed
+- [ ] ADR-022 textual normalization/retrieval changes, a fixed
       release regression fixture and vertical-slice acceptance validation.
-- [ ] Production API executor/readiness composition, worker scheduling, source locking and
+- [ ] Worker scheduling, source locking and
       operations; language/accent investigation.
 - [ ] Release coverage and the initial textual matching slice.
 - [ ] Additional-source selection/adapter, separate from the at-least-one-source

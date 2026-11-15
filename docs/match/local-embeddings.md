@@ -95,3 +95,10 @@ readiness, migration round trips and semantic retrieval. The optional actual
 local smoke is recorded separately in the runtime report: it is not a measured
 five-second complete-request benchmark or independently reviewed calibration.
 Production quality and performance acceptance still require those evaluations.
+
+`EmbeddingUnavailableError` identifies missing local inference packages or an
+unavailable pinned model artifact at loading. The API maps this typed dependency
+failure to 503. Invalid input/vector dimensions, nonfinite results and other
+programming or inference-contract errors retain their original exception type
+and use the API's sanitized 500 path. This classification adds no model download,
+cache, calibration result or quality approval.

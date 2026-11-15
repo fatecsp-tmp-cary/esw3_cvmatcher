@@ -3,9 +3,8 @@
 Authority: [ADR-008](../architecture/decisions/ADR-008-extraction-contract-and-semantic-evidence.md)
 and the implementation interview on 2026-11-11. This records policy decisions;
 the deterministic scoring primitives and request-scoped matching pipeline are
-implemented in this branch. Production API composition remains pending in stack
-PR #175; calibration and release
-approval remain provisional.
+implemented in this branch and composed by the production API in #175.
+Calibration remains provisional and release approval remains disabled.
 
 ## Confirmed starting policy
 
@@ -32,7 +31,7 @@ approval remain provisional.
   experience/education entry and combines current textual/semantic candidates.
   When both sections are absent it performs no semantic encoding or retrieval;
   competencies/projects/languages may still retrieve actual textual evidence.
-  Production API composition in `src/api/runtime.py` remains planned in #175.
+  Production API composition in `src/api/runtime.py` is implemented in #175.
   Per-entry cosine calibration is explicit and provisional.
   Its provisional policy version is `semantic-aggregation-v2-provisional`; v2
   corrects available-section normalization for extreme finite configured weights.
