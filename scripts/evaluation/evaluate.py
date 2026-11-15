@@ -3,11 +3,19 @@
 import argparse
 import json
 import math
+import re
+from datetime import datetime
 from pathlib import Path
 
 CLASSES = {"REQUIRED", "PREFERRED", "NICE_TO_HAVE", None}
 DEFAULT_FIXTURE = (
     Path(__file__).resolve().parents[2] / "tests/fixtures/matching/reviewed_cases.json"
+)
+CURRENT_REVIEW_POLICY = "ADR-018"
+# ADR-018: this corpus's old held-out cases informed diagnosis. Even its original
+# human labels cannot become independent acceptance by dropping policy metadata.
+REUSED_HOLDOUT_SOURCE_HASHES = frozenset(
+    {"f84ef6e837e0a263d1dae5fc481d673211b0e69cb0cdc0f0ef2c23043485e150"}
 )
 
 
@@ -61,7 +69,94 @@ def validate_fixture(fixture):
         if case["expected"]["role_relation"] not in {"relevant", "irrelevant"}:
             raise ValueError("invalid role relation")
         validate_spans(case["expected"]["requirements"], case["job"]["description"])
+    validate_provenance(fixture.get("provenance"), cases)
     return cases
+
+
+def _nonempty_text(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
+def validate_provenance(provenance, cases):
+    """Validate declared review provenance before any quality status is derived.
+
+    Review records document an annotation claim; validation does not authenticate
+    reviewers or establish model quality. Policy-adjudicated copies cannot regain
+    held-out independence by omitting their explicit regression-only flags.
+    """
+    if not isinstance(provenance, dict) or provenance.get("release_quality_measured") is not False:
+        raise ValueError("fixture provenance must declare unmeasured release quality")
+    if provenance.get("release_quality_approved", False) is not False:
+        raise ValueError("fixture provenance cannot approve release quality")
+    kind = provenance.get("kind")
+    if kind == "agent-reviewed synthetic":
+        if (
+            not _nonempty_text(provenance.get("reviewer"))
+            or provenance.get("labels_before_model_outputs") is not True
+            or provenance.get("human_reviewed") is not False
+            or any(name in provenance for name in ("reviews", "partition", "policy_adjudication"))
+        ):
+            raise ValueError("invalid agent-reviewed fixture provenance")
+        return
+    if kind != "human-reviewed synthetic" or provenance.get("human_reviewed") is not True:
+        raise ValueError("unsupported fixture review provenance")
+    source_hash = provenance.get("source_sha256")
+    if not isinstance(source_hash, str) or re.fullmatch(r"[0-9a-f]{64}", source_hash) is None:
+        raise ValueError("review provenance requires its source SHA-256")
+    by_id = {case["id"]: case for case in cases}
+    reviews = provenance.get("reviews")
+    if not isinstance(reviews, dict) or set(reviews) != set(by_id):
+        raise ValueError("review provenance requires one record for every case")
+    for review in reviews.values():
+        if not isinstance(review, dict) or not _nonempty_text(review.get("reviewer")):
+            raise ValueError("review provenance requires a reviewer for every case")
+        reviewed_at = review.get("reviewed_at")
+        if not isinstance(reviewed_at, str):
+            raise ValueError("review provenance requires timezone-aware review timestamps")
+        try:
+            instant = datetime.fromisoformat(reviewed_at.replace("Z", "+00:00"))
+        except ValueError:
+            raise ValueError("invalid review provenance timestamp") from None
+        if instant.tzinfo is None or instant.utcoffset() is None:
+            raise ValueError("review provenance requires timezone-aware review timestamps")
+    partition = provenance.get("partition")
+    if (
+        not isinstance(partition, dict)
+        or partition.get("schema_version") != "1.0"
+        or partition.get("source_sha256") != source_hash
+        or not _nonempty_text(partition.get("assignment"))
+    ):
+        raise ValueError("invalid review provenance partition")
+    groups = []
+    for name in ("calibration_ids", "heldout_ids"):
+        ids = partition.get(name)
+        if (
+            not isinstance(ids, list)
+            or len(ids) != 25
+            or not all(isinstance(identifier, str) for identifier in ids)
+            or len(set(ids)) != 25
+            or not set(ids) <= set(by_id)
+            or sum(by_id[identifier]["language"] == "pt" for identifier in ids) != 20
+        ):
+            raise ValueError("review partitions must each contain 20 PT and 5 EN cases")
+        groups.append(set(ids))
+    if groups[0] & groups[1] or groups[0] | groups[1] != set(by_id):
+        raise ValueError("review provenance partitions must be disjoint and complete")
+    for name in ("heldout_independent", "labels_independently_reviewed_after_policy_change"):
+        if name in provenance and type(provenance[name]) is not bool:
+            raise ValueError("review independence flags must be booleans")
+    if "independence_policy" in provenance and not _nonempty_text(
+        provenance["independence_policy"]
+    ):
+        raise ValueError("review independence policy must be identified")
+    if "policy_adjudication" in provenance and (
+        not _nonempty_text(provenance["policy_adjudication"])
+        or not _nonempty_text(provenance.get("policy_adjudication_method"))
+        or not _nonempty_text(provenance.get("heldout_use"))
+        or provenance.get("heldout_independent") is not False
+        or provenance.get("labels_independently_reviewed_after_policy_change") is not False
+    ):
+        raise ValueError("policy-adjudicated provenance must remain regression-only")
 
 
 def _metrics(tp, fp, fn):
@@ -92,8 +187,10 @@ def evaluate(fixture, predictions, *, case_ids=None):
     )
     heldout = (
         reviewed
-        and provenance.get("heldout_independent", True) is True
-        and provenance.get("labels_independently_reviewed_after_policy_change", True) is True
+        and provenance.get("heldout_independent") is True
+        and provenance.get("labels_independently_reviewed_after_policy_change") is True
+        and provenance.get("independence_policy") == CURRENT_REVIEW_POLICY
+        and provenance["source_sha256"] not in REUSED_HOLDOUT_SOURCE_HASHES
         and case_ids is not None
         and set(case_ids) == set(provenance.get("partition", {}).get("heldout_ids", []))
     )
@@ -236,6 +333,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         fixture = json.loads(args.fixtures.read_text())
+        validate_fixture(fixture)
         ids = None
         if args.partition:
             provenance = fixture.get("provenance", {})

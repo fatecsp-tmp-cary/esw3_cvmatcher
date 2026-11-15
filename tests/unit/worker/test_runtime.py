@@ -332,3 +332,40 @@ def test_startup_rejects_invalid_batch_limit_before_database(limit):
     with pytest.raises(ValueError, match="source batch limit"):
         subject.run_startup(limit=limit)
     assert subject.startup_pending
+
+def test_default_cli_retry_uses_only_database_dependencies(monkeypatch):
+    from src.worker import bootstrap
+
+    calls = []
+    engine = SimpleNamespace(dispose=lambda: calls.append("disposed"))
+    sessions = object()
+    monkeypatch.delenv("CVMATCHER_EXTRACTION_DIRECTORY", raising=False)
+    monkeypatch.setattr(bootstrap, "create_db_engine", lambda: engine)
+    monkeypatch.setattr(bootstrap, "create_session_factory", lambda actual: sessions)
+    monkeypatch.setattr(
+        bootstrap,
+        "retry_extraction",
+        lambda actual, identity, version: calls.append((actual, identity, version)),
+    )
+    for name in ("GlinerExtractor", "LocalEmbeddingEncoder"):
+        monkeypatch.setattr(bootstrap, name, lambda *_, **__: pytest.fail("model constructed"))
+    assert main(["--retry-extraction", "42"]) == 0
+    assert calls == [(sessions, 42, bootstrap.EXTRACTION_VERSION), "disposed"]
+
+
+def test_default_retry_failure_disposes_database_and_keeps_error_private(monkeypatch, caplog):
+    from src.worker import bootstrap
+
+    disposed = []
+    engine = SimpleNamespace(dispose=lambda: disposed.append(True))
+    monkeypatch.setattr(bootstrap, "create_db_engine", lambda: engine)
+    monkeypatch.setattr(bootstrap, "create_session_factory", lambda _: object())
+
+    def broken(*_):
+        raise RuntimeError("private job and database credentials")
+
+    monkeypatch.setattr(bootstrap, "retry_extraction", broken)
+    assert main(["--retry-extraction", "42"]) == 1
+    assert disposed == [True]
+    assert "private" not in caplog.text
+    assert json.loads(caplog.records[0].message) == {"event": "worker_operation_failed"}

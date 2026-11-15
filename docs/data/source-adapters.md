@@ -9,8 +9,15 @@ and database ingestion. No source schema or public curriculum contract changes.
 explicitly rather than inventing identities. `fetch_jobs()` asynchronously yields
 raw records unchanged, including malformed individual records: ingestion remains
 responsible for rejecting those independently. Synchronous `normalize(record)`
-uses the existing APiBR normalizer, preserving source identity, explicit availability
-and null raw retention. `fetch_job(id)` scans APiBR pages until the ID is found or
+uses the existing APiBR normalizer, preserving source identity and null raw
+retention. Under accepted ADR-014, listing presence is open-vacancy evidence:
+state-free records become ACTIVE and successful ingestion advances verification;
+explicit closure is EXPIRED and terminal expiration cannot be reopened. Vacancy-level category aliases follow the
+[issue #180 mapping](../../specs/feature-001-mvp/spec.md#apibr-vacancy-label-mapping):
+exactly one distinct category is required, conflicting evidence stays unknown,
+and every source label name stays in `keywords`. Repository topics never establish
+vacancy categories. This supersedes #168's earlier first-recognized-label behavior.
+`fetch_job(id)` scans APiBR pages until the ID is found or
 an empty page is observed. APiBR has no verified single-record endpoint here; this
 operation can be expensive. Prefer `fetch_jobs()` for polling. No method silently
 requests GitHub job URLs or verifies availability elsewhere.
@@ -72,6 +79,11 @@ excluded from CI.
 
 ## Label metadata field mapping
 
+Authority: [issue #180](https://github.com/fatecsp-tmp-cary/esw3_cvmatcher/issues/180)
+and the [feature contract](../../specs/feature-001-mvp/spec.md#apibr-vacancy-label-mapping).
+The explicit conflict-to-unknown rule supersedes the first-label behavior
+preserved in #168; shared aliases and canonical fields remain unchanged.
+
 Observed on 2026-11-12, `GET /vagas/api/v2/issues` returns each label as an object
 with `name`, `type` and `color`, plus a title-derived `keywords` string array. The
 `type` is `label` (issue labels), `APIBr` (categories assigned by the aggregator)
@@ -120,6 +132,13 @@ invalidates completeness. Unsupported clients/missing health and incremental
 configurations never qualify. SourceRun.snapshot_evidence stores only bounded
 counts/signatures/policy flags in JSONB migration b1e006, not IDs, authors or raw
 responses. Async cancellation/truncation cannot publish completed attestation.
+
+Synchronous ingestion captures both health signatures and all remote pages before
+acquiring the bounded, ordered identity-lock stripes. It then applies buffered
+observations in source order within one transaction. Persistence-phase rejections
+update the stored evidence's rejection count and invalidate qualification without
+another remote call. Network failure leaves job changes rolled back; a rejected
+record still permits valid observations to commit as PARTIAL.
 
 This is explicitly best effort: timestamp/count equality cannot rule out concurrent
 rewrites. It does not establish source permissions, job openness, raw retention
