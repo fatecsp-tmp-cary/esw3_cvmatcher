@@ -32,7 +32,8 @@ absence-based lifecycle changes remain separate policy/implementation work.
    is implemented in #175; validate calibration independently before release approval.
 7. Production matching API and privacy-safe readiness/error composition are
    implemented in #175. Bounded background processing and database-only explicit
-   retry are implemented in #176. Complete bounded availability verification,
+   retry are implemented in #176. APiBR listing-presence availability is implemented
+   in #183 under ADR-014; independent bounded per-job verification remains optional. Complete
    lifecycle policies and release regressions. Compose packaging/recovery tooling
    is implemented in #177; current-head operational acceptance remains separate.
 

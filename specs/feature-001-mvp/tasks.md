@@ -17,7 +17,7 @@ Implementation below is distinct from release approval. #99 remains open.
   atomic scan rollback. Independent-connection regressions cover inserts,
   lifecycle updates, reversed overlapping scans and unexpected write failure.
 - Bounded sequential APiBR scans and sync/async source adapters with retry policy;
-  unknown availability without GitHub requests, isolated malformed records,
+  ADR-014 listing-presence availability without GitHub requests, isolated malformed records,
   PARTIAL/FAILED evidence and PostgreSQL regressions. Explicit SNAPSHOT mode uses
   ADR-013 best-effort health/count attestation; all remote calls finish before
   identity locking and persistence rejection invalidates qualification.
@@ -307,3 +307,12 @@ keyword retention are implemented; title-first/display policy, mandatory coverag
 and bilingual/fuzzy retrieval remain separate user-deferred follow-ups.
 See the [review record](../../docs/reports/2026-11-15-pr182-review.md) for both
 review dispositions, parent reconciliation and current-head checks.
+
+
+## PR #183 incremental verification
+
+The [review record](../../docs/reports/2026-11-15-pr183-review.md) reconciles
+ADR-014 listing-presence availability with the reviewed parent changes. Listed
+records become ACTIVE and advance verification; explicit closure and terminal
+expiration remain preserved. Snapshot qualification, rejection isolation and
+atomic rollback retain their separate rules.

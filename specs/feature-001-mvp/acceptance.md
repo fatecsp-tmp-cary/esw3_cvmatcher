@@ -89,8 +89,9 @@ The legacy `CandidateProfile` must not become a second public-input validator.
   migrations and terminal EXPIRED. Preserve description sections;
   omit raw payloads until retention rights are established.
 - [ADR-003](../../docs/architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md)
-  records conservative unknown availability, no default verifier, per-record
-  rejection and PARTIAL commits. Network failures roll back job changes; partial
+  originally records conservative unknown availability, superseded for APiBR
+  listing presence by ADR-014. Its no-default-verifier, per-record rejection
+  and PARTIAL-commit rules remain in force. Network failures roll back job changes; partial
   runs do not advance last_success_at or absence-based lifecycle evidence.
 
 ## Unresolved; address before dependent implementation
@@ -414,3 +415,14 @@ permitted. Current verification is recorded in the
 Authority is the [feature contract](spec.md#apibr-vacancy-label-mapping).
 Current scoped evidence is recorded in the
 [PR #182 review](../../docs/reports/2026-11-15-pr182-review.md).
+
+
+## APiBR listing availability verification
+
+Under [ADR-014](../../docs/architecture/decisions/ADR-014-apibr-listing-presence-is-open-evidence.md),
+listed state-free jobs normalize to ACTIVE and successful observations advance
+`last_verified_at`. Existing DISCOVERED jobs activate when observed; explicitly
+closed jobs expire and later listing observations cannot reopen terminal EXPIRED
+records. Failed scans roll back status and verification changes; completeness
+alone does not authorize absence transitions. Current-head checks are recorded in
+the [PR #183 review](../../docs/reports/2026-11-15-pr183-review.md).

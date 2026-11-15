@@ -9,8 +9,10 @@ and database ingestion. No source schema or public curriculum contract changes.
 explicitly rather than inventing identities. `fetch_jobs()` asynchronously yields
 raw records unchanged, including malformed individual records: ingestion remains
 responsible for rejecting those independently. Synchronous `normalize(record)`
-uses the existing APiBR normalizer, preserving source identity, explicit availability
-and null raw retention. Vacancy-level category aliases follow the
+uses the existing APiBR normalizer, preserving source identity and null raw
+retention. Under accepted ADR-014, listing presence is open-vacancy evidence:
+state-free records become ACTIVE and successful ingestion advances verification;
+explicit closure is EXPIRED and terminal expiration cannot be reopened. Vacancy-level category aliases follow the
 [issue #180 mapping](../../specs/feature-001-mvp/spec.md#apibr-vacancy-label-mapping):
 exactly one distinct category is required, conflicting evidence stays unknown,
 and every source label name stays in `keywords`. Repository topics never establish
