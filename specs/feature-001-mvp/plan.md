@@ -35,9 +35,10 @@ absence-based lifecycle changes remain separate policy/implementation work.
    is implemented in #175; validate calibration independently before release approval.
 7. Production matching API and privacy-safe readiness/error composition are
    implemented in #175. Bounded background processing and database-only explicit
-   retry are implemented in #176. Complete bounded availability verification,
+   retry are implemented in #176. APiBR listing-presence availability is implemented
+   in #183 under ADR-014; independent bounded per-job verification remains optional. Complete
    lifecycle policies and release regressions. Compose packaging/recovery tooling
-   is implemented in #177; current-head operational acceptance remains separate. Complete the initial textual matching slice.
+   is implemented in #177; current-head operational acceptance remains separate. Complete the initial textual matching slice. is implemented in #177; current-head operational acceptance remains separate.
 
 Current implementation status is in [tasks](tasks.md); requirements
 and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).
@@ -105,4 +106,11 @@ Record measured verification before marking implementation complete. No release 
 ## Stale expiration interview — issue #145
 
 Follow [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-stale-expiration.md). Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.
-Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
+Record measured verification before marking implementation complete. No release or merge is approved by this documentation. ## Current evaluation verification
+
+PR #178 validates declared provenance and retains both pipeline-boundary and
+background-to-API synthetic regressions. Original human annotations/calibration
+measurements are preserved, while policy-reused held-out cases remain regression
+evidence. Fresh independent acceptance is still required for the revised runtime.
+The current review does not rerun historical model/CPU/Compose acceptance or
+implement the explicitly deferred ADR-020/021/022 follow-ups.

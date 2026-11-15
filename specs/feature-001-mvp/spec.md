@@ -60,6 +60,25 @@ Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
 Examples: Kubernetes (`k8s`, `kube`), PostgreSQL (`Postgres`), JavaScript (`JS`,
 `ECMAScript`).
 
+### APiBR vacancy label mapping
+
+Issue [#180](https://github.com/fatecsp-tmp-cary/esw3_cvmatcher/issues/180)
+requires canonical seniority and work arrangement to remain empty when evidence
+is missing or conflicting. This feature supersedes the earlier #168
+first-recognized-label rule: map exact shared aliases from vacancy-level labels
+and title-derived source `keywords`, requiring exactly one distinct category.
+Repository `topic` labels never establish vacancy categories or skills. Known
+leading decorations and `Level-`/`Lang-` prefixes may be removed before lookup;
+unknown values remain unclassified. Repeated aliases for the same category agree.
+
+Map recognized exact skill aliases into deduplicated, sorted canonical skills.
+Keep every source label name as a keyword, including topics. This stage does not
+infer fields from title or body text, invent mandatory status, or apply geographic
+eligibility. Field changes participate in the existing content hash and invalidate
+extraction/embedding readiness. See the
+[source adapter guide](../../docs/data/source-adapters.md#label-metadata-field-mapping).
+Accepted later title-first/display policy is still a separate pending follow-up.
+
 ## Lifecycle and indexing
 
 States: `DISCOVERED`, `ACTIVE`, `STALE`, `EXPIRED`. Allowed transitions:
@@ -72,7 +91,11 @@ jobs of that source `STALE`
 `STALE→EXPIRED` is approved after three qualifying absence snapshots, including
 the first STALE transition; no age trigger is selected (ADR-020). Supporting
 counters and expiry implementation remain pending #145. Reliable explicit
-`source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.
+`source_expires_at` may expire immediately. Adapters must normalize this only
+from a supported reliable upstream expiry field as a timezone-aware datetime,
+without fallback dates; APiBR currently emits null. The explicit-expiry sweep
+coordinates with all bounded ingestion stripes before changing rows, preserving
+observation/verification timestamps and terminal expiration. Rediscovery reactivates stale jobs.
 `EXPIRED` is terminal even if a source later reopens the record.
 Retain expired records; physical deletion is out of MVP.
 
@@ -300,3 +323,11 @@ groups, including textual retrieval. The pipeline now applies that combined
 predicate at retrieval and final rechecks. Per-group invalidation and independent
 status-transition regressions are recorded in the PR #195 review; acceptance of
 the decision alone is not release or model-quality approval.
+
+## Compose implementation status at PR #177
+
+The production API/worker/database composition, pinned model preparation,
+persistent volumes and recovery scripts are implemented. Local host database
+tools require the explicit development port overlay; production does not publish
+the database. See [deployment](../../docs/operations/deployment.md) for the
+procedure. Static configuration checks are not deployment or quality acceptance.

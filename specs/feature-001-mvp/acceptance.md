@@ -92,8 +92,9 @@ The legacy `CandidateProfile` must not become a second public-input validator.
   migrations and terminal EXPIRED. Preserve description sections;
   omit raw payloads until retention rights are established.
 - [ADR-003](../../docs/architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md)
-  records conservative unknown availability, no default verifier, per-record
-  rejection and PARTIAL commits. Network failures roll back job changes; partial
+  originally records conservative unknown availability, superseded for APiBR
+  listing presence by ADR-014. Its no-default-verifier, per-record rejection
+  and PARTIAL-commit rules remain in force. Network failures roll back job changes; partial
   runs do not advance last_success_at or absence-based lifecycle evidence.
 
 ## Unresolved; address before dependent implementation

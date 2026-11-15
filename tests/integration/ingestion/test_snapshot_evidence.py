@@ -245,6 +245,15 @@ def test_snapshot_network_finishes_before_locks_and_db_rejection_invalidates_evi
 
     def reject_second(session, source_id, normalized, observed_at, verified):
         assert remote_calls == ["health", "page-1", "page-2", "health"]
+        assert (
+            session.scalar(
+                text(
+                    "SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' "
+                    "AND pid = pg_backend_pid() AND classid = 1129729365 AND objsubid = 2"
+                )
+            )
+            == 256
+        )
         if normalized["source_job_id"] == "2":
             raise ValueError("synthetic persistence rejection")
         return original(session, source_id, normalized, observed_at, verified)

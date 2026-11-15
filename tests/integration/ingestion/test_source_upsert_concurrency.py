@@ -1,7 +1,7 @@
 """Independent committed transactions exercise source-identity serialization."""
 
-from concurrent.futures import ThreadPoolExecutor
-from datetime import UTC, datetime
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from datetime import UTC, datetime, timedelta
 from threading import Barrier, Event
 from uuid import uuid4
 
@@ -252,3 +252,93 @@ def test_expiry_sweep_and_stale_reactivation_serialize_without_reopening(
             session.scalar(select(Job.status).where(Job.source_id == committed_source))
             == JobStatus.EXPIRED
         )
+
+
+def test_qualifying_absence_waits_for_a_fresh_identity_observation(
+    db_engine, committed_source, monkeypatch
+):
+    from src.ingestion import apibr
+
+    payload = {
+        "platform": "apibr",
+        "source_job_id": "snapshot-race",
+        "title": "Role",
+        "status": "ACTIVE",
+    }
+    with Session(db_engine) as session:
+        session.get(JobSource, committed_source).polling_mode = "SNAPSHOT"
+        upsert_job(session, committed_source, payload, datetime.now(UTC) - timedelta(days=1), True)
+        session.commit()
+
+    scan_started, writer_ready, all_locks_started = Event(), Event(), Event()
+    remote_calls = []
+    original_locks = apibr.lock_all_job_identities
+
+    def all_locks(session):
+        assert remote_calls == ["health", "page-1", "health"]
+        all_locks_started.set()
+        return original_locks(session)
+
+    monkeypatch.setattr(apibr, "lock_all_job_identities", all_locks)
+
+    def snapshot():
+        with Session(db_engine) as session:
+
+            class EmptySnapshot:
+                request_failures = 0
+
+                def fetch_health(self):
+                    assert (
+                        session.scalar(
+                            text(
+                                "SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' "
+                                "AND pid = pg_backend_pid()"
+                            )
+                        )
+                        == 0
+                    )
+                    remote_calls.append("health")
+                    scan_started.set()
+                    assert writer_ready.wait(timeout=5)
+                    return {
+                        "status": "healthy",
+                        "checks": {
+                            "dataset_issues_body": {
+                                "status": "healthy",
+                                "details": {
+                                    "records": 0,
+                                    "last_updated": "2026-11-12T08:29:29-03:00",
+                                    "from_backup": False,
+                                },
+                            }
+                        },
+                    }
+
+                def fetch_page(self, page):
+                    remote_calls.append(f"page-{page}")
+                    return []
+
+            return ingest_apibr(session, committed_source, EmptySnapshot())
+
+    with ThreadPoolExecutor(max_workers=1) as executor, Session(db_engine) as writer:
+        future = executor.submit(snapshot)
+        try:
+            assert scan_started.wait(timeout=5)
+            observed = datetime.now(UTC)
+            assert upsert_job(writer, committed_source, payload, observed, True)[0] == "unchanged"
+            writer_ready.set()
+            assert all_locks_started.wait(timeout=5)
+            # The scan cannot mark this identity absent while its fresh
+            # observation is still uncommitted in the independent writer.
+            with pytest.raises(TimeoutError):
+                future.result(timeout=0.2)
+        finally:
+            writer_ready.set()
+            writer.commit()
+        result = future.result(timeout=10)
+    assert result.snapshot_complete
+    assert (result.jobs_absent, result.jobs_marked_stale) == (0, 0)
+    with Session(db_engine) as session:
+        job = session.scalar(select(Job).where(Job.source_id == committed_source))
+        assert job.status == JobStatus.ACTIVE
+        assert job.last_seen_at == observed

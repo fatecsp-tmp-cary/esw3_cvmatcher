@@ -266,21 +266,54 @@ def test_invalid_startup_gap_is_rejected(gap):
         SourceScheduler(None, None, startup_min_gap_seconds=gap)
 
 
-def test_only_the_first_loop_cycle_forces_a_poll_when_enabled():
+def test_loop_drains_bounded_startup_batches_before_normal_polling():
     stop = Event()
     calls = []
+    subject_scheduler = SimpleNamespace(startup_pending=True)
 
-    def run_due(**kwargs):
-        calls.append(kwargs.get("force", False))
-        if len(calls) == 3:
-            stop.set()
+    def startup(**kwargs):
+        calls.append("startup")
+        subject_scheduler.startup_pending = len(calls) < 2
         return ()
 
-    subject = worker(scheduler=SimpleNamespace(run_due=run_due), poll_on_start=True)
+    def run_due(**kwargs):
+        calls.append("due")
+        stop.set()
+        return ()
+
+    subject_scheduler.run_startup = startup
+    subject_scheduler.run_due = run_due
+    subject = worker(scheduler=subject_scheduler, poll_on_start=True)
     subject.enqueue_missing = lambda: 0
     subject.run_forever(stop, poll_seconds=0.001)
 
-    assert calls == [True, False, False]
+    assert calls == ["startup", "startup", "due"]
+
+
+def test_startup_initialization_failure_keeps_startup_pending():
+    stop = Event()
+    calls = []
+    subject_scheduler = SimpleNamespace(startup_pending=True)
+
+    def startup(**kwargs):
+        calls.append("startup")
+        if len(calls) == 1:
+            raise RuntimeError("temporary database failure")
+        subject_scheduler.startup_pending = False
+        return ()
+
+    def run_due(**kwargs):
+        calls.append("due")
+        stop.set()
+        return ()
+
+    subject_scheduler.run_startup = startup
+    subject_scheduler.run_due = run_due
+    subject = worker(scheduler=subject_scheduler, poll_on_start=True)
+    subject.enqueue_missing = lambda: 0
+    subject.run_forever(stop, poll_seconds=0.001)
+
+    assert calls == ["startup", "startup", "due"]
 
 
 def test_loop_never_forces_a_poll_by_default_and_once_stays_bounded():
@@ -291,6 +324,14 @@ def test_loop_never_forces_a_poll_by_default_and_once_stays_bounded():
 
     assert calls == [{"now": None}]
     assert subject.poll_on_start is False
+
+
+@pytest.mark.parametrize("limit", [0, -1, True, 1.5])
+def test_startup_rejects_invalid_batch_limit_before_database(limit):
+    subject = SourceScheduler(None, None)
+    with pytest.raises(ValueError, match="source batch limit"):
+        subject.run_startup(limit=limit)
+    assert subject.startup_pending
 
 
 def test_default_cli_retry_uses_only_database_dependencies(monkeypatch):
