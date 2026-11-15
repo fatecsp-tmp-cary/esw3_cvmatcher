@@ -9,10 +9,15 @@ and database ingestion. No source schema or public curriculum contract changes.
 explicitly rather than inventing identities. `fetch_jobs()` asynchronously yields
 raw records unchanged, including malformed individual records: ingestion remains
 responsible for rejecting those independently. Synchronous `normalize(record)`
-uses the existing APiBR normalizer, preserving source identity, explicit availability
-and null raw retention. Recognized category labels retain the accepted first-label
-precedence for work arrangement and seniority, while every normalized label stays
-in `keywords`. Unknown labels do not invent categories. `fetch_job(id)` scans APiBR pages until the ID is found or
+uses the existing APiBR normalizer, preserving source identity and null raw
+retention. Under accepted ADR-014, listing presence is open-vacancy evidence:
+state-free records become ACTIVE and successful ingestion advances verification;
+explicit closure is EXPIRED and terminal expiration cannot be reopened. Vacancy-level category aliases follow the
+[issue #180 mapping](../../specs/feature-001-mvp/spec.md#apibr-vacancy-label-mapping):
+exactly one distinct category is required, conflicting evidence stays unknown,
+and every source label name stays in `keywords`. Repository topics never establish
+vacancy categories. This supersedes #168's earlier first-recognized-label behavior.
+`fetch_job(id)` scans APiBR pages until the ID is found or
 an empty page is observed. APiBR has no verified single-record endpoint here; this
 operation can be expensive. Prefer `fetch_jobs()` for polling. No method silently
 requests GitHub job URLs or verifies availability elsewhere.
@@ -73,6 +78,11 @@ common async adapter is available independently. Live calls remain optional and
 excluded from CI.
 
 ## Label metadata field mapping
+
+Authority: [issue #180](https://github.com/fatecsp-tmp-cary/esw3_cvmatcher/issues/180)
+and the [feature contract](../../specs/feature-001-mvp/spec.md#apibr-vacancy-label-mapping).
+The explicit conflict-to-unknown rule supersedes the first-label behavior
+preserved in #168; shared aliases and canonical fields remain unchanged.
 
 Observed on 2026-11-12, `GET /vagas/api/v2/issues` returns each label as an object
 with `name`, `type` and `color`, plus a title-derived `keywords` string array. The

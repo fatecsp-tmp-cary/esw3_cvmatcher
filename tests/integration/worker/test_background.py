@@ -352,6 +352,74 @@ def test_forced_start_poll_ignores_next_run_but_respects_enablement_and_recent_r
     assert subject.run_due(now=NOW, force=True) == ()
 
 
+
+
+def test_startup_drains_more_than_one_batch_once_and_preserves_skipped_watermarks(
+    db_engine, records
+):
+    future = NOW + timedelta(hours=20)
+    rows = [records(next_run_at=future) for _ in range(13)]
+    busy, failed = rows[0][0], rows[1][0]
+    recent, _ = records(next_run_at=future, last_run_at=NOW - timedelta(minutes=9))
+    disabled, _ = records(next_run_at=future, enabled=False)
+    calls = []
+
+    def poll(session, identifier):
+        calls.append(identifier)
+        return SimpleNamespace(status="FAILED" if identifier == failed else "SUCCEEDED")
+
+    subject = scheduler(db_engine, dict.fromkeys((name for _, name in rows), poll))
+    assert subject.startup_pending
+    with source_lock(db_engine, busy) as acquired:
+        assert acquired
+        first = subject.run_startup(now=NOW)
+    # Ten attempts include the busy source; failures still consume their entry.
+    assert len(first) == 9 and len(calls) == 9
+    assert next(row for row in first if row.source_id == failed).status == "FAILED"
+    assert subject.startup_pending
+    late, _ = records(next_run_at=future)
+    # More than the restart guard passes, but completed sources are not repolled,
+    # and formerly recent/new sources are not added to the startup snapshot.
+    second = subject.run_startup(now=NOW + timedelta(minutes=11))
+    assert len(second) == 3
+    assert calls == [identifier for identifier, _ in rows if identifier != busy]
+    assert not subject.startup_pending
+    assert subject.run_startup(now=NOW + timedelta(days=1)) == ()
+    assert subject.run_due(now=NOW + timedelta(minutes=11)) == ()
+    with Session(db_engine) as session:
+        for identifier in (busy, recent, disabled, late):
+            assert session.get(JobSource, identifier).next_run_at == future
+        assert session.get(JobSource, busy).last_run_at is None
+        assert session.get(JobSource, late).last_run_at is None
+        assert session.get(JobSource, failed).last_error == "poll_failed"
+
+
+def test_startup_preserves_unattempted_sources_after_a_batch_exception(db_engine, records):
+    future = NOW + timedelta(hours=20)
+    rows = [records(next_run_at=future) for _ in range(4)]
+    calls = []
+    subject = scheduler(db_engine, dict.fromkeys((name for _, name in rows), _succeeding(calls)))
+    original = subject._poll_source
+    attempts = []
+
+    def poll(source_id, now, force=False):
+        attempts.append(source_id)
+        if source_id == rows[1][0]:
+            raise RuntimeError("synthetic storage failure")
+        return original(source_id, now, force)
+
+    subject._poll_source = poll
+    with pytest.raises(RuntimeError, match="synthetic storage failure"):
+        subject.run_startup(now=NOW)
+    assert subject.startup_pending
+    remaining = subject.run_startup(now=NOW)
+    assert [row.source_id for row in remaining] == [row[0] for row in rows[2:]]
+    assert attempts == [row[0] for row in rows]
+    assert calls == [row[0] for row in rows if row != rows[1]]
+    assert not subject.startup_pending
+    with Session(db_engine) as session:
+        assert session.get(JobSource, rows[1][0]).next_run_at == future
+
 @pytest.mark.parametrize("existing_state", [False, True])
 def test_expired_retry_rejects_without_creating_or_resetting_work(
     db_engine, records, existing_state
