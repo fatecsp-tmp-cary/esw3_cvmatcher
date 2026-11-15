@@ -27,6 +27,22 @@ class CycleResult:
     errors: tuple[str, ...]
 
 
+def retry_extraction(sessions: Callable[[], Session], job_id: int, config_version: str) -> None:
+    """Requeue stored nonterminal work without constructing inference services."""
+    if type(job_id) is not int or job_id <= 0:
+        raise ValueError("job identity must be a positive integer")
+    with sessions() as session, session.begin():
+        job = session.scalar(
+            select(Job)
+            .where(Job.id == job_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+        if job is None or job.status == JobStatus.EXPIRED:
+            raise ValueError("retry requires a non-expired persisted job")
+        enqueue(session, job_id, config_version, retry=True)
+
+
 class BackgroundWorker:
     def __init__(
         self,
@@ -80,10 +96,7 @@ class BackgroundWorker:
             return len(identifiers)
 
     def retry_extraction(self, job_id: int) -> None:
-        if type(job_id) is not int or job_id <= 0:
-            raise ValueError("job identity must be a positive integer")
-        with self.sessions() as session, session.begin():
-            enqueue(session, job_id, self.config_version, retry=True)
+        retry_extraction(self.sessions, job_id, self.config_version)
 
     def run_once(self, *, now: datetime | None = None, force_poll: bool = False) -> CycleResult:
         errors = []
@@ -102,7 +115,7 @@ class BackgroundWorker:
 
         def poll():
             if force_poll:
-                return self.scheduler.run_due(now=now, force=True)
+                return self.scheduler.run_startup(now=now)
             return self.scheduler.run_due(now=now)
 
         polls = stage("source_poll", poll, ())
@@ -124,12 +137,12 @@ class BackgroundWorker:
     def run_forever(self, stop: Event, *, poll_seconds: float = 5.0) -> None:
         if not math.isfinite(poll_seconds) or poll_seconds <= 0:
             raise ValueError("worker polling delay must be finite and positive")
-        # Only the first cycle of a long-running worker may poll before a source is due.
+        # Drain the finite startup snapshot across bounded cycles before ordinary polling.
         force_poll = self.poll_on_start
         while not stop.is_set():
             if force_poll:
                 self.run_once(force_poll=True)
-                force_poll = False
+                force_poll = self.scheduler.startup_pending
             else:
                 self.run_once()
             stop.wait(poll_seconds)

@@ -9,8 +9,15 @@ and database ingestion. No source schema or public curriculum contract changes.
 explicitly rather than inventing identities. `fetch_jobs()` asynchronously yields
 raw records unchanged, including malformed individual records: ingestion remains
 responsible for rejecting those independently. Synchronous `normalize(record)`
-uses the existing APiBR normalizer, preserving source identity, explicit availability
-and null raw retention. `fetch_job(id)` scans APiBR pages until the ID is found or
+uses the existing APiBR normalizer, preserving source identity and null raw
+retention. Under accepted ADR-014, listing presence is open-vacancy evidence:
+state-free records become ACTIVE and successful ingestion advances verification;
+explicit closure is EXPIRED and terminal expiration cannot be reopened. Vacancy-level category aliases follow the
+[issue #180 mapping](../../specs/feature-001-mvp/spec.md#apibr-vacancy-label-mapping):
+exactly one distinct category is required, conflicting evidence stays unknown,
+and every source label name stays in `keywords`. Repository topics never establish
+vacancy categories. This supersedes #168's earlier first-recognized-label behavior.
+`fetch_job(id)` scans APiBR pages until the ID is found or
 an empty page is observed. APiBR has no verified single-record endpoint here; this
 operation can be expensive. Prefer `fetch_jobs()` for polling. No method silently
 requests GitHub job URLs or verifies availability elsewhere.
@@ -70,49 +77,22 @@ The worker invokes the bounded synchronous ingestion compatibility path; the
 common async adapter is available independently. Live calls remain optional and
 excluded from CI.
 
-## Current field-mapping implementation (awaiting ADR-019 correction)
+## Current field mapping and displayed skills
 
-Observed on 2026-11-12, `GET /vagas/api/v2/issues` returns each label as an object
-with `name`, `type` and `color`, plus a title-derived `keywords` string array. The
-`type` is `label` (issue labels), `APIBr` (categories assigned by the aggregator)
-or `topic` (topics of the aggregated repository). `normalize_apibr_job` maps this
-explicit metadata to canonical fields:
+Authority: [ADR-019](../architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md), which supersedes the proposed ADR-017 precedence and display behavior while preserving ADR-017.
+
+Observed APiBR labels include `name`, `type`, and `color`, plus title-derived `keywords`. Repository `topic` labels are ignored for field classification; all source label names remain keywords. Shared exact aliases map recognized fields. Leading decorative symbols and supported `Level-`/`Lang-` prefixes are removed before lookup.
 
 | Canonical field | Source evidence | Rule |
 | --- | --- | --- |
-| `keywords` | every label name | Unchanged: all names are kept, including topics. |
-| `seniority_level` | non-topic labels and `keywords`, then explicit body fields, then the title | Shared seniority aliases; exactly one distinct value per evidence level, in that order. |
-| `work_arrangement` | non-topic labels and `keywords`, then explicit body fields, then the title | Shared work-arrangement aliases; exactly one distinct value per evidence level, in that order. |
-| `skills` | non-topic labels and `keywords` | Names recognized by the shared skill aliases, deduplicated and sorted. |
+| `seniority_level` | title, usable typed labels, explicit named/checked body fields | Title wins first; multiple values use the ADR-019 order, with first occurrence breaking the specialist/coordinator tie. Conflicting labels may fall through to checked body options. |
+| `work_arrangement` | title, usable typed labels, explicit named/checked body fields | Title wins first; multiple values use REMOTE < HYBRID < ON_SITE. Conflicting labels may fall through to checked body options. |
+| `skills` | source labels plus current extraction provenance | The public result adds only exact, affirmative, non-negated, non-conflicting extracted skills. Stored source fields and score associations remain unchanged. |
+| `keywords` | every source label name | Retained unchanged, including topics. |
 
-Repository topics describe the aggregated repository, not the vacancy, and are
-never classified. Leading decorative symbols and the explicit `Level-`/`Lang-`
-prefixes used by some repositories are removed before the exact alias lookup.
-The current draft implementation uses the former proposal ([ADR-017](../architecture/decisions/ADR-017-job-field-evidence-order-and-extracted-skills.md)):
-typed labels first, then explicit body fields, then a single recognizable
-word of the title. The first of labels and body fields with exactly one
-distinct value wins; explicit but conflicting evidence leaves the field empty
-and the title is not consulted. A body field is an inline `Nível: pleno` or
-`Localização: Remoto` line, or a `Nível`/`Alocação`/`Modalidade`/`Local`
-heading followed by options, where unchecked `[ ]` options are ignored. The
-title is used only when nothing explicit produced a value and it holds exactly
-one distinct value; `Pleno/Sênior` or `Remote.com` stay unknown. Prose is never
-interpreted, and extraction of requirements from text remains the separate
-[job field extraction](job-field-extraction.md) stage. Conflicting labels, such
-as an issue form that publishes every option, resolve only through its checked
-body options. `Alocado` has no agreed canonical arrangement and stays a
-keyword only. `company`, `location` and `salary` have no structured source field
-and remain empty. Work arrangement is descriptive and is never used for
-geographic eligibility. Skill recall is bounded by the shared alias list in
-`src/extraction/taxonomy.py`; unrecognized technology labels remain keywords.
-The current draft also displays extraction-associated skills without the
-provenance filtering now required by ADR-019. That implementation must be corrected
-before approval; stored canonical skills must remain unchanged.
+Body evidence is restricted to named fields such as `Nível: pleno` or `Localização: Remoto`, and checked options in recognized sections. Free prose is not interpreted. An unambiguous label is used only when the title contains no recognized value; a conflicting label set can fall through to valid body evidence. Unknown categories stay empty. `company`, `location`, and `salary` remain empty because APiBR provides no structured source fields for them. Work arrangement never drives geographic eligibility.
 
-These fields are part of the job content hash, so a mapping change re-queues
-stored jobs for extraction and embedding. The deterministic
-`tests/resources/apibr_v2_issues.json` fixture mirrors the observed shape with
-synthetic content only; no source record is retained.
+Field mapping changes participate in content hashing and re-queue extraction and embedding. Displayed extracted skills require matching current successful extraction evidence; a `JobSkill` association alone is not proof of display trust. The deterministic `tests/resources/apibr_v2_issues.json` fixture uses synthetic records only. Current implementation and verification are recorded in the [PR #197 review](../../docs/reports/2026-11-15-pr197-review.md).
 
 ## Accepted best-effort SNAPSHOT mode
 
@@ -132,6 +112,13 @@ configurations never qualify. SourceRun.snapshot_evidence stores only bounded
 counts/signatures/policy flags in JSONB migration b1e006, not IDs, authors or raw
 responses. Async cancellation/truncation cannot publish completed attestation.
 
+Synchronous ingestion captures both health signatures and all remote pages before
+acquiring the bounded, ordered identity-lock stripes. It then applies buffered
+observations in source order within one transaction. Persistence-phase rejections
+update the stored evidence's rejection count and invalidate qualification without
+another remote call. Network failure leaves job changes rolled back; a rejected
+record still permits valid observations to commit as PARTIAL.
+
 This is explicitly best effort: timestamp/count equality cannot rule out concurrent
 rewrites. It does not establish source permissions, job openness, raw retention
 rights or implementation of the #145 stale-expiry counters. ADR-020 now defines
@@ -142,11 +129,6 @@ specific; listed state-free records are ACTIVE under ADR-014. The bounded live
 count probe
 is in the [aggregate evidence](../reports/2026-11-12-apibr-count-attestation.json).
 
-## Accepted field policy supersedes the draft proposal
+## Accepted field policy implementation
 
-[ADR-019](../architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md)
-is current authority for title > label > named-body evidence, restrictive mapped
-value order and exact/affirmative/non-conflicting displayed extraction skills.
-ADR-017 remains the original proposal. The current normalizer still uses its old
-labels/body/title and unique-value rules; correction and tests remain pending.
-An association row alone cannot prove that an extracted skill is safe to display.
+ADR-019 is implemented in PR #197. The normalizer applies title > typed labels > named/checked body fields, approved restrictive value orders and first-occurrence tie handling. Result skills are provenance-filtered without changing stored canonical skills. ADR-017 remains preserved as the original proposal.

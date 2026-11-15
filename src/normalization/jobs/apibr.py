@@ -281,8 +281,9 @@ def normalize_apibr_job(raw_job: dict[str, Any]) -> dict[str, Any]:
 
     keywords = normalize_keywords(raw_job.get("labels") or raw_job.get("keywords"))
 
-    # Only exact shared aliases are mapped and prose is never interpreted.
-    # ADR-019 gives title evidence priority, then usable labels and named fields.
+    # Only exact shared aliases are mapped; free prose is never interpreted.
+    # ADR-019 applies title-first priority and permits checked-body fallback when
+    # category labels conflict (for example every option of an issue form).
     labels = vacancy_labels(raw_job)
     description = normalize_text(raw_job.get("body"), preserve_sections=True)
     seniority = categorize(

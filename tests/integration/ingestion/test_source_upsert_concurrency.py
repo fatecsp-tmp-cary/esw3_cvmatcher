@@ -1,17 +1,20 @@
 """Independent committed transactions exercise source-identity serialization."""
 
-from concurrent.futures import ThreadPoolExecutor
-from datetime import UTC, datetime
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from datetime import UTC, datetime, timedelta
 from threading import Barrier, Event
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, text
 from sqlalchemy.orm import Session
 
+from src.ingestion.apibr import ingest_apibr
 from src.ingestion.upsert import upsert_job
+from src.lifecycle.expiration import expire_source_timestamps
 from src.persistence.job.job import Job, JobStatus
 from src.persistence.job.job_source import JobSource
+from src.persistence.job.source_run import SourceRun
 
 
 @pytest.fixture
@@ -27,6 +30,7 @@ def committed_source(db_engine):
     finally:
         with Session(db_engine) as session:
             session.execute(delete(Job).where(Job.source_id == source_id))
+            session.execute(delete(SourceRun).where(SourceRun.source_id == source_id))
             session.execute(delete(JobSource).where(JobSource.id == source_id))
             session.commit()
 
@@ -112,3 +116,229 @@ def test_waiting_writer_refreshes_previously_loaded_lifecycle(db_engine, committ
         stale.commit()
         assert result == ("unchanged", False, False)
         assert old_job.status == JobStatus.EXPIRED
+
+
+def _issue(issue_id):
+    return {
+        "id": issue_id,
+        "title": f"Developer {issue_id}",
+        "state": "open",
+        "body": "Build APIs",
+        "html_url": f"https://github.com/acme/jobs/issues/{issue_id}",
+    }
+
+
+def test_reversed_overlapping_scans_fetch_without_locks_and_commit_atomically(
+    db_engine, committed_source
+):
+    # In the former streaming implementation, both scans held their first
+    # identity while waiting at page two, then deadlocked on opposite identities.
+    second_page = Barrier(2)
+    identities = (committed_source * 10, committed_source * 10 + 1)
+
+    def scan(order):
+        with Session(db_engine) as session:
+
+            class Pages:
+                def fetch_page(self, page):
+                    held = session.scalar(
+                        text(
+                            "SELECT count(*) FROM pg_locks "
+                            "WHERE locktype = 'advisory' AND pid = pg_backend_pid()"
+                        )
+                    )
+                    assert held == 0, "Remote fetch must precede identity locking"
+                    if page == 2:
+                        second_page.wait(timeout=5)
+                    return [_issue(order[page - 1])] if page <= 2 else []
+
+            return ingest_apibr(session, committed_source, Pages())
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        first = executor.submit(scan, identities)
+        second = executor.submit(scan, identities[::-1])
+        results = [first.result(timeout=15), second.result(timeout=15)]
+    assert all(result.status == "SUCCEEDED" for result in results)
+    assert sum(result.jobs_created for result in results) == 2
+    assert sum(result.jobs_unchanged for result in results) == 2
+    with Session(db_engine) as session:
+        jobs = session.scalars(select(Job).where(Job.source_id == committed_source)).all()
+        assert len(jobs) == 2
+
+
+def test_batch_write_failure_rolls_back_prior_records(db_engine, committed_source, monkeypatch):
+    from src.ingestion import apibr
+
+    calls = 0
+    original = apibr.upsert_job
+
+    def fail_second(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise RuntimeError("synthetic write failure")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(apibr, "upsert_job", fail_second)
+
+    class Pages:
+        def fetch_page(self, page):
+            return (
+                [_issue(committed_source * 10), _issue(committed_source * 10 + 1)]
+                if page == 1
+                else []
+            )
+
+    with (
+        Session(db_engine) as session,
+        pytest.raises(RuntimeError, match="synthetic write failure"),
+    ):
+        ingest_apibr(session, committed_source, Pages())
+    with Session(db_engine) as session:
+        assert session.scalar(select(Job.id).where(Job.source_id == committed_source)) is None
+        run = session.scalar(select(SourceRun).where(SourceRun.source_id == committed_source))
+        assert run.status == "FAILED"
+        assert run.jobs_created == 0
+
+
+@pytest.mark.parametrize("first_actor", ["sweep", "upsert"])
+def test_expiry_sweep_and_stale_reactivation_serialize_without_reopening(
+    db_engine, committed_source, first_actor
+):
+    now = datetime.now(UTC)
+    normalized = {**_job(committed_source, status="STALE"), "source_expires_at": now}
+    with Session(db_engine) as session:
+        upsert_job(session, committed_source, normalized, now, True)
+        session.commit()
+    attempted = Event()
+
+    def act(session, actor):
+        if actor == "sweep":
+            return expire_source_timestamps(session, now=now)
+        return upsert_job(session, committed_source, {**normalized, "status": "ACTIVE"}, now, True)
+
+    def compete(actor):
+        with Session(db_engine) as session:
+            # Retain a pre-sweep ORM identity to verify populate_existing too.
+            old = session.scalar(select(Job).where(Job.source_id == committed_source))
+            assert old.status == JobStatus.STALE
+            attempted.set()
+            result = act(session, actor)
+            session.commit()
+            return result
+
+    other_actor = "upsert" if first_actor == "sweep" else "sweep"
+    with ThreadPoolExecutor(max_workers=1) as executor, Session(db_engine) as first:
+        act(first, first_actor)
+        first.flush()
+        if first_actor == "sweep":
+            assert (
+                first.scalar(
+                    text(
+                        "SELECT count(*) FROM pg_locks "
+                        "WHERE locktype = 'advisory' AND pid = pg_backend_pid()"
+                    )
+                )
+                == 256
+            )
+        future = executor.submit(compete, other_actor)
+        try:
+            assert attempted.wait(timeout=5)
+        finally:
+            first.commit()
+        future.result(timeout=15)
+    with Session(db_engine) as session:
+        assert (
+            session.scalar(select(Job.status).where(Job.source_id == committed_source))
+            == JobStatus.EXPIRED
+        )
+
+
+def test_qualifying_absence_waits_for_a_fresh_identity_observation(
+    db_engine, committed_source, monkeypatch
+):
+    from src.ingestion import apibr
+
+    payload = {
+        "platform": "apibr",
+        "source_job_id": "snapshot-race",
+        "title": "Role",
+        "status": "ACTIVE",
+    }
+    with Session(db_engine) as session:
+        session.get(JobSource, committed_source).polling_mode = "SNAPSHOT"
+        upsert_job(session, committed_source, payload, datetime.now(UTC) - timedelta(days=1), True)
+        session.commit()
+
+    scan_started, writer_ready, all_locks_started = Event(), Event(), Event()
+    remote_calls = []
+    original_locks = apibr.lock_all_job_identities
+
+    def all_locks(session):
+        assert remote_calls == ["health", "page-1", "health"]
+        all_locks_started.set()
+        return original_locks(session)
+
+    monkeypatch.setattr(apibr, "lock_all_job_identities", all_locks)
+
+    def snapshot():
+        with Session(db_engine) as session:
+
+            class EmptySnapshot:
+                request_failures = 0
+
+                def fetch_health(self):
+                    assert (
+                        session.scalar(
+                            text(
+                                "SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' "
+                                "AND pid = pg_backend_pid()"
+                            )
+                        )
+                        == 0
+                    )
+                    remote_calls.append("health")
+                    scan_started.set()
+                    assert writer_ready.wait(timeout=5)
+                    return {
+                        "status": "healthy",
+                        "checks": {
+                            "dataset_issues_body": {
+                                "status": "healthy",
+                                "details": {
+                                    "records": 0,
+                                    "last_updated": "2026-11-12T08:29:29-03:00",
+                                    "from_backup": False,
+                                },
+                            }
+                        },
+                    }
+
+                def fetch_page(self, page):
+                    remote_calls.append(f"page-{page}")
+                    return []
+
+            return ingest_apibr(session, committed_source, EmptySnapshot())
+
+    with ThreadPoolExecutor(max_workers=1) as executor, Session(db_engine) as writer:
+        future = executor.submit(snapshot)
+        try:
+            assert scan_started.wait(timeout=5)
+            observed = datetime.now(UTC)
+            assert upsert_job(writer, committed_source, payload, observed, True)[0] == "unchanged"
+            writer_ready.set()
+            assert all_locks_started.wait(timeout=5)
+            # The scan cannot mark this identity absent while its fresh
+            # observation is still uncommitted in the independent writer.
+            with pytest.raises(TimeoutError):
+                future.result(timeout=0.2)
+        finally:
+            writer_ready.set()
+            writer.commit()
+        result = future.result(timeout=10)
+    assert result.snapshot_complete
+    assert (result.jobs_absent, result.jobs_marked_stale) == (0, 0)
+    with Session(db_engine) as session:
+        job = session.scalar(select(Job).where(Job.source_id == committed_source))
+        assert job.status == JobStatus.ACTIVE
+        assert job.last_seen_at == observed

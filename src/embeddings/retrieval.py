@@ -16,18 +16,22 @@ def semantic_statement(
     *,
     limit: int = 100,
     statuses: tuple[JobStatus, ...] = ACTIVE_STATUSES,
+    exclude_ids: tuple[int, ...] = (),
 ):
     if type(limit) is not int or limit < 1:
         raise ValueError("Retrieval limit must be a positive integer")
     vector = normalized_vector(query_vector)
     distance = Job.embedding.cosine_distance(vector)
     similarity = func.greatest(-1.0, func.least(1.0, literal(1.0) - distance)).label("similarity")
-    return (
+    statement = (
         select(Job, similarity)
         .where(status_predicate(statuses), ready_predicate(config, extraction_version))
         .order_by(distance.asc(), Job.platform.asc(), Job.source_job_id.asc(), Job.id.asc())
         .limit(limit)
     )
+    if exclude_ids:
+        statement = statement.where(Job.id.not_in(exclude_ids))
+    return statement
 
 
 def retrieve_semantic(
@@ -38,13 +42,19 @@ def retrieve_semantic(
     *,
     limit: int = 100,
     statuses: tuple[JobStatus, ...] = ACTIVE_STATUSES,
+    exclude_ids: tuple[int, ...] = (),
 ) -> list[tuple[Job, float]]:
     """Return cosine similarities [-1,1]; caller owns empirical score calibration."""
     return [
         (job, float(score))
         for job, score in session.execute(
             semantic_statement(
-                query_vector, config, extraction_version, limit=limit, statuses=statuses
+                query_vector,
+                config,
+                extraction_version,
+                limit=limit,
+                statuses=statuses,
+                exclude_ids=exclude_ids,
             )
         )
     ]

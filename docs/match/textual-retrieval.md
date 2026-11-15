@@ -42,7 +42,11 @@ Every retrieval entry point requires an explicit SQL predicate proving current
 successful extraction to return jobs. Omitted `readiness` becomes SQL false in
 both job and requirement branches, including the legacy wrapper. Integrators
 must check current content hash and extraction configuration; pending, failed
-or obsolete extraction remains withheld. An explicit true predicate appears only
+or obsolete extraction remains withheld. Production matching supplies the combined
+current extraction/embedding predicate in both status groups under
+[ADR-024](../architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md). Textual
+matches cannot bypass embedding readiness; low-level FTS fixtures remain isolated
+from production processing. An explicit true predicate appears only
 in focused FTS fixtures. Only ACTIVE jobs pass by default; the pipeline searches
 the inactive status group separately under
 [ADR-016](../architecture/decisions/ADR-016-inactive-jobs-complete-ranked-matches.md).
@@ -68,9 +72,21 @@ logged or persisted.
 Offline tests cover SQL construction, API shape, safe binding and fail-closed
 predicates. PostgreSQL regressions cover field weights, JSON text, requirement
 rank combination, readiness, publication ties and immutable expression indexing;
-they require parent-run database validation. Migration/ORM registration and
-algorithm-version integration belong to the parent; this scope does not claim
-index installation, PostgreSQL execution or production performance.
+the [PR #172 review](../reports/2026-11-14-pr172-review.md) records current
+PostgreSQL verification after merging predecessor fixes. Migrated index/ORM
+expression parity is tested. The request-scoped matching pipeline now combines
+these scores with semantic and structured evidence, and fingerprints retrieval
+and scoring policies in its algorithm version. It rechecks considered jobs for
+current textual or semantic evidence and current extraction/embedding provenance
+before returning them. Already-returned IDs are excluded before inactive retrieval
+limits. API composition is implemented in #175; this is not production performance
+evidence.
+
+The current JSON serializer escapes non-ASCII characters. The specific `Café`
+and `Paraná` regressions pass because Portuguese queries stem to `caf` and
+`paran`, which also occur before the escaped suffixes in their indexed JSON text.
+Keep these regressions, but do not infer general accent-insensitive retrieval;
+the approved broader projection remains future work under ADR-022.
 
 ## Accepted next retrieval policy (not implemented)
 
@@ -79,4 +95,4 @@ accepts a separate lowercase ASCII search projection, PT/EN stemming and fuzzy
 fill-only fallback when ordinary combined retrieval cannot fill the request.
 Canonical Unicode and extraction offsets remain unchanged. Technical projection,
 threshold and index alternatives require measured comparison under #147/#159;
-existing Portuguese queries/indexes below describe the current implementation.
+existing Portuguese queries/indexes above describe the current implementation.

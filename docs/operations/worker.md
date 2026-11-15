@@ -74,13 +74,20 @@ No availability transition is inferred from extraction or polling failure.
 `python -m src.worker --once` runs one bounded production cycle.
 `python -m src.worker --retry-extraction JOB_ID` explicitly resets extraction
 work for that persisted numeric job ID using the configured extraction version.
+The default retry composition uses only PostgreSQL sessions and the versioned
+policy; it does not construct GLiNER or embedding services or require prepared
+model directories. The job is locked and refreshed before terminal status is
+checked. Missing or EXPIRED jobs fail without creating or resetting extraction
+state; an existing failed state remains unchanged. The lock is retained through
+the reset, so expiration cannot intervene between the check and enqueue.
 This command neither receives nor stores a curriculum and does not change job
 availability. The operations are mutually exclusive. The default command runs a
 loop with a five-second delay; SIGINT/SIGTERM request a stop after the active cycle
 and interrupt idle waiting. They do not forcibly terminate in-flight model/HTTP
 work. Injected source transport retains its own bounded page request policy.
 
-The entrypoint imports `src.worker.bootstrap.create_default_worker()`. It uses
+For processing cycles, the entrypoint calls
+`src.worker.bootstrap.create_default_worker()`. It uses
 `DATABASE_URL` for PostgreSQL, requires `CVMATCHER_EXTRACTION_DIRECTORY` to point
 to the prepared pinned GLiNER directory, and passes `CVMATCHER_EMBEDDING_CACHE`
 to the offline embedding encoder. Extraction uses `EXTRACTION_VERSION` from the
@@ -105,7 +112,9 @@ restart follows [ADR-010](../architecture/decisions/ADR-010-preproduction-and-mi
 Persist PostgreSQL/model cache volumes across restarts; never remove volumes as
 part of ordinary worker shutdown.
 
-The expiration callback must use only reliable `source_expires_at` timestamps.
+The production expiration callback uses the shared identity-stripe protocol
+implemented in the [lifecycle operation](lifecycle.md), in its own transaction
+before enqueueing. It must use only reliable `source_expires_at` timestamps.
 No approved age/missing-snapshot thresholds exist here. An unproven/partial scan
 cannot mark absent jobs stale or expired. No callback implements geographic
 eligibility. Live source access, model inference/quality, and complete deployment

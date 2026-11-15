@@ -22,6 +22,12 @@ includes the production API, background worker/scheduler and PostgreSQL+pgvector
 with persistent database and local-model cache volumes. Deployment acceptance
 is defined in the [MVP spec](../../specs/feature-001-mvp/spec.md#docker-compose-deployment).
 
+Production API composition (#175) and bounded PostgreSQL-coordinated worker
+composition (#176) are implemented. Explicit extraction recovery uses a separate
+database-only path. Compose packaging/recovery tooling is implemented in #177,
+including an explicit development-only database port overlay. Current-head
+operational deployment acceptance remains pending.
+
 The production and mock APIs share public request/response models in
 `src/schemas/`. Canonical work-arrangement and seniority enums live in
 `src/domain/job.py` and are reused by schemas and persistence, allowing the mock
@@ -31,7 +37,7 @@ The transient public-request projection lives in
 `src/normalization/candidate/curriculum.py`. Its immutable `NormalizedCandidate`
 preserves all five source sections without the UUID or additional caps. It is
 an intermediate matching representation, not a new public API model. Production
-matching uses this projection; compatibility reconciliation preserves both
+matching integrates this projection through `src/api/runtime.py` in #175; compatibility reconciliation preserves both
 projection APIs under [ADR-011](decisions/ADR-011-main-integration-compatibility.md).
 
 The intended canonical `Job` has exactly these fields:
@@ -60,13 +66,25 @@ experiences with recency weighting and the best education score per job, while
 preserving the public integration contract. See
 [ADR-008](decisions/ADR-008-extraction-contract-and-semantic-evidence.md).
 
-The implementation interview requires successful extraction before jobs enter
-any matching path. Extraction readiness is supporting state separate from
+[ADR-024](decisions/ADR-024-all-result-extraction-and-embedding-readiness.md) requires
+current successful extraction and embedding provenance before jobs enter any
+production matching path, including textual retrieval and both status groups. Extraction readiness is supporting state separate from
 canonical availability; failures must not change lifecycle. The semantic
-aggregation primitive now lives in `src/matching/semantic.py`, using the
+aggregation primitive is implemented in `src/matching/semantic.py`, using the
 provisional coefficients documented in [scoring policy](../match/scoring-policy.md).
-Pinned local inference and production executor wiring are implemented; calibration
+Pinned local GLiNER extraction, versioned evidence and bounded claim/retry
+processing are implemented in #170. Pinned local embedding inference, job-only
+provenance and semantic retrieval are implemented in #171; production executor
+wiring is implemented in #175. Embedding passages include normalized requirement
+text and deterministic location ordering under a versioned policy. Calibration
 and quality approval remain pending. Portuguese FTS retains ADR-004/005 weights,
-JSON text rendering and publication-date/identity ties, with current extraction
-readiness on every path; integrated database verification passed under ADR-011.
+JSON text rendering and publication-date/identity ties, with extraction
+readiness on job and requirement retrieval paths implemented in #172. The request-scoped pipeline in `src/matching/pipeline.py` now combines textual
+and semantic retrieval, rechecks readiness and computes deterministic final scores.
+Only experience/education entries supply semantic queries. A considered job must
+still have current textual or semantic evidence at the final check and pass both
+processing-readiness gates. Textual evidence cannot bypass embedding readiness.
+Active jobs precede inactive completion; previously returned IDs are excluded
+before the inactive retrieval limits to prevent duplicates during status changes. The production ASGI entry point now composes this pipeline lazily in #175. Integrated database verification
+under ADR-011 is historical evidence from the original integration, not this head.
 Taxonomy persistence and category aliases from main remain part of the system.

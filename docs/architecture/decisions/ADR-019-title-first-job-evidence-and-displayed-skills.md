@@ -4,7 +4,7 @@
 - **Date:** 2026-11-14
 - **Authority:** User interview following the extraction correction and branch decision audit.
 - **Supersedes:** ADR-017 proposal for job-field precedence, multiple-value resolution and displayed extraction skills; ADR-008 explicit-source precedence for these two fields only. Original ADR-017 is preserved.
-- **Implementation status:** Policy recorded; implementation and verification remain pending unless separately evidenced in feature tasks.
+- **Implementation status:** Implemented and verified in PR #197; see the feature tasks and review report.
 
 ## Context
 
@@ -62,7 +62,6 @@ Supersede ADR-017's proposed precedence/ambiguity and unfiltered display-union
 behavior with this accepted policy, preserving its original record. Update #196/
 PR #197 implementation/tests for source priority, all ordering/tie cases, ambiguous
 labels and checked-body resolution, dotted names and provenance-filtered skills.
-Version changed normalization/extraction inputs and reprocessing as required;
-preserve API shape/privacy/source identity. Existing draft code still uses
-labels/body/title, unique-value rejection and an unfiltered association union;
-those behaviors have not been made compliant merely by recording this ADR.
+Preserve API shape, privacy and source identity. PR #197 implements this policy,
+versions the changed field mapping, filters display by retained extraction
+provenance, and verifies the ordering, fallback, tie and score-only cases.

@@ -2,10 +2,12 @@
 
 ## Behavior
 
-The service receives an already structured CV, validates and normalizes it to a
+The required service behavior is to receive an already structured CV, validate and normalize it to a
 request-scoped `NormalizedCandidate`, ingests normalized source-specific jobs,
 maintains their lifecycle and search indexes, and returns ranked compatible
-jobs through `POST /matches`. CV parsing is external. `GET /health` is optional.
+jobs through `POST /matches`. The request-scoped normalization/retrieval/scoring
+pipeline and lazy production API composition are implemented in #175. CV parsing
+is external. `GET /health` is optional.
 
 The public five-section contract is defined in [acceptance](acceptance.md#resolved-api-contract).
 Its lossless transient projection preserves all sections without the UUID or
@@ -47,13 +49,36 @@ assumed mandatory. Deterministic dictionaries, aliases, regex, phrase/fuzzy
 matching, and section detection complement the selected local GLiNER job-field
 extraction strategy. Follow [the extraction plan](../../docs/data/job-field-extraction.md)
 for evidence, confidence, contextual requirement classification, model versioning
-and failure handling. Pinned offline extraction and bounded job-state processing are implemented; mandatory exclusions remain disabled pending measured quality approval. PostgreSQL FTS handles DB-level
+and failure handling. Pinned offline extraction and bounded job-state processing are implemented in
+stack PR #170, including clause-local score-only requirement classification under
+ADR-018. Mandatory exclusions remain disabled pending independent quality
+approval; production API wiring is implemented in #175. PostgreSQL FTS handles DB-level
 tokenization, stemming, and ranking.
 
 Use a shared skill taxonomy (`id`, `canonical_name`, `category`,
 `parent_skill_id`, `aliases`); candidate-side taxonomy processing is transient.
 Examples: Kubernetes (`k8s`, `kube`), PostgreSQL (`Postgres`), JavaScript (`JS`,
 `ECMAScript`).
+
+### APiBR vacancy label mapping
+
+Issue [#180](https://github.com/fatecsp-tmp-cary/esw3_cvmatcher/issues/180)
+requires canonical seniority and work arrangement to remain empty when evidence
+is missing or conflicting. This feature supersedes the earlier #168
+first-recognized-label rule: map exact shared aliases from vacancy-level labels
+and title-derived source `keywords`, requiring exactly one distinct category.
+Repository `topic` labels never establish vacancy categories or skills. Known
+leading decorations and `Level-`/`Lang-` prefixes may be removed before lookup;
+unknown values remain unclassified. Repeated aliases for the same category agree.
+
+Map recognized exact skill aliases into deduplicated, sorted canonical skills.
+Keep every source label name as a keyword, including topics. Under ADR-019,
+seniority/work-arrangement use title-first exact aliases with named/checked body
+fallback; free prose is not interpreted. This does not invent mandatory status or
+apply geographic eligibility. Field changes participate in the existing content hash and invalidate
+extraction/embedding readiness. See the
+[source adapter guide](../../docs/data/source-adapters.md#label-metadata-field-mapping).
+Title-first field precedence and provenance-filtered displayed skills are implemented under ADR-019 in PR #197.
 
 ## Lifecycle and indexing
 
@@ -67,7 +92,11 @@ jobs of that source `STALE`
 `STALE→EXPIRED` is approved after three qualifying absence snapshots, including
 the first STALE transition; no age trigger is selected (ADR-020). Supporting
 counters and expiry implementation remain pending #145. Reliable explicit
-`source_expires_at` may expire immediately. Rediscovery reactivates stale jobs.
+`source_expires_at` may expire immediately. Adapters must normalize this only
+from a supported reliable upstream expiry field as a timezone-aware datetime,
+without fallback dates; APiBR currently emits null. The explicit-expiry sweep
+coordinates with all bounded ingestion stripes before changing rows, preserving
+observation/verification timestamps and terminal expiration. Rediscovery reactivates stale jobs.
 `EXPIRED` is terminal even if a source later reopens the record.
 Retain expired records; physical deletion is out of MVP.
 
@@ -77,7 +106,8 @@ hash updates the job, reindexes text, nulls its embedding, and schedules
 regeneration. Unchanged content is not updated. Model/version changes
 independently invalidate and regenerate embeddings.
 
-Only jobs with successful extraction enter matching retrieval. Active jobs are
+Only jobs with current successful extraction and a valid current embedding enter
+production matching retrieval, including the textual path (ADR-024). Active jobs are
 ranked first; jobs in any other status only fill the remaining positions after
 them, with `eligibility: false`
 ([ADR-016](../../docs/architecture/decisions/ADR-016-inactive-jobs-complete-ranked-matches.md)).
@@ -89,12 +119,25 @@ keywords, skills, normalized requirements, and location. Portuguese any-term FTS
 uses A title/skills, B company/keywords/normalized requirements and D
 description/location, PostgreSQL JSON text rendering and descending publication
 date then platform/source-ID ties under ADR-004/005. All retrieval paths require
-successful extraction for current content/configuration. Semantic job representation is title,
-normalized skills, requirements, relevant description, location, and mode.
+successful extraction for current content/configuration. The implemented FTS
+helpers fail closed when readiness is omitted. The request-scoped pipeline
+supplies combined current extraction/embedding readiness, unions considered
+candidates, then rechecks the selected status group, processing readiness and
+final evidence. A candidate remains only if both processing gates pass and it has
+current textual evidence or available experience/education semantic evidence.
+Textual matches cannot remain without a current vector. Already-returned IDs are
+excluded before either inactive retrieval LIMIT; a concurrent active-to-inactive
+transition cannot repeat a job or consume a remaining recommendation slot. Projects/competencies/languages alone
+do not trigger semantic retrieval. Production API composition is implemented in #175. Semantic job representation is title,
+normalized skills, current normalized requirement texts (sorted and deduplicated),
+relevant description, location string values in sorted-key order, and mode. Passage
+representation is part of the embedding policy identity; its changes require
+regeneration even when source content is unchanged.
 Candidate representation is job titles, occupations, skills, experience,
 education, certifications, languages, and preferences. Persist only job
 embeddings in pgvector; candidate embeddings stay in memory. Jobs without a
-current valid embedding are excluded from semantic retrieval while missing.
+current valid embedding are excluded from all production matching retrieval
+while missing, including textual-only candidates (ADR-024).
 
 ## Matching and API
 
@@ -113,6 +156,8 @@ then aggregate with greater weight for more recent selected experiences. Combine
 that result with the highest semantic education score. Use existing education
 course/level fields; do not add a public description field. Fewer than three
 experiences use all available entries; missing sections never fabricate evidence.
+Normalize only available section weights, including extreme finite ratios.
+Retrieval-pool limits are positive integer counts, validated before SQL retrieval.
 Initial semantic mixing is 80% experience / 20% education; distinct recency
 groups use weights 1.5/1.25/1.0 with equal weight for equal recency. Calibration
 and reviewed-example validation remain pending; see
@@ -150,11 +195,7 @@ The response is `MatchesResponse {matches: MatchResult[]}`. Each result contains
 `missing_requirements`, `embedding_model`, and `algorithm_version`. The nested
 job contains `id` (the stable positive integer persisted job ID), `company`, `title`, `description`, `keywords`, `location`,
 `work_arrangement`, `seniority_level`, `skills`, `salary`, `currency`,
-`job_url`, and `publication_date`. The `skills` of a result are the job's own
-skills plus the skills the worker associated with it from explicit requirement
-contexts
-([ADR-017](../../docs/architecture/decisions/ADR-017-job-field-evidence-order-and-extracted-skills.md)).
-The public contract omits `curriculo_id`
+`job_url`, and `publication_date`. The public contract omits `curriculo_id`
 and internal component scores. Ranking order is represented by
 array order and `rank`. `GET /health` returns `{"status":"ok"}`. FastAPI
 publishes the OpenAPI schema and Swagger UI.
@@ -181,6 +222,23 @@ failures. Scheduler flow: lock source → poll/fetch → validate → normalize 
 upsert → lifecycle update → schedule indexing/embedding. Distinguish found,
 created, updated, unchanged, and absent-from-complete-snapshot. PostgreSQL locks
 prevent overlapping same-source runs/conflicting lifecycle operations.
+
+Implemented source-identity upserts use 256 bounded PostgreSQL advisory-lock
+stripes shared by all writers. APiBR fetches and normalizes the scan before
+identity locking, acquires the complete stripe set in ascending order, then
+applies observations in source order with per-record rejection savepoints and
+one outer commit. Fetch/pagination or unexpected write failure leaves no job
+changes. Other multi-record callers must acquire their full stripe set before
+writing; no remote I/O may run while identity locks are held. Stripe collisions
+may serialize unrelated identities without merging their records. The implemented
+`SourceScheduler` separately holds per-source session advisory locks on an
+independent connection across polling commits. Bounded worker cycles coordinate
+source polling, reliable expiry, extraction and embedding maintenance.
+
+Explicit extraction retry is database-only: lock and refresh the stored job,
+reject missing/EXPIRED IDs without changing extraction state, then reset eligible
+work using the configured extraction version in the same transaction. Prepared
+model artifacts are required for processing, not for this recovery operation.
 
 Worker handles polling, normalization, expiration, indexing, embedding, and
 model-change reprocessing. Scheduler may be bundled or separate. Embedding work
@@ -257,8 +315,27 @@ Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-st
 
 The accepted expiration threshold is three qualifying absence snapshots, including the one that first marks STALE. No age-based threshold is selected. Bad scans do not advance the count; rediscovery resets it. Supporting counters remain outside canonical Job.
 
-## Field-evidence interview — issue #196 / PR #197
+## Resolved clarification: all-result readiness (PR #195 review)
+
+[ADR-024](../../docs/architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md)
+resolves the ADR-016/issue #194 conflict: every returned job requires current
+successful extraction and a valid current embedding, in both active and inactive
+groups, including textual retrieval. The pipeline now applies that combined
+predicate at retrieval and final rechecks. Per-group invalidation and independent
+status-transition regressions are recorded in the PR #195 review; acceptance of
+the decision alone is not release or model-quality approval.
+
+## Compose implementation status at PR #177
+
+The production API/worker/database composition, pinned model preparation,
+persistent volumes and recovery scripts are implemented. Local host database
+tools require the explicit development port overlay; production does not publish
+the database. See [deployment](../../docs/operations/deployment.md) for the
+procedure. Static configuration checks are not deployment or quality acceptance.
+
+
+## Field evidence and displayed skills — issue #196 / PR #197
 
 Authority: [ADR-019](../../docs/architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md).
 
-Job field source priority is title > typed labels > named/checked body fields. Resolve title/selected-body values by the approved orders; conflicting labels may fall through to checked body options; specialist/coordinator ties use first occurrence. Add only exact affirmative non-conflicting extracted skills to displayed source skills. Current draft code still implements ADR-017 and requires correction.
+Seniority and work arrangement use title evidence first, then a usable typed vacancy label, then explicit named or checked body fields. Conflicting labels may fall through to checked body options. Title/body values use the accepted category order, with first occurrence resolving the specialist/coordinator tie. Displayed job skills include source skills and only exact, affirmative, non-negated, non-conflicting extracted skills supported by current extraction provenance. This response projection does not change stored source fields, score support, or the public DTO. Implementation and regressions are recorded in the PR #197 review.

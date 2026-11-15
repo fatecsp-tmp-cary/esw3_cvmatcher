@@ -80,8 +80,9 @@ The executor accepts `CurriculumRequest` and `limit`.
 Transient normalization is implemented by `normalize_curriculum` into an immutable
 `NormalizedCandidate`, preserving section order, all text, dates, proficiency,
 education level/status and projects, while excluding the UUID. This projection
-adds no collection/text caps and accepts empty sections. Production pipeline integration uses this projection; the legacy `CandidateProfile` is not used as a
-second public-input validator.
+adds no collection/text caps and accepts empty sections. The matching pipeline
+uses this projection and is composed by the production API in #175.
+The legacy `CandidateProfile` must not become a second public-input validator.
 
 ## Implementation decisions
 
@@ -91,8 +92,9 @@ second public-input validator.
   migrations and terminal EXPIRED. Preserve description sections;
   omit raw payloads until retention rights are established.
 - [ADR-003](../../docs/architecture/decisions/ADR-003-apibr-availability-and-partial-runs.md)
-  records conservative unknown availability, no default verifier, per-record
-  rejection and PARTIAL commits. Network failures roll back job changes; partial
+  originally records conservative unknown availability, superseded for APiBR
+  listing presence by ADR-014. Its no-default-verifier, per-record rejection
+  and PARTIAL-commit rules remain in force. Network failures roll back job changes; partial
   runs do not advance last_success_at or absence-based lifecycle evidence.
 
 ## Unresolved; address before dependent implementation
@@ -104,8 +106,7 @@ second public-input validator.
    so listed jobs are ACTIVE. No hidden verifier is enabled. Under accepted
    ADR-015, a job absent from a qualifying SNAPSHOT poll becomes STALE; no
    incremental, partial, failed or non-qualifying scan may mark absent jobs
-   stale. ADR-020 selects three qualifying absent snapshots for STALE→EXPIRED;
-   counter/expiry implementation remains #145.
+   stale, and STALE→EXPIRED counter implementation remains pending #145 under ADR-020.
 2. The pinned multilingual E5 model/version and separate provenance are implemented
    (#26/#118/#140); empirical calibration/release approval remains pending. Preserve
    the fixed canonical Job fields.
@@ -144,7 +145,9 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   See [scoring policy](../../docs/match/scoring-policy.md).
   Recency grouping uses initial weights **1.5 / 1.25 / 1.0**, with equal recency
   receiving equal weight. Similarity calibration and release validation remain
-  pending; the aggregation primitive is implemented and wired to pinned local inference, with provisional calibration.
+  pending; the deterministic aggregation primitive is implemented in #173 and
+  request-scoped inference/retrieval/scoring in #174. Production API composition
+  is implemented in #175 and calibration remains provisional.
 - Pinned GLiNER revision/labels, provisional confidence, separate evidence storage
   and bounded retry/reprocessing are implemented; see [local GLiNER](../../docs/data/local-gliner.md).
   Mandatory exclusion remains disabled until independently measured quality and
@@ -169,13 +172,16 @@ Authority: [ADR-008](../../docs/architecture/decisions/ADR-008-extraction-contra
   HTTPS, global rate-limit and database-access protections (authentication is
   intentionally absent under ADR-009).
 
-See [deployment behavior](spec.md#docker-compose-deployment). The pinned offline Compose smoke passed again after main reconciliation,
-including worker/API processing, replacement durability and backup/restore.
+See [deployment behavior](spec.md#docker-compose-deployment). The pinned offline Compose smoke is historical evidence from the original
+integration after main reconciliation, including worker/API processing, replacement
+durability and backup/restore. It has not been rerun for this branch; current-head
+Compose acceptance remains pending.
 Evidence and remaining release checks are tracked in [tasks](tasks.md).
 
 ## Implementation interview: readiness and performance
 
-- Withhold jobs from every matching path until extraction succeeds. Extraction
+- Withhold jobs from every production matching path until current extraction and
+  embedding succeed (ADR-024). Extraction
   failure is not an availability transition. After three failed attempts, record
   failure, emit a structured local error log and require explicit retry.
   No email/webhook alert integration is required. Details and remaining
@@ -283,9 +289,106 @@ Authority: [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverag
 
 Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
 
-## Deferred external deployment and source expansion
 
-Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
+## Concurrent source-identity persistence
+
+- Concurrent inserts/updates preserve unique platform/source identity, content
+  hashes, terminal expiration and refreshed committed lifecycle evidence.
+- Reversed overlapping APiBR scans complete without deadlock. All remote page
+  fetches precede identity locking; batch locks use a deterministic order and
+  no more than 256 stripes regardless of record count.
+- Per-record malformed data remains isolated. Unexpected persistence failure
+  rolls back every job change in that scan and records a failed run.
+
+These incremental regressions are recorded in the
+[PR #167 review](../../docs/reports/2026-11-14-pr167-review.md).
+
+
+## Explicit source-timestamp expiration
+
+Due reliable source expiry expires nonterminal records once, preserves retained
+history and first/last observation plus verification timestamps, and remains
+terminal when ingestion runs concurrently. Ambiguous expiry/clock representations
+are rejected. A partial due-time index agrees with migrated PostgreSQL metadata.
+See the [PR #169 review](../../docs/reports/2026-11-14-pr169-review.md).
+
+
+## PR #171 embedding maintenance acceptance
+
+Equivalent normalized location objects must produce identical passages despite
+JSON key insertion order. Current normalized requirements participate in passages;
+changed extraction/model/passage-policy versions invalidate prior vectors.
+Independent-connection tests must preserve skip-locked claims without locking Job
+rows, and preparation must set telemetry configuration before importing the hub.
+Current-head verification is recorded in the
+[PR #171 review](../../docs/reports/2026-11-14-pr171-review.md).
+
+
+## PR #173 scoring regressions
+
+Ranking configuration rejects non-integer and nonpositive retrieval counts before
+SQL retrieval. Semantic aggregation normalizes over available sections even for
+extreme positive finite weight ratios; a missing section cannot erase the other
+section's evidence. Defaults and final blend remain unchanged. See the
+[review record](../../docs/reports/2026-11-14-pr173-review.md).
+
+## Request-scoped matching pipeline verification
+
+- Empty curricula return no matches before encoding or database access. Without
+  experience/education, no semantic query is invented from other sections; actual
+  textual evidence remains eligible for textual/structured scoring only when the
+  job has current successful extraction and embedding provenance under ADR-024.
+- Textual/semantic union deduplicates persisted job IDs. Active jobs rank first;
+  inactive jobs only fill remaining positions. Every result requires current
+  successful extraction and embedding provenance, including current model, content,
+  extraction version and valid vector dimensions. Recheck final textual/vector
+  evidence so stale pool hits cannot become unscored recommendations. Exclude
+  already-returned IDs before inactive retrieval limits, including during a
+  concurrent active-to-inactive transition.
+- Invalid encoder counts/vectors fail explicitly. Final scores/order/ranks remain
+  deterministic; candidate identity/content stay out of logs and responses, and
+  contrasting job locations/modes never create geographic eligibility exclusions.
+
+See the [PR #174 review](../../docs/reports/2026-11-14-pr174-review.md) for scoped
+verification. Production API composition is implemented in #175; release acceptance remains pending.
+
+
+## Production API composition verification
+
+- The module application runs the production executor with successful/empty
+  stubbed-pipeline results while preserving the curriculum contract and limit.
+- Recognized database/model outages return sanitized 503 responses; unexpected
+  application errors return sanitized 500 responses with type/source diagnostics.
+  Neither path echoes candidate or library exception values.
+- Health invokes both database and model readiness, distinguishing dependency
+  outages from programming errors. Missing database configuration fails closed.
+- Lazy factory composition uses the configured session factory, local model cache
+  and extraction version and reuses the resulting pipeline.
+
+Current scoped evidence is in the
+[PR #175 review](../../docs/reports/2026-11-15-pr175-review.md). These boundary
+regressions do not constitute independent model-quality or deployment acceptance.
+
+
+## Worker recovery verification
+
+The production worker is implemented in #176 with bounded cycles and independent
+per-source coordination. Explicit retry must function without prepared inference
+artifacts, preserve availability, and reject missing or terminal jobs without
+creating/resetting extraction state. Database tests verify the terminal check and
+reset retain the same job lock. Compose/recovery packaging is supplied by #177;
+current worker tests do not establish deployment or model-quality acceptance.
+
+## PR #177 configuration verification
+
+Verify both production and development Compose configurations, retaining no host
+database port in production and loopback-only exposure in development. README
+commands must select the overlay consistently. Packaging is implemented; actual
+model/Compose/recovery and independent quality acceptance require their own
+evidence. See [review scope](../../docs/reports/2026-11-15-pr177-review.md).
+
+
+## Deferred deployment and second source
 
 Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
 
@@ -295,8 +398,11 @@ Authority: [ADR-020](../../docs/architecture/decisions/ADR-020-three-snapshot-st
 
 Implement #145 three-snapshot expiration with count/reset/transaction/source-isolation/terminal-state boundary tests; retain the existing one-snapshot STALE transition and timestamp expiry.
 
-## Field-evidence interview — issue #196 / PR #197
 
-Authority: [ADR-019](../../docs/architecture/decisions/ADR-019-title-first-job-evidence-and-displayed-skills.md).
+## PR #197 field-evidence acceptance
 
-Update #196 implementation/tests to ADR-019, retaining dotted-name boundaries, exact aliases, approved ordering/ties, checked body fallback, provenance-filtered skills, public DTO shape and score-only safety.
+- Seniority/work-arrangement precedence follows ADR-019: title, usable typed vacancy labels, then explicit named/checked body fields. Exact aliases, dotted-name boundaries, approved ordering and tie behavior are covered.
+- A conflicting label set may use checked body evidence; unselected body options and free prose do not classify a field.
+- Displayed skills add only exact affirmative non-conflicting extracted skills with current successful provenance. Missing/stale provenance cannot authorize display, and score associations remain intact. Source skills, stored content/hash, public DTO shape, and score-only safety remain unchanged.
+
+See the [PR #197 review](../../docs/reports/2026-11-15-pr197-review.md) for current-head verification.

@@ -15,11 +15,15 @@ from src.domain.requirements import comparable_score
 from src.embeddings.config import EmbeddingConfig
 from src.embeddings.retrieval import retrieve_semantic
 from src.embeddings.service import ready_predicate as embedding_ready
-from src.extraction.service import ready_predicate as extraction_ready
 from src.extraction.taxonomy import _ALIASES, find_skills, normalize_skill
 from src.indexing.textual import TEXTUAL_VERSION
 from src.matching.ranking import RankingPolicy, SimilarityCalibration
-from src.matching.semantic import ExperienceScore, selected_experience_indices, semantic_score
+from src.matching.semantic import (
+    ExperienceScore,
+    SemanticPolicy,
+    selected_experience_indices,
+    semantic_score,
+)
 from src.matching.textual import candidate_query_text, retrieve_textual, textual_statement
 from src.normalization.candidate.curriculum import normalize_curriculum
 from src.persistence.extraction import JobExtraction
@@ -34,11 +38,7 @@ DISPLAYED_SKILLS_VERSION = "exact-affirmative-nonconflicting-v1"
 
 
 def trusted_extracted_skills(evidence: list[dict[str, object]] | None) -> set[str]:
-    """Names supported by exact, affirmative, unambiguous extraction evidence.
-
-    Missing provenance is unknown. Score-only JobSkill associations are not proof
-    of display trust, and remain independent from this response-only projection.
-    """
+    """Return exact, affirmative, non-conflicting extracted skill names."""
     return {
         normalize_skill(name)
         for row in evidence or []
@@ -53,11 +53,7 @@ def trusted_extracted_skills(evidence: list[dict[str, object]] | None) -> set[st
 
 
 def displayed_skills(own: list[str] | None, extracted: dict[str, str]) -> list[str] | None:
-    """Union of the job's own skills and the skills the worker associated with it.
-
-    Deduplicated by normalized name and ordered deterministically. The job's own
-    spelling wins; without any skill the stored value is returned unchanged.
-    """
+    """Merge source skills with trusted extracted skills deterministically."""
     merged = {normalize_skill(skill): skill for skill in own or [] if skill.strip()}
     for key, name in extracted.items():
         merged.setdefault(key, name)
@@ -103,8 +99,9 @@ class MatchingPipeline:
             "extraction": self.extraction_version,
             "textual_policy": TEXTUAL_VERSION,
             "structured_policy": REQUIREMENTS_VERSION,
-            "semantic_policy": "semantic-aggregation-v1-provisional",
+            "semantic_policy": SemanticPolicy().version,
             "displayed_skills_policy": DISPLAYED_SKILLS_VERSION,
+            "retrieval_policy": "all-result-readiness-unique-status-groups-v3",
         }
         digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()[:16]
         return f"{self.ranking.version}:{self.calibration.version}:{digest}"
@@ -144,15 +141,15 @@ class MatchingPipeline:
         education_texts = [f"{x.course}\n{x.level}" for x in candidate.education]
         texts = experience_texts + education_texts
         checkpoint()
-        vectors = self.encoder.encode_queries(texts or [query_text])
+        vectors = self.encoder.encode_queries(texts) if texts else []
         checkpoint()
-        if len(vectors) != len(texts or [query_text]):
+        if len(vectors) != len(texts):
             raise ValueError("Invalid embedding result count")
         from src.embeddings.encoder import normalized_vector
 
         vectors = [normalized_vector(vector) for vector in vectors]
         config = self.encoder.config
-        gate = extraction_ready(self.extraction_version)
+        gate = embedding_ready(config, self.extraction_version)
         checkpoint()
         with self.sessions() as session:
             matches: list[MatchResult] = []
@@ -160,11 +157,15 @@ class MatchingPipeline:
             for statuses, eligible in ((ACTIVE_STATUSES, True), (INACTIVE_STATUSES, False)):
                 if len(matches) >= limit:
                     break
+                # Exclude prior results in SQL before either retrieval LIMIT.
+                # A concurrent status transition must not consume an inactive slot.
+                returned_ids = tuple(sorted(match.job.id for match in matches))
+                group_gate = gate & Job.id.not_in(returned_ids) if returned_ids else gate
                 pool: set[int] = set()
                 for job, _ in retrieve_textual(
                     session,
                     candidate,
-                    readiness=gate,
+                    readiness=group_gate,
                     limit=self.ranking.retrieval_limit,
                     statuses=statuses,
                 ):
@@ -179,6 +180,7 @@ class MatchingPipeline:
                         self.extraction_version,
                         limit=self.ranking.retrieval_limit,
                         statuses=statuses,
+                        exclude_ids=returned_ids,
                     ):
                         pool.add(job.id)
                 if not pool:
@@ -186,7 +188,7 @@ class MatchingPipeline:
                 checkpoint()
                 jobs = session.scalars(
                     select(Job)
-                    .where(Job.id.in_(sorted(pool)), status_predicate(statuses), gate)
+                    .where(Job.id.in_(sorted(pool)), status_predicate(statuses), group_gate)
                     .order_by(Job.platform, Job.source_job_id, Job.id)
                     .execution_options(populate_existing=True)
                 ).all()
@@ -195,7 +197,8 @@ class MatchingPipeline:
                     session.scalars(
                         select(Job.id).where(
                             Job.id.in_(sorted(pool)),
-                            embedding_ready(config, self.extraction_version),
+                            status_predicate(statuses),
+                            group_gate,
                         )
                     )
                 )
@@ -205,10 +208,17 @@ class MatchingPipeline:
                     job.id: float(score)
                     for job, score in session.execute(
                         textual_statement(
-                            query_text, readiness=gate, limit=len(pool), statuses=statuses
+                            query_text, readiness=group_gate, limit=len(pool), statuses=statuses
                         ).where(Job.id.in_(sorted(pool)))
                     )
                 }
+                # ADR-024 requires both current extraction and vector provenance,
+                # even for textual-only candidates. Recheck after pool retrieval.
+                jobs = [
+                    job
+                    for job in jobs
+                    if job.id in vector_jobs and (job.id in text_scores or texts)
+                ]
                 associated_skills: dict[int, set[str]] = {}
                 extracted_names: dict[int, dict[str, str]] = {}
                 trusted_names = {

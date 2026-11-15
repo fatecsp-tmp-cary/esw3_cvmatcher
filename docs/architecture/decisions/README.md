@@ -23,11 +23,12 @@ new accepted records supersede the relevant rules rather than rewriting history.
 | 016 | [Inactive jobs complete the ranked matches after active jobs](ADR-016-inactive-jobs-complete-ranked-matches.md) | Accepted |
 | 017 | [Evidence order for APiBR job fields and extracted skills in results](ADR-017-job-field-evidence-order-and-extracted-skills.md) | Original proposal preserved; field/display rules superseded by ADR-019 |
 | 018 | [Clause-local extraction and approximate score evidence](ADR-018-extraction-context-and-approximate-evidence.md) | Accepted extraction policy, renumbered from the colliding extraction ADR-014 |
-| 019 | [Title-first job fields and trustworthy displayed skills](ADR-019-title-first-job-evidence-and-displayed-skills.md) | Accepted policy; implementation and verification pending |
+| 019 | [Title-first job fields and trustworthy displayed skills](ADR-019-title-first-job-evidence-and-displayed-skills.md) | Accepted and implemented in PR #197 |
 | 020 | [Three qualifying absence snapshots expire stale jobs](ADR-020-three-snapshot-stale-expiration.md) | Accepted policy; implementation and verification pending |
 | 021 | [Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) | Accepted policy; implementation and verification pending |
 | 022 | [Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) | Accepted policy; implementation and verification pending |
 | 023 | [External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) | Accepted deferral; no external deployment or second source authorized |
+| 024 | [Current extraction and embeddings for every returned job](ADR-024-all-result-extraction-and-embedding-readiness.md) | Accepted and implemented in PR #195 |
 
 ## Identifier reconciliation
 
@@ -41,7 +42,4 @@ different accepted field/display policy.
 
 ## Implementation authority
 
-Feature specs/acceptance/plan/tasks and supporting documents track the pending
-changes for ADR-019 through ADR-022. Historical test reports do not verify these
-new policies. ADR-023 keeps external deployment and source expansion deferred.
-No hard exclusions, merge or release approval follow from a documentation update.
+Feature specs/acceptance/plan/tasks track ADR-019 implementation as complete in PR #197 and ADR-020/021/022 as accepted follow-up work. ADR-023 keeps external deployment and source expansion deferred. ADR-024 records current extraction and embedding readiness for every returned job. No hard exclusions or release approval follow from a documentation update.
