@@ -11,26 +11,38 @@ acceptance criteria, plan, and task status are in
 
 ## Local PostgreSQL
 
-Integration and e2e tests, and eventually the application itself, need a local
+Integration and e2e tests and the application need a local
 PostgreSQL with `pgvector`. Start it with:
 
 ```bash
 cp .env.example .env   # first time only; adjust values if needed
-docker compose up -d
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
-This starts `pgvector/pgvector:pg17` on `localhost:5432` with the credentials
-from `.env` (defaults: user/password/db `cvmatch`). Check it's ready with:
+This starts the pinned PostgreSQL 17 + pgvector image with a loopback-only
+host port, using the credentials from `.env` (example user/password/db: `cvmatch`).
+The base Compose file keeps PostgreSQL unexposed; host tools require the explicit
+development overlay. Check readiness with:
 
 ```bash
-docker compose ps                       # STATUS should be "healthy"
-psql "$DATABASE_URL" -c "select 1;"     # or: docker compose exec postgres pg_isready
+docker compose -f docker-compose.yml -f docker-compose.dev.yml ps
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec postgres pg_isready -U cvmatch
 ```
 
-Stop it with `docker compose down` (add `-v` to also drop the data volume).
+Use your configured `POSTGRES_USER` in place of `cvmatch` if changed. After exporting
+`DATABASE_URL` as described under [migrations](#database-migrations), host tools can
+connect to `localhost:5432`. If that port is occupied, change `POSTGRES_PORT` in
+`.env` and use the same port in `DATABASE_URL`; keep both Compose files selected.
 
-If port 5432 is already taken (for example by a PostgreSQL installed on your machine),
-change `POSTGRES_PORT` in `.env` and use the same port in `DATABASE_URL`.
+Stop the development database while retaining its volume with:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+```
+
+For the API, worker, model caches and production network boundary, follow the
+[deployment procedure](docs/operations/deployment.md). Production does not load
+the development overlay.
 
 ## Runnable API mock
 

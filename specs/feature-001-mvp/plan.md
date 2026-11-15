@@ -33,8 +33,8 @@ absence-based lifecycle changes remain separate policy/implementation work.
 7. Production matching API and privacy-safe readiness/error composition are
    implemented in #175. Bounded background processing and database-only explicit
    retry are implemented in #176. Complete bounded availability verification,
-   lifecycle policies, Compose packaging/operations in #177, and
-   release regressions. Complete the initial textual matching slice.
+   lifecycle policies and release regressions. Compose packaging/recovery tooling
+   is implemented in #177; current-head operational acceptance remains separate. Complete the initial textual matching slice.
 
 Current implementation status is in [tasks](tasks.md); requirements
 and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).

@@ -273,3 +273,11 @@ Only explicit REQUIRED concepts enter the ADR-021 threshold: all below three, ot
 Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
 
 External hosting/HTTPS deployment and second-source research/selection remain deferred. Local pre-production and APiBR remain the authorized scope.
+
+## Compose implementation status at PR #177
+
+The production API/worker/database composition, pinned model preparation,
+persistent volumes and recovery scripts are implemented. Local host database
+tools require the explicit development port overlay; production does not publish
+the database. See [deployment](../../docs/operations/deployment.md) for the
+procedure. Static configuration checks are not deployment or quality acceptance.

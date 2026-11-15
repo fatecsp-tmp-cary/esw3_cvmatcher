@@ -24,8 +24,9 @@ is defined in the [MVP spec](../../specs/feature-001-mvp/spec.md#docker-compose-
 
 Production API composition (#175) and bounded PostgreSQL-coordinated worker
 composition (#176) are implemented. Explicit extraction recovery uses a separate
-database-only path. Compose packaging belongs to #177; operational deployment
-acceptance remains pending.
+database-only path. Compose packaging/recovery tooling is implemented in #177,
+including an explicit development-only database port overlay. Current-head
+operational deployment acceptance remains pending.
 
 The production and mock APIs share public request/response models in
 `src/schemas/`. Canonical work-arrangement and seniority enums live in

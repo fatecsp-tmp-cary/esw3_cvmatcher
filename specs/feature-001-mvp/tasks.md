@@ -65,7 +65,8 @@ Requirements and completion gates are in [spec](spec.md),
 - [ ] Lifecycle policies. Never infer absence from an unproven scan.
 - [ ] ADR-022 textual normalization/retrieval changes, a fixed
       release regression fixture and vertical-slice acceptance validation.
-- [ ] Compose packaging/recovery operations (#177) and deployment acceptance;
+- [ ] Current-head Compose deployment/recovery acceptance; packaging and recovery
+      tooling are implemented in #177;
       language/accent investigation remains a tracked follow-up.
 - [ ] Release coverage and the initial textual matching slice.
 - [ ] Additional-source selection/adapter, separate from the at-least-one-source
@@ -181,3 +182,11 @@ are implemented. Fake-encoder PostgreSQL regressions cover empty/competency-only
 input, deduplication, stale/inactive provenance, invalid vectors/counts, stable
 ordering and privacy/geography invariants. See the
 [review record](../../docs/reports/2026-11-14-pr174-review.md) for actual results.
+
+## PR #177 incremental verification
+
+Compose packaging and recovery tooling are implemented. Local host database
+instructions select the development overlay for startup/status/shutdown and
+custom ports; production keeps the database unexposed. Current-head configuration
+and review evidence are recorded in [the review report](../../docs/reports/2026-11-15-pr177-review.md).
+Operational/model/quality release acceptance remains separate.

@@ -366,3 +366,11 @@ artifacts, preserve availability, and reject missing or terminal jobs without
 creating/resetting extraction state. Database tests verify the terminal check and
 reset retain the same job lock. Compose/recovery packaging is supplied by #177;
 current worker tests do not establish deployment or model-quality acceptance.
+
+## PR #177 configuration verification
+
+Verify both production and development Compose configurations, retaining no host
+database port in production and loopback-only exposure in development. README
+commands must select the overlay consistently. Packaging is implemented; actual
+model/Compose/recovery and independent quality acceptance require their own
+evidence. See [review scope](../../docs/reports/2026-11-15-pr177-review.md).
