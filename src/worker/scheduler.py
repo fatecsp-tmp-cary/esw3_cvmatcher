@@ -3,7 +3,8 @@
 import json
 import logging
 import re
-from collections.abc import Callable, Iterator, Mapping
+from collections import deque
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime, time, timedelta, tzinfo
@@ -112,6 +113,7 @@ class SourceScheduler:
         self.daily_at = daily_at
         self.timezone = timezone
         self.startup_min_gap = timedelta(seconds=startup_min_gap_seconds)
+        self._startup_sources: deque[int] | None = None
 
     def _next_run(self, after: datetime, interval: int) -> datetime:
         """A configured daily time replaces interval polling for every source."""
@@ -147,6 +149,53 @@ class SourceScheduler:
                 .order_by(JobSource.next_run_at.asc().nullsfirst(), JobSource.id)
                 .limit(limit)
             ).all()
+        return self._poll_identifiers(identifiers, now=now, force=force)
+
+    @property
+    def startup_pending(self) -> bool:
+        """Whether this scheduler still has startup work, including initialization."""
+        return self._startup_sources is None or bool(self._startup_sources)
+
+    def run_startup(
+        self, *, now: datetime | None = None, limit: int = 10
+    ) -> tuple[PollOutcome, ...]:
+        """Attempt a bounded part of the startup snapshot exactly once per source.
+
+        The recent-run guard is applied when capturing the enabled source IDs and
+        again under the source lock. Busy locks and failed attempts consume their
+        queue entry; newly enabled sources use normal scheduling. A failure while
+        processing one entry leaves the unattempted remainder for later cycles.
+        """
+        if type(limit) is not int or limit <= 0:
+            raise ValueError("source batch limit must be a positive integer")
+        if self._startup_sources is None:
+            due_at = now or self.clock()
+            with self.sessions() as session:
+                identifiers = session.scalars(
+                    select(JobSource.id)
+                    .where(
+                        JobSource.enabled.is_(True),
+                        or_(
+                            JobSource.last_run_at.is_(None),
+                            JobSource.last_run_at <= due_at - self.startup_min_gap,
+                        ),
+                    )
+                    .order_by(JobSource.next_run_at.asc().nullsfirst(), JobSource.id)
+                ).all()
+            self._startup_sources = deque(identifiers)
+        pending = self._startup_sources
+
+        def batch() -> Iterator[int]:
+            for _ in range(limit):
+                if not pending:
+                    break
+                yield pending.popleft()
+
+        return self._poll_identifiers(batch(), now=now, force=True)
+
+    def _poll_identifiers(
+        self, identifiers: Iterable[int], *, now: datetime | None, force: bool
+    ) -> tuple[PollOutcome, ...]:
         outcomes = []
         for source_id in identifiers:
             with source_lock(self.engine, source_id) as acquired:

@@ -90,3 +90,16 @@ def test_large_finite_relative_weights_do_not_overflow():
     assert semantic_score(
         (experience(100, 2025), experience(0, 2000)), (0,), policy
     ) == pytest.approx(100 / 3)
+
+
+@pytest.mark.parametrize("available", ["experience", "education"])
+def test_absent_section_weight_cannot_underflow_available_evidence(available):
+    experience_only = available == "experience"
+    policy = SemanticPolicy(
+        experience_weight=1e-308 if experience_only else 1e308,
+        education_weight=1e308 if experience_only else 1e-308,
+    )
+    entries = (experience(100),) if experience_only else ()
+    education = () if experience_only else (100,)
+    assert semantic_score(entries, education, policy) == 100
+    assert policy.version == "semantic-aggregation-v2-provisional"
