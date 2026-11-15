@@ -2,9 +2,16 @@
 
 import copy
 import json
+from pathlib import Path
 
 import pytest
-from scripts.evaluation.evaluate import DEFAULT_FIXTURE, evaluate, main, validate_fixture
+from scripts.evaluation.evaluate import (
+    CURRENT_REVIEW_POLICY,
+    DEFAULT_FIXTURE,
+    evaluate,
+    main,
+    validate_fixture,
+)
 
 
 @pytest.fixture
@@ -57,6 +64,178 @@ def test_fixture_contract(fixture):
         group = [c for c in cases if c["language"] == language]
         assert {c["expected"]["role_relation"] for c in group} == {"relevant", "irrelevant"}
         assert any(len(c["job"]["description"]) > 4000 for c in group)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["missing", "null", "kind", "reviewer", "labels", "human", "measured", "approved"],
+)
+def test_evaluation_rejects_missing_or_false_agent_provenance(fixture, mutation):
+    if mutation == "missing":
+        fixture.pop("provenance")
+    elif mutation == "null":
+        fixture["provenance"] = None
+    else:
+        field, value = {
+            "kind": ("kind", "unreviewed"),
+            "reviewer": ("reviewer", " "),
+            "labels": ("labels_before_model_outputs", False),
+            "human": ("human_reviewed", True),
+            "measured": ("release_quality_measured", True),
+            "approved": ("release_quality_approved", True),
+        }[mutation]
+        fixture["provenance"][field] = value
+    with pytest.raises(ValueError, match="provenance"):
+        evaluate(fixture, oracle(fixture))
+
+
+@pytest.fixture
+def human_fixture(fixture):
+    # Synthetic metadata exercises the promotion format, never actual annotations.
+    partition_path = Path(__file__).resolve().parents[3] / "docs/match/human-review/partition.json"
+    partition = json.loads(partition_path.read_text())
+    fixture["provenance"] = {
+        "kind": "human-reviewed synthetic",
+        "human_reviewed": True,
+        "release_quality_measured": False,
+        "release_quality_approved": False,
+        "source_sha256": partition["source_sha256"],
+        "partition": partition,
+        "reviews": {
+            case["id"]: {
+                "reviewer": "synthetic-validation-only",
+                "reviewed_at": "2026-11-12T00:00:00Z",
+            }
+            for case in fixture["cases"]
+        },
+    }
+    return fixture
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["review", "reviewer", "timestamp", "timezone", "hash", "partition", "overlap", "duplicate"],
+)
+def test_invalid_review_records_cannot_claim_release_measurement(human_fixture, mutation):
+    provenance = human_fixture["provenance"]
+    ids = provenance["partition"]["heldout_ids"]
+    review = provenance["reviews"][ids[0]]
+    if mutation == "review":
+        provenance["reviews"][ids[0]] = None
+    elif mutation == "reviewer":
+        review["reviewer"] = ""
+    elif mutation == "timestamp":
+        review["reviewed_at"] = "not a timestamp"
+    elif mutation == "timezone":
+        review["reviewed_at"] = "2026-11-12T00:00:00"
+    elif mutation == "hash":
+        provenance["source_sha256"] = "invalid"
+    elif mutation == "partition":
+        provenance["partition"] = {"heldout_ids": ids}
+    elif mutation == "overlap":
+        provenance["partition"]["calibration_ids"] = list(ids)
+    else:
+        provenance["partition"]["calibration_ids"][0] = provenance["partition"]["calibration_ids"][
+            1
+        ]
+    with pytest.raises(ValueError):
+        evaluate(human_fixture, {"schema_version": "1.0", "predictions": []}, case_ids=ids)
+
+
+def test_policy_adjudication_cannot_restore_independence_by_omitting_flags(human_fixture):
+    human_fixture["provenance"].update(
+        {
+            "policy_adjudication": "synthetic-policy-test",
+            "policy_adjudication_method": "synthetic test metadata only",
+            "heldout_use": "regression only",
+        }
+    )
+    with pytest.raises(ValueError, match="regression-only"):
+        validate_fixture(human_fixture)
+
+
+def test_legacy_promoted_gold_is_valid_regression_without_fresh_independence(human_fixture):
+    ids = human_fixture["provenance"]["partition"]["heldout_ids"]
+    report = evaluate(human_fixture, {"schema_version": "1.0", "predictions": []}, case_ids=ids)
+    assert report["dataset_kind"] == "human-reviewed synthetic"
+    assert not report["heldout_independent"] and not report["release_quality_measured"]
+
+
+@pytest.mark.parametrize("policy_metadata", ["original", "removed", "explicit-fresh-claim"])
+def test_known_reused_corpus_cannot_regain_independent_acceptance(policy_metadata):
+    directory = Path(__file__).resolve().parents[3] / "docs/match/human-review/extraction-policy-v2"
+    name = "source-reviewed-gold.json" if policy_metadata == "original" else "gold.json"
+    fixture = json.loads((directory / name).read_text())
+    provenance = fixture["provenance"]
+    if policy_metadata != "original":
+        for field in (
+            "policy_adjudication",
+            "policy_adjudication_method",
+            "heldout_use",
+            "heldout_independent",
+            "labels_independently_reviewed_after_policy_change",
+        ):
+            provenance.pop(field, None)
+    if policy_metadata == "explicit-fresh-claim":
+        provenance.update(
+            {
+                "heldout_independent": True,
+                "labels_independently_reviewed_after_policy_change": True,
+                "independence_policy": CURRENT_REVIEW_POLICY,
+            }
+        )
+    ids = provenance["partition"]["heldout_ids"]
+    report = evaluate(fixture, {"schema_version": "1.0", "predictions": []}, case_ids=ids)
+    assert not report["heldout_independent"] and not report["release_quality_measured"]
+    assert not report["release_quality_approved"]
+
+
+@pytest.mark.parametrize("missing", ["policy", "heldout", "labels", "old-policy", None])
+def test_new_source_requires_explicit_current_policy_independence(human_fixture, missing):
+    # A synthetic metadata probe tests interpretation, never annotation quality.
+    provenance = human_fixture["provenance"]
+    provenance.update(
+        {
+            "source_sha256": "1" * 64,
+            "heldout_independent": True,
+            "labels_independently_reviewed_after_policy_change": True,
+            "independence_policy": CURRENT_REVIEW_POLICY,
+        }
+    )
+    provenance["partition"]["source_sha256"] = provenance["source_sha256"]
+    if missing == "old-policy":
+        provenance["independence_policy"] = "ADR-008"
+    elif missing is not None:
+        field = {
+            "policy": "independence_policy",
+            "heldout": "heldout_independent",
+            "labels": "labels_independently_reviewed_after_policy_change",
+        }[missing]
+        provenance.pop(field)
+    ids = provenance["partition"]["heldout_ids"]
+    report = evaluate(human_fixture, {"schema_version": "1.0", "predictions": []}, case_ids=ids)
+    assert report["release_quality_measured"] is (missing is None)
+    assert not report["heldout_targets_met"] and not report["release_quality_approved"]
+
+
+def test_cli_rejects_null_provenance_before_reading_partition(fixture, tmp_path):
+    fixture["provenance"] = None
+    fixture_path = tmp_path / "invalid-fixture.json"
+    fixture_path.write_text(json.dumps(fixture))
+    predictions = tmp_path / "predictions.json"
+    predictions.write_text(json.dumps({"schema_version": "1.0", "predictions": []}))
+    with pytest.raises(SystemExit) as exc:
+        main(
+            [
+                "--fixtures",
+                str(fixture_path),
+                "--predictions",
+                str(predictions),
+                "--partition",
+                "heldout",
+            ]
+        )
+    assert exc.value.code == 2
 
 
 @pytest.mark.parametrize("mutation", ["offset", "vocabulary", "identity", "id", "language"])

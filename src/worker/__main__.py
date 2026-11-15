@@ -7,7 +7,7 @@ import signal
 from collections.abc import Callable, Sequence
 from threading import Event
 
-from src.worker.bootstrap import create_default_worker
+from src.worker.bootstrap import create_default_worker, retry_default_extraction
 from src.worker.runtime import BackgroundWorker
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,14 @@ def main(
         "--retry-extraction", type=int, metavar="JOB_ID", help="Explicitly requeue a stored job"
     )
     args = parser.parse_args(argv)
+    # Recovery must work even when the serving model artifacts are unavailable.
+    if args.retry_extraction is not None and worker_factory is None:
+        try:
+            retry_default_extraction(args.retry_extraction)
+            return 0
+        except Exception:
+            logger.error(json.dumps({"event": "worker_operation_failed"}, sort_keys=True))
+            return 1
     try:
         worker = (worker_factory or create_default_worker)()
     except Exception:

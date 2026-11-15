@@ -11,23 +11,38 @@ acceptance criteria, plan, and task status are in
 
 ## Local PostgreSQL
 
-Integration/e2e tests and the application use PostgreSQL with pgvector. The
-base Compose file pins the selected image digest and keeps the database private.
-For local tools, explicitly add the loopback-only development overlay:
+Integration and e2e tests and the application need a local
+PostgreSQL with `pgvector`. Start it with:
 
 ```bash
-# First time only: copy .env.example to .env if .env does not exist; adjust it.
+# First time only: copy .env.example to .env if it does not exist; adjust values.
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
-Set POSTGRES_PASSWORD in the private environment file. User/database default to
-cvmatch; the development port defaults to 127.0.0.1:5432. Change POSTGRES_PORT
-and DATABASE_URL together when needed. Check readiness with the same two files
-and `compose ps`, or `psql "$DATABASE_URL" -c "select 1;"`.
+This starts the pinned PostgreSQL 17 + pgvector image with a loopback-only
+host port, using the credentials from `.env` (example user/password/db: `cvmatch`).
+The base Compose file keeps PostgreSQL unexposed; host tools require the explicit
+development overlay. Check readiness with:
 
-Stop using `docker compose -f docker-compose.yml -f docker-compose.dev.yml down`.
-Retain named volumes; see [deployment and recovery](docs/operations/deployment.md)
-for production composition, model preparation and backup procedures.
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml ps
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec postgres pg_isready -U cvmatch
+```
+
+Use your configured `POSTGRES_USER` in place of `cvmatch` if changed. After exporting
+`DATABASE_URL` as described under [migrations](#database-migrations), host tools can
+connect to `localhost:5432`. If that port is occupied, change `POSTGRES_PORT` in
+`.env` and use the same port in `DATABASE_URL`; keep both Compose files selected.
+
+Stop the development database while retaining its volume with:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+```
+
+For the API, worker, model caches and production network boundary, follow the
+[deployment procedure](docs/operations/deployment.md). Production does not load
+the development overlay.
 
 ## Run the complete stack
 
