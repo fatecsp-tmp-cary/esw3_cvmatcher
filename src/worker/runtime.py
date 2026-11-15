@@ -27,6 +27,22 @@ class CycleResult:
     errors: tuple[str, ...]
 
 
+def retry_extraction(sessions: Callable[[], Session], job_id: int, config_version: str) -> None:
+    """Requeue stored nonterminal work without constructing inference services."""
+    if type(job_id) is not int or job_id <= 0:
+        raise ValueError("job identity must be a positive integer")
+    with sessions() as session, session.begin():
+        job = session.scalar(
+            select(Job)
+            .where(Job.id == job_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+        if job is None or job.status == JobStatus.EXPIRED:
+            raise ValueError("retry requires a non-expired persisted job")
+        enqueue(session, job_id, config_version, retry=True)
+
+
 class BackgroundWorker:
     def __init__(
         self,
@@ -78,10 +94,7 @@ class BackgroundWorker:
             return len(identifiers)
 
     def retry_extraction(self, job_id: int) -> None:
-        if type(job_id) is not int or job_id <= 0:
-            raise ValueError("job identity must be a positive integer")
-        with self.sessions() as session, session.begin():
-            enqueue(session, job_id, self.config_version, retry=True)
+        retry_extraction(self.sessions, job_id, self.config_version)
 
     def run_once(self, *, now: datetime | None = None) -> CycleResult:
         errors = []

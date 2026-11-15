@@ -9,11 +9,13 @@ absence-based lifecycle changes remain separate policy/implementation work.
    bounded retries and explicit best-effort snapshot attestation are implemented.
 2. Canonical persistence and source identity, hashing, source-specific upsert,
    and conservative partial-safe ingestion. Concurrent upserts and explicit-source
-   expiry sweeps now share bounded ordered stripes; source scheduling is pending.
+   expiry sweeps share bounded ordered stripes. Bounded source scheduling with
+   independent-connection per-source locks is implemented in #176.
 3. Shared taxonomy persistence, seed and classified requirements are implemented
    with pinned local extraction and ADR-018 clause-local score-only projection.
    Preserve sections and unknown/negated evidence. Keep exclusions disabled;
-   production scheduling and independent quality acceptance remain pending.
+   production scheduling is implemented in #176; independent quality acceptance
+   remains pending.
 4. Weighted Portuguese FTS indexes and shared query expressions are implemented,
    with explicit extraction readiness on both job and requirement paths. Keep raw
    rank distinct from bounded textual/final compatibility scores. Production
@@ -29,8 +31,9 @@ absence-based lifecycle changes remain separate policy/implementation work.
    final readiness/evidence rechecks are implemented in #174. API composition
    is implemented in #175; validate calibration independently before release approval.
 7. Production matching API and privacy-safe readiness/error composition are
-   implemented in #175. Complete background work and bounded
-   availability verification, lifecycle policies, packaging/operations, and
+   implemented in #175. Bounded background processing and database-only explicit
+   retry are implemented in #176. Complete bounded availability verification,
+   lifecycle policies, Compose packaging/operations in #177, and
    release regressions. Complete the initial textual matching slice.
 
 Current implementation status is in [tasks](tasks.md); requirements

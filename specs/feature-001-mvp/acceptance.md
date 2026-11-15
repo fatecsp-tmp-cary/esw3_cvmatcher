@@ -355,3 +355,13 @@ verification. Production API composition is implemented in #175; release accepta
 Current scoped evidence is in the
 [PR #175 review](../../docs/reports/2026-11-15-pr175-review.md). These boundary
 regressions do not constitute independent model-quality or deployment acceptance.
+
+
+## Worker recovery verification
+
+The production worker is implemented in #176 with bounded cycles and independent
+per-source coordination. Explicit retry must function without prepared inference
+artifacts, preserve availability, and reject missing or terminal jobs without
+creating/resetting extraction state. Database tests verify the terminal check and
+reset retain the same job lock. Compose/recovery packaging is supplied by #177;
+current worker tests do not establish deployment or model-quality acceptance.

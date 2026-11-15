@@ -50,17 +50,23 @@ Requirements and completion gates are in [spec](spec.md),
   boundary/factory regressions are recorded in the
   [PR #175 review](../../docs/reports/2026-11-15-pr175-review.md).
 
+- Bounded production worker cycles and per-source scheduling use PostgreSQL
+  coordination across polling commits. Extraction/embedding maintenance preserves
+  failed current work until explicit retry. Database-only retry locks/refetches
+  the job and rejects missing/EXPIRED IDs without changing prior state. See the
+  [PR #176 review](../../docs/reports/2026-11-15-pr176-review.md).
+
 ## Remaining MVP work
 
 - [ ] Source usage/permission evidence and worker integration of the async interface;
       optional bounded availability verification. Real payload capture is pending.
-- [ ] Scheduler/source-run concurrency and production extraction scheduling/wiring.
-      Preserve source independence and uncertain evidence.
+- [ ] Complete operational acceptance beyond bounded source scheduling and
+      extraction/embedding wiring. Preserve source independence and uncertain evidence.
 - [ ] Lifecycle policies. Never infer absence from an unproven scan.
 - [ ] ADR-022 textual normalization/retrieval changes, a fixed
       release regression fixture and vertical-slice acceptance validation.
-- [ ] Worker scheduling, source locking and
-      operations; language/accent investigation.
+- [ ] Compose packaging/recovery operations (#177) and deployment acceptance;
+      language/accent investigation remains a tracked follow-up.
 - [ ] Release coverage and the initial textual matching slice.
 - [ ] Additional-source selection/adapter, separate from the at-least-one-source
       MVP acceptance minimum.

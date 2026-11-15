@@ -22,6 +22,11 @@ includes the production API, background worker/scheduler and PostgreSQL+pgvector
 with persistent database and local-model cache volumes. Deployment acceptance
 is defined in the [MVP spec](../../specs/feature-001-mvp/spec.md#docker-compose-deployment).
 
+Production API composition (#175) and bounded PostgreSQL-coordinated worker
+composition (#176) are implemented. Explicit extraction recovery uses a separate
+database-only path. Compose packaging belongs to #177; operational deployment
+acceptance remains pending.
+
 The production and mock APIs share public request/response models in
 `src/schemas/`. Canonical work-arrangement and seniority enums live in
 `src/domain/job.py` and are reused by schemas and persistence, allowing the mock

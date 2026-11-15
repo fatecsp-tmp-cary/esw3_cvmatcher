@@ -195,8 +195,15 @@ applies observations in source order with per-record rejection savepoints and
 one outer commit. Fetch/pagination or unexpected write failure leaves no job
 changes. Other multi-record callers must acquire their full stripe set before
 writing; no remote I/O may run while identity locks are held. Stripe collisions
-may serialize unrelated identities without merging their records. Scheduler
-source coordination remains a separate requirement.
+may serialize unrelated identities without merging their records. The implemented
+`SourceScheduler` separately holds per-source session advisory locks on an
+independent connection across polling commits. Bounded worker cycles coordinate
+source polling, reliable expiry, extraction and embedding maintenance.
+
+Explicit extraction retry is database-only: lock and refresh the stored job,
+reject missing/EXPIRED IDs without changing extraction state, then reset eligible
+work using the configured extraction version in the same transaction. Prepared
+model artifacts are required for processing, not for this recovery operation.
 
 Worker handles polling, normalization, expiration, indexing, embedding, and
 model-change reprocessing. Scheduler may be bundled or separate. Embedding work
