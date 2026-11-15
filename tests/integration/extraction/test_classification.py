@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import select
 
 from src.extraction.contracts import SpanEvidence
@@ -93,3 +94,32 @@ def test_approximate_evidence_is_score_only_and_negation_retains_no_association(
     ).all() == ["Python"]
     seed = session.scalar(select(Skill).where(Skill.canonical_name == "Python"))
     assert "pyhton" not in seed.aliases
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Python required, but not Java.",
+        "Python obrigatório, mas não Java.",
+        "Requirements:\nPython required\nBenefits: health insurance\nJava required.",
+        "Requisitos:\nPython obrigatório\nBenefícios: plano de saúde\nJava obrigatório.",
+    ],
+)
+def test_negation_and_inline_background_do_not_persist_positive_associations(db_session, text):
+    source = JobSource(name="local-context-review", type="api", polling_mode="INCREMENTAL")
+    db_session.add(source)
+    db_session.flush()
+    job = Job(source_id=source.id, platform="fixture", source_job_id="context", title="Role")
+    db_session.add(job)
+    db_session.flush()
+    raw = []
+    persist_requirements(db_session, job, raw, text)
+    assert db_session.scalars(
+        select(JobRequirement.text).where(JobRequirement.job_id == job.id)
+    ).all() == ["Python"]
+    assert db_session.scalars(
+        select(Skill.canonical_name).join(JobSkill).where(JobSkill.job_id == job.id)
+    ).all() == ["Python"]
+    java = next(row for row in raw if text[row["start"] : row["end"]] == "Java")
+    assert java["requirement_class"] is None
+    assert not java["exclusion_safe"]

@@ -1,214 +1,243 @@
-"""Synthetic PostgreSQL-to-production-API regressions with deterministic inference."""
+"""Pipeline boundary regressions with real retrieval and deterministic inference."""
 
-from copy import deepcopy
+import logging
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import delete, inspect, select
 from sqlalchemy.orm import Session
 
-from src.api.app import CURRICULUM_EXAMPLE, create_app
-from src.api.rate_limit import GlobalRateLimiter
 from src.embeddings.config import EmbeddingConfig
-from src.embeddings.service import EmbeddingWorker
-from src.embeddings.service import enqueue as enqueue_embedding
-from src.extraction.contracts import SpanEvidence
-from src.extraction.service import ExtractionWorker, enqueue
+from src.matching import pipeline as module
 from src.matching.pipeline import MatchingPipeline
+from src.persistence.embedding import JobEmbedding
+from src.persistence.extraction import JobExtraction
 from src.persistence.job.job import Job, JobStatus
 from src.persistence.job.job_source import JobSource
+from src.schemas.candidate.curriculum import CurriculumRequest
 
-VERSION = "pipeline-test-extraction-v1"
+CONFIG = EmbeddingConfig()
+EXTRACTION = "pipeline-fixture-v1"
 VECTOR = [1.0] + [0.0] * 383
 
 
 class Encoder:
-    config = EmbeddingConfig()
-    model_version = config.model_version
+    config = CONFIG
+    model_version = CONFIG.model_version
 
-    def __init__(self):
+    def __init__(self, result=None):
         self.calls = []
-
-    def encode_jobs(self, texts):
-        return [VECTOR for _ in texts]
+        self.result = result
 
     def encode_queries(self, texts):
         self.calls.append(list(texts))
-        return [VECTOR for _ in texts]
+        return self.result if self.result is not None else [VECTOR for _ in texts]
 
 
-class Extractor:
-    def extract(self, text):
-        start = text.index("Python")
-        return [SpanEvidence(start, start + 6, "skill", 0.9)]
+def request(*, experience=False, skill=None):
+    return CurriculumRequest(
+        curriculo_id=uuid4(),
+        formacoes=[],
+        experiencias=[
+            {
+                "empresa": "Private company",
+                "cargo": "Python",
+                "descricao": "Build APIs",
+                "inicio": "2024-01-01",
+                "fim": None,
+            }
+        ]
+        if experience
+        else [],
+        projetos=[],
+        competencias=[{"descricao": skill, "nivel": "intermediario"}] if skill else [],
+        idiomas=[],
+    )
 
 
 @pytest.fixture
-def populated(db_engine):
-    identities = []
-    with Session(db_engine) as session, session.begin():
-        source = JobSource(name=f"pipeline-{uuid4()}", type="api", polling_mode="INCREMENTAL")
-        session.add(source)
-        session.flush()
-        source_id = source.id
-        for platform, status in (
-            ("a-independent", JobStatus.ACTIVE),
-            ("b-independent", JobStatus.ACTIVE),
-            ("c-withheld", JobStatus.ACTIVE),
-            ("d-expired", JobStatus.EXPIRED),
-        ):
-            job = Job(
-                source_id=source_id,
-                platform=platform,
-                source_job_id="same-upstream-id",
-                title="Python Developer",
-                description="Desenvolvimento Python e PostgreSQL",
-                skills=["Python", "PostgreSQL"],
-                location={"city": "Lisboa", "country": "PT"},
-                content_hash="synthetic-content-v1",
-                status=status,
-            )
-            session.add(job)
-            session.flush()
-            identities.append(job.id)
-            if platform in ("a-independent", "b-independent"):
-                enqueue(session, job.id, VERSION)
+def setup(db_session):
+    source = JobSource(name="pipeline-fixture", type="api", polling_mode="INCREMENTAL")
+    db_session.add(source)
+    db_session.flush()
+
+    def add(identity, *, vector=VECTOR, **values):
+        job = Job(
+            source_id=source.id,
+            platform="fixture",
+            source_job_id=identity,
+            title="Python",
+            status=JobStatus.ACTIVE,
+            content_hash="hash-" + identity,
+            embedding=vector,
+        )
+        for name, value in values.items():
+            setattr(job, name, value)
+        db_session.add(job)
+        db_session.flush()
+        now = datetime.now(UTC)
+        db_session.add_all(
+            [
+                JobExtraction(
+                    job_id=job.id,
+                    content_hash=job.content_hash,
+                    config_version=EXTRACTION,
+                    status="SUCCEEDED",
+                    attempts=1,
+                    evidence=[],
+                    updated_at=now,
+                ),
+                JobEmbedding(
+                    job_id=job.id,
+                    content_hash=job.content_hash,
+                    model_version=CONFIG.model_version,
+                    extraction_version=EXTRACTION,
+                    status="SUCCEEDED",
+                    attempts=1,
+                    updated_at=now,
+                ),
+            ]
+        )
+        db_session.flush()
+        return job
+
+    def pipeline(encoder=None):
+        return MatchingPipeline(
+            lambda: Session(bind=db_session.connection(), join_transaction_mode="create_savepoint"),
+            encoder or Encoder(),
+            EXTRACTION,
+        )
+
+    return add, pipeline
+
+
+def test_empty_candidate_does_not_encode_or_open_a_session():
     encoder = Encoder()
 
-    def sessions():
-        return Session(db_engine)
+    def no_session():
+        pytest.fail("Empty input must return before database access")
 
-    extractor = ExtractionWorker(sessions, Extractor(), VERSION)
-    assert extractor.process_once()
-    assert extractor.process_once()
-    with Session(db_engine) as session, session.begin():
-        for identifier in identities[:2]:
-            enqueue_embedding(session, identifier, encoder.config, VERSION)
-    embedder = EmbeddingWorker(sessions, encoder, VERSION)
-    assert embedder.process_once()
-    assert embedder.process_once()
-    try:
-        yield sessions, encoder, identities
-    finally:
-        with Session(db_engine) as session, session.begin():
-            session.execute(delete(Job).where(Job.source_id == source_id))
-            session.execute(delete(JobSource).where(JobSource.id == source_id))
-
-
-def curriculum():
-    body = deepcopy(CURRICULUM_EXAMPLE)
-    body["experiencias"][0]["cargo"] = "Python Developer"
-    body["experiencias"][0]["descricao"] = "Python PostgreSQL"
-    body["competencias"] = [{"descricao": "Python", "nivel": "avançado"}]
-    return body
-
-
-def test_background_to_api_ranking_is_repeatable_private_and_source_independent(
-    db_engine, populated, caplog
-):
-    sessions, encoder, identities = populated
-    pipeline = MatchingPipeline(sessions, encoder, VERSION)
-    body = curriculum()
-    with TestClient(create_app(pipeline, rate_limiter=GlobalRateLimiter(db_engine))) as client:
-        first = client.post("/matches", json=body)
-        second = client.post("/matches", json=body)
-        limited = client.post("/matches?limit=1", json=body)
-    assert first.status_code == 200
-    assert first.json() == second.json()
-    matches = first.json()["matches"]
-    assert [match["job"]["id"] for match in matches] == identities[:2]
-    assert len(limited.json()["matches"]) == 1
-    assert all(match["eligibility"] for match in matches)
-    assert all(0 <= match["score"] <= 100 for match in matches)
-    assert all(match["matched_skills"] == ["postgresql", "python"] for match in matches)
-    assert all(match["missing_requirements"] == [] for match in matches)
-    assert all(match["embedding_model"] == encoder.model_version for match in matches)
-    # Identical jobs from two platforms stay separate, including foreign location.
-    assert matches[0]["job"]["location"]["country"] == "PT"
-    assert body["curriculo_id"] not in first.text + caplog.text
-    assert body["experiencias"][0]["descricao"] not in caplog.text
-    assert all("candidate" not in name for name in inspect(db_engine).get_table_names())
-    assert len(encoder.calls[0]) == len(body["experiencias"]) + len(body["formacoes"])
-
-
-def test_empty_sections_do_not_invent_evidence_or_run_inference(populated):
-    from src.schemas.candidate.curriculum import CurriculumRequest
-
-    sessions, encoder, _ = populated
-    body = {key: [] for key in ("experiencias", "formacoes", "competencias", "projetos", "idiomas")}
-    body["curriculo_id"] = str(uuid4())
-    assert (
-        MatchingPipeline(sessions, encoder, VERSION)(
-            CurriculumRequest.model_validate(body), 10
-        ).matches
-        == []
-    )
+    assert MatchingPipeline(no_session, encoder, EXTRACTION)(request(), 10).matches == []
     assert encoder.calls == []
 
 
-def test_content_or_extraction_version_change_withholds_every_path(populated):
-    from src.schemas.candidate.curriculum import CurriculumRequest
-
-    sessions, encoder, identities = populated
-    with sessions() as session, session.begin():
-        for identifier in identities[:2]:
-            session.get(Job, identifier).content_hash = "changed-content"
-    request = CurriculumRequest.model_validate(curriculum())
-    assert MatchingPipeline(sessions, encoder, VERSION)(request, 10).matches == []
-    assert MatchingPipeline(sessions, encoder, "new-version")(request, 10).matches == []
-
-
-def test_inference_failure_is_privacy_safe_and_does_not_mutate_job_data(populated, monkeypatch):
-    from src.api import runtime
-
-    sessions, encoder, identities = populated
-
-    def broken(_texts):
-        raise RuntimeError("private candidate text and secret dependency detail")
-
-    encoder.encode_queries = broken
-    monkeypatch.setattr(
-        runtime, "get_pipeline", lambda: MatchingPipeline(sessions, encoder, VERSION)
-    )
-    with TestClient(create_app(runtime.production_matches)) as client:
-        response = client.post("/matches", json=curriculum())
-    assert response.status_code == 503
-    assert "private candidate" not in response.text
-    assert "secret" not in response.text
-    with sessions() as session:
-        assert (
-            session.scalars(select(Job.id).where(Job.id.in_(identities)).order_by(Job.id)).all()
-            == identities
-        )
+def test_competency_only_uses_textual_evidence_without_semantic_fallback(setup):
+    add, pipeline = setup
+    related = add("related", vector=None)
+    add("unrelated", title="Gardener")
+    encoder = Encoder()
+    result = pipeline(encoder)(request(skill="Python"), 10)
+    assert [row.job.id for row in result.matches] == [related.id]
+    assert result.matches[0].score > 0
+    assert encoder.calls == []
 
 
-def test_typo_support_on_both_sides_keeps_exclusions_disabled_and_candidate_private(
-    populated, caplog
-):
-    from src.extraction.persistence import persist_requirements
-    from src.schemas.candidate.curriculum import CurriculumRequest
+def test_union_deduplicates_and_stable_ties_preserve_privacy_and_geography(setup, caplog):
+    add, pipeline = setup
+    first = add("a", location={"city": "Lisboa"}, work_arrangement="REMOTE")
+    second = add("b", location={"city": "Tokyo"}, work_arrangement="ON_SITE")
+    encoder = Encoder()
+    subject = pipeline(encoder)
+    candidate = request(experience=True)
+    with caplog.at_level(logging.INFO, logger="src.matching.pipeline"):
+        result = subject(candidate, 10)
+        repeated = subject(candidate, 10)
+    assert [row.job.id for row in result.matches] == [first.id, second.id]
+    assert result == repeated
+    assert result.matches[0].score == result.matches[1].score
+    assert all(row.eligibility for row in result.matches)
+    assert [row.rank for row in result.matches] == [1, 2]
+    assert encoder.calls == [["Python\nBuild APIs"], ["Python\nBuild APIs"]]
+    assert str(candidate.curriculo_id) not in result.model_dump_json()
+    assert "Private company" not in caplog.text and "Build APIs" not in caplog.text
+    assert "matching_outcome=success" in caplog.text
 
-    sessions, encoder, identities = populated
-    with sessions() as session, session.begin():
-        for identifier in identities[:2]:
-            job = session.get(Job, identifier)
-            job.skills = []
-            job.description = "Pyhton required."
-            text = job.title + "\n" + job.description
-            start = text.rindex("Pyhton")
-            rows = [SpanEvidence(start, start + 6, "skill", 0.9).serialize(text)]
-            persist_requirements(session, job, rows, text)
-            assert rows[0]["approximate_match"] and not rows[0]["exclusion_safe"]
-    body = curriculum()
-    for entry in body["experiencias"]:
-        entry["cargo"] = "Pythom Developer"
-        entry["descricao"] = "Pythom PostgreSQL"
-    body["competencias"] = [{"descricao": "Pythom", "nivel": "avançado"}]
-    result = MatchingPipeline(sessions, encoder, VERSION)(
-        CurriculumRequest.model_validate(body), 10
-    )
-    assert len(result.matches) == 2
-    assert all("python" in row.matched_skills for row in result.matches)
-    assert all(row.eligibility and row.missing_requirements == [] for row in result.matches)
-    assert "Pythom" not in caplog.text and body["curriculo_id"] not in caplog.text
+
+@pytest.mark.parametrize("state", [JobStatus.DISCOVERED, JobStatus.STALE, JobStatus.EXPIRED])
+def test_inactive_jobs_never_reach_final_response(setup, state):
+    add, pipeline = setup
+    add("inactive", status=state)
+    assert pipeline()(request(experience=True), 10).matches == []
+
+
+@pytest.mark.parametrize("invalid", ["extraction", "hash", "model", "dimension"])
+def test_semantic_only_candidates_require_current_valid_provenance(setup, db_session, invalid):
+    add, pipeline = setup
+    job = add("semantic", title="Gardener")
+    if invalid == "extraction":
+        db_session.get(JobExtraction, job.id).status = "FAILED"
+    elif invalid == "hash":
+        db_session.get(JobEmbedding, job.id).content_hash = "obsolete"
+    elif invalid == "model":
+        db_session.get(JobEmbedding, job.id).model_version = "obsolete"
+    else:
+        job.embedding = [1.0, 0.0]
+    db_session.flush()
+    assert pipeline()(request(experience=True), 10).matches == []
+
+
+@pytest.mark.parametrize("initial", ["textual", "semantic"])
+def test_final_evidence_recheck_drops_stale_pool_hits(setup, monkeypatch, initial):
+    add, pipeline = setup
+    add("changed", title="Python" if initial == "textual" else "Gardener")
+    retrieve = module.retrieve_semantic
+
+    def invalidate(session, *args, **kwargs):
+        rows = retrieve(session, *args, **kwargs)
+        assert len(rows) == 1
+        job = rows[0][0]
+        # Simulate an update visible after candidate retrieval, before final checks.
+        job.title = "Gardener"
+        job.embedding = None
+        session.flush()
+        return rows
+
+    monkeypatch.setattr(module, "retrieve_semantic", invalidate)
+    assert pipeline()(request(experience=True), 10).matches == []
+
+
+def test_final_textual_evidence_survives_embedding_invalidation(setup, monkeypatch):
+    add, pipeline = setup
+    job = add("textual")
+    retrieve = module.retrieve_semantic
+
+    def invalidate(session, *args, **kwargs):
+        rows = retrieve(session, *args, **kwargs)
+        rows[0][0].embedding = None
+        session.flush()
+        return rows
+
+    monkeypatch.setattr(module, "retrieve_semantic", invalidate)
+    result = pipeline()(request(experience=True), 10)
+    assert [row.job.id for row in result.matches] == [job.id]
+    assert result.matches[0].score > 0
+
+
+@pytest.mark.parametrize(
+    "vectors", [[], [VECTOR, VECTOR], [[0.0] * 384], [[float("nan")] * 384], [[1.0]]]
+)
+def test_invalid_encoder_results_fail_before_retrieval(setup, vectors):
+    _, pipeline = setup
+    with pytest.raises(ValueError):
+        pipeline(Encoder(vectors))(request(experience=True), 10)
+
+
+@pytest.mark.parametrize("revoked", ["availability", "extraction"])
+def test_final_active_and_extraction_gate_reject_revoked_hits(setup, monkeypatch, revoked):
+    add, pipeline = setup
+    add("revoked")
+    retrieve = module.retrieve_semantic
+
+    def invalidate(session, *args, **kwargs):
+        rows = retrieve(session, *args, **kwargs)
+        assert len(rows) == 1
+        job = rows[0][0]
+        if revoked == "availability":
+            job.status = JobStatus.EXPIRED
+        else:
+            session.get(JobExtraction, job.id).status = "FAILED"
+        session.flush()
+        return rows
+
+    monkeypatch.setattr(module, "retrieve_semantic", invalidate)
+    assert pipeline()(request(experience=True), 10).matches == []

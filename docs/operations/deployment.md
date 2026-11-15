@@ -46,6 +46,14 @@ attempt/readiness state. The process-local one-request limit and cooperative
 An executing native inference call finishes before the next checkpoint can stop
 work. Overload returns generic 503; no extra field or collection cap is imposed.
 
+## Host database tools during development
+
+The base database service publishes no host port. Local host tools use the
+loopback-only `docker-compose.dev.yml` overlay with the base file for startup,
+status and shutdown; see [local PostgreSQL](../../README.md#local-postgresql).
+`POSTGRES_PORT` and the host-facing `DATABASE_URL` must agree. Production keeps
+host `postgres` on the Compose network and does not load this overlay.
+
 ## Configure and prepare
 
 Use Docker Compose v2 on a host sized for PostgreSQL and two CPU model processes.
