@@ -4,7 +4,7 @@
 - **Date:** 2026-11-14
 - **Authority:** User interview following the extraction correction and branch decision audit.
 - **Supersedes:** No evaluation sample minimum or final blend; this adds an accepted per-job score-only coverage policy.
-- **Implementation status:** Policy recorded; implementation and verification remain pending unless separately evidenced in feature tasks.
+- **Implementation status:** Implemented as score-only tiered skill coverage in #215 / PR #219 under [ADR-027](ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md); held-out reviewed evaluation remains pending.
 
 ## Context
 

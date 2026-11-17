@@ -25,13 +25,13 @@ new accepted records supersede the relevant rules rather than rewriting history.
 | 018 | [Clause-local extraction and approximate score evidence](ADR-018-extraction-context-and-approximate-evidence.md) | Accepted extraction policy, renumbered from the colliding extraction ADR-014 |
 | 019 | [Title-first job fields and trustworthy displayed skills](ADR-019-title-first-job-evidence-and-displayed-skills.md) | Accepted and implemented in PR #197 (seniority filter superseded by ADR-027) |
 | 020 | [Three qualifying absence snapshots expire stale jobs](ADR-020-three-snapshot-stale-expiration.md) | Accepted policy; implementation and verification pending |
-| 021 | [Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) | Accepted policy; implementation and verification pending |
+| 021 | [Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) | Accepted and implemented under ADR-027 (#215); held-out review pending |
 | 022 | [Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) | Accepted policy; implementation and verification pending |
 | 023 | [External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) | External deployment deferred; second-source deferral superseded by ADR-026 |
 | 024 | [Current extraction and embeddings for every returned job](ADR-024-all-result-extraction-and-embedding-readiness.md) | Accepted and implemented in PR #195 |
 | 025 | [Initial matching stack: PostgreSQL FTS, pgvector and multilingual-e5-small](ADR-025-initial-matching-stack.md) | Accepted; records implemented decisions (#26) |
 | 026 | [MeuPadrinho source adapter, JSONL import, and bounded availability validation](ADR-026-meupadrinho-source-and-validation.md) | Accepted and implemented |
-| 027 | [Bidirectional scoring, dual job vectors and seniority hard filter](ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) | Accepted (#214, #215, #216, #217); decision 2 implemented in #214 |
+| 027 | [Bidirectional scoring, dual job vectors and seniority hard filter](ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) | Accepted (#214, #215, #216, #217); decisions 2 & 3 implemented |
 
 ## Identifier reconciliation
 
@@ -45,4 +45,4 @@ different accepted field/display policy.
 
 ## Implementation authority
 
-Feature specs/acceptance/plan/tasks track ADR-019 implementation as complete in PR #197 and ADR-020/021/022 as accepted follow-up work. ADR-023 keeps external deployment deferred, while ADR-026 selects and implements MeuPadrinho as the second source (with source terms, official rate limits, and raw-payload retention permissions tracked in issue #213). ADR-024 records current extraction and embedding readiness for every returned job. No hard exclusions or release approval follow from a documentation update.
+Feature specs/acceptance/plan/tasks track ADR-019 implementation as complete in PR #197, ADR-021 mandatory coverage in PR #219 (under ADR-027), and ADR-020/022 as accepted follow-up work. ADR-023 keeps external deployment deferred, while ADR-026 selects and implements MeuPadrinho as the second source (with source terms, official rate limits, and raw-payload retention permissions tracked in issue #213). ADR-024 records current extraction and embedding readiness for every returned job. No hard exclusions or release approval follow from a documentation update (seniority hard filtering is authorized separately by ADR-027).

@@ -78,6 +78,7 @@ and the reconciled production image build passed. See the
 [historical validation report](../../docs/reports/2026-11-12-mvp-validation.md).
 - Initial matching stack (PostgreSQL FTS, pgvector, `multilingual-e5-small`) recorded with alternatives, setup and limitations in [ADR-025](../../docs/architecture/decisions/ADR-025-initial-matching-stack.md) (#26).
 - Dual job vectors (`jobs.embedding` and `job_embeddings.core_embedding` over title, seniority, skills and `REQUIRED` items) implemented under [ADR-027](../../docs/architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) (#214).
+- Bidirectional tiered skill scoring with `ADR-021` mandatory coverage and sparse-job Bayesian smoothing implemented in `src/domain/requirements.py` and `src/matching/pipeline.py` under [ADR-027](../../docs/architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) (#215).
 
 ## Remaining current-head work
 

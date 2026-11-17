@@ -20,9 +20,9 @@
   readiness, privacy and the frozen public contract remain in force.
 - **Issues:** #214 (dual vectors), #215 (skills), #216 (seniority), #217 (length
   normalization).
-- **Implementation status:** Decision 2 is implemented in #214. Decisions 1, 3
-  and 4 are implemented by the stacked PRs for #216, #215 and #217. Calibration and
-  reviewed held-out evaluation remain pending.
+- **Implementation status:** Decisions 2 and 3 are implemented in #214 and #215.
+  Decisions 1 and 4 are implemented by the stacked PRs for #216 and #217.
+  Calibration and reviewed held-out evaluation remain pending.
 
 ## Context
 
@@ -91,10 +91,12 @@ Observed rankings showed five coupled problems:
   (`N=1,2 -> N`, `N>=3 -> max(3, ceil(0.7N))`), then Bayesian-smooths it toward a
   neutral 0.5 prior with strength 2.5 weight units, so a job with one or two
   skills stays near neutral instead of reaching 100.
-- Candidate-to-job precision is matched job skills over the candidate's core
-  skills (competencies, projects and the three most recent experiences), with the
-  denominator capped at 15 so broad but legitimate toolkits are not crushed.
-- The skills dimension is `100 * F_beta(coverage, precision)` with beta 1.5
+- Candidate-to-job precision is `(matched job skills ∩ core CV skills) / min(core CV skills, 15)`
+  over one unified core skill projection (`competencies`, `projects`, and the
+  three most recent experiences), clamped to `[0, 1]`. Using `sqrt(precision)`
+  keeps 1–3 skill jobs from being crushed for broad 10–15 skill developers while
+  still damping sparse APiBR jobs below well-specified MeuPadrinho jobs.
+- The skills dimension is `100 * F_beta(coverage, sqrt(precision))` with beta 1.5
   (coverage weighted 2.25 times precision). This remains score-only.
 
 ### 4. Length normalization and profile alignment (#217)
