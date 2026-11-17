@@ -32,7 +32,11 @@ Calibration remains provisional and release approval remains disabled.
   When both sections are absent it performs no semantic encoding or retrieval;
   competencies/projects/languages may still retrieve actual textual evidence,
   but every returned job must also have current successful extraction and embedding
-  provenance under [ADR-024](../architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md).
+  provenance under [ADR-024](../architecture/decisions/ADR-024-all-result-extraction-and-embedding-readiness.md)
+  and [ADR-027](../architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md),
+  including both the full job vector (`jobs.embedding`) and the internal job-core
+  vector (`job_embeddings.core_embedding`, combined per entry via
+  `max(core, 0.65*core + 0.35*full)`).
   This job-readiness gate does not invent candidate semantic evidence.
   Production API composition in `src/api/runtime.py` is implemented in #175.
   Per-entry cosine calibration is explicit and provisional.

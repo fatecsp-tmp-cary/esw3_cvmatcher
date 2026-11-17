@@ -2,6 +2,7 @@
 
 import math
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,13 +27,26 @@ class SimilarityCalibration:
         return max(0.0, min(100.0, 100 * (cosine - self.zero) / (self.full - self.zero)))
 
 
+def dual_similarity(np: Any, core: Any, full: Any, core_weight: float) -> Any:
+    """Combine job-core and full-job cosines without letting boilerplate hurt.
+
+    ``max(core, w*core + (1-w)*full)``: a long description can only lift an
+    entry whose detail also matches; it never drags a matching role/stack below
+    its core similarity. Works elementwise on NumPy arrays (``np`` is injected so
+    this module keeps no import-time NumPy dependency).
+    """
+    return np.maximum(core, core_weight * core + (1.0 - core_weight) * full)
+
+
 @dataclass(frozen=True, slots=True)
 class RankingPolicy:
-    version: str = "compatibility-v1-provisional"
+    version: str = "compatibility-v2-dual-vector-provisional"
     textual: float = 0.45
     semantic: float = 0.35
     structured: float = 0.20
     retrieval_limit: int = 100
+    # ADR-027: share of the job-core cosine in the dual-vector entry similarity.
+    core_weight: float = 0.65
 
     def __post_init__(self) -> None:
         weights = (self.textual, self.semantic, self.structured)
@@ -42,6 +56,8 @@ class RankingPolicy:
             or not math.isclose(sum(weights), 1.0)
             or type(self.retrieval_limit) is not int
             or self.retrieval_limit < 1
+            or not math.isfinite(self.core_weight)
+            or not 0.0 <= self.core_weight <= 1.0
         ):
             raise ValueError("Invalid ranking policy")
 

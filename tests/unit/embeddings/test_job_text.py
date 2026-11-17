@@ -39,3 +39,33 @@ def test_passage_policy_invalidates_the_pre_review_embedding_identity():
         json.dumps(previous, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
     assert EmbeddingConfig().policy_version != previous_hash
+
+
+def test_core_passage_keeps_role_and_required_items_without_description_boilerplate():
+    from src.domain.job import SeniorityLevel, WorkArrangement
+    from src.embeddings.service import job_core_text
+
+    job = Job(
+        title="Backend Developer",
+        seniority_level=SeniorityLevel.SENIOR,
+        skills=["Python", "PostgreSQL"],
+        description="About us: benefits, culture and a very long company history",
+        location={"city": "São Paulo"},
+        work_arrangement=WorkArrangement.REMOTE,
+    )
+    text = job_core_text(job, ["Django", " ", "AWS", "Django"])
+    assert text == "Backend Developer\nSENIOR\nPython\nPostgreSQL\nAWS\nDjango"
+    assert "benefits" not in text and "São Paulo" not in text and "REMOTE" not in text
+    assert job_core_text(job, ["AWS", "Django"]) == job_core_text(job, ["Django", "AWS"])
+    assert job_core_text(Job(title="Role")) == "Role"
+
+
+def test_core_passage_policy_is_part_of_the_embedding_identity():
+    from src.embeddings import config as module
+
+    original = EmbeddingConfig().model_version
+    try:
+        module.CORE_TEXT_VERSION = "different-core-policy"
+        assert EmbeddingConfig().model_version != original
+    finally:
+        module.CORE_TEXT_VERSION = "core-title-seniority-skills-required-sorted-v1"

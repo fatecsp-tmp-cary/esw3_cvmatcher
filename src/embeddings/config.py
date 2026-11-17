@@ -8,6 +8,8 @@ MODEL_ID = "intfloat/multilingual-e5-small"
 MODEL_REVISION = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
 DIMENSIONS = 384
 JOB_TEXT_VERSION = "title-skills-requirements-description-sorted-location-mode-v2"
+# ADR-027: a second job vector without description/location boilerplate.
+CORE_TEXT_VERSION = "core-title-seniority-skills-required-sorted-v1"
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +41,7 @@ class EmbeddingConfig:
             "passage_prefix": "passage: ",
             "normalization": "l2-each-window-and-aggregate",
             "job_text": JOB_TEXT_VERSION,
+            "core_text": CORE_TEXT_VERSION,
         }
         encoded = json.dumps(policy, sort_keys=True, separators=(",", ":")).encode()
         return hashlib.sha256(encoded).hexdigest()

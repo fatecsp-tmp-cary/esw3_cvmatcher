@@ -131,7 +131,7 @@ def test_concurrent_claim_is_unique_and_revocation_rejects_stale_completion(db_e
     assert len(claimed) == 1
     with Session(db_engine) as session, session.begin():
         enqueue(session, job_id, CONFIG, EXTRACTION, retry=True)
-    assert not worker(db_engine).finish(claimed[0], VECTOR)
+    assert not worker(db_engine).finish(claimed[0], VECTOR, core_vector=VECTOR)
     assert worker(db_engine).process_once()
     assert ready(db_engine, job_id)
 
@@ -140,14 +140,14 @@ def test_content_or_extraction_changes_during_inference_cannot_publish(db_engine
     claim = worker(db_engine).claim()
     with Session(db_engine) as session, session.begin():
         session.get(Job, job_id).content_hash = "changed"
-    assert not worker(db_engine).finish(claim, VECTOR)
+    assert not worker(db_engine).finish(claim, VECTOR, core_vector=VECTOR)
     assert not ready(db_engine, job_id)
     with Session(db_engine) as session, session.begin():
         session.get(JobExtraction, job_id).content_hash = "changed"
     next_claim = worker(db_engine).claim()
     with Session(db_engine) as session, session.begin():
         session.get(JobExtraction, job_id).status = "FAILED"
-    assert not worker(db_engine).finish(next_claim, VECTOR)
+    assert not worker(db_engine).finish(next_claim, VECTOR, core_vector=VECTOR)
     assert not ready(db_engine, job_id)
 
 
@@ -195,7 +195,7 @@ def test_invalid_output_and_expired_claims_are_bounded(db_engine, job_id):
     second = subject.claim(now=now + timedelta(seconds=31))
     third = subject.claim(now=now + timedelta(seconds=332))
     assert second is not None and third is not None and third.token != second.token
-    assert not subject.finish(second, VECTOR, now=now + timedelta(seconds=333))
+    assert not subject.finish(second, VECTOR, core_vector=VECTOR, now=now + timedelta(seconds=333))
     assert subject.claim(now=now + timedelta(seconds=633)) is None
     with Session(db_engine) as session:
         state = session.get(JobEmbedding, job_id)
@@ -262,7 +262,7 @@ def test_claim_includes_requirements_and_new_extraction_generation_requeues(db_e
         )
     claim = worker(db_engine).claim()
     assert claim is not None and "SQL expertise" in claim.text
-    assert worker(db_engine).finish(claim, VECTOR)
+    assert worker(db_engine).finish(claim, VECTOR, core_vector=VECTOR)
     updated = "extraction-test-v2"
     with Session(db_engine) as session, session.begin():
         session.get(JobExtraction, job_id).config_version = updated
@@ -280,7 +280,7 @@ def test_claim_includes_requirements_and_new_extraction_generation_requeues(db_e
     current = current_worker.claim()
     assert current is not None and "Java expertise" in current.text
     assert "SQL expertise" not in current.text
-    assert current_worker.finish(current, VECTOR)
+    assert current_worker.finish(current, VECTOR, core_vector=VECTOR)
     assert ready(db_engine, job_id, extraction_version=updated)
 
 
@@ -304,3 +304,110 @@ def test_claim_reads_locked_job_without_waiting_and_skips_locked_embedding(db_en
             assert future.result(timeout=3) is None
         finally:
             holding.rollback()
+
+
+CORE = [0.0, 1.0] + [0.0] * 382
+
+
+class DualEncoder(Encoder):
+    """Distinct full/core outputs so tests can tell the two vectors apart."""
+
+    def __init__(self):
+        self.batches = []
+
+    def encode_jobs(self, texts):
+        self.batches.append(list(texts))
+        return [VECTOR, CORE][: len(texts)]
+
+
+def test_core_vector_is_published_atomically_and_required_for_readiness(db_engine, job_id):
+    from src.persistence.job.skill import JobRequirement, RequirementClass
+
+    with Session(db_engine) as session, session.begin():
+        job = session.get(Job, job_id)
+        job.skills = ["Python"]
+        job.description = "Long company description with benefits and culture text"
+        session.add_all(
+            [
+                JobRequirement(
+                    job_id=job_id, text="Django", requirement_class=RequirementClass.REQUIRED
+                ),
+                JobRequirement(
+                    job_id=job_id, text="Kafka", requirement_class=RequirementClass.PREFERRED
+                ),
+            ]
+        )
+    encoder = DualEncoder()
+    assert worker(db_engine, encoder).process_once()
+    (batch,) = encoder.batches
+    full_text, core_text = batch
+    # The full passage keeps the description; the core keeps only REQUIRED items.
+    assert "benefits" in full_text and "Kafka" in full_text
+    assert core_text == "Python developer\nPython\nDjango"
+    assert ready(db_engine, job_id)
+    with Session(db_engine) as session, session.begin():
+        assert list(session.get(Job, job_id).embedding) == VECTOR
+        assert list(session.get(JobEmbedding, job_id).core_embedding) == CORE
+        rows = retrieve_semantic(session, CORE, CONFIG, EXTRACTION, vector="core")
+        assert [(job.id, similarity) for job, similarity in rows] == [(job_id, 1.0)]
+        best_rows = retrieve_semantic(session, CORE, CONFIG, EXTRACTION, vector="best")
+        assert [(job.id, similarity) for job, similarity in best_rows] == [(job_id, 1.0)]
+        # The full vector is orthogonal to the core query.
+        (full_row,) = retrieve_semantic(session, CORE, CONFIG, EXTRACTION)
+        assert full_row[1] == pytest.approx(0.0)
+        # A job with only one of the two vectors is withheld everywhere.
+        session.get(JobEmbedding, job_id).core_embedding = None
+        session.flush()
+        assert retrieve_semantic(session, VECTOR, CONFIG, EXTRACTION) == []
+        assert retrieve_semantic(session, CORE, CONFIG, EXTRACTION, vector="core") == []
+
+
+def test_invalidation_failure_and_missing_core_never_publish_a_partial_pair(db_engine, job_id):
+    assert worker(db_engine).process_once()
+    with Session(db_engine) as session, session.begin():
+        enqueue(session, job_id, CONFIG, EXTRACTION, retry=True)
+        assert session.get(JobEmbedding, job_id).core_embedding is None
+        assert session.get(Job, job_id).embedding is None
+
+    class OneVector(Encoder):
+        def encode_jobs(self, texts):
+            return [VECTOR]
+
+    assert worker(db_engine, OneVector()).process_once()
+    with Session(db_engine) as session:
+        state = session.get(JobEmbedding, job_id)
+        assert state.error_code == "invalid_result" and state.core_embedding is None
+        assert session.get(Job, job_id).embedding is None
+    claim = worker(db_engine).claim(now=datetime.now(UTC) + timedelta(seconds=31))
+    assert claim is not None
+    with pytest.raises(ValueError, match="full and core"):
+        worker(db_engine).finish(claim, VECTOR)
+    from src.embeddings.retrieval import semantic_statement
+
+    with pytest.raises(ValueError, match="Unknown job vector"):
+        semantic_statement(VECTOR, CONFIG, EXTRACTION, vector="other")
+
+
+def test_core_embedding_migration_round_trip_keeps_canonical_jobs_unchanged(db_engine, job_id):
+    from alembic import command
+    from alembic.config import Config
+
+    assert worker(db_engine).process_once()
+    # The canonical jobs table gains no field; the vector lives in job_embeddings.
+    assert "core_embedding" not in {c["name"] for c in inspect(db_engine).get_columns("jobs")}
+    config = Config()
+    config.set_main_option("script_location", "migrations")
+    command.downgrade(config, "b1e007")
+    try:
+        columns = {c["name"] for c in inspect(db_engine).get_columns("job_embeddings")}
+        assert "core_embedding" not in columns
+        with Session(db_engine) as session:
+            assert session.get(Job, job_id).title == "Python developer"
+    finally:
+        command.upgrade(config, "head")
+    # Upgraded rows have no core vector yet: readiness fails until re-embedding.
+    assert not ready(db_engine, job_id)
+    with Session(db_engine) as session, session.begin():
+        enqueue(session, job_id, CONFIG, EXTRACTION, retry=True)
+    assert worker(db_engine).process_once()
+    assert ready(db_engine, job_id)

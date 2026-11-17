@@ -16,14 +16,14 @@ new accepted records supersede the relevant rules rather than rewriting history.
 | 009 | [Open API with global admission limit](ADR-009-open-api-global-rate-limit.md) | Accepted |
 | 010 | [Pre-production scope and corrected rate-limit interval](ADR-010-preproduction-and-minute-rate-limit.md) | Accepted |
 | 011 | [Main integration compatibility record](ADR-011-main-integration-compatibility.md) | Recorded reconciliation of existing accepted authority |
-| 012 | [Issue completion, request budgets and reviewed evaluation](ADR-012-issue-completion-and-evaluation-policy.md) | Accepted |
+| 012 | [Issue completion, request budgets and reviewed evaluation](ADR-012-issue-completion-and-evaluation-policy.md) | Accepted (seniority exclusions superseded by ADR-027) |
 | 013 | [Best-effort APiBR health/count snapshot attestation](ADR-013-best-effort-apibr-snapshot-attestation.md) | Accepted |
 | 014 | [APiBR listing presence is open-vacancy evidence](ADR-014-apibr-listing-presence-is-open-evidence.md) | Accepted |
 | 015 | [Absence from a qualifying APiBR snapshot marks jobs STALE](ADR-015-qualifying-snapshot-absence-marks-stale.md) | Accepted |
 | 016 | [Inactive jobs complete the ranked matches after active jobs](ADR-016-inactive-jobs-complete-ranked-matches.md) | Accepted |
 | 017 | [Evidence order for APiBR job fields and extracted skills in results](ADR-017-job-field-evidence-order-and-extracted-skills.md) | Original proposal preserved; field/display rules superseded by ADR-019 |
 | 018 | [Clause-local extraction and approximate score evidence](ADR-018-extraction-context-and-approximate-evidence.md) | Accepted extraction policy, renumbered from the colliding extraction ADR-014 |
-| 019 | [Title-first job fields and trustworthy displayed skills](ADR-019-title-first-job-evidence-and-displayed-skills.md) | Accepted and implemented in PR #197 |
+| 019 | [Title-first job fields and trustworthy displayed skills](ADR-019-title-first-job-evidence-and-displayed-skills.md) | Accepted and implemented in PR #197 (seniority filter superseded by ADR-027) |
 | 020 | [Three qualifying absence snapshots expire stale jobs](ADR-020-three-snapshot-stale-expiration.md) | Accepted policy; implementation and verification pending |
 | 021 | [Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) | Accepted policy; implementation and verification pending |
 | 022 | [Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) | Accepted policy; implementation and verification pending |
@@ -31,6 +31,7 @@ new accepted records supersede the relevant rules rather than rewriting history.
 | 024 | [Current extraction and embeddings for every returned job](ADR-024-all-result-extraction-and-embedding-readiness.md) | Accepted and implemented in PR #195 |
 | 025 | [Initial matching stack: PostgreSQL FTS, pgvector and multilingual-e5-small](ADR-025-initial-matching-stack.md) | Accepted; records implemented decisions (#26) |
 | 026 | [MeuPadrinho source adapter, JSONL import, and bounded availability validation](ADR-026-meupadrinho-source-and-validation.md) | Accepted and implemented |
+| 027 | [Bidirectional scoring, dual job vectors and seniority hard filter](ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) | Accepted (#214, #215, #216, #217); decision 2 implemented in #214 |
 
 ## Identifier reconciliation
 

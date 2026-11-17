@@ -95,6 +95,7 @@ def setup(db_session):
                     status="SUCCEEDED",
                     attempts=1,
                     updated_at=now,
+                    core_embedding=vector,
                 ),
             ]
         )
@@ -307,7 +308,7 @@ def test_textual_candidates_in_every_group_require_current_processing(
 
 
 @pytest.mark.parametrize("state", list(JobStatus))
-@pytest.mark.parametrize("revoked", ["vector", "embedding", "extraction"])
+@pytest.mark.parametrize("revoked", ["vector", "core", "embedding", "extraction"])
 def test_final_group_gate_withholds_processing_revoked_after_textual_retrieval(
     setup, db_session, monkeypatch, state, revoked
 ):
@@ -323,6 +324,8 @@ def test_final_group_gate_withholds_processing_revoked_after_textual_retrieval(
             changed = True
             if revoked == "vector":
                 session.get(Job, job.id).embedding = None
+            elif revoked == "core":
+                session.get(JobEmbedding, job.id).core_embedding = None
             elif revoked == "embedding":
                 session.get(JobEmbedding, job.id).status = "FAILED"
             else:
@@ -331,5 +334,5 @@ def test_final_group_gate_withholds_processing_revoked_after_textual_retrieval(
         return rows
 
     monkeypatch.setattr(module, "retrieve_textual", invalidate)
-    assert pipeline()(request(skill="Python"), 10).matches == []
+    assert pipeline()(request(skill="Python", experience=(revoked == "core")), 10).matches == []
     assert changed

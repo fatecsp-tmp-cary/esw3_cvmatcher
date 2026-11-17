@@ -25,9 +25,12 @@
   Polling failure never changes lifecycle.
 - Source-specific jobs remain independent: no cross-source deduplication,
   merging, or same-opportunity detection.
-- Every returned match requires current successful extraction and a valid current
-  job embedding, including textual-only candidates and every status group
-  ([ADR-024](decisions/ADR-024-all-result-extraction-and-embedding-readiness.md)).
+- Every returned match requires current successful extraction and valid current
+  full and core job embeddings, including textual-only candidates and every status
+  group ([ADR-024](decisions/ADR-024-all-result-extraction-and-embedding-readiness.md),
+  [ADR-027](decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md)).
+  The internal job-core vector (`job_embeddings.core_embedding`) stays outside
+  canonical `Job` fields and public payloads.
 - Regenerate embeddings independently after content or embedding model/version
   changes; model changes do not depend on `content_hash`.
 - Location and work mode may be stored, normalized, indexed, and included in

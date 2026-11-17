@@ -6,6 +6,9 @@
 - **Supersedes:** Pending language/employment mappings, request processing budgets,
   sample minimums, evaluation partition/targets and deployment acceptance scope.
   Existing model-quality gates, privacy rules and immutable API remain in force.
+- **Superseded in part by:** [ADR-027](ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md)
+  (bounded override enabling severe-gap seniority hard filtering; all other
+  exclusions remain disabled).
 
 ## Context
 

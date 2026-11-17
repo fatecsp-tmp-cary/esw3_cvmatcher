@@ -22,7 +22,7 @@ from src.extraction.taxonomy import (
     resolve_skills,
 )
 from src.indexing.textual import TEXTUAL_VERSION
-from src.matching.ranking import RankingPolicy, SimilarityCalibration
+from src.matching.ranking import RankingPolicy, SimilarityCalibration, dual_similarity
 from src.matching.semantic import (
     ExperienceScore,
     SemanticPolicy,
@@ -31,6 +31,7 @@ from src.matching.semantic import (
 )
 from src.matching.textual import candidate_query_text, retrieve_textual, textual_statement
 from src.normalization.candidate.curriculum import normalize_curriculum
+from src.persistence.embedding import JobEmbedding
 from src.persistence.extraction import JobExtraction
 from src.persistence.job.job import ACTIVE_STATUSES, INACTIVE_STATUSES, Job, status_predicate
 from src.persistence.job.skill import JobRequirement, JobSkill, Skill
@@ -113,6 +114,7 @@ class MatchingPipeline:
             "semantic": self.ranking.semantic,
             "structured": self.ranking.structured,
             "pool": self.ranking.retrieval_limit,
+            "core_weight": self.ranking.core_weight,
             "zero": self.calibration.zero,
             "full": self.calibration.full,
             "extraction": self.extraction_version,
@@ -205,6 +207,7 @@ class MatchingPipeline:
                         limit=self.ranking.retrieval_limit,
                         statuses=statuses,
                         exclude_ids=returned_ids,
+                        vector="best",
                     ):
                         pool.add(job.id)
                 if not pool:
@@ -236,12 +239,27 @@ class MatchingPipeline:
                         ).where(Job.id.in_(sorted(pool)))
                     )
                 }
-                # ADR-024 requires both current extraction and vector provenance,
+                # Internal job-core vectors (ADR-027); readiness already requires them.
+                core_vectors: dict[int, Any] = {}
+                if texts:
+                    for identifier, core in session.execute(
+                        select(JobEmbedding.job_id, JobEmbedding.core_embedding).where(
+                            JobEmbedding.job_id.in_(sorted(pool)),
+                            JobEmbedding.core_embedding.is_not(None),
+                        )
+                    ):
+                        if core is not None:
+                            core_vectors[identifier] = np.asarray(
+                                normalized_vector(core), dtype=np.float64
+                            )
+                # ADR-024 / ADR-027 require current extraction and both vectors,
                 # even for textual-only candidates. Recheck after pool retrieval.
                 jobs = [
                     job
                     for job in jobs
-                    if job.id in vector_jobs and (job.id in text_scores or texts)
+                    if job.id in vector_jobs
+                    and (job.id in text_scores or texts)
+                    and (not texts or (job.embedding is not None and job.id in core_vectors))
                 ]
                 associated_skills: dict[int, set[str]] = {}
                 extracted_names: dict[int, dict[str, str]] = {}
@@ -279,11 +297,15 @@ class MatchingPipeline:
                     checkpoint()
                     semantic = 0.0
                     relevant_experience: tuple[Any, ...] = ()
-                    if texts and job.id in vector_jobs and job.embedding is not None:
+                    if texts and job.embedding is not None:
                         job_vector: Any = np.asarray(
                             normalized_vector(job.embedding), dtype=np.float64
                         )
                         similarities = np.clip(entry_matrix @ job_vector, -1.0, 1.0)
+                        core_similarities = np.clip(entry_matrix @ core_vectors[job.id], -1.0, 1.0)
+                        similarities = dual_similarity(
+                            np, core_similarities, similarities, self.ranking.core_weight
+                        )
                         entry_scores = [
                             self.calibration.score(float(value)) for value in similarities
                         ]

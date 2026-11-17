@@ -18,7 +18,7 @@ from src.embeddings.encoder import LocalEmbeddingEncoder, normalized_vector
 from src.extraction.service import ready_predicate as extraction_ready
 from src.persistence.embedding import JobEmbedding
 from src.persistence.job.job import Job, JobStatus
-from src.persistence.job.skill import JobRequirement
+from src.persistence.job.skill import JobRequirement, RequirementClass
 
 logger = logging.getLogger(__name__)
 
@@ -30,18 +30,26 @@ def _extraction_version(value: str) -> str:
 
 
 def ready_predicate(config: EmbeddingConfig, extraction_version: str):
-    """Require a current successful extraction and matching embedding provenance."""
+    """Require a current successful extraction and matching embedding provenance.
+
+    Both the full job vector and the internal job-core vector (ADR-027) must be
+    present; a job with only one of them is withheld from every retrieval path.
+    """
     return and_(
         Job.embedding.is_not(None),
         func.vector_dims(Job.embedding) == DIMENSIONS,
         extraction_ready(_extraction_version(extraction_version)),
-        exists().where(
+        exists()
+        .where(
             JobEmbedding.job_id == Job.id,
             JobEmbedding.status == "SUCCEEDED",
             JobEmbedding.content_hash == Job.content_hash,
             JobEmbedding.model_version == config.model_version,
             JobEmbedding.extraction_version == extraction_version,
-        ),
+            JobEmbedding.core_embedding.is_not(None),
+            func.vector_dims(JobEmbedding.core_embedding) == DIMENSIONS,
+        )
+        .correlate(Job),
     )
 
 
@@ -98,6 +106,7 @@ def enqueue(
         or state.extraction_version != extraction_version
     ):
         job.embedding = None
+        state.core_embedding = None
         state.content_hash = job.content_hash
         state.model_version = config.model_version
         state.extraction_version = extraction_version
@@ -129,6 +138,33 @@ def job_text(job: Job, requirements: Iterable[str] = ()) -> str:
     return "\n".join(fields)
 
 
+def job_core_text(job: Job, required: Iterable[str] = ()) -> str:
+    """Job-core passage for the second vector (ADR-027).
+
+    Title, explicit seniority, source skills and REQUIRED requirement texts only:
+    long descriptions, location and work mode stay in ``job_text`` so they cannot
+    dilute the role/stack signal of long postings. Deterministic for equal input.
+    """
+    fields = [job.title]
+    if job.seniority_level:
+        fields.append(job.seniority_level.value)
+    if job.skills:
+        fields.append("\n".join(job.skills))
+    fields.extend(sorted({value.strip() for value in required if value.strip()}))
+    return "\n".join(fields)
+
+
+def _required_texts(session: Session, job_id: int) -> list[str]:
+    return list(
+        session.scalars(
+            select(JobRequirement.text).where(
+                JobRequirement.job_id == job_id,
+                JobRequirement.requirement_class == RequirementClass.REQUIRED,
+            )
+        )
+    )
+
+
 @dataclass(frozen=True, slots=True, repr=False)
 class EmbeddingClaim:
     job_id: int
@@ -137,6 +173,7 @@ class EmbeddingClaim:
     extraction_version: str
     token: str
     text: str
+    core_text: str = ""
 
 
 class EmbeddingWorker:
@@ -232,6 +269,7 @@ class EmbeddingWorker:
                         select(JobRequirement.text).where(JobRequirement.job_id == job.id)
                     ),
                 ),
+                job_core_text(job, _required_texts(session, job.id)),
             )
 
     def finish(
@@ -239,14 +277,20 @@ class EmbeddingWorker:
         claim: EmbeddingClaim,
         vector: list[float] | None,
         *,
+        core_vector: list[float] | None = None,
         error_code: str | None = None,
         now: datetime | None = None,
     ) -> bool:
         if error_code not in (None, "inference_error", "invalid_result"):
             raise ValueError("Unknown embedding error category")
         prepared = normalized_vector(vector) if error_code is None and vector is not None else None
-        if error_code is None and prepared is None:
-            raise ValueError("Successful embedding requires a vector")
+        prepared_core = (
+            normalized_vector(core_vector)
+            if error_code is None and core_vector is not None
+            else None
+        )
+        if error_code is None and (prepared is None or prepared_core is None):
+            raise ValueError("Successful embedding requires full and core vectors")
         now = now or datetime.now(UTC)
         alert = False
         with self.sessions() as session, session.begin():
@@ -284,6 +328,7 @@ class EmbeddingWorker:
                 or job.status == JobStatus.EXPIRED
             ):
                 job.embedding = None
+                state.core_embedding = None
                 state.status = "PENDING"
                 state.attempts = 0
                 state.content_hash = job.content_hash or claim.content_hash
@@ -293,13 +338,16 @@ class EmbeddingWorker:
             state.error_code = error_code
             if error_code:
                 job.embedding = None
+                state.core_embedding = None
                 state.status = "FAILED" if state.attempts == 3 else "PENDING"
                 state.next_attempt_at = (
                     None if state.attempts == 3 else now + self._retry_delay(state.attempts)
                 )
                 alert = state.status == "FAILED"
             else:
+                # Both vectors publish in one transaction; readiness needs both.
                 job.embedding = prepared
+                state.core_embedding = prepared_core
                 state.status = "SUCCEEDED"
                 state.next_attempt_at = None
         if alert:
@@ -311,18 +359,19 @@ class EmbeddingWorker:
         if claim is None:
             return False
         try:
-            vectors = self.encoder.encode_jobs([claim.text])
+            vectors = self.encoder.encode_jobs([claim.text, claim.core_text])
         except Exception:
             self.finish(claim, None, error_code="inference_error", now=now)
             return True
         try:
-            if len(vectors) != 1:
+            if len(vectors) != 2:
                 raise ValueError("Invalid embedding batch")
             vector = normalized_vector(vectors[0])
+            core_vector = normalized_vector(vectors[1])
         except Exception:
             self.finish(claim, None, error_code="invalid_result", now=now)
             return True
-        self.finish(claim, vector, now=now)
+        self.finish(claim, vector, core_vector=core_vector, now=now)
         return True
 
 
