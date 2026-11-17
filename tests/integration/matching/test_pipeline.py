@@ -480,3 +480,199 @@ def test_long_description_boilerplate_does_not_reduce_semantic_score_when_core_m
     )
     assert [row.job.id for row in response.matches] == identities[:2]
     assert response.matches[0].score > response.matches[1].score
+
+
+def test_tiered_bidirectional_skill_scoring_favors_rich_meupadrinho_over_sparse_apibr(db_engine):
+    from datetime import UTC, datetime
+
+    from src.persistence.embedding import JobEmbedding
+    from src.persistence.extraction import JobExtraction
+    from src.persistence.job.skill import JobRequirement, RequirementClass, Skill
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    with Session(db_engine) as session, session.begin():
+        source = JobSource(name=f"tiered-{uuid4()}", type="api", polling_mode="INCREMENTAL")
+        session.add(source)
+        session.flush()
+        source_id = source.id
+        apibr = Job(
+            source_id=source_id,
+            platform="apibr",
+            source_job_id="sparse-1",
+            title="Python Developer",
+            description="Vaga backend",
+            skills=["Python"],
+            content_hash="h1",
+            status=JobStatus.ACTIVE,
+            embedding=VECTOR,
+        )
+        meupadrinho = Job(
+            source_id=source_id,
+            platform="meupadrinho",
+            source_job_id="rich-1",
+            title="Python Developer",
+            description="Vaga backend",
+            skills=["Python", "PostgreSQL", "Docker", "FastAPI"],
+            content_hash="h2",
+            status=JobStatus.ACTIVE,
+            embedding=VECTOR,
+        )
+        session.add_all([apibr, meupadrinho])
+        session.flush()
+        now = datetime.now(UTC)
+        for job in (apibr, meupadrinho):
+            session.add_all(
+                [
+                    JobExtraction(
+                        job_id=job.id,
+                        content_hash=job.content_hash,
+                        config_version=VERSION,
+                        status="SUCCEEDED",
+                        attempts=1,
+                        evidence=[],
+                        updated_at=now,
+                    ),
+                    JobEmbedding(
+                        job_id=job.id,
+                        content_hash=job.content_hash,
+                        model_version=EmbeddingConfig().model_version,
+                        extraction_version=VERSION,
+                        status="SUCCEEDED",
+                        attempts=1,
+                        updated_at=now,
+                        core_embedding=VECTOR,
+                    ),
+                ]
+            )
+        # Add optional skills on meupadrinho that the candidate lacks.
+        extra_skill = session.scalar(select(Skill).where(Skill.canonical_name == "Kubernetes"))
+        if extra_skill is None:
+            extra_skill = Skill(canonical_name="Kubernetes", aliases=["kubernetes"])
+            session.add(extra_skill)
+            session.flush()
+        session.add(
+            JobRequirement(
+                job_id=meupadrinho.id,
+                text="Kubernetes",
+                requirement_class=RequirementClass.NICE_TO_HAVE,
+                skill_id=extra_skill.id,
+            )
+        )
+        apibr_id, meupadrinho_id = apibr.id, meupadrinho.id
+    body = curriculum()
+    body["experiencias"][0]["descricao"] = "Python PostgreSQL Docker FastAPI AWS Redis"
+    body["competencias"] = [
+        {"descricao": name, "nivel": "avancado"}
+        for name in ("Python", "PostgreSQL", "Docker", "FastAPI", "AWS", "Redis")
+    ]
+    try:
+        response = MatchingPipeline(lambda: Session(db_engine), Encoder(), VERSION)(
+            CurriculumRequest.model_validate(body), 10
+        )
+        assert [row.job.id for row in response.matches] == [meupadrinho_id, apibr_id]
+        assert response.matches[0].score > response.matches[1].score
+    finally:
+        with Session(db_engine) as session, session.begin():
+            session.execute(delete(Job).where(Job.source_id == source_id))
+            session.execute(delete(JobSource).where(JobSource.id == source_id))
+
+
+def test_non_core_education_and_old_experience_skills_cannot_inflate_precision(db_engine):
+    from datetime import UTC, datetime
+
+    from src.persistence.embedding import JobEmbedding
+    from src.persistence.extraction import JobExtraction
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    with Session(db_engine) as session, session.begin():
+        source = JobSource(name=f"noncore-{uuid4()}", type="api", polling_mode="INCREMENTAL")
+        session.add(source)
+        session.flush()
+        source_id = source.id
+        job = Job(
+            source_id=source_id,
+            platform="meupadrinho",
+            source_job_id="five-skills",
+            title="Platform Engineer",
+            description="Python SQL Java Kafka Docker Kubernetes",
+            skills=["Python", "SQL", "Java", "Kafka", "Docker"],
+            content_hash="h-noncore",
+            status=JobStatus.ACTIVE,
+            embedding=VECTOR,
+        )
+        session.add(job)
+        session.flush()
+        job_id = job.id
+        now = datetime.now(UTC)
+        session.add_all(
+            [
+                JobExtraction(
+                    job_id=job_id,
+                    content_hash=job.content_hash,
+                    config_version=VERSION,
+                    status="SUCCEEDED",
+                    attempts=1,
+                    evidence=[],
+                    updated_at=now,
+                ),
+                JobEmbedding(
+                    job_id=job_id,
+                    content_hash=job.content_hash,
+                    model_version=EmbeddingConfig().model_version,
+                    extraction_version=VERSION,
+                    status="SUCCEEDED",
+                    attempts=1,
+                    updated_at=now,
+                    core_embedding=VECTOR,
+                ),
+            ]
+        )
+
+    body = curriculum()
+    body["projetos"] = []
+    body["idiomas"] = []
+    body["experiencias"] = [
+        {
+            "empresa": f"Co {i}",
+            "cargo": "Python Developer" if i < 3 else "Java Kafka Engineer",
+            "descricao": "Python SQL" if i < 3 else "Java Kafka",
+            "inicio": f"202{3 - i}-01-01",
+            "fim": f"202{3 - i}-12-01",
+        }
+        for i in range(4)
+    ]
+    body["formacoes"] = [
+        {
+            "instituicao": "Univ",
+            "curso": "Docker e Kubernetes",
+            "nivel": "especializacao",
+            "status": "concluido",
+            "inicio": "2022-01-01",
+            "fim": "2022-12-01",
+        }
+    ]
+    body["competencias"] = [
+        {"descricao": "Python", "nivel": "avancado"},
+        {"descricao": "SQL", "nivel": "avancado"},
+    ]
+    try:
+        response = MatchingPipeline(lambda: Session(db_engine), Encoder(), VERSION)(
+            CurriculumRequest.model_validate(body), 10
+        )
+        (match,) = response.matches
+        assert match.job.id == job_id
+        # Only core-supported skills (Python, SQL) count; old Java/Kafka and course Docker do not.
+        assert match.matched_skills == ["python", "sql"]
+        # Compare against a candidate with all 5 skills in core: non-core skills stay excluded.
+        full_body = deepcopy(body)
+        full_body["competencias"].extend(
+            {"descricao": name, "nivel": "avancado"} for name in ("Java", "Kafka", "Docker")
+        )
+        (full_match,) = MatchingPipeline(lambda: Session(db_engine), Encoder(), VERSION)(
+            CurriculumRequest.model_validate(full_body), 10
+        ).matches
+        assert match.score < full_match.score
+    finally:
+        with Session(db_engine) as session, session.begin():
+            session.execute(delete(Job).where(Job.source_id == source_id))
+            session.execute(delete(JobSource).where(JobSource.id == source_id))

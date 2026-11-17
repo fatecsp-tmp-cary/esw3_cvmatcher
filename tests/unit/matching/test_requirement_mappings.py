@@ -189,9 +189,50 @@ def test_sparse_job_is_damped_and_rich_meupadrinho_job_beats_one_skill_apibr_job
         exact_required={"python", "django", "postgresql", "docker", "aws", "pytest"},
         exact_matched={"python", "django", "postgresql", "docker", "aws", "pytest"},
     )
-    assert apibr_sparse < 25.0
-    assert meupadrinho_rich > 60.0
+    assert 30.0 <= apibr_sparse <= 45.0
+    assert meupadrinho_rich > 70.0
     assert meupadrinho_rich > apibr_sparse
+
+
+def test_bidirectional_skill_score_invariants_and_non_core_exclusion():
+    # Property checks across varied tier sizes, core toolkits and extra non-core hits.
+    for n_req in (0, 1, 3, 6):
+        for n_pref in (0, 2):
+            for n_opt in (0, 4):
+                if n_req + n_pref + n_opt == 0:
+                    continue
+                req = {f"r{i}" for i in range(n_req)}
+                pref = {f"p{i}" for i in range(n_pref)}
+                opt = {f"o{i}" for i in range(n_opt)}
+                for n_core in (1, 2, 5, 10, 20):
+                    core = {f"r{i}" for i in range(min(n_core, n_req))} | {
+                        f"extra{i}" for i in range(max(0, n_core - n_req))
+                    }
+                    # Include non-core matches (e.g. old titles / education) in `matched`:
+                    # precision must stay <= 1.0 and score <= 100.0, never inflating to 100.
+                    non_core_hits = req | pref | opt
+                    score = bidirectional_skill_score(
+                        required_skills=req,
+                        preferred_skills=pref,
+                        nice_to_have_skills=opt,
+                        matched=non_core_hits,
+                        candidate_core_skills=core,
+                    )
+                    assert 0.0 <= score <= 100.0
+                    # If only 1 of 5 required skills is in core, score cannot exceed 80 even
+                    # when non-core skills cover the rest.
+                    if n_req >= 5 and len(core & (req | pref | opt)) < 2:
+                        assert score < 80.0
+
+    # Broad 15-skill toolkit matching a 3-skill job stays >= 50 (not over-penalized).
+    three_skill_broad = bidirectional_skill_score(
+        required_skills={"python", "fastapi", "postgresql"},
+        preferred_skills=set(),
+        nice_to_have_skills=set(),
+        matched={"python", "fastapi", "postgresql"},
+        candidate_core_skills={"python", "fastapi", "postgresql"} | {f"s{i}" for i in range(12)},
+    )
+    assert three_skill_broad > 50.0
 
 
 def test_long_optional_list_does_not_crush_qualified_candidate_and_exact_vs_approx_differs():
