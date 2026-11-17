@@ -456,7 +456,7 @@ class SkillTextMatcher:
                             shape = (size, len(phrase), re.sub(r"\w", "", phrase))
                             self._phrases_by_shape.setdefault(shape, []).append(phrase)
 
-    def match(self, vocabulary: Iterable[str]) -> set[str]:
+    def match(self, vocabulary: Iterable[str], *, include_approximate: bool = True) -> set[str]:
         """Match pre-extracted candidate text against a target job vocabulary."""
         if not self.normalized_texts:
             return set()
@@ -465,14 +465,17 @@ class SkillTextMatcher:
             return set()
 
         known_taxonomy = known & _TAXONOMY_CANONICAL_FOLDS
-        found = (self._prose_taxonomy_found | self._approx_taxonomy_found) & known_taxonomy
+        prose_hits = self._prose_taxonomy_found
+        found = (
+            (prose_hits | self._approx_taxonomy_found) if include_approximate else prose_hits
+        ) & known_taxonomy
 
         extras = known - _TAXONOMY_CANONICAL_FOLDS
         if not extras:
             return found
 
         extra_widths = {len(skill.split()) for skill in extras if len(skill) >= 5}
-        if extra_widths:
+        if extra_widths and include_approximate:
             self._collect_phrases(extra_widths)
 
         for extra in extras:
@@ -483,7 +486,7 @@ class SkillTextMatcher:
                 ):
                     found.add(extra)
                     continue
-            if len(extra) >= 5:
+            if include_approximate and len(extra) >= 5:
                 width = len(extra.split())
                 punct = re.sub(r"\w", "", extra)
                 for size in (len(extra) - 1, len(extra), len(extra) + 1):

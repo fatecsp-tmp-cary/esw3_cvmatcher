@@ -101,10 +101,15 @@ explicit competencies or recognized skill mentions exist in the curriculum, omit
 the skills dimension rather than scoring unknown knowledge as zero. Explicit
 nonmatching skill evidence remains a comparable score-only dimension.
 
-## Accepted mandatory coverage (implementation pending)
+## Accepted mandatory coverage and bidirectional skills
 
 [ADR-021](../architecture/decisions/ADR-021-mandatory-coverage-score-only.md)
-records the user-selected exact-evidence coverage threshold. It is separate from
-mandatory-classification precision/recall and reviewed sample counts. No new blend
-weight or exclusion is authorized; the current ranking implementation below does
-not yet implement this coverage policy.
+and [ADR-027](../architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md)
+govern tiered bidirectional skill scoring in `src/domain/requirements.py`
+(`bidirectional-tiered-adr021-v3`): `REQUIRED` (weight `1.0`) and `ADR-021`
+exact-evidence mandatory coverage (`N=1,2 -> N; N>=3 -> max(3, ceil(0.70*N))`),
+`PREFERRED` (`0.4`), `NICE_TO_HAVE` (`0.15`), Bayesian sparse-job smoothing
+toward neutral `0.5` (`strength = 2.5`), and clamped Candidate→Job core-skill
+precision (`sqrt(matched ∩ core / min(core, 15))` over the single core
+projection of competencies, projects, and the 3 most recent experiences)
+combined via $F_{1.5}$. This remains score-only with no skill exclusion.
