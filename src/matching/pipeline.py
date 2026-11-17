@@ -15,7 +15,7 @@ from src.domain.requirements import comparable_score
 from src.embeddings.config import EmbeddingConfig
 from src.embeddings.retrieval import retrieve_semantic
 from src.embeddings.service import ready_predicate as embedding_ready
-from src.extraction.taxonomy import _ALIASES, find_skills, normalize_skill
+from src.extraction.taxonomy import _ALIASES, find_skills, normalize_skill, resolve_skills
 from src.indexing.textual import TEXTUAL_VERSION
 from src.matching.ranking import RankingPolicy, SimilarityCalibration
 from src.matching.semantic import (
@@ -275,9 +275,15 @@ class MatchingPipeline:
                             for index in selected_experience_indices(experiences)
                             if experiences[index].score >= 50.0
                         )
-                    skills = {
-                        normalize_skill(skill) for skill in (job.skills or []) if skill.strip()
-                    }
+                    skills: set[str] = set()
+                    for raw_skill in job.skills or []:
+                        if not raw_skill.strip():
+                            continue
+                        resolved = resolve_skills(raw_skill)
+                        if resolved:
+                            skills.update(normalize_skill(item) for item in resolved)
+                        else:
+                            skills.add(normalize_skill(raw_skill))
                     skills |= associated_skills.get(job.id, set())
                     matched = find_skills([query_text], skills)
                     structured = comparable_score(
