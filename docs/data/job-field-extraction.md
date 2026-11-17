@@ -133,11 +133,22 @@ PT/EN sentence or immediate section-heading cues. Negation remains null; hedges 
 and conflicting occurrences retain the strongest strength with conflict flags under ADR-018. Presence or confidence alone never
 establishes a required skill. `src/extraction/persistence.py` atomically replaces
 current JobRequirement/JobSkill associations with successful claim completion.
-The versioned project-maintained alias seed has canonical technology names,
-additive aliases, category `technology` and null parents for flat roots. Existing
-curated categories/parents are preserved. Repeated seeding preserves identities.
-No external taxonomy provenance or inferred hierarchy is claimed. Candidate
-matching uses the same explicit aliases transiently. The extraction-version hash
+The versioned project-maintained taxonomy seed (`src/extraction/taxonomy_data.py`,
+version `explicit-aliases-single-edit-min5-v5`) defines canonical skill names,
+bilingual (PT-BR/EN) additive aliases, domain categories (`programming_language`,
+`framework`, `database`, `cloud`, `devops`, `observability`, `messaging`,
+`data_engineering`, `analytics_bi`, `ai_ml`, `security`, `testing`, `networking`,
+`architecture`, `methodology`, `design`, `erp_crm`, `operating_system`,
+`protocol_api`, `tool`, `language`, `certification`, `professional_license`), and
+curated acyclic `parent_skill_id` relationships. Existing independently curated
+non-default categories and parents are preserved; legacy default `"technology"`
+categories and missing parent links are backfilled idempotently. Repeated seeding
+preserves identities. Prose-safe aliases supplement GLiNER detections in
+`alias_spans()` with GLiNER-compatible labels while label-only aliases and
+proficiency-wrapper normalization stay scoped to discrete skill inputs and matching.
+No external taxonomy provenance or inferred equivalence between distinct tools is
+claimed. Candidate matching uses the same explicit taxonomy and compound-label
+resolution (`resolve_skills`) transiently. The extraction-version hash
 includes classification and seed versions, forcing unchanged-content reprocessing
 when those policies change. Canonical Job content/hash is not mutated by these
 supporting associations. Mandatory exclusions remain disabled pending review.

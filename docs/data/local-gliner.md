@@ -67,8 +67,13 @@ predictions of the same label are resolved by highest confidence, then longest
 span and stable offset order; final output is sorted by original offsets/label.
 This merges evidence within one job only and never merges source jobs.
 
-`src.extraction.taxonomy` provides explicit aliases and bounded phrase matching:
-`normalize_skill`, `canonical_skill` and `find_skills`. Exact aliases preserve punctuation in C++, C# and Node.js. Unknown terms of
+`src.extraction.taxonomy` provides explicit bilingual aliases, domain categories,
+curated parent relationships, and bounded phrase matching:
+`normalize_skill`, `canonical_skill`, `resolve_skills`, `alias_spans`, `match_skill`,
+and `find_skills`, backed by the curated catalog in `src/extraction/taxonomy_data.py`.
+Exact aliases preserve punctuation in C++, C# and Node.js, guard against hyphenated
+package names and URLs, and separate prose-safe aliases from discrete skill-label
+aliases to avoid common-word false positives in free text. Unknown terms of
 at least five characters may have one unique edit-distance match, including an
 adjacent transposition, with punctuation/word boundaries preserved. This approximate
 match supports scoring only and does not manufacture canonical equivalence,
