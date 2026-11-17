@@ -1,7 +1,7 @@
 # ADR-025: Initial matching stack
 
 - **Status:** Accepted (records decisions already implemented on `main`)
-- **Date:** 2026-11-17
+- **Date:** 2026-11-16
 - **Issue:** #26 (parent #4)
 - **Authority:** [MVP spec](../../../specs/feature-001-mvp/spec.md), [ADR-004](ADR-004-portuguese-full-text-search.md), [ADR-005](ADR-005-weighted-any-term-fts.md), [ADR-022](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) and the benchmark reports under [`docs/match/benchmarks/`](../../match/benchmarks/).
 
@@ -38,8 +38,8 @@ Measured on 5 fictitious resumes and 100 fictitious jobs with a human gabarito
   its top 10 in the single-resume test.
 - `all-MiniLM-L6-v2`: not recommended. Weak PT/EN support (gap 0.16) and a 256-token
   limit; kept only as a baseline.
-- `multilingual-e5-small`: 0.698. Selected: higher mean with chunking, same pool
-  recall as L12, 512-token limit, same 384 dimensions. The cost is that the two
+- `multilingual-e5-small`: 0.698. Selected: higher mean with chunking, pool
+  recall close to L12 (0.94 against 0.96), 512-token limit, same 384 dimensions. The cost is that the two
   prefixes must be applied by one shared function in the worker and in the API.
 - Whole resume as one vector: 0.621 (e5-small) and 0.629 (L12) because the model
   truncates it; chunking is needed for real resumes.
