@@ -1054,7 +1054,8 @@ TAXONOMY_SPECS: tuple[SkillSpec, ...] = (
     SkillSpec(
         "Networking",
         "networking",
-        aliases=("redes", "redes de computadores", "infraestrutura de redes"),
+        aliases=("redes de computadores", "infraestrutura de redes"),
+        label_only_aliases=("redes",),
     ),
     SkillSpec("TCP/IP", "networking", aliases=("redes tcp/ip",)),
     SkillSpec("DNS", "networking"),
@@ -1142,7 +1143,12 @@ TAXONOMY_SPECS: tuple[SkillSpec, ...] = (
     SkillSpec(
         "Domain-Driven Design", "architecture", aliases=("ddd", "domain-driven design (ddd)")
     ),
-    SkillSpec("SOLID", "architecture"),
+    SkillSpec(
+        "SOLID",
+        "architecture",
+        prose_safe_canonical=False,
+        aliases=("solid principles", "princípios solid", "principios solid"),
+    ),
     SkillSpec(
         "Design Patterns", "architecture", aliases=("padrões de projeto", "padrões de design")
     ),
@@ -1217,7 +1223,13 @@ TAXONOMY_SPECS: tuple[SkillSpec, ...] = (
     ),
     SkillSpec("Scrum", "methodology", parent="Agile"),
     SkillSpec("Kanban", "methodology", parent="Agile"),
-    SkillSpec("SAFe", "methodology", parent="Agile"),
+    SkillSpec(
+        "SAFe",
+        "methodology",
+        parent="Agile",
+        prose_safe_canonical=False,
+        aliases=("scaled agile", "scaled agile framework", "safe framework"),
+    ),
     SkillSpec("Waterfall", "methodology", prose_safe_canonical=False),
     SkillSpec("DevOps", "methodology", aliases=("práticas devops", "cultura devops")),
     SkillSpec("DevSecOps", "methodology"),
@@ -1424,18 +1436,12 @@ TAXONOMY_SPECS: tuple[SkillSpec, ...] = (
     # -------------------------------------------------------------------------
     # APIs & Data Formats
     # -------------------------------------------------------------------------
-    SkillSpec("REST", "protocol_api", aliases=("restful",), prose_safe_canonical=False),
     SkillSpec(
-        "APIs",
+        "REST",
         "protocol_api",
-        label_only_aliases=("api", "web api", "web apis"),
-        prose_safe_canonical=False,
-    ),
-    SkillSpec(
-        "REST API",
-        "protocol_api",
-        parent="REST",
         aliases=(
+            "restful",
+            "rest api",
             "rest apis",
             "apis rest",
             "api rest",
@@ -1444,11 +1450,18 @@ TAXONOMY_SPECS: tuple[SkillSpec, ...] = (
             "apis restful",
             "api restful",
         ),
+        prose_safe_canonical=False,
+    ),
+    SkillSpec(
+        "APIs",
+        "protocol_api",
+        label_only_aliases=("api", "web api", "web apis"),
+        prose_safe_canonical=False,
     ),
     SkillSpec("GraphQL", "protocol_api"),
     SkillSpec("SOAP", "protocol_api", prose_safe_canonical=False),
     SkillSpec("Web Services", "protocol_api", aliases=("webservices",)),
-    SkillSpec("OpenAPI", "protocol_api", parent="REST API"),
+    SkillSpec("OpenAPI", "protocol_api", parent="REST"),
     SkillSpec("Swagger", "protocol_api", parent="OpenAPI"),
     SkillSpec("Webhooks", "protocol_api", aliases=("webhook",)),
     SkillSpec("JSON", "protocol_api"),

@@ -42,7 +42,14 @@ def seed_taxonomy(session):
         if skill.aliases != merged_aliases:
             skill.aliases = merged_aliases
         target_category = CATEGORIES.get(name, "technology")
-        if skill.category is None or skill.category == "technology":
+        if (
+            skill.category is None
+            or skill.category == "technology"
+            or (
+                skill.category == "professional license"
+                and target_category == "professional_license"
+            )
+        ):
             skill.category = target_category
     session.flush()
 

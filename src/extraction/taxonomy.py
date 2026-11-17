@@ -110,10 +110,10 @@ _TRAILING_PAREN_TAG = re.compile(
     re.I,
 )
 _TRAILING_LEVEL = re.compile(
-    r"(?:\s+(?:intermedi[aá]ri[oa]\s*(?:/|ou)\s*avan[cç]ad[oa]|"
+    r"\s+(?:intermedi[aá]ri[oa]\s*(?:/|ou)\s*avan[cç]ad[oa]|"
     r"avan[cç]ad[oa]\s*(?:/|ou)\s*fluente|"
     r"avan[cç]ad[oa]s?|intermedi[aá]ri[oa]s?|b[aá]sic[oa]s?|fluente|t[eé]cnic[oa]|"
-    r"profissional|advanced|intermediate|basic|fluent|fluency|proficiency))+$",
+    r"profissional|advanced|intermediate|basic|fluent|fluency|proficiency)$",
     re.I,
 )
 _ATOMIC_SLASH_SKILLS = frozenset(_ALIASES)
@@ -131,12 +131,15 @@ def _strip_qualifiers(value: str) -> str:
     if not cleaned:
         return ""
     while True:
-        updated = _TRAILING_PAREN_TAG.sub("", cleaned).strip()
-        updated = _TRAILING_LEVEL.sub("", updated).strip()
-        updated = _LEADING_WRAPPER.sub("", updated).strip()
-        if updated == cleaned:
+        for pattern in (_TRAILING_PAREN_TAG, _TRAILING_LEVEL, _LEADING_WRAPPER):
+            updated = pattern.sub("", cleaned).strip()
+            if updated != cleaned:
+                cleaned = updated
+                if _exact_lookup(cleaned) is not None:
+                    return cleaned
+                break
+        else:
             break
-        cleaned = updated
     return cleaned
 
 
@@ -179,11 +182,19 @@ def resolve_skills(value: str) -> tuple[str, ...]:
 
     resolved: list[str] = []
     seen: set[str] = set()
+    last_cnh = False
 
     def _add(name: str) -> None:
+        nonlocal last_cnh
+        last_cnh = name.startswith("CNH ")
         if name not in seen:
             seen.add(name)
             resolved.append(name)
+
+    def _resolve_cnh_letter(value: str) -> str | None:
+        if last_cnh and len(value) == 1 and value.upper() in {"A", "B", "C", "D", "E"}:
+            return canonical_skill(f"CNH {value.upper()}")
+        return None
 
     for chunk in parts:
         chunk_clean = chunk.strip(" ()[]{};,.")
@@ -198,7 +209,7 @@ def resolve_skills(value: str) -> tuple[str, ...]:
             token = token.strip(" ()[]{};,.")
             if not token:
                 continue
-            if (hit := canonical_skill(token)) is not None:
+            if (hit := _resolve_cnh_letter(token) or canonical_skill(token)) is not None:
                 _add(hit)
                 continue
             if (
@@ -210,7 +221,9 @@ def resolve_skills(value: str) -> tuple[str, ...]:
             if "/" in token and _fold(token) not in _ATOMIC_SLASH_SKILLS:
                 for sub in token.split("/"):
                     sub = sub.strip(" ()[]{};,.")
-                    if sub and (sub_hit := canonical_skill(sub)) is not None:
+                    if not sub:
+                        continue
+                    if (sub_hit := _resolve_cnh_letter(sub) or canonical_skill(sub)) is not None:
                         _add(sub_hit)
     return tuple(resolved)
 
@@ -227,16 +240,35 @@ def parent_skill(name: str) -> str | None:
     return PARENTS.get(canonical)
 
 
+_URL_TLD_PREFIX = re.compile(
+    r"^(?:https?://|www\.|[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|org|net|io|dev|br|gov|edu|co|app|ai)(?:\.[a-z]{2})?(?:/|$))",
+    re.I,
+)
+_URL_DOMAIN_SUFFIX = re.compile(
+    r"^\.(?:com|org|net|io|dev|br|gov|edu|co|app|ai)(?:\.[a-z]{2})?(?:/|\b)",
+    re.I,
+)
+
+
 def alias_spans(text: str) -> Iterator[tuple[int, int, str]]:
     """Supplement model detection with exact explicit prose-safe vocabulary occurrences.
 
     Match original Unicode directly; no fuzzy-generated offsets or strength.
     """
     for match in _PROSE_SPAN_PATTERN.finditer(text):
-        if text[match.end() : match.end() + 3] == "://":
-            continue
-        prefix = text[max(0, match.start() - 40) : match.start()]
-        if re.search(r"https?://\S*$", prefix, re.I):
+        token_start = max(
+            text.rfind(" ", 0, match.start()),
+            text.rfind("\n", 0, match.start()),
+            text.rfind("\t", 0, match.start()),
+            text.rfind("(", 0, match.start()),
+            -1,
+        )
+        token_prefix = text[token_start + 1 : match.start()]
+        if (
+            text[match.end() : match.end() + 3] == "://"
+            or _URL_TLD_PREFIX.match(token_prefix)
+            or _URL_DOMAIN_SUFFIX.match(text[match.end() :])
+        ):
             continue
         matched_folded = _fold(match.group())
         name = _PROSE_ALIASES.get(matched_folded) or _PROSE_ALIASES_ASCII.get(
@@ -350,72 +382,130 @@ def _skill_find_pattern(canonical: str) -> re.Pattern[str]:
     )
 
 
+_TOKEN_REGEX = re.compile(r"\w+(?:[.+#/-]+\w+)*[+#]*")
+
+
+class SkillTextMatcher:
+    """Request-local precompiled skill matcher over fixed candidate text."""
+
+    def __init__(self, texts: Iterable[str]) -> None:
+        self.normalized_texts = [
+            " ".join(unicodedata.normalize("NFKC", text).casefold().split()) for text in texts
+        ]
+        self.ascii_texts = [_fold_ascii(text) for text in self.normalized_texts]
+        self._prose_taxonomy_found: set[str] = set()
+        self._approx_taxonomy_found: set[str] = set()
+        self._tokenized_texts: list[tuple[str, list[re.Match[str]], list[str]]] = []
+        self._phrases_by_width: dict[int, set[str]] = {}
+        self._phrases_by_shape: dict[tuple[int, int, str], list[str]] = {}
+
+        if not self.normalized_texts:
+            return
+
+        for source_text in (*self.normalized_texts, *self.ascii_texts):
+            for match in _PROSE_SPAN_PATTERN.finditer(source_text):
+                matched_folded = _fold(match.group())
+                name = _PROSE_ALIASES.get(matched_folded) or _PROSE_ALIASES_ASCII.get(
+                    _fold_ascii(matched_folded)
+                )
+                if name is not None:
+                    self._prose_taxonomy_found.add(name.casefold())
+
+        for text in self.normalized_texts:
+            matches = list(_TOKEN_REGEX.finditer(text))
+            tokens = [m.group() for m in matches]
+            self._tokenized_texts.append((text, matches, tokens))
+
+        self._collect_phrases(_DEFAULT_WIDTHS)
+        for width in _DEFAULT_WIDTHS:
+            for phrase in self._phrases_by_width.get(width, ()):
+                exact_prose = _PROSE_ALIASES.get(phrase) or _PROSE_ALIASES_ASCII.get(
+                    _fold_ascii(phrase)
+                )
+                if exact_prose is not None:
+                    self._prose_taxonomy_found.add(exact_prose.casefold())
+                approx_match = _lookup(phrase, _ALIASES, _DEFAULT_BUCKETS)
+                if approx_match and approx_match.approximate:
+                    self._approx_taxonomy_found.add(normalize_skill(approx_match.name))
+
+    def _collect_phrases(self, widths: Iterable[int]) -> None:
+        missing = tuple(sorted({w for w in widths if w > 0 and w not in self._phrases_by_width}))
+        if not missing:
+            return
+        for w in missing:
+            self._phrases_by_width[w] = set()
+        for text, matches, tokens in self._tokenized_texts:
+            for start in range(len(tokens)):
+                for size in missing:
+                    if start + size > len(tokens):
+                        break
+                    if any(
+                        not text[a.end() : b.start()].isspace()
+                        for a, b in zip(
+                            matches[start : start + size],
+                            matches[start + 1 : start + size],
+                            strict=False,
+                        )
+                    ):
+                        continue
+                    phrase = " ".join(tokens[start : start + size])
+                    bucket = self._phrases_by_width[size]
+                    if phrase not in bucket:
+                        bucket.add(phrase)
+                        if len(phrase) >= 4:
+                            shape = (size, len(phrase), re.sub(r"\w", "", phrase))
+                            self._phrases_by_shape.setdefault(shape, []).append(phrase)
+
+    def match(self, vocabulary: Iterable[str]) -> set[str]:
+        """Match pre-extracted candidate text against a target job vocabulary."""
+        if not self.normalized_texts:
+            return set()
+        known = {normalize_skill(name) for name in vocabulary if name.strip()}
+        if not known:
+            return set()
+
+        known_taxonomy = known & _TAXONOMY_CANONICAL_FOLDS
+        found = (self._prose_taxonomy_found | self._approx_taxonomy_found) & known_taxonomy
+
+        extras = known - _TAXONOMY_CANONICAL_FOLDS
+        if not extras:
+            return found
+
+        extra_widths = {len(skill.split()) for skill in extras if len(skill) >= 5}
+        if extra_widths:
+            self._collect_phrases(extra_widths)
+
+        for extra in extras:
+            if any(extra in text for text in (*self.normalized_texts, *self.ascii_texts)):
+                pattern = _skill_find_pattern(extra)
+                if any(pattern.search(text) for text in self.normalized_texts) or any(
+                    pattern.search(text) for text in self.ascii_texts
+                ):
+                    found.add(extra)
+                    continue
+            if len(extra) >= 5:
+                width = len(extra.split())
+                punct = re.sub(r"\w", "", extra)
+                for size in (len(extra) - 1, len(extra), len(extra) + 1):
+                    for phrase in self._phrases_by_shape.get((width, size, punct), ()):
+                        if phrase not in _ALIASES and len(phrase) >= 5 and one_edit(phrase, extra):
+                            found.add(extra)
+                            break
+                    else:
+                        continue
+                    break
+        return found
+
+
+def compile_skill_matcher(texts: Iterable[str]) -> SkillTextMatcher:
+    """Build a request-local matcher for repeated per-job intersections."""
+    return SkillTextMatcher(texts)
+
+
 def find_skills(texts: Iterable[str], vocabulary: Iterable[str]) -> set[str]:
     """Return normalized vocabulary skills explicitly mentioned in supplied text.
 
     Exact aliases plus bounded score-only typo support. This result is never
     sufficient evidence for mandatory satisfaction or candidate exclusion.
     """
-    normalized_texts = [
-        " ".join(unicodedata.normalize("NFKC", text).casefold().split()) for text in texts
-    ]
-    if not normalized_texts:
-        return set()
-    ascii_texts = [_fold_ascii(text) for text in normalized_texts]
-    vocab_tuple = tuple(name for name in vocabulary if name.strip())
-    known = {normalize_skill(name) for name in vocab_tuple}
-    if not known:
-        return set()
-
-    found: set[str] = set()
-    for canonical in known:
-        if canonical in _TAXONOMY_CANONICAL_FOLDS:
-            variants = _PROSE_VARIANTS_BY_CANONICAL.get(canonical, frozenset())
-        else:
-            variants = frozenset({canonical})
-        if not variants:
-            continue
-        # Fast C-level substring prefilter before regex boundary verification.
-        if not any(
-            variant in text for variant in variants for text in (*normalized_texts, *ascii_texts)
-        ):
-            continue
-        pattern = _skill_find_pattern(canonical)
-        if any(pattern.search(text) for text in normalized_texts) or any(
-            pattern.search(text) for text in ascii_texts
-        ):
-            found.add(canonical)
-
-    # Tokenize full names, retaining internal punctuation. Sentence-final full
-    # stops are separators, while Node.js and C++ remain single distinct tokens.
-    aliases, buckets = _alias_index(vocab_tuple)
-    widths = (
-        _DEFAULT_WIDTHS
-        if aliases is _ALIASES
-        else tuple(sorted({len(name.split()) for name in aliases}))
-    )
-    seen: set[str] = set()
-    for text in normalized_texts:
-        matches = list(re.finditer(r"\w+(?:[.+#/-]+\w+)*[+#]*", text))
-        tokens = [m.group() for m in matches]
-        for start in range(len(tokens)):
-            for size in widths:
-                if start + size > len(tokens):
-                    break
-                if any(
-                    not text[a.end() : b.start()].isspace()
-                    for a, b in zip(
-                        matches[start : start + size],
-                        matches[start + 1 : start + size],
-                        strict=False,
-                    )
-                ):
-                    continue
-                phrase = " ".join(tokens[start : start + size])
-                if phrase in seen:
-                    continue
-                seen.add(phrase)
-                match = _lookup(phrase, aliases, buckets)
-                if match and match.approximate and normalize_skill(match.name) in known:
-                    found.add(normalize_skill(match.name))
-    return found
+    return SkillTextMatcher(texts).match(vocabulary)
