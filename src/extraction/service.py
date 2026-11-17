@@ -6,6 +6,8 @@ three-claim budget; stale workers cannot publish. Stop workers before config cha
 
 import json
 import logging
+import math
+import random
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -101,11 +103,34 @@ class ExtractionWorker:
     """Each factory call must return an independent, dedicated Session."""
 
     def __init__(
-        self, sessions: Callable[[], Session], extractor: LocalExtractor, config_version: str
+        self,
+        sessions: Callable[[], Session],
+        extractor: LocalExtractor,
+        config_version: str,
+        *,
+        retry_jitter_seconds: float = 0.0,
+        rng: Callable[[], float] = random.random,
     ):
+        if (
+            isinstance(retry_jitter_seconds, bool)
+            or not isinstance(retry_jitter_seconds, (int, float))
+            or not math.isfinite(retry_jitter_seconds)
+            or not 0.0 <= retry_jitter_seconds <= 30.0
+        ):
+            raise ValueError("retry_jitter_seconds must be finite and between 0 and 30")
         self.sessions = sessions
         self.extractor = extractor
         self.config_version = _version(config_version)
+        self.retry_jitter_seconds = float(retry_jitter_seconds)
+        self.rng = rng
+
+    def _retry_delay(self, attempts: int) -> timedelta:
+        jitter = (
+            min(max(float(self.rng()), 0.0), 1.0) * self.retry_jitter_seconds
+            if self.retry_jitter_seconds > 0.0
+            else 0.0
+        )
+        return timedelta(seconds=(30 * attempts) + jitter)
 
     def claim(self, *, now: datetime | None = None) -> Claim | None:
         now = now or datetime.now(UTC)
@@ -217,7 +242,7 @@ class ExtractionWorker:
                 state.evidence = None
                 state.status = "FAILED" if state.attempts == 3 else "PENDING"
                 state.next_attempt_at = (
-                    None if state.attempts == 3 else now + timedelta(seconds=30 * state.attempts)
+                    None if state.attempts == 3 else now + self._retry_delay(state.attempts)
                 )
                 alert = state.status == "FAILED"
             else:

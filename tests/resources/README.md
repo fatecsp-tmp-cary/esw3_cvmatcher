@@ -18,6 +18,13 @@ covers explicit, decorated, conflicting and topic-only label metadata, an issue
 form whose checked options are in the body, an inline `Nível:` body field and a
 title with the only evidence.
 
+`meupadrinho_vagas.json` is a synthetic fixture that mirrors the `{"nano_id": ..., "contents": {...}}`
+record shape produced by the MeuPadrinho collection script (`meu_padriho.sh`) and
+`GET /api/vagas/{nano_id}`. All identifiers, companies, titles, and URLs are
+synthetic. It covers structured field mapping, URL fallback priority, salary range
+parsing, `Techlead` seniority normalization, `presecial` work-arrangement typo
+normalization, and explicit `vaga_encerrada` closure.
+
 ## File Location
 `tests/resources/jobs_fixture.json`
 

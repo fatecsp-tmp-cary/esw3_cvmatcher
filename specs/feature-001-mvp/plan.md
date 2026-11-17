@@ -98,10 +98,9 @@ Record measured verification before marking implementation complete. No release 
 Follow [ADR-021](../../docs/architecture/decisions/ADR-021-mandatory-coverage-score-only.md). Implement/version per-job coverage and its boundary/evidence tests without changing eligibility, DTOs, existing blend weights or evaluation sample requirements.
 Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
 
-## Deferred external deployment and source expansion
+## Deferred external deployment and second-source expansion (#127 / #128)
 
-Follow [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md). Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
-Record measured verification before marking implementation complete. No release or merge is approved by this documentation.
+Follow [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md) to keep external deployment (#150) deferred. Follow [ADR-026](../../docs/architecture/decisions/ADR-026-meupadrinho-source-and-validation.md) for the selected second source (#127) and adapter implementation (#128): normalize structured MeuPadrinho records to canonical `Job` fields, support offline JSONL dump ingestion (`ingest_meupadrinho_jsonl` and `python -m src.worker --import-meupadrinho`), and validate active job availability in bounded worker batches via `GET /api/vagas/{nano_id}`.
 
 ## Stale expiration interview — issue #145
 

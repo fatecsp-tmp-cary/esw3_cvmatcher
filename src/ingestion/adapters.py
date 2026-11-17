@@ -1,7 +1,9 @@
 """Source adapter contract and bounded, privacy-safe request policy."""
 
 import math
-from collections.abc import AsyncIterator
+import random
+import time
+from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
@@ -57,6 +59,8 @@ class RetryPolicy:
     max_attempts: int = 3
     base_delay_seconds: float = 1.0
     max_delay_seconds: float = 60.0
+    jitter_ratio: float = 0.0
+    rng: Callable[[], float] = random.random
 
     def __post_init__(self) -> None:
         if (
@@ -71,11 +75,26 @@ class RetryPolicy:
             or not 0 <= self.base_delay_seconds <= self.max_delay_seconds <= 60
         ):
             raise ValueError("retry delays must be finite and between 0 and 60 seconds")
+        if (
+            isinstance(self.jitter_ratio, bool)
+            or not isinstance(self.jitter_ratio, (int, float))
+            or not math.isfinite(self.jitter_ratio)
+            or not 0.0 <= self.jitter_ratio <= 1.0
+        ):
+            raise ValueError("jitter_ratio must be finite and between 0 and 1")
+
+    def _apply_jitter(self, wait_seconds: float) -> float:
+        if self.jitter_ratio <= 0.0 or wait_seconds <= 0.0:
+            return wait_seconds
+        sample = float(self.rng())
+        sample = min(max(sample, 0.0), 1.0)
+        factor = (1.0 - self.jitter_ratio) + (2.0 * self.jitter_ratio * sample)
+        return min(max(wait_seconds * factor, 0.0), self.max_delay_seconds)
 
     def delay(self, failed_attempt: int, retry_after: str | None, now: datetime) -> float:
         fallback = min(self.base_delay_seconds * 2 ** (failed_attempt - 1), self.max_delay_seconds)
         if retry_after is None:
-            return fallback
+            return self._apply_jitter(fallback)
         try:
             # RFC Retry-After is an integer delay or an HTTP date, never a float.
             if retry_after.isascii() and retry_after.isdigit():
@@ -87,4 +106,57 @@ class RetryPolicy:
                 delay = (parsed - now).total_seconds()
             return min(max(delay, 0.0), self.max_delay_seconds)
         except (ValueError, TypeError, OverflowError):
-            return fallback
+            return self._apply_jitter(fallback)
+
+
+class RateLimiter:
+    """Bounded interval pacer enforcing max requests/second with optional jitter."""
+
+    def __init__(
+        self,
+        max_requests_per_second: float = 60.0,
+        *,
+        jitter_seconds: float = 0.0,
+        clock: Callable[[], float] = time.monotonic,
+        rng: Callable[[], float] = random.random,
+    ) -> None:
+        if (
+            isinstance(max_requests_per_second, bool)
+            or not isinstance(max_requests_per_second, (int, float))
+            or not math.isfinite(max_requests_per_second)
+            or max_requests_per_second <= 0
+        ):
+            raise ValueError("max_requests_per_second must be finite and positive")
+        if (
+            isinstance(jitter_seconds, bool)
+            or not isinstance(jitter_seconds, (int, float))
+            or not math.isfinite(jitter_seconds)
+            or not 0.0 <= jitter_seconds <= 10.0
+        ):
+            raise ValueError("jitter_seconds must be finite and between 0 and 10")
+        self.max_requests_per_second = float(max_requests_per_second)
+        self.min_interval_seconds = 1.0 / self.max_requests_per_second
+        self.jitter_seconds = float(jitter_seconds)
+        self.clock = clock
+        self.rng = rng
+        self._next_allowed_at: float | None = None
+
+    def acquire_delay(self) -> float:
+        now = float(self.clock())
+        jitter = (
+            min(max(float(self.rng()), 0.0), 1.0) * self.jitter_seconds
+            if self.jitter_seconds > 0.0
+            else 0.0
+        )
+        if self._next_allowed_at is None or now >= self._next_allowed_at:
+            self._next_allowed_at = now + self.min_interval_seconds + jitter
+            return jitter
+        wait = (self._next_allowed_at - now) + jitter
+        self._next_allowed_at = self._next_allowed_at + self.min_interval_seconds + jitter
+        return max(wait, 0.0)
+
+    def wait(self, sleep: Callable[[float], None] = time.sleep) -> float:
+        delay = self.acquire_delay()
+        if delay > 0.0:
+            sleep(delay)
+        return delay

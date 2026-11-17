@@ -135,6 +135,35 @@ def test_stopped_worker_does_not_run_another_cycle(monkeypatch):
     assert calls == [True]
 
 
+def test_run_forever_applies_exponential_backoff_and_jitter_on_error_cycles(monkeypatch):
+    subject = worker(poll_jitter_seconds=0.5, rng=lambda: 0.5)
+    stop = Event()
+    waits = []
+    results = iter(
+        [
+            CycleResult((), 0, 0, ("source_poll",)),
+            CycleResult((), 0, 0, ("source_poll",)),
+            CycleResult((), 0, 0, ("source_poll",)),
+            CycleResult((), 0, 0, ()),
+        ]
+    )
+
+    def fake_wait(delay):
+        waits.append(delay)
+        if len(waits) == 4:
+            stop.set()
+        return False
+
+    monkeypatch.setattr(subject, "run_once", lambda **_: next(results))
+    monkeypatch.setattr(stop, "wait", fake_wait)
+    subject.run_forever(stop, poll_seconds=2.0, max_backoff_seconds=5.0)
+    # 1st error cycle: 2.0 * 2^1 + 0.25 = 4.25
+    # 2nd error cycle: min(2.0 * 2^2, 5.0) + 0.25 = 5.25 (capped at max_backoff_seconds)
+    # 3rd error cycle: min(2.0 * 2^3, 5.0) + 0.25 = 5.25 (remains capped)
+    # 4th clean cycle: 2.0 + 0.25 = 2.25
+    assert waits == [4.25, 5.25, 5.25, 2.25]
+
+
 @pytest.mark.parametrize("delay", [0, -1, float("nan"), float("inf")])
 def test_loop_rejects_invalid_poll_delay(delay):
     with pytest.raises(ValueError):
@@ -152,6 +181,13 @@ def test_cli_retry_is_explicit_and_does_not_run_cycles():
     subject = SimpleNamespace(retry_extraction=identifiers.append)
     assert main(["--retry-extraction", "42"], worker_factory=lambda: subject) == 0
     assert identifiers == [42]
+
+
+def test_cli_import_meupadrinho_is_explicit_and_does_not_run_cycles():
+    paths = []
+    subject = SimpleNamespace(import_meupadrinho=paths.append)
+    assert main(["--import-meupadrinho", "dump.jsonl"], worker_factory=lambda: subject) == 0
+    assert paths == ["dump.jsonl"]
 
 
 def test_cli_configuration_failure_is_safe(caplog):
@@ -266,6 +302,12 @@ def test_invalid_startup_gap_is_rejected(gap):
         SourceScheduler(None, None, startup_min_gap_seconds=gap)
 
 
+def test_scheduler_next_run_applies_configured_jitter():
+    subject = SourceScheduler(None, None, jitter_seconds=10.0, rng=lambda: 0.5)
+    now = datetime(2026, 11, 12, 10, 0, tzinfo=UTC)
+    assert subject._next_run(now, 60) == now + timedelta(seconds=65)
+
+
 def test_loop_drains_bounded_startup_batches_before_normal_polling():
     stop = Event()
     calls = []
@@ -352,6 +394,46 @@ def test_default_cli_retry_uses_only_database_dependencies(monkeypatch):
         monkeypatch.setattr(bootstrap, name, lambda *_, **__: pytest.fail("model constructed"))
     assert main(["--retry-extraction", "42"]) == 0
     assert calls == [(sessions, 42, bootstrap.EXTRACTION_VERSION), "disposed"]
+
+
+def test_default_cli_import_meupadrinho_uses_only_database_dependencies(monkeypatch):
+    from src.worker import bootstrap
+
+    calls = []
+    engine = SimpleNamespace(dispose=lambda: calls.append("disposed"))
+
+    class FakeSession:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return False
+
+        def commit(self):
+            calls.append("committed")
+
+    monkeypatch.delenv("CVMATCHER_EXTRACTION_DIRECTORY", raising=False)
+    monkeypatch.setattr(bootstrap, "create_db_engine", lambda: engine)
+    monkeypatch.setattr(bootstrap, "create_session_factory", lambda _: FakeSession)
+    monkeypatch.setattr(bootstrap, "register_source", lambda session, name: (7, True))
+    monkeypatch.setattr(
+        bootstrap,
+        "ingest_meupadrinho_jsonl",
+        lambda session, source_id, path: (
+            calls.append((source_id, path)) or SimpleNamespace(status="SUCCEEDED")
+        ),
+    )
+    for name in ("GlinerExtractor", "LocalEmbeddingEncoder"):
+        monkeypatch.setattr(bootstrap, name, lambda *_, **__: pytest.fail("model constructed"))
+    assert main(["--import-meupadrinho", "dump.jsonl"]) == 0
+    assert calls == ["committed", (7, "dump.jsonl"), "disposed"]
+
+    monkeypatch.setattr(
+        bootstrap,
+        "ingest_meupadrinho_jsonl",
+        lambda session, source_id, path: SimpleNamespace(status="FAILED"),
+    )
+    assert main(["--import-meupadrinho", "bad.jsonl"]) == 1
 
 
 def test_default_retry_failure_disposes_database_and_keeps_error_private(monkeypatch, caplog):

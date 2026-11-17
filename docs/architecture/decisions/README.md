@@ -27,9 +27,10 @@ new accepted records supersede the relevant rules rather than rewriting history.
 | 020 | [Three qualifying absence snapshots expire stale jobs](ADR-020-three-snapshot-stale-expiration.md) | Accepted policy; implementation and verification pending |
 | 021 | [Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) | Accepted policy; implementation and verification pending |
 | 022 | [Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) | Accepted policy; implementation and verification pending |
-| 023 | [External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) | Accepted deferral; no external deployment or second source authorized |
+| 023 | [External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) | External deployment deferred; second-source deferral superseded by ADR-026 |
 | 024 | [Current extraction and embeddings for every returned job](ADR-024-all-result-extraction-and-embedding-readiness.md) | Accepted and implemented in PR #195 |
 | 025 | [Initial matching stack: PostgreSQL FTS, pgvector and multilingual-e5-small](ADR-025-initial-matching-stack.md) | Accepted; records implemented decisions (#26) |
+| 026 | [MeuPadrinho source adapter, JSONL import, and bounded availability validation](ADR-026-meupadrinho-source-and-validation.md) | Accepted and implemented |
 
 ## Identifier reconciliation
 
@@ -43,4 +44,4 @@ different accepted field/display policy.
 
 ## Implementation authority
 
-Feature specs/acceptance/plan/tasks track ADR-019 implementation as complete in PR #197 and ADR-020/021/022 as accepted follow-up work. ADR-023 keeps external deployment and source expansion deferred. ADR-024 records current extraction and embedding readiness for every returned job. No hard exclusions or release approval follow from a documentation update.
+Feature specs/acceptance/plan/tasks track ADR-019 implementation as complete in PR #197 and ADR-020/021/022 as accepted follow-up work. ADR-023 keeps external deployment deferred, while ADR-026 selects and implements MeuPadrinho as the second source (with source terms, official rate limits, and raw-payload retention permissions tracked in issue #213). ADR-024 records current extraction and embedding readiness for every returned job. No hard exclusions or release approval follow from a documentation update.

@@ -13,12 +13,14 @@ from src.embeddings.encoder import LocalEmbeddingEncoder
 from src.embeddings.service import EmbeddingWorker, enqueue
 from src.extraction.gliner import EXTRACTION_VERSION, GlinerExtractor
 from src.extraction.service import ExtractionWorker, ready_predicate
+from src.ingestion.meupadrinho import ingest_meupadrinho_jsonl
 from src.lifecycle.expiration import expire_source_timestamps
 from src.persistence.database import create_db_engine, create_session_factory
 from src.persistence.embedding import JobEmbedding
 from src.persistence.job.job import Job, JobStatus
 from src.worker.runtime import BackgroundWorker, retry_extraction
 from src.worker.scheduler import SourceScheduler, parse_daily_time
+from src.worker.sources import register_source
 
 
 class EmbeddingMaintenance:
@@ -91,6 +93,23 @@ def retry_default_extraction(job_id: int) -> None:
         engine.dispose()
 
 
+def import_default_meupadrinho(path: str) -> None:
+    """Import a MeuPadrinho JSONL file with database dependencies only."""
+    if not isinstance(path, str) or not path.strip():
+        raise ValueError("A non-empty MeuPadrinho JSONL path is required")
+    engine = create_db_engine()
+    try:
+        sessions = create_session_factory(engine)
+        with sessions() as session:
+            source_id, _ = register_source(session, "meupadrinho")
+            session.commit()
+            result = ingest_meupadrinho_jsonl(session, source_id, path.strip())
+            if result.status == "FAILED":
+                raise RuntimeError("MeuPadrinho JSONL import failed")
+    finally:
+        engine.dispose()
+
+
 def create_default_worker() -> BackgroundWorker:
     schedule = source_schedule(os.environ)
     directory = os.environ["CVMATCHER_EXTRACTION_DIRECTORY"]
@@ -113,13 +132,16 @@ def create_default_worker() -> BackgroundWorker:
             sessions,
             daily_at=schedule["daily_at"],
             timezone=schedule["timezone"],
+            jitter_seconds=5.0,
         ),
         sessions,
-        ExtractionWorker(sessions, extractor, EXTRACTION_VERSION),
+        ExtractionWorker(sessions, extractor, EXTRACTION_VERSION, retry_jitter_seconds=5.0),
         EXTRACTION_VERSION,
         embedding_hook=EmbeddingMaintenance(
-            sessions, EmbeddingWorker(sessions, encoder, EXTRACTION_VERSION)
+            sessions,
+            EmbeddingWorker(sessions, encoder, EXTRACTION_VERSION, retry_jitter_seconds=5.0),
         ),
         expiration_hook=expire,
         poll_on_start=schedule["poll_on_start"],
+        poll_jitter_seconds=1.0,
     )

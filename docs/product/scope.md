@@ -29,6 +29,9 @@ crawling; sophisticated entity resolution or personalization.
 Implementation status and remaining work are tracked in
 [MVP tasks](../../specs/feature-001-mvp/tasks.md).
 
-External deployment and a second source remain deferred under
-[ADR-023](../architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
-Their optional future inclusion is not current implementation authorization.
+External deployment remains deferred under
+[ADR-023](../architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md);
+its optional future inclusion is not current implementation authorization.
+MeuPadrinho is accepted as the second source under
+[ADR-026](../architecture/decisions/ADR-026-meupadrinho-source-and-validation.md),
+with raw payload retention disabled while source terms and retention permissions remain tracked in issue #213.
