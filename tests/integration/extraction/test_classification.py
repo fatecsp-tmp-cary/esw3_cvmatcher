@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from src.extraction.contracts import SpanEvidence
 from src.extraction.persistence import persist_requirements, seed_taxonomy
@@ -123,3 +124,64 @@ def test_negation_and_inline_background_do_not_persist_positive_associations(db_
     java = next(row for row in raw if text[row["start"] : row["end"]] == "Java")
     assert java["requirement_class"] is None
     assert not java["exclusion_safe"]
+
+
+def _upsert_skill(
+    db_session,
+    *,
+    canonical_name: str,
+    category: str | None,
+    aliases: list[str] | None = None,
+    parent_skill_id: int | None = None,
+) -> Skill:
+    stmt = pg_insert(Skill).values(
+        canonical_name=canonical_name,
+        category=category,
+        aliases=aliases or [],
+        parent_skill_id=parent_skill_id,
+    )
+    stmt = stmt.on_conflict_do_update(
+        index_elements=[Skill.canonical_name],
+        set_={
+            "category": category,
+            "aliases": aliases or [],
+            "parent_skill_id": parent_skill_id,
+        },
+    )
+    db_session.execute(stmt)
+    db_session.flush()
+    return db_session.scalar(select(Skill).where(Skill.canonical_name == canonical_name))
+
+
+def test_seed_taxonomy_populates_categories_and_parents_while_preserving_curated(db_session):
+    custom_root = _upsert_skill(db_session, canonical_name="Custom Root", category="custom_domain")
+    _upsert_skill(
+        db_session, canonical_name="PostgreSQL", category="technology", aliases=["postgres"]
+    )
+    _upsert_skill(db_session, canonical_name="React", category="curated_ui")
+    _upsert_skill(
+        db_session,
+        canonical_name="Next.js",
+        category="curated_ssr",
+        parent_skill_id=custom_root.id,
+        aliases=["nextjs"],
+    )
+    _upsert_skill(db_session, canonical_name="COREN", category="professional license")
+
+    seed_taxonomy(db_session)
+
+    pg = db_session.scalar(select(Skill).where(Skill.canonical_name == "PostgreSQL"))
+    aws = db_session.scalar(select(Skill).where(Skill.canonical_name == "AWS"))
+    aws_lambda = db_session.scalar(select(Skill).where(Skill.canonical_name == "AWS Lambda"))
+    react = db_session.scalar(select(Skill).where(Skill.canonical_name == "React"))
+    nextjs = db_session.scalar(select(Skill).where(Skill.canonical_name == "Next.js"))
+    coren = db_session.scalar(select(Skill).where(Skill.canonical_name == "COREN"))
+
+    assert pg.category == "database"
+    assert aws.category == "cloud"
+    assert aws_lambda.parent_skill_id == aws.id
+    assert coren.category == "professional_license"
+    # Independently curated non-default categories and parent links are preserved.
+    assert react.category == "curated_ui"
+    assert nextjs.category == "curated_ssr"
+    assert nextjs.parent_skill_id == custom_root.id

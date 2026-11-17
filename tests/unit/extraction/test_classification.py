@@ -258,3 +258,102 @@ def test_inline_requirement_heading_carries_strength_to_following_lines():
     rows = annotate_spans(text, [])
     assert [text[row["start"] : row["end"]] for row in rows] == ["Python", "Java"]
     assert [row["requirement_class"] for row in rows] == ["REQUIRED", "REQUIRED"]
+
+
+def test_bullet_colons_and_obrigatorios_differentials_subheadings_preserve_requirements():
+    text = (
+        "## Requisitos\n"
+        "**Obrigatórios:**\n"
+        "- Domínio de pelo menos uma linguagem: Python, TypeScript\n"
+        "- Conhecimento avançado em Power BI\n"
+        "- English speaker\n"
+        "**Differentials**\n"
+        "- Kubernetes\n"
+        "## Habilidades:\n"
+        "- Tableau\n"
+    )
+    raw = evidence(
+        text,
+        "Conhecimento",
+        "English speaker",
+    )
+    raw.append(
+        SpanEvidence(
+            text.index("Conhecimento avançado em Power BI"),
+            text.index("Conhecimento avançado em Power BI")
+            + len("Conhecimento avançado em Power BI"),
+            "skill",
+            0.9,
+        ).serialize(text)
+    )
+    rows = annotate_spans(text, raw)
+    extracted = [(text[r["start"] : r["end"]], r["requirement_class"]) for r in rows]
+    assert ("Python", "REQUIRED") in extracted
+    assert ("TypeScript", "REQUIRED") in extracted
+    assert ("Power BI", "REQUIRED") in extracted
+    assert ("English", "REQUIRED") in extracted
+    assert ("Kubernetes", "PREFERRED") in extracted
+    assert ("Tableau", "REQUIRED") in extracted
+    assert all(name != "Conhecimento" for name, _ in extracted)
+
+
+def test_preferred_headings_and_sub_cues_do_not_promote_to_required():
+    text = (
+        "## Requirements\n"
+        "- Python\n"
+        "## Preferred Qualifications\n"
+        "- Kubernetes\n"
+        "## Requisitos desejáveis\n"
+        "- Docker\n"
+        "## Habilidades desejadas\n"
+        "- Terraform\n"
+        "## Diferenciais\n"
+        "- Habilidades com Go\n"
+    )
+    rows = annotate_spans(text, evidence(text, "Terraform"))
+    assert [(text[r["start"] : r["end"]], r["requirement_class"]) for r in rows] == [
+        ("Python", "REQUIRED"),
+        ("Kubernetes", "PREFERRED"),
+        ("Docker", "PREFERRED"),
+        ("Terraform", "PREFERRED"),
+        ("Go", "PREFERRED"),
+    ]
+
+
+def test_html_headings_and_colon_bullets_preserve_requirement_section():
+    text = (
+        "<p><strong>Requisitos Mandatórios:</strong></p>\n"
+        "<ul>\n"
+        "  <li>Gestão de estado: Redux</li>\n"
+        "  <li>Python</li>\n"
+        "</ul>\n"
+    )
+    rows = annotate_spans(text, [])
+    extracted = [(text[r["start"] : r["end"]], r["requirement_class"]) for r in rows]
+    assert ("Redux", "REQUIRED") in extracted
+    assert ("Python", "REQUIRED") in extracted
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    [
+        "Projetos no GitHub",
+        "Vivência no Linux",
+        "Experiência sólida no Kubernetes",
+    ],
+)
+def test_portuguese_contraction_no_is_not_treated_as_negation(phrase):
+    text = f"Requisitos:\n- {phrase}"
+    rows = annotate_spans(text, [])
+    assert len(rows) == 1
+    assert rows[0]["requirement_class"] == "REQUIRED"
+    assert rows[0]["negated"] is False
+
+
+def test_education_and_communication_requirements_are_not_filtered_by_stopwords():
+    text = "Requisitos:\n- Graduação em Ciência da Computação\n- Comunicação"
+    rows = annotate_spans(text, evidence(text, "Graduação", "Comunicação"))
+    assert [(text[r["start"] : r["end"]], r["requirement_class"]) for r in rows] == [
+        ("Graduação", "REQUIRED"),
+        ("Comunicação", "REQUIRED"),
+    ]

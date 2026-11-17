@@ -7,9 +7,13 @@ reviewed classification/quality acceptance is pending.
 Use GLiNER locally during background job normalization/enrichment. The reference
 is the sibling `../gline/README.md`, `extract_requirements.py`, `benchmark.py` and
 `VALIDATION.md`, inspected on 2026-11-11. The prototype's multilingual extraction
-configuration (`urchade/gliner_multi-v2.1`, threshold 0.3) is an evaluation starting
-point, not a production model/threshold decision. Its five-posting qualitative
-review is not a release quality gate; source labels are weak labels, not gold data.
+configuration (`urchade/gliner_multi-v2.1`, threshold 0.3) was the evaluation
+starting point. The current provisional threshold is 0.25, selected from the
+23-posting manually labeled APiBR sample after cue,
+taxonomy, and span-tokenization improvements; see the
+[sample tuning report](../reports/2026-11-16-apibr-gliner-sample-tuning.md).
+That small, manually labeled sample from one source is not an independent release
+quality gate.
 
 1. Preserve cleaned title/description and section boundaries. Extract from bounded
    overlapping chunks with offsets; cover the full supported description, rather
@@ -133,11 +137,22 @@ PT/EN sentence or immediate section-heading cues. Negation remains null; hedges 
 and conflicting occurrences retain the strongest strength with conflict flags under ADR-018. Presence or confidence alone never
 establishes a required skill. `src/extraction/persistence.py` atomically replaces
 current JobRequirement/JobSkill associations with successful claim completion.
-The versioned project-maintained alias seed has canonical technology names,
-additive aliases, category `technology` and null parents for flat roots. Existing
-curated categories/parents are preserved. Repeated seeding preserves identities.
-No external taxonomy provenance or inferred hierarchy is claimed. Candidate
-matching uses the same explicit aliases transiently. The extraction-version hash
+The versioned project-maintained taxonomy seed (`src/extraction/taxonomy_data.py`,
+version `explicit-aliases-single-edit-min5-v5`) defines canonical skill names,
+bilingual (PT-BR/EN) additive aliases, domain categories (`programming_language`,
+`framework`, `database`, `cloud`, `devops`, `observability`, `messaging`,
+`data_engineering`, `analytics_bi`, `ai_ml`, `security`, `testing`, `networking`,
+`architecture`, `methodology`, `design`, `erp_crm`, `operating_system`,
+`protocol_api`, `tool`, `language`, `certification`, `professional_license`), and
+curated acyclic `parent_skill_id` relationships. Existing independently curated
+non-default categories and parents are preserved; legacy default `"technology"`
+categories and missing parent links are backfilled idempotently. Repeated seeding
+preserves identities. Prose-safe aliases supplement GLiNER detections in
+`alias_spans()` with GLiNER-compatible labels while label-only aliases and
+proficiency-wrapper normalization stay scoped to discrete skill inputs and matching.
+No external taxonomy provenance or inferred equivalence between distinct tools is
+claimed. Candidate matching uses the same explicit taxonomy and compound-label
+resolution (`resolve_skills`) transiently. The extraction-version hash
 includes classification and seed versions, forcing unchanged-content reprocessing
 when those policies change. Canonical Job content/hash is not mutated by these
 supporting associations. Mandatory exclusions remain disabled pending review.
@@ -179,8 +194,9 @@ headings supply fallback strength. Sentence-local team-context labels do not
 suppress an explicit later requirement on the same line.
 
 These deterministic corrections version classification as
-`clause-strongest-negation-hedge-conflict-v4` and context as
-`sentence-clause-sections-v3`, changing `EXTRACTION_VERSION`. Apply the existing
+`clause-strongest-negation-hedge-conflict-v5`, context as
+`sentence-clause-sections-v4`, spans as `smallest-meaningful-entity-v4`, and
+taxonomy seed as `explicit-aliases-single-edit-min5-v4`, changing `EXTRACTION_VERSION`. Apply the existing
 stop/reprepare/reprocess/restart procedure before using corrected artifacts.
 Frozen annotation copies, calibration outputs and prior failures remain unchanged;
 those results do not calibrate this revised runtime. Exclusions and release

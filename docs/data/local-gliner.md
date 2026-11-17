@@ -42,7 +42,24 @@ operational safeguard; preparation is the sole intentional network step.
 
 The provisional labels are `skill`, `tool`, `framework`, `database`, `cloud`,
 `education`, `work experience requirement`, `professional credential`,
-`professional license`, `language`, `certification`; threshold is 0.3. Labels/confidence
+`professional license`, `language`, `certification`; the current provisional
+threshold is 0.25. It was selected using required/preferred fields from 23 manually
+labeled APiBR postings after updating cues/section parsing,
+proficiency wrapper trimming, taxonomy aliases/boundaries, and tokenizer special-token
+budgeting: on the 70/30 calibration split (16 postings, 217 deduplicated labels),
+threshold 0.25 maximized class F1 at 0.674 (213 predicted items, count ratio 0.982).
+On the 7 heldout postings (79 labels), 0.25 selected 91 items (68 text matches,
+67 class-correct, class precision 0.736, class recall 0.848, class F1 0.788),
+substantially improving over the prior evaluation at 0.20 (69 selected, 40 class-correct,
+class F1 0.541) and over the `tmp/gline` prototype script at 0.30 (class F1 0.184).
+Across all 23 postings at 0.25, the extractor selected 304 items for 296 deduplicated
+labels (count ratio 1.027), with 228 text matches (text F1 0.760) and 212 class-correct
+matches (class precision 0.697, class recall 0.716, class F1 0.707); 5-fold out-of-fold
+class F1 was 0.661. The sample
+does not establish independent extraction acceptance or release quality;
+mandatory exclusions remain disabled. See the
+[complete sample measurements](../reports/2026-11-16-apibr-gliner-sample-tuning.md).
+Labels/confidence
 never imply mandatory status. Occurrence classes are assigned only by explicit clause/section context under
 [ADR-018](../architecture/decisions/ADR-018-extraction-context-and-approximate-evidence.md).
 Unknown/negated detections remain null. Classification supports scores only;
@@ -53,7 +70,9 @@ Each input is the worker's cleaned title, newline and description. Windows cover
 every original character with at most 1,200 characters and up to 200 characters
 of overlap (reduced for short windows to guarantee forward progress). Before
 inference, every window is checked against the exact tokenizer input assembled
-by GLiNER's label prompt and word splitter: at most 384 words and 384 subtokens,
+by GLiNER's label prompt and word splitter: at most 382 words and 382 prompt/word
+subtokens (`MAX_TOKENS - SPECIAL_TOKENS`, reserving two positions for `[CLS]` and
+`[SEP]` within the 384-token runtime budget),
 with tokenizer truncation disabled during the check. Windows are reduced until
 they fit. An unrepresentable single character fails the job rather than silently
 truncating. The same runtime tokenizer limit is 384, below the pinned backbone's
@@ -67,8 +86,13 @@ predictions of the same label are resolved by highest confidence, then longest
 span and stable offset order; final output is sorted by original offsets/label.
 This merges evidence within one job only and never merges source jobs.
 
-`src.extraction.taxonomy` provides explicit aliases and bounded phrase matching:
-`normalize_skill`, `canonical_skill` and `find_skills`. Exact aliases preserve punctuation in C++, C# and Node.js. Unknown terms of
+`src.extraction.taxonomy` provides explicit bilingual aliases, domain categories,
+curated parent relationships, and bounded phrase matching:
+`normalize_skill`, `canonical_skill`, `resolve_skills`, `alias_spans`, `match_skill`,
+and `find_skills`, backed by the curated catalog in `src/extraction/taxonomy_data.py`.
+Exact aliases preserve punctuation in C++, C# and Node.js, guard against hyphenated
+package names and URLs, and separate prose-safe aliases from discrete skill-label
+aliases to avoid common-word false positives in free text. Unknown terms of
 at least five characters may have one unique edit-distance match, including an
 adjacent transposition, with punctuation/word boundaries preserved. This approximate
 match supports scoring only and does not manufacture canonical equivalence,

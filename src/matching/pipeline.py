@@ -4,7 +4,7 @@ import hashlib
 import json
 import logging
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Any, Protocol
 
 from sqlalchemy import select
@@ -15,7 +15,12 @@ from src.domain.requirements import comparable_score
 from src.embeddings.config import EmbeddingConfig
 from src.embeddings.retrieval import retrieve_semantic
 from src.embeddings.service import ready_predicate as embedding_ready
-from src.extraction.taxonomy import _ALIASES, find_skills, normalize_skill
+from src.extraction.taxonomy import (
+    _ALIASES,
+    compile_skill_matcher,
+    normalize_skill,
+    resolve_skills,
+)
 from src.indexing.textual import TEXTUAL_VERSION
 from src.matching.ranking import RankingPolicy, SimilarityCalibration
 from src.matching.semantic import (
@@ -35,6 +40,20 @@ from src.schemas.matches import MatchedJob, MatchesResponse, MatchResult
 
 logger = logging.getLogger(__name__)
 DISPLAYED_SKILLS_VERSION = "exact-affirmative-nonconflicting-v1"
+
+
+def _normalized_skill_labels(values: Iterable[str]) -> set[str]:
+    """Resolve discrete skill labels into normalized canonical keys."""
+    labels: set[str] = set()
+    for raw in values:
+        if not raw.strip():
+            continue
+        resolved = resolve_skills(raw)
+        if resolved:
+            labels.update(normalize_skill(item) for item in resolved)
+        else:
+            labels.add(normalize_skill(raw))
+    return labels
 
 
 def trusted_extracted_skills(evidence: list[dict[str, object]] | None) -> set[str]:
@@ -132,10 +151,15 @@ class MatchingPipeline:
         checkpoint()
         candidate = normalize_curriculum(request)
         query_text = candidate_query_text(candidate)
-        candidate_skills = {normalize_skill(x.description) for x in candidate.competencies}
-        candidate_skills |= find_skills([query_text], _ALIASES.values())
         if not query_text.strip():
             return MatchesResponse(matches=[])
+        # Discrete CV competencies match job skills as labels; free prose uses prose-safe
+        # matching compiled once for this request (never cached across requests).
+        candidate_label_skills = _normalized_skill_labels(
+            x.description for x in candidate.competencies
+        )
+        skill_matcher = compile_skill_matcher([query_text])
+        candidate_skills = candidate_label_skills | skill_matcher.match(_ALIASES.values())
         # Each entry is embedded separately, once per request. No candidate cache.
         experience_texts = [f"{x.title}\n{x.description}" for x in candidate.experience]
         education_texts = [f"{x.course}\n{x.level}" for x in candidate.education]
@@ -275,11 +299,9 @@ class MatchingPipeline:
                             for index in selected_experience_indices(experiences)
                             if experiences[index].score >= 50.0
                         )
-                    skills = {
-                        normalize_skill(skill) for skill in (job.skills or []) if skill.strip()
-                    }
+                    skills = _normalized_skill_labels(job.skills or [])
                     skills |= associated_skills.get(job.id, set())
-                    matched = find_skills([query_text], skills)
+                    matched = skill_matcher.match(skills) | (candidate_label_skills & skills)
                     structured = comparable_score(
                         candidate,
                         job,
