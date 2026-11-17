@@ -105,6 +105,8 @@ def test_exact_tokenized_prompt_budget_and_word_limit():
 
     subject.tokenizer = tokenizer
     assert subject._fits("Python")
+    assert subject._fits("x" * 241)
+    assert not subject._fits("x" * 242)
     assert not subject._fits("x" * 500)
     assert not subject._fits("x " * 385)
     assert calls[0]["truncation"] is False and calls[0]["add_special_tokens"] is False

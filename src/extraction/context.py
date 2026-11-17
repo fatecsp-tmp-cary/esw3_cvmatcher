@@ -95,7 +95,7 @@ class Section:
     heading: str
 
 
-_HTML_TAG = re.compile(r"</?(?:p|strong|b|em|i|u|ul|li|br)\b[^>]*>|&nbsp;", re.I)
+_HTML_TAG = re.compile(r"</?(?:p|strong|b|em|i|u|ul|ol|li|br|h[1-6]|div|span)\b[^>]*>|&nbsp;", re.I)
 
 
 def _clean_line(line: str) -> str:
@@ -113,7 +113,9 @@ def sections(text: str) -> tuple[Section, ...]:
     )
     for line in text.splitlines(keepends=True):
         stripped = _clean_line(line)
-        is_bullet = bool(re.match(r"^[-*•⚫]\s+", stripped))
+        is_bullet = bool(re.match(r"^\s*<li\b", line, re.I)) or bool(
+            re.match(r"^[-*•⚫]\s+", stripped)
+        )
         plain = key(stripped.strip("#*_ :\t"))
         prefix = key(stripped.split(":", 1)[0].strip("#*_ \t"))
         # Sentence-local context labels are handled by BACKGROUND_PREFIX; they
