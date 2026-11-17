@@ -44,3 +44,25 @@ def test_retrieval_limit_rejects_non_integer_or_nonpositive_counts(limit):
 @pytest.mark.parametrize("limit", [1, 100, 1000])
 def test_retrieval_limit_accepts_positive_integer_counts(limit):
     assert RankingPolicy(retrieval_limit=limit).retrieval_limit == limit
+
+
+def test_dual_similarity_never_lets_long_descriptions_drag_the_core_below_itself():
+    import numpy as np
+
+    from src.matching.ranking import dual_similarity
+
+    core = np.array([0.90, 0.70, 0.80])
+    full = np.array([0.60, 0.90, 0.80])
+    result = dual_similarity(np, core, full, RankingPolicy().core_weight)
+    # Boilerplate-diluted full vector: the core similarity is kept.
+    assert result[0] == pytest.approx(0.90)
+    # Matching detail in the description can lift the entry.
+    assert result[1] == pytest.approx(0.65 * 0.70 + 0.35 * 0.90)
+    assert result[2] == pytest.approx(0.80)
+    assert all(result >= core)
+
+
+@pytest.mark.parametrize("weight", [-0.1, 1.1, float("nan"), float("inf")])
+def test_core_weight_is_a_finite_share(weight):
+    with pytest.raises(ValueError, match="Invalid ranking policy"):
+        RankingPolicy(core_weight=weight)

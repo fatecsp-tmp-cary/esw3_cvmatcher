@@ -458,3 +458,25 @@ def test_status_change_cannot_repeat_a_job_or_consume_the_next_group_limit(
     assert [row.job.id for row in response.matches] == [target, identities["b-stale"]]
     assert [row.eligibility for row in response.matches] == [True, False]
     assert [row.rank for row in response.matches] == [1, 2]
+
+
+def test_long_description_boilerplate_does_not_reduce_semantic_score_when_core_matches(
+    populated,
+):
+    from src.persistence.embedding import JobEmbedding
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    sessions, encoder, identities = populated
+    orthogonal = [0.0, 1.0] + [0.0] * 382
+    with sessions() as session, session.begin():
+        # Job 0 has its full embedding diluted by boilerplate (orthogonal to VECTOR),
+        # while its core_embedding matches VECTOR. Job 1 has both orthogonal.
+        session.get(Job, identities[0]).embedding = orthogonal
+        session.get(JobEmbedding, identities[0]).core_embedding = VECTOR
+        session.get(Job, identities[1]).embedding = orthogonal
+        session.get(JobEmbedding, identities[1]).core_embedding = orthogonal
+    response = MatchingPipeline(sessions, encoder, VERSION)(
+        CurriculumRequest.model_validate(curriculum()), 10
+    )
+    assert [row.job.id for row in response.matches] == identities[:2]
+    assert response.matches[0].score > response.matches[1].score
