@@ -37,7 +37,14 @@ class TextualMatch:
 
 
 def _retrieval_statement(
-    query_text, *, readiness, requirements, limit, bounded, statuses=ACTIVE_STATUSES
+    query_text,
+    *,
+    readiness,
+    requirements,
+    limit,
+    bounded,
+    statuses=ACTIVE_STATUSES,
+    exclude_ids: tuple[int, ...] = (),
 ):
     if not isinstance(query_text, str):
         raise TypeError("query must be text")
@@ -48,9 +55,14 @@ def _retrieval_statement(
     query = any_term_query(query_text)
     gate = false() if readiness is None else readiness
     status = status_predicate(statuses)
+    job_filters = [status, gate, document.bool_op("@@")(query)]
+    req_filters = [status, gate, requirement_document.bool_op("@@")(query)]
+    if exclude_ids:
+        job_filters.append(Job.id.not_in(exclude_ids))
+        req_filters.append(Job.id.not_in(exclude_ids))
     job_matches = select(
         Job.id.label("job_id"), func.ts_rank_cd(document, query).label("rank")
-    ).where(status, gate, document.bool_op("@@")(query))
+    ).where(*job_filters)
     # Maximum avoids multiplying evidence by the number of requirement rows.
     requirement_matches = (
         select(
@@ -58,7 +70,7 @@ def _retrieval_statement(
             func.max(func.ts_rank_cd(requirement_document, query)).label("rank"),
         )
         .join(Job, Job.id == JobRequirement.job_id)
-        .where(status, gate, requirement_document.bool_op("@@")(query))
+        .where(*req_filters)
         .group_by(JobRequirement.job_id)
     )
     matches = union_all(job_matches, requirement_matches).subquery()
@@ -90,6 +102,7 @@ def textual_statement(
     requirements: ColumnElement | None = None,
     limit: int = 100,
     statuses: tuple[JobStatus, ...] = ACTIVE_STATUSES,
+    exclude_ids: tuple[int, ...] = (),
 ) -> Select:
     """Select (Job, bounded score), with explicit successful-extraction readiness.
 
@@ -105,6 +118,7 @@ def textual_statement(
         limit=limit,
         bounded=True,
         statuses=statuses,
+        exclude_ids=exclude_ids,
     )
 
 
@@ -140,6 +154,7 @@ def retrieve_textual(
     requirements: ColumnElement | None = None,
     limit: int = 100,
     statuses: tuple[JobStatus, ...] = ACTIVE_STATUSES,
+    exclude_ids: tuple[int, ...] = (),
 ) -> list[tuple[Job, float]]:
     """Run one request-scoped query; persist/log none of its candidate evidence."""
     statement = textual_statement(
@@ -148,5 +163,6 @@ def retrieve_textual(
         requirements=requirements,
         limit=limit,
         statuses=statuses,
+        exclude_ids=exclude_ids,
     )
     return [(job, float(score)) for job, score in session.execute(statement)]
