@@ -35,7 +35,11 @@ from src.matching.semantic import (
     selected_experience_indices,
     semantic_score,
 )
-from src.matching.textual import candidate_query_text, retrieve_textual, textual_statement
+from src.matching.textual import (
+    focused_candidate_query_text,
+    retrieve_textual,
+    textual_statement,
+)
 from src.normalization.candidate.curriculum import NormalizedCandidate, normalize_curriculum
 from src.persistence.embedding import JobEmbedding
 from src.persistence.extraction import JobExtraction
@@ -47,6 +51,31 @@ from src.schemas.matches import MatchedJob, MatchesResponse, MatchResult
 
 logger = logging.getLogger(__name__)
 DISPLAYED_SKILLS_VERSION = "exact-affirmative-nonconflicting-v1"
+
+
+def _candidate_summary_text(candidate: NormalizedCandidate) -> str:
+    """Concise whole-profile summary for bidirectional semantic alignment (ADR-027)."""
+    recent = sorted(
+        candidate.experience,
+        key=lambda x: (x.end_date is None, x.end_date or date.min, x.start_date),
+        reverse=True,
+    )
+    items = [
+        *(x.title for x in recent),
+        *(x.description for x in candidate.competencies),
+        *(x.description for x in recent[:2]),
+    ]
+    seen: set[str] = set()
+    unique: list[str] = []
+    for item in items:
+        cleaned = " ".join(item.split())
+        if not cleaned:
+            continue
+        folded = cleaned.casefold()
+        if folded not in seen:
+            seen.add(folded)
+            unique.append(cleaned)
+    return "\n".join(unique)
 
 
 def _candidate_core_texts(candidate: NormalizedCandidate) -> list[str]:
@@ -194,7 +223,7 @@ class MatchingPipeline:
         checkpoint()
         request_date = self.as_of_date or datetime.now(UTC).date()
         candidate = normalize_curriculum(request)
-        query_text = candidate_query_text(candidate)
+        query_text = focused_candidate_query_text(candidate)
         if not query_text.strip():
             return MatchesResponse(matches=[])
         # Discrete CV competencies match job skills as labels; free prose uses prose-safe
@@ -211,20 +240,27 @@ class MatchingPipeline:
         experience_texts = [f"{x.title}\n{x.description}" for x in candidate.experience]
         education_texts = [f"{x.course}\n{x.level}" for x in candidate.education]
         texts = experience_texts + education_texts
+        summary_text = _candidate_summary_text(candidate) if texts else ""
+        encode_inputs = texts + ([summary_text] if summary_text else [])
         checkpoint()
-        vectors = self.encoder.encode_queries(texts) if texts else []
+        encoded_vectors = self.encoder.encode_queries(encode_inputs) if encode_inputs else []
         checkpoint()
-        if len(vectors) != len(texts):
+        if len(encoded_vectors) != len(encode_inputs):
             raise ValueError("Invalid embedding result count")
         from src.embeddings.encoder import normalized_vector
 
-        vectors = [normalized_vector(vector) for vector in vectors]
+        encoded_vectors = [normalized_vector(vector) for vector in encoded_vectors]
+        vectors = encoded_vectors[: len(texts)]
+        summary_vector = encoded_vectors[len(texts)] if summary_text else None
         config = self.encoder.config
         gate = embedding_ready(config, self.extraction_version)
         checkpoint()
         with self.sessions() as session:
             matches: list[MatchResult] = []
             entry_matrix: Any = np.asarray(vectors[: len(texts)], dtype=np.float64)
+            summary_arr: Any = (
+                np.asarray(summary_vector, dtype=np.float64) if summary_vector is not None else None
+            )
             # Active jobs are ranked first; inactive jobs only complete the list (ADR-016).
             for statuses, eligible in ((ACTIVE_STATUSES, True), (INACTIVE_STATUSES, False)):
                 if len(matches) >= limit:
@@ -262,6 +298,19 @@ class MatchingPipeline:
                             statuses=statuses,
                             exclude_ids=exclude_ids,
                             vector="best",
+                        ):
+                            pool.add(job.id)
+                    if summary_vector is not None:
+                        checkpoint()
+                        for job, _ in retrieve_semantic(
+                            session,
+                            summary_vector,
+                            config,
+                            self.extraction_version,
+                            limit=self.ranking.retrieval_limit,
+                            statuses=statuses,
+                            exclude_ids=exclude_ids,
+                            vector="core",
                         ):
                             pool.add(job.id)
                     pool -= group_seen
@@ -383,8 +432,18 @@ class MatchingPipeline:
                                 ExperienceScore(entry_scores[i], entry.start_date, entry.end_date)
                                 for i, entry in enumerate(candidate.experience)
                             )
+                            summary_score: float | None = None
+                            if summary_arr is not None:
+                                summary_cos = float(
+                                    np.clip(summary_arr @ core_vectors[job.id], -1.0, 1.0)
+                                )
+                                summary_score = self.calibration.score(summary_cos)
+                            relevant_count = sum(1 for item in experiences if item.score >= 50.0)
                             semantic = semantic_score(
-                                experiences, tuple(entry_scores[len(experience_texts) :])
+                                experiences,
+                                tuple(entry_scores[len(experience_texts) :]),
+                                summary_score=summary_score,
+                                relevant_count=relevant_count,
                             )
                             relevant_experience = tuple(
                                 candidate.experience[index]
