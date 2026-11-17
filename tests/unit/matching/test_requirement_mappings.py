@@ -3,7 +3,14 @@ from types import SimpleNamespace
 import pytest
 
 from src.domain.job import SeniorityLevel
-from src.domain.requirements import cefr, comparable_score, employment, language
+from src.domain.requirements import (
+    bidirectional_skill_score,
+    cefr,
+    comparable_score,
+    employment,
+    language,
+    mandatory_coverage_ratio,
+)
 from src.extraction.classification import classify
 
 
@@ -28,6 +35,14 @@ def test_equal_available_dimensions_and_unknowns_are_score_only():
         languages=[SimpleNamespace(name="Inglês", level="B1")],
     )
     job = SimpleNamespace(seniority_level=SeniorityLevel.SENIOR, title="Developer")
+    one_skill = bidirectional_skill_score(
+        required_skills={"python"},
+        preferred_skills=set(),
+        nice_to_have_skills=set(),
+        matched={"python"},
+        candidate_core_skills={"python"},
+    )
+    assert one_skill == pytest.approx(100.0 * 3.25 * (2.25 / 3.5) / (2.25 * (2.25 / 3.5) + 1.0))
     assert comparable_score(
         candidate,
         job,
@@ -35,20 +50,17 @@ def test_equal_available_dimensions_and_unknowns_are_score_only():
         matched={"python"},
         requirements=["English B2"],
         relevant_experience=candidate.experience,
-    ) == pytest.approx(200 / 3)
+    ) == pytest.approx((one_skill + 100.0 + 0.0) / 3)
     # Unknown proficiency is omitted rather than scored as incompatible.
     candidate.languages[0].level = "fluent"
-    assert (
-        comparable_score(
-            candidate,
-            job,
-            skills={"python"},
-            matched={"python"},
-            requirements=["English B2"],
-            relevant_experience=candidate.experience,
-        )
-        == 100
-    )
+    assert comparable_score(
+        candidate,
+        job,
+        skills={"python"},
+        matched={"python"},
+        requirements=["English B2"],
+        relevant_experience=candidate.experience,
+    ) == pytest.approx((one_skill + 100.0) / 2)
     # No public employment preference is invented from a past job/company.
     assert (
         comparable_score(
@@ -87,29 +99,30 @@ def test_context_classification_does_not_guess_from_presence(text, expected):
 def test_unrelated_or_nonordinal_seniority_is_unknown_not_a_penalty():
     candidate = SimpleNamespace(experience=[SimpleNamespace(title="Senior nurse")], languages=[])
     job = SimpleNamespace(seniority_level=SeniorityLevel.SENIOR, title="Developer")
-    assert (
-        comparable_score(
-            candidate,
-            job,
-            skills={"python"},
-            matched={"python"},
-            requirements=[],
-            relevant_experience=(),
-        )
-        == 100.0
+    expected = bidirectional_skill_score(
+        required_skills={"python"},
+        preferred_skills=set(),
+        nice_to_have_skills=set(),
+        matched={"python"},
+        candidate_core_skills={"python"},
     )
+    assert comparable_score(
+        candidate,
+        job,
+        skills={"python"},
+        matched={"python"},
+        requirements=[],
+        relevant_experience=(),
+    ) == pytest.approx(expected)
     coordinator = [SimpleNamespace(title="Project coordinator")]
-    assert (
-        comparable_score(
-            candidate,
-            job,
-            skills={"python"},
-            matched={"python"},
-            requirements=[],
-            relevant_experience=coordinator,
-        )
-        == 100.0
-    )
+    assert comparable_score(
+        candidate,
+        job,
+        skills={"python"},
+        matched={"python"},
+        requirements=[],
+        relevant_experience=coordinator,
+    ) == pytest.approx(expected)
 
 
 def test_missing_candidate_skills_are_omitted_but_explicit_nonmatching_skills_compare():
@@ -122,3 +135,107 @@ def test_missing_candidate_skills_are_omitted_but_explicit_nonmatching_skills_co
     # Explicit Java evidence establishes an available skills dimension even
     # though it does not match this job's Python evidence.
     assert comparable_score(candidate, job, candidate_skills={"java"}, **args) == 50.0
+
+
+@pytest.mark.parametrize(
+    "n_req, n_match, expected",
+    [
+        (0, 0, None),
+        (1, 1, 1.0),
+        (2, 1, 0.5),
+        (3, 3, 1.0),
+        (4, 3, 1.0),
+        (5, 4, 1.0),
+        (10, 7, 1.0),
+        (10, 5, 5 / 7),
+    ],
+)
+def test_adr021_mandatory_coverage_thresholds_and_rounding(n_req, n_match, expected):
+    required = {f"skill_{i}" for i in range(n_req)}
+    matched = {f"skill_{i}" for i in range(n_match)}
+    result = mandatory_coverage_ratio(required, matched)
+    if expected is None:
+        assert result is None
+    else:
+        assert result == pytest.approx(expected)
+
+
+def test_sparse_job_is_damped_and_rich_meupadrinho_job_beats_one_skill_apibr_job():
+    candidate_toolkit = {
+        "python",
+        "django",
+        "postgresql",
+        "docker",
+        "aws",
+        "redis",
+        "git",
+        "linux",
+        "pytest",
+        "rest",
+    }
+    apibr_sparse = bidirectional_skill_score(
+        required_skills={"python"},
+        preferred_skills=set(),
+        nice_to_have_skills=set(),
+        matched={"python"},
+        candidate_core_skills=candidate_toolkit,
+    )
+    meupadrinho_rich = bidirectional_skill_score(
+        required_skills={"python", "django", "postgresql", "docker", "aws", "pytest"},
+        preferred_skills={"redis"},
+        nice_to_have_skills={"graphql", "kubernetes", "terraform"},
+        matched={"python", "django", "postgresql", "docker", "aws", "pytest", "redis"},
+        candidate_core_skills=candidate_toolkit,
+        exact_required={"python", "django", "postgresql", "docker", "aws", "pytest"},
+        exact_matched={"python", "django", "postgresql", "docker", "aws", "pytest"},
+    )
+    assert apibr_sparse < 25.0
+    assert meupadrinho_rich > 60.0
+    assert meupadrinho_rich > apibr_sparse
+
+
+def test_long_optional_list_does_not_crush_qualified_candidate_and_exact_vs_approx_differs():
+    candidate_skills = {"python", "sql", "fastapi"}
+    required = {"python", "sql", "fastapi"}
+    many_optional = {f"bonus_{i}" for i in range(12)}
+    score_exact = bidirectional_skill_score(
+        required_skills=required,
+        preferred_skills=set(),
+        nice_to_have_skills=many_optional,
+        matched=required,
+        candidate_core_skills=candidate_skills,
+        exact_required=required,
+        exact_matched=required,
+    )
+    # Approximate matches support score but do not satisfy ADR-021 mandatory coverage.
+    score_approx = bidirectional_skill_score(
+        required_skills=required,
+        preferred_skills=set(),
+        nice_to_have_skills=many_optional,
+        matched=required,
+        candidate_core_skills=candidate_skills,
+        exact_required=required,
+        exact_matched=set(),
+    )
+    assert score_exact > 70.0
+    assert score_exact > score_approx
+
+
+def test_precision_denominator_caps_at_15_and_exact_skill_matcher_excludes_typos():
+    from src.extraction.taxonomy import compile_skill_matcher
+
+    toolkit_15 = {f"skill_{i}" for i in range(15)}
+    toolkit_30 = {f"skill_{i}" for i in range(30)}
+    args: dict[str, set[str]] = {
+        "required_skills": {"skill_0", "skill_1"},
+        "preferred_skills": set(),
+        "nice_to_have_skills": set(),
+        "matched": {"skill_0", "skill_1"},
+    }
+    assert bidirectional_skill_score(**args, candidate_core_skills=toolkit_15) == pytest.approx(
+        bidirectional_skill_score(**args, candidate_core_skills=toolkit_30)
+    )
+
+    matcher = compile_skill_matcher(["Pythom e PostgreSQL"])
+    assert matcher.match({"python", "postgresql"}) == {"postgresql", "python"}
+    assert matcher.match({"python", "postgresql"}, include_approximate=False) == {"postgresql"}
