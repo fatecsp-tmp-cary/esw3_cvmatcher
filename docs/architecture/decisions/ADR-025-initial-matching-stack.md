@@ -1,6 +1,6 @@
 # ADR-025: Initial matching stack
 
-- **Status:** Accepted (records decisions already implemented on `main`)
+- **Status:** Accepted (records the technology choices already implemented on `main`; calibration, release approval and ADR-022 remain pending)
 - **Date:** 2026-11-16
 - **Issue:** #26 (parent #4)
 - **Authority:** [MVP spec](../../../specs/feature-001-mvp/spec.md), [ADR-004](ADR-004-portuguese-full-text-search.md), [ADR-005](ADR-005-weighted-any-term-fts.md), [ADR-022](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) and the benchmark reports under [`docs/match/benchmarks/`](../../match/benchmarks/).
