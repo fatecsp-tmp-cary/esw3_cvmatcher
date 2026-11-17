@@ -27,10 +27,16 @@ _SENIORITY_ALIASES = {
     "sr": SeniorityLevel.SENIOR,
     "specialist": SeniorityLevel.SPECIALIST,
     "especialista": SeniorityLevel.SPECIALIST,
+    "staff": SeniorityLevel.SPECIALIST,
     "coordinator": SeniorityLevel.COORDINATOR,
     "coordenador(a)": SeniorityLevel.COORDINATOR,
     "coordenador": SeniorityLevel.COORDINATOR,
     "coordenadora": SeniorityLevel.COORDINATOR,
+    "techlead": SeniorityLevel.COORDINATOR,
+    "tech lead": SeniorityLevel.COORDINATOR,
+    "diretor": SeniorityLevel.COORDINATOR,
+    "diretora": SeniorityLevel.COORDINATOR,
+    "director": SeniorityLevel.COORDINATOR,
 }
 
 _WORK_ARRANGEMENT_ALIASES = {
@@ -43,6 +49,7 @@ _WORK_ARRANGEMENT_ALIASES = {
     "on site": WorkArrangement.ON_SITE,
     "onsite": WorkArrangement.ON_SITE,
     "presencial": WorkArrangement.ON_SITE,
+    "presecial": WorkArrangement.ON_SITE,
 }
 
 # Title matching is bounded by the vocabulary, including its multiword aliases.
