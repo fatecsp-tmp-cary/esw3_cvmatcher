@@ -76,6 +76,7 @@ the primary integrated a bounded-score regression and strengthened the dependenc
 checker; 171 API/worker/ranking tests and 10 checker tests passed. Ruff lint/format
 and the reconciled production image build passed. See the
 [historical validation report](../../docs/reports/2026-11-12-mvp-validation.md).
+- Initial matching stack (PostgreSQL FTS, pgvector, `multilingual-e5-small`) recorded with alternatives, setup and limitations in [ADR-025](../../docs/architecture/decisions/ADR-025-initial-matching-stack.md) (#26).
 
 ## Remaining current-head work
 
