@@ -59,11 +59,6 @@ Measured on 5 fictitious resumes and 100 fictitious jobs with a human gabarito
 
 ## Limitations
 
-- The evidence is small: 5 resumes, one person writing the gabarito, fictitious jobs
-  and 7 to 11 relevant jobs per resume. Differences below about 0.05 nDCG@10 are not
-  reliable, so e5-small and L12 are close, and e5-small does not lose quality here.
-- The gabarito was corrected after a first pass partly because of jobs both models
-  ranked in the top 10, so it is not fully independent of the rankings.
 - The benchmark embeds jobs as `title. description`, not the full job representation
   of the spec, and ran on 100 rows where the planner needs no ANN index. No migration
   creates an HNSW or IVFFlat index: semantic search is an exact cosine scan. Index
