@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -29,3 +30,6 @@ class JobEmbedding(Base):
     next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     error_code: Mapped[str | None] = mapped_column(String(32))
+    # Internal job-core vector (title, seniority, skills, REQUIRED requirements;
+    # ADR-027). Kept outside canonical Job fields and public payloads.
+    core_embedding: Mapped[list[float] | None] = mapped_column(Vector())
