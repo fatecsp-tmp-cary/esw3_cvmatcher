@@ -258,3 +258,40 @@ def test_inline_requirement_heading_carries_strength_to_following_lines():
     rows = annotate_spans(text, [])
     assert [text[row["start"] : row["end"]] for row in rows] == ["Python", "Java"]
     assert [row["requirement_class"] for row in rows] == ["REQUIRED", "REQUIRED"]
+
+
+def test_bullet_colons_and_obrigatorios_differentials_subheadings_preserve_requirements():
+    text = (
+        "## Requisitos\n"
+        "**Obrigatórios:**\n"
+        "- Domínio de pelo menos uma linguagem: Python, TypeScript\n"
+        "- Conhecimento avançado em Power BI\n"
+        "- English speaker\n"
+        "**Differentials**\n"
+        "- Kubernetes\n"
+        "## Habilidades:\n"
+        "- Tableau\n"
+    )
+    raw = evidence(
+        text,
+        "Conhecimento",
+        "English speaker",
+    )
+    raw.append(
+        SpanEvidence(
+            text.index("Conhecimento avançado em Power BI"),
+            text.index("Conhecimento avançado em Power BI")
+            + len("Conhecimento avançado em Power BI"),
+            "skill",
+            0.9,
+        ).serialize(text)
+    )
+    rows = annotate_spans(text, raw)
+    extracted = [(text[r["start"] : r["end"]], r["requirement_class"]) for r in rows]
+    assert ("Python", "REQUIRED") in extracted
+    assert ("TypeScript", "REQUIRED") in extracted
+    assert ("Power BI", "REQUIRED") in extracted
+    assert ("English", "REQUIRED") in extracted
+    assert ("Kubernetes", "PREFERRED") in extracted
+    assert ("Tableau", "REQUIRED") in extracted
+    assert all(name != "Conhecimento" for name, _ in extracted)

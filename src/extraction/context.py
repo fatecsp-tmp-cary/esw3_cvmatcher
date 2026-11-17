@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from src.domain.requirements import key
 
-VERSION = "sentence-clause-sections-v3"
+VERSION = "sentence-clause-sections-v4"
 REQUIREMENT_HEADINGS = {
     "requirements",
     "requirement",
@@ -16,7 +16,16 @@ REQUIREMENT_HEADINGS = {
     "minimum qualifications",
     "requisitos",
     "requisitos obrigatorios",
+    "requisitos mandatorios",
+    "requisitos desejaveis",
+    "obrigatorio",
+    "obrigatorios",
+    "experiencia e requisitos",
+    "o que precisa",
+    "o que precisa?",
     "qualificacoes",
+    "habilidades",
+    "habilidades desejadas",
     "o que buscamos",
     "o que esperamos",
     "perfil desejado",
@@ -26,11 +35,14 @@ REQUIREMENT_HEADINGS = {
     "what we’re looking for",
     "preferred",
     "preferred qualifications",
+    "preferred experience",
     "desirable",
     "desejavel",
     "desejaveis",
     "diferencial",
     "diferenciais",
+    "differential",
+    "differentials",
     "nice to have",
     "nice-to-have",
     "bonus",
@@ -83,17 +95,25 @@ class Section:
     heading: str
 
 
+_HTML_TAG = re.compile(r"</?(?:p|strong|b|em|i|u|ul|li|br)\b[^>]*>|&nbsp;", re.I)
+
+
+def _clean_line(line: str) -> str:
+    return _HTML_TAG.sub(" ", line).strip()
+
+
 def sections(text: str) -> tuple[Section, ...]:
     """Unknown marked headings terminate scope; missing sections allow local cues."""
     output = []
     offset = 0
     kind, heading = "unsectioned", ""
     has_requirements = any(
-        key(line.split(":", 1)[0].strip().strip("#*_ :\t")) in REQUIREMENT_HEADINGS
+        key(_clean_line(line).split(":", 1)[0].strip("#*_ :\t")) in REQUIREMENT_HEADINGS
         for line in text.splitlines()
     )
     for line in text.splitlines(keepends=True):
-        stripped = line.strip()
+        stripped = _clean_line(line)
+        is_bullet = bool(re.match(r"^[-*•⚫]\s+", stripped))
         plain = key(stripped.strip("#*_ :\t"))
         prefix = key(stripped.split(":", 1)[0].strip("#*_ \t"))
         # Sentence-local context labels are handled by BACKGROUND_PREFIX; they
@@ -105,7 +125,8 @@ def sections(text: str) -> tuple[Section, ...]:
             and (
                 prefix in REQUIREMENT_HEADINGS | BACKGROUND_HEADINGS
                 or (
-                    has_requirements
+                    not is_bullet
+                    and has_requirements
                     and len(prefix) < 120
                     and bool(re.fullmatch(r"[\w \-]+", prefix))
                 )
@@ -113,7 +134,11 @@ def sections(text: str) -> tuple[Section, ...]:
         )
         if inline_heading:
             plain = prefix
-        marked = inline_heading or bool(re.match(r"^#{1,6}\s+", stripped)) or stripped.endswith(":")
+        marked = (
+            inline_heading
+            or bool(re.match(r"^#{1,6}\s+", stripped))
+            or (not is_bullet and stripped.endswith(":"))
+        )
         marked |= any(
             stripped.startswith(mark) and stripped.endswith(mark) for mark in ("**", "__")
         )
@@ -126,7 +151,11 @@ def sections(text: str) -> tuple[Section, ...]:
             else:
                 kind = "unsectioned"
             heading = plain
-            heading_end = offset + line.index(":") + 1 if inline_heading else offset + len(line)
+            heading_end = (
+                offset + line.index(":") + 1
+                if (inline_heading and ":" in line)
+                else offset + len(line)
+            )
             output.append(Section(offset, heading_end, "heading", heading))
             if heading_end < offset + len(line):
                 output.append(Section(heading_end, offset + len(line), kind, heading))
