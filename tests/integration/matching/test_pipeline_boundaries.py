@@ -148,7 +148,10 @@ def test_union_deduplicates_and_stable_ties_preserve_privacy_and_geography(setup
     assert result.matches[0].score == result.matches[1].score
     assert all(row.eligibility for row in result.matches)
     assert [row.rank for row in result.matches] == [1, 2]
-    assert encoder.calls == [["Python\nBuild APIs"], ["Python\nBuild APIs"]]
+    assert encoder.calls == [
+        ["Python\nBuild APIs", "Python\nBuild APIs"],
+        ["Python\nBuild APIs", "Python\nBuild APIs"],
+    ]
     assert str(candidate.curriculo_id) not in result.model_dump_json()
     assert "Private company" not in caplog.text and "Build APIs" not in caplog.text
     assert "matching_outcome=success" in caplog.text
@@ -220,7 +223,7 @@ def test_final_textual_evidence_cannot_bypass_embedding_invalidation(setup, monk
 
 
 @pytest.mark.parametrize(
-    "vectors", [[], [VECTOR, VECTOR], [[0.0] * 384], [[float("nan")] * 384], [[1.0]]]
+    "vectors", [[], [VECTOR, VECTOR, VECTOR], [[0.0] * 384], [[float("nan")] * 384], [[1.0]]]
 )
 def test_invalid_encoder_results_fail_before_retrieval(setup, vectors):
     _, pipeline = setup
