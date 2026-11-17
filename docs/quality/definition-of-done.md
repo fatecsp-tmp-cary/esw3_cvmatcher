@@ -45,5 +45,6 @@ The accepted policies in ADR-019 through ADR-022 require their own implementatio
 and verification. Existing extraction/Compose/CI measurements do not establish
 compliance with title-first fields, filtered displayed skills, three-snapshot
 expiry, mandatory coverage or bilingual/fuzzy retrieval. ADR-023 keeps external
-deployment and second-source expansion deferred. Per-job 70% coverage is distinct
+deployment deferred, while ADR-026 accepts MeuPadrinho as the second source
+with raw payload retention disabled pending verification in issue #213. Per-job 70% coverage is distinct
 from mandatory-classification precision/recall and evaluation sample sufficiency.

@@ -222,7 +222,7 @@ Policy authority: [ADR-018](../../docs/architecture/decisions/ADR-018-extraction
 
 
 - [x] Record the user decision in [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
-- [x] Supersede the second-source deferral in [ADR-025](../../docs/architecture/decisions/ADR-025-meupadrinho-source-and-validation.md) and implement the MeuPadrinho normalizer, adapter, JSONL importer, and bounded availability validation worker; external deployment (#150) remains deferred.
+- [x] Supersede the second-source deferral in [ADR-026](../../docs/architecture/decisions/ADR-026-meupadrinho-source-and-validation.md) and implement the MeuPadrinho normalizer, adapter, JSONL importer, and bounded availability validation worker; external deployment (#150) and source terms/retention verification (#213) remain separate.
 - [ ] Verify the owning feature acceptance criteria and document results; policy acceptance alone is not implementation completion.
 
 ## Stale expiration interview — issue #145

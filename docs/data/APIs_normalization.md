@@ -48,7 +48,7 @@ not part of this persisted schema.
 
 ## 2. Technical Specification and Endpoints for All Sources
 
-### 2.1 Meu Padrinho / API Vagas Tech (Selected second source; ADR-025)
+### 2.1 Meu Padrinho / API Vagas Tech (Selected second source; ADR-026)
 
 Main Endpoint: GET [https://meupadrinho.com.br/api/vagas](https://meupadrinho.com.br/api/vagas)
 
@@ -148,7 +148,7 @@ Repositories Endpoint: GET `/vagas/repositories`
 
 | Criterion / API | APiBR | Meu Padrinho | InHire | Solides | Trampos.co | Quero Vagas Tech |
 |---|---|---|---|---|---|---|
-| Selection status | Selected initial source | Selected second source (ADR-025) | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected |
+| Selection status | Selected initial source | Selected second source (ADR-026) | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected |
 | HTTP Method | GET | GET | GET | GET | GET | GET |
 | JSON Response | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Authentication Required | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
@@ -206,7 +206,7 @@ This was selected as the official primary source for the MVP since its structure
 - Bulk collection uses disjoint filter combinations (`cargos`, `formasTrabalho`, `niveis`, `plataformaVaga`) and similarity links via `meu_padriho.sh`, imported via `ingest_meupadrinho_jsonl` / `python -m src.worker --import-meupadrinho <path>`.
 - Scheduled worker runs (`ingest_meupadrinho`) validate non-expired `meupadrinho` jobs in bounded batches (`GET /api/vagas/{nano_id}` ordered by oldest `last_verified_at`), marking `vaga_encerrada=True` or HTTP 404 as `EXPIRED`.
 
-Under [ADR-025](../architecture/decisions/ADR-025-meupadrinho-source-and-validation.md), Meu Padrinho is selected and implemented as the second job source (#127/#128).
+Under [ADR-026](../architecture/decisions/ADR-026-meupadrinho-source-and-validation.md), Meu Padrinho is selected and implemented as the second job source (#127/#128).
 
 **InHire** may be considered in the future when the project has a defined list of companies whose vacancies should be collected.
 

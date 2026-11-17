@@ -29,16 +29,16 @@ Rejected as the primary source because endpoint availability is uncertain.
 The access error's cause and status code are unconfirmed; anomalous traffic
 detection must not be treated as established fact.
 
-### Meu Padrinho (Selected Second Source — ADR-025)
+### Meu Padrinho (Selected Second Source — ADR-026)
 Initially evaluated and deferred due to:
 - Broken pagination behavior on `GET /api/vagas`: `page=0` returns HTTP 200 with ~10 jobs; `page >= 1` returns HTTP 204; `offset`, `limit`, and `pagina` parameters are ignored
 - Filter queries (`cargos`, `formasTrabalho`, `niveis`, `plataformaVaga`) expose subsets of jobs, while `GET /api/vagas/{nano_id}` provides complete structured job details and explicit availability (`vaga_encerrada`)
 
-Under [ADR-025](../architecture/decisions/ADR-025-meupadrinho-source-and-validation.md), Meu Padrinho (`platform="meupadrinho"`, `source_job_id=nano_id`) is selected as the second job source:
+Under [ADR-026](../architecture/decisions/ADR-026-meupadrinho-source-and-validation.md), Meu Padrinho (`platform="meupadrinho"`, `source_job_id=nano_id`) is selected as the second job source:
 - **Ingestion & JSONL import**: Accepts structured JSONL dumps produced by `meu_padriho.sh` (`ingest_meupadrinho_jsonl` / `python -m src.worker --import-meupadrinho <path>`) and supports optional live filter discovery.
-- **Availability validation worker & rate limit**: Validates persisted non-expired `meupadrinho` jobs in bounded batches (`validation_limit=50`, ordered by oldest `last_verified_at`) via `GET https://meupadrinho.com.br/api/vagas/{nano_id}` while enforcing MeuPadrinho's **60 requests/second** rate limit (`RateLimiter(60.0)`) and exponential retry backoff with jitter (`RetryPolicy(jitter_ratio=0.2)`). Explicit `vaga_encerrada=True` or HTTP `404` transitions the job to terminal `EXPIRED`.
+- **Availability validation worker & project-imposed throttle**: Validates persisted non-expired `meupadrinho` jobs in bounded batches (`validation_limit=50`, ordered by oldest `last_verified_at`) via `GET https://meupadrinho.com.br/api/vagas/{nano_id}` while enforcing a **60 requests/second** project-imposed client throttle (`RateLimiter(60.0)`) and exponential retry backoff with jitter (`RetryPolicy(jitter_ratio=0.2)`). Explicit `vaga_encerrada=True` or HTTP `404` transitions the job to terminal `EXPIRED`.
 - **Polling mode & completeness**: Uses `INCREMENTAL` polling mode (`snapshot_complete=False`); listing absence never marks jobs `STALE` or `EXPIRED`.
-- **Terms & storage**: Raw payloads are not persisted (`raw=None`); only normalized canonical fields are stored, and cross-source records remain independent of APiBR (`(platform, source_job_id)`).
+- **Terms & storage**: Raw payloads are not persisted (`raw=None`); only normalized canonical fields are stored, and cross-source records remain independent of APiBR (`(platform, source_job_id)`). Source terms, official rate limits, and retention permissions remain tracked in issue #213.
 
 ### Other sources ruled out
 InHire, Solides, Trampos.co, and Quero Vagas Tech were also evaluated and are not being considered for the MVP.
@@ -116,7 +116,7 @@ requests and invalid/partial scan protection are in the
 
 ## Second-source selection and implementation (#127 / #128)
 
-[ADR-025](../architecture/decisions/ADR-025-meupadrinho-source-and-validation.md)
+[ADR-026](../architecture/decisions/ADR-026-meupadrinho-source-and-validation.md)
 supersedes the second-source deferral in [ADR-023](../architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md),
-selecting and implementing MeuPadrinho (`meupadrinho`) as the second job source alongside APiBR.
-Source terms/retention rights verification remains open; `raw` stays `None` and no cross-source deduplication is performed.
+selecting and implementing MeuPadrinho (`meupadrinho`) as the second job source alongside APiBR (#127/#128).
+Source terms, official rate limits, and retention rights verification remain tracked separately in issue #213; `raw` stays `None` and no cross-source deduplication is performed.

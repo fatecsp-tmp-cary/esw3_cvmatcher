@@ -1,10 +1,11 @@
-# ADR-025: MeuPadrinho source adapter, JSONL import, and bounded availability validation
+# ADR-026: MeuPadrinho source adapter, JSONL import, and bounded availability validation
 
 - **Status:** Accepted
 - **Date:** 2026-11-17
 - **Authority:** User request and interview on 2026-11-17.
 - **Supersedes:** Only the second-source deferral in [ADR-023](ADR-023-deferred-external-deployment-and-second-source.md); external deployment deferral in ADR-023 and all other architectural invariants remain unchanged.
 - **Implementation status:** Implemented in `src/normalization/jobs/meupadrinho.py`, `src/ingestion/meupadrinho.py`, `src/worker/scheduler.py`, `src/worker/sources.py`, `src/worker/bootstrap.py`, `src/worker/runtime.py`, and `src/worker/__main__.py`.
+- **Pending source verification:** Source terms of use, official rate limits, and raw-payload retention permissions are tracked in issue #213; `raw` stays `None` while unverified.
 
 ## Context
 
@@ -18,18 +19,18 @@ The project now includes a structured MeuPadrinho (`meupadrinho.com.br`) dataset
    - `title`: `titulo_vaga`
    - `description`: `descricao_vaga`, appending `Requisitos desejáveis:\n<requisitos_desejaveis>` when non-empty so downstream GLiNER extraction can classify preferred requirements.
    - `location`: parsed into `{"city": ..., "state": ..., "country": ..., "raw": ...}` when unambiguous (`"City, UF"`, `"City, Brasil"`, `"Brasil"`, `"City, State, Country"`), preserving `"raw"` for all non-empty strings.
-   - `work_arrangement`: `forma_trabalho` mapped via `normalize_work_arrangement` (including the observed `"presecial"` typo -> `ON_SITE`).
-   - `seniority_level`: `nivel_vaga` with fallback to `nivel`, mapping `Staff` -> `SPECIALIST` and `Techlead` / `Diretor` -> `COORDINATOR`.
+   - `work_arrangement`: `forma_trabalho` mapped via `normalize_work_arrangement` plus MeuPadrinho-scoped fallback for the observed `"presecial"` typo -> `ON_SITE`.
+   - `seniority_level`: `nivel_vaga` with fallback to `nivel`, using shared `normalize_seniority` plus MeuPadrinho-only aliases (`Staff` -> `SPECIALIST`, `Techlead` / `Tech Lead` / `Diretor(a)` / `Director` -> `COORDINATOR`) scoped to `src/normalization/jobs/meupadrinho.py` so APiBR and candidate seniority remain unchanged.
    - `skills`: `;`-separated items from `requisitos_tecnicos`, mapping recognized aliases via `canonical_skill` while preserving other technical terms, deduplicated case-insensitively and sorted.
-   - `salary` and `currency`: numeric values/ranges in `salario` parsed to `{"min": ..., "max": ...}` with `currency="BRL"`; `None` for both when `salario` is empty or non-numeric (e.g. `"0,00"`, `"A combinar"`).
+   - `salary` and `currency`: clean single values and ranges (including `k` suffixes) in `salario` parsed to `{"min": ..., "max": ...}` with `currency="BRL"`; `None` for both when `salario` is empty, non-numeric, `0`, or contains unrelated bonus components (e.g. `+ VR`).
    - `job_url`: priority `link_vaga` > `link_vaga_publicado` > `link_plataforma_publicado` > `"https://meupadrinho.com.br/api/vagas/{nano_id}"`.
    - `publication_date`: `horario_registro` normalized to UTC.
    - `status`: `EXPIRED` when `vaga_encerrada` is `True`, otherwise `ACTIVE`.
-3. **JSONL ingestion and CLI:** Provide `ingest_meupadrinho_jsonl(session, source_id, path)` and CLI flag `python -m src.worker --import-meupadrinho <path>` to ingest JSONL dumps produced by `meu_padriho.sh` with per-record savepoints and `SourceRun` tracking, without requiring model artifacts to be loaded during the import command.
-4. **Worker availability validation, rate limiting, and backoff/jitter protocol:**
-   - **MeuPadrinho rate limit (`60 req/s`):** `MeuPadrinhoClient` enforces a bounded `RateLimiter` (`MEUPADRINHO_MAX_REQUESTS_PER_SECOND = 60.0`, minimum interval `1/60s`) before every HTTP request across both synchronous and async adapter calls, paired with `RetryPolicy(jitter_ratio=0.2)` exponential backoff (`1s`, `2s`, capped at `60s`, honoring `Retry-After` on HTTP `429`/`5xx`).
+3. **JSONL ingestion and CLI:** Provide `ingest_meupadrinho_jsonl(session, source_id, path)` and CLI flag `python -m src.worker --import-meupadrinho <path>` to ingest JSONL dumps produced by `meu_padriho.sh` with per-record savepoints and `SourceRun` tracking, without requiring model artifacts to be loaded during the import command. If every non-empty record in a batch is rejected, the run is recorded as `FAILED`.
+4. **Worker availability validation, project-imposed client throttle, and backoff/jitter protocol:**
+   - **Project-imposed client throttle (`60 req/s`):** `MeuPadrinhoClient` enforces a bounded `RateLimiter` (`MEUPADRINHO_MAX_REQUESTS_PER_SECOND = 60.0`, minimum interval `1/60s`) as a project-imposed safeguard before every HTTP request across both synchronous and async adapter calls (official source limits remain unverified under #213), paired with `RetryPolicy(jitter_ratio=0.2)` exponential backoff (`1s`, `2s`, capped at `60s`, honoring `Retry-After` on HTTP `429`/`5xx`).
    - **Unified worker backoff & jitter:** All workers support injectable, deterministic-default jitter and backoff: `RetryPolicy(jitter_ratio=...)` and `RateLimiter` for source HTTP adapters (`APiBRClient`, `MeuPadrinhoClient`), `SourceScheduler(..., jitter_seconds=...)` for poll scheduling, `ExtractionWorker(..., retry_jitter_seconds=...)` and `EmbeddingWorker(..., retry_jitter_seconds=...)` for transient inference retry backoff (`30s * attempts + jitter`), and `BackgroundWorker.run_forever` exponential cycle backoff (`poll_seconds * 2^consecutive_error_cycles` capped at `max_backoff_seconds`) with `poll_jitter_seconds`. Production composition (`create_default_worker`) enables jitter across these components while unit/integration defaults remain `0.0` for deterministic test assertions.
-   - When `SourceScheduler` polls `meupadrinho`, `ingest_meupadrinho` selects up to a bounded batch (`validation_limit=50` by default) of non-expired `meupadrinho` jobs ordered by oldest `last_verified_at` (nulls first) and queries `GET https://meupadrinho.com.br/api/vagas/{nano_id}`. Jobs returning `vaga_encerrada=True` or HTTP `404` transition to terminal `EXPIRED`; open jobs update their content/verification timestamp. Optional live discovery (`discover_new=True`) is also supported.
+   - When `SourceScheduler` polls `meupadrinho`, `ingest_meupadrinho` selects up to a bounded batch (`validation_limit=50` by default) of non-expired `meupadrinho` jobs ordered by oldest `last_verified_at` (nulls first) and queries `GET https://meupadrinho.com.br/api/vagas/{nano_id}`. Per-job `SourceError` failures are isolated and counted as rejected so one broken record does not block newer jobs in the batch, while full-batch `SourceError` failure fails and rolls back the run. Jobs returning `vaga_encerrada=True` or HTTP `404` transition to terminal `EXPIRED`; open jobs update their content/verification timestamp. Optional live discovery (`discover_new=True`) is also supported.
 
 ## Consequences
 
