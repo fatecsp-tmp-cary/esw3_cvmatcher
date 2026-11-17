@@ -1,6 +1,6 @@
 {
   "caveats": [
-    "gold = extracted_required/extracted_preferred, which look like another system's output: this measures agreement with that system, not accuracy",
+    "gold = independent human-labeled extracted_required/extracted_preferred lists from sample_apibr_script.json",
     "in-sample numbers (threshold_sweep, selected_in_sample) are descriptive; use cv_out_of_fold or split_70_30.heldout for generalization",
     "jobs=23; wide CIs are expected at this size"
   ],

@@ -92,7 +92,11 @@ class-correct matches) because:
 The provisional threshold is now set to `0.25`, which maximizes calibration class
 F1 (`0.674`) on the 70/30 split, yields a near 1:1 element count ratio (`213/217`
 on calibration, `91/79` on heldout, `304/296` overall), and raises heldout class
-F1 from `0.541` to `0.788` (`67/79` class-correct matches). `EXTRACTION_VERSION`
+F1 from `0.541` to `0.788` (`67/79` class-correct matches). Because the sample
+is small (`n=23`), bootstrap confidence intervals are wide (`0.570`–`0.746`
+tuned OOF class F1 vs. `0.596`–`0.782` at `0.30`, `p_tuned_better = 0.142`), so
+`0.25` is not statistically superior to `0.30` in 5-fold CV (`0.661` vs `0.661`)
+and remains provisional. `EXTRACTION_VERSION`
 changes because the threshold, context, classification, span, and taxonomy
 versions are part of the extraction policy. Stop workers, prepare a fresh
 artifact directory, reprocess unchanged jobs, and restart workers before serving.
