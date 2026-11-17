@@ -388,9 +388,9 @@ model/Compose/recovery and independent quality acceptance require their own
 evidence. See [review scope](../../docs/reports/2026-11-15-pr177-review.md).
 
 
-## Deferred deployment and second source
+## Deferred deployment and second source (#127 / #128)
 
-Retain external deployment (#150) and second-source selection/adapter (#127/#128) as deferred tasks; do not mark them implemented or choose a provider/source implicitly.
+External deployment (#150) remains deferred under [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md). Second-source selection (#127) and adapter implementation (#128) are resolved by [ADR-025](../../docs/architecture/decisions/ADR-025-meupadrinho-source-and-validation.md): MeuPadrinho (`platform="meupadrinho"`, `source_job_id=nano_id`) is integrated with direct canonical field normalization, JSONL dump import (`ingest_meupadrinho_jsonl` / `--import-meupadrinho`), and bounded per-job availability validation (`GET /api/vagas/{nano_id}`), preserving cross-source independence and `raw=None`.
 
 ## Stale expiration interview — issue #145
 

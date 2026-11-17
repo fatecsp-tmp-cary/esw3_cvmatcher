@@ -29,14 +29,16 @@ Rejected as the primary source because endpoint availability is uncertain.
 The access error's cause and status code are unconfirmed; anomalous traffic
 detection must not be treated as established fact.
 
-### Meu Padrinho
-Considered due to a higher reported job volume (~27,600 total postings), but rejected due to:
-- Broken pagination behavior: `page=0` returns HTTP 200 with 10 jobs; `page >= 1` returns HTTP 204; `offset`, `limit`, and `pagina` parameters are ignored
-- Only the `niveis` filter is functional, limited to 10 jobs per level, restricting access to a small, fixed recent subset of the total volume
-- Risk of data inconsistency under combined filters: a theoretical combination of filters was estimated to yield up to ~32,000 records (assuming disjoint categories), against a real benchmark of ~2,700, indicating unreliable or overlapping data
-- Risk of future endpoint instability analogous to the one observed with Gupy
+### Meu Padrinho (Selected Second Source — ADR-025)
+Initially evaluated and deferred due to:
+- Broken pagination behavior on `GET /api/vagas`: `page=0` returns HTTP 200 with ~10 jobs; `page >= 1` returns HTTP 204; `offset`, `limit`, and `pagina` parameters are ignored
+- Filter queries (`cargos`, `formasTrabalho`, `niveis`, `plataformaVaga`) expose subsets of jobs, while `GET /api/vagas/{nano_id}` provides complete structured job details and explicit availability (`vaga_encerrada`)
 
-Only APiBR is selected for the initial integration. Additional adapters may be selected later.
+Under [ADR-025](../architecture/decisions/ADR-025-meupadrinho-source-and-validation.md), Meu Padrinho (`platform="meupadrinho"`, `source_job_id=nano_id`) is selected as the second job source:
+- **Ingestion & JSONL import**: Accepts structured JSONL dumps produced by `meu_padriho.sh` (`ingest_meupadrinho_jsonl` / `python -m src.worker --import-meupadrinho <path>`) and supports optional live filter discovery.
+- **Availability validation worker & rate limit**: Validates persisted non-expired `meupadrinho` jobs in bounded batches (`validation_limit=50`, ordered by oldest `last_verified_at`) via `GET https://meupadrinho.com.br/api/vagas/{nano_id}` while enforcing MeuPadrinho's **60 requests/second** rate limit (`RateLimiter(60.0)`) and exponential retry backoff with jitter (`RetryPolicy(jitter_ratio=0.2)`). Explicit `vaga_encerrada=True` or HTTP `404` transitions the job to terminal `EXPIRED`.
+- **Polling mode & completeness**: Uses `INCREMENTAL` polling mode (`snapshot_complete=False`); listing absence never marks jobs `STALE` or `EXPIRED`.
+- **Terms & storage**: Raw payloads are not persisted (`raw=None`); only normalized canonical fields are stored, and cross-source records remain independent of APiBR (`(platform, source_job_id)`).
 
 ### Other sources ruled out
 InHire, Solides, Trampos.co, and Quero Vagas Tech were also evaluated and are not being considered for the MVP.
@@ -112,8 +114,9 @@ or evidence of source usage/retention rights. Operator configuration, bounded
 requests and invalid/partial scan protection are in the
 [source-adapter policy](source-adapters.md).
 
-## Second-source interview outcome
+## Second-source selection and implementation (#127 / #128)
 
-[ADR-023](../architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md)
-defers second-source research/selection (#127) and adapter implementation (#128).
-APiBR remains the only selected MVP source; source rights verification remains open.
+[ADR-025](../architecture/decisions/ADR-025-meupadrinho-source-and-validation.md)
+supersedes the second-source deferral in [ADR-023](../architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md),
+selecting and implementing MeuPadrinho (`meupadrinho`) as the second job source alongside APiBR.
+Source terms/retention rights verification remains open; `raw` stays `None` and no cross-source deduplication is performed.

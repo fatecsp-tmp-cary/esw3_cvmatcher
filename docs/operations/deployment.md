@@ -103,6 +103,7 @@ a model:
 
 ```sh
 docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml run --rm worker python -m src.worker.sources register apibr --polling-mode SNAPSHOT
+docker compose --project-name cvmatch -f docker-compose.yml -f docker-compose.production.yml run --rm worker python -m src.worker.sources register meupadrinho --polling-mode INCREMENTAL
 ```
 
 Use `--polling-mode INCREMENTAL` (the default) to ignore absence, or `--disabled`

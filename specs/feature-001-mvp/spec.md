@@ -305,9 +305,9 @@ Only explicit REQUIRED concepts enter the ADR-021 threshold: all below three, ot
 
 ## Deferred external deployment and source expansion
 
-Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md).
+Authority: [ADR-023](../../docs/architecture/decisions/ADR-023-deferred-external-deployment-and-second-source.md) and [ADR-025](../../docs/architecture/decisions/ADR-025-meupadrinho-source-and-validation.md).
 
-External hosting/HTTPS deployment and second-source research/selection remain deferred. Local pre-production and APiBR remain the authorized scope.
+External hosting/HTTPS deployment remains deferred under ADR-023. ADR-025 supersedes the second-source deferral by adding the MeuPadrinho (`meupadrinho`) source adapter, direct structured field mapping, JSONL dump import (`ingest_meupadrinho_jsonl` and `--import-meupadrinho`), and bounded per-job availability validation (`GET /api/vagas/{nano_id}`).
 
 ## Stale expiration interview — issue #145
 

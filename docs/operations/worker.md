@@ -11,9 +11,12 @@ persistence, source, migration, geographic filter or absence-based expiration.
 `SourceScheduler(engine, sessions, pollers=...)` uses a new independent SQLAlchemy
 Session from `sessions()` for each poll. A poller receives `(session, source_id)`
 and returns an object with `status` equal to `SUCCEEDED`, `PARTIAL` or `FAILED`.
-The default poller maps the case-folded source name `apibr` to `ingest_apibr`.
-Register it with `python -m src.worker.sources register apibr`; see
-[deployment](deployment.md). Other enabled names require explicit adapter
+The default pollers map the case-folded source names `apibr` to `ingest_apibr`
+and `meupadrinho` to `ingest_meupadrinho`.
+Register them with `python -m src.worker.sources register <apibr|meupadrinho>`; see
+[deployment](deployment.md). To bulk-import a MeuPadrinho JSONL dump produced by
+`meu_padriho.sh` without loading inference models, run
+`python -m src.worker --import-meupadrinho <path>`. Other enabled names require explicit adapter
 registration; unknown names record
 `unsupported_source` without invoking another source or making hidden requests.
 
@@ -82,9 +85,14 @@ state; an existing failed state remains unchanged. The lock is retained through
 the reset, so expiration cannot intervene between the check and enqueue.
 This command neither receives nor stores a curriculum and does not change job
 availability. The operations are mutually exclusive. The default command runs a
-loop with a five-second delay; SIGINT/SIGTERM request a stop after the active cycle
+loop with a five-second base delay, applying exponential backoff (up to 60 seconds)
+after cycles with stage errors and configurable jitter (`poll_jitter_seconds`) in
+production; SIGINT/SIGTERM request a stop after the active cycle
 and interrupt idle waiting. They do not forcibly terminate in-flight model/HTTP
-work. Injected source transport retains its own bounded page request policy.
+work. Injected source transport retains its own bounded request and rate-limit policy
+(including MeuPadrinho's 60 requests/second `RateLimiter` and jittered `RetryPolicy`),
+and both `ExtractionWorker` and `EmbeddingWorker` support configurable retry jitter
+(`retry_jitter_seconds`) on their `30s * attempts` transient failure backoff.
 
 For processing cycles, the entrypoint calls
 `src.worker.bootstrap.create_default_worker()`. It uses

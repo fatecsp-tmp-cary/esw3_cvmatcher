@@ -48,7 +48,7 @@ not part of this persisted schema.
 
 ## 2. Technical Specification and Endpoints for All Sources
 
-### 2.1 Meu Padrinho / API Vagas Tech (Evaluated; not selected for initial integration)
+### 2.1 Meu Padrinho / API Vagas Tech (Selected second source; ADR-025)
 
 Main Endpoint: GET [https://meupadrinho.com.br/api/vagas](https://meupadrinho.com.br/api/vagas)
 
@@ -148,7 +148,7 @@ Repositories Endpoint: GET `/vagas/repositories`
 
 | Criterion / API | APiBR | Meu Padrinho | InHire | Solides | Trampos.co | Quero Vagas Tech |
 |---|---|---|---|---|---|---|
-| Selection status | Selected initial source | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected |
+| Selection status | Selected initial source | Selected second source (ADR-025) | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected | Evaluated, not selected |
 | HTTP Method | GET | GET | GET | GET | GET | GET |
 | JSON Response | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Authentication Required | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
@@ -201,15 +201,12 @@ This was selected as the official primary source for the MVP since its structure
 
 ### 5.2 Other Evaluated Sources
 
-**Meu Padrinho / API Vagas Tech** was initially considered as the main source because it provides structured job data and additional endpoints for job details and technologies. However, live testing showed that its pagination is not functional:
+**Meu Padrinho / API Vagas Tech** provides structured job data and a detail endpoint (`GET /api/vagas/{nano_id}`) with explicit closure status (`vaga_encerrada`). Because standard `page>=1` pagination returns HTTP 204 No Content:
 
-- page=0 returns approximately 10 jobs.
-- page>=1 returns HTTP 204 No Content.
-- offset, limit, and pagina were ignored during testing.
-- The niveis parameter can expose additional jobs by seniority.
-- Only a small fraction of the available job universe can therefore be collected.
+- Bulk collection uses disjoint filter combinations (`cargos`, `formasTrabalho`, `niveis`, `plataformaVaga`) and similarity links via `meu_padriho.sh`, imported via `ingest_meupadrinho_jsonl` / `python -m src.worker --import-meupadrinho <path>`.
+- Scheduled worker runs (`ingest_meupadrinho`) validate non-expired `meupadrinho` jobs in bounded batches (`GET /api/vagas/{nano_id}` ordered by oldest `last_verified_at`), marking `vaga_encerrada=True` or HTTP 404 as `EXPIRED`.
 
-For this reason, Meu Padrinho was not selected for the initial integration; it remains an evaluated candidate.
+Under [ADR-025](../architecture/decisions/ADR-025-meupadrinho-source-and-validation.md), Meu Padrinho is selected and implemented as the second job source (#127/#128).
 
 **InHire** may be considered in the future when the project has a defined list of companies whose vacancies should be collected.
 

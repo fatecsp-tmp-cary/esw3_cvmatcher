@@ -27,8 +27,9 @@ new accepted records supersede the relevant rules rather than rewriting history.
 | 020 | [Three qualifying absence snapshots expire stale jobs](ADR-020-three-snapshot-stale-expiration.md) | Accepted policy; implementation and verification pending |
 | 021 | [Exact-evidence mandatory coverage remains score-only](ADR-021-mandatory-coverage-score-only.md) | Accepted policy; implementation and verification pending |
 | 022 | [Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) | Accepted policy; implementation and verification pending |
-| 023 | [External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) | Accepted deferral; no external deployment or second source authorized |
+| 023 | [External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) | External deployment deferred; second-source deferral superseded by ADR-025 |
 | 024 | [Current extraction and embeddings for every returned job](ADR-024-all-result-extraction-and-embedding-readiness.md) | Accepted and implemented in PR #195 |
+| 025 | [MeuPadrinho source adapter, JSONL import, and bounded availability validation](ADR-025-meupadrinho-source-and-validation.md) | Accepted and implemented |
 
 ## Identifier reconciliation
 

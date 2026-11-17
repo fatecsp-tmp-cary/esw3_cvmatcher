@@ -132,3 +132,14 @@ is in the [aggregate evidence](../reports/2026-11-12-apibr-count-attestation.jso
 ## Accepted field policy implementation
 
 ADR-019 is implemented in PR #197. The normalizer applies title > typed labels > named/checked body fields, approved restrictive value orders and first-occurrence tie handling. Result skills are provenance-filtered without changing stored canonical skills. ADR-017 remains preserved as the original proposal.
+
+## MeuPadrinho adapter, JSONL import, and availability validation
+
+Authority: [ADR-025](../architecture/decisions/ADR-025-meupadrinho-source-and-validation.md).
+
+`MeuPadrinhoAdapter` and `MeuPadrinhoClient` in `src/ingestion/meupadrinho.py` and `normalize_meupadrinho_job` in `src/normalization/jobs/meupadrinho.py` integrate MeuPadrinho (`platform="meupadrinho"`, `source_job_id=nano_id`):
+
+- Direct mapping translates `nome_empresa` -> `company`, `titulo_vaga` -> `title`, `descricao_vaga` (+ `requisitos_desejaveis`) -> `description`, `local` -> `location`, `forma_trabalho` -> `work_arrangement`, `nivel_vaga` (fallback `nivel`) -> `seniority_level`, `;`-split `requisitos_tecnicos` -> `skills`, `salario` -> `salary` + `currency="BRL"`, `link_vaga` > `link_vaga_publicado` > `link_plataforma_publicado` > `https://meupadrinho.com.br/api/vagas/{nano_id}` -> `job_url`, and `horario_registro` -> `publication_date`.
+- `ingest_meupadrinho_jsonl` and `python -m src.worker --import-meupadrinho <path>` import JSONL dumps produced by `meu_padriho.sh` with per-record savepoints and `SourceRun` tracking.
+- Scheduled polling via `ingest_meupadrinho` validates active/non-expired MeuPadrinho jobs in bounded batches (`GET /api/vagas/{nano_id}` ordered by oldest `last_verified_at`), marking `vaga_encerrada=True` or HTTP `404` as `EXPIRED`.
+- `MeuPadrinhoClient` enforces MeuPadrinho's 60 requests/second rate limit via `RateLimiter(60.0)` and uses `RetryPolicy(jitter_ratio=0.2)` for jittered exponential retry backoff. Both `RetryPolicy` and `RateLimiter` in `src/ingestion/adapters.py` are shared across source adapters.
