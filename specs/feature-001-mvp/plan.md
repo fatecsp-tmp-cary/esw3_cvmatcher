@@ -38,7 +38,7 @@ absence-based lifecycle changes remain separate policy/implementation work.
    retry are implemented in #176. APiBR listing-presence availability is implemented
    in #183 under ADR-014; independent bounded per-job verification remains optional. Complete
    lifecycle policies and release regressions. Compose packaging/recovery tooling
-   is implemented in #177; current-head operational acceptance remains separate. Complete the initial textual matching slice. is implemented in #177; current-head operational acceptance remains separate.
+   is implemented in #177; current-head operational acceptance remains separate.
 
 Current implementation status is in [tasks](tasks.md); requirements
 and unresolved decisions are in [spec](spec.md) and [acceptance](acceptance.md).
