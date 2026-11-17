@@ -4,11 +4,45 @@ import re
 from datetime import UTC, datetime
 from typing import Any
 
-from src.domain.categories import normalize_seniority, normalize_work_arrangement
+from src.domain.categories import (
+    _key,
+    normalize_seniority,
+    normalize_work_arrangement,
+)
+from src.domain.job import SeniorityLevel, WorkArrangement
 from src.extraction.taxonomy import canonical_skill
 from src.normalization.jobs.apibr import normalize_text
 
 MEUPADRINHO_VAGA_URL_TEMPLATE = "https://meupadrinho.com.br/api/vagas/{nano_id}"
+
+# Keep MeuPadrinho-only aliases local so shared APiBR/candidate scoring and hashes stay unchanged.
+_MEUPADRINHO_SENIORITY_ALIASES = {
+    "staff": SeniorityLevel.SPECIALIST,
+    "techlead": SeniorityLevel.COORDINATOR,
+    "tech lead": SeniorityLevel.COORDINATOR,
+    "diretor": SeniorityLevel.COORDINATOR,
+    "diretora": SeniorityLevel.COORDINATOR,
+    "director": SeniorityLevel.COORDINATOR,
+}
+
+_MEUPADRINHO_WORK_ARRANGEMENT_ALIASES = {
+    "presecial": WorkArrangement.ON_SITE,
+}
+
+
+def _normalize_meupadrinho_seniority(value: str | None) -> SeniorityLevel | None:
+    if (shared := normalize_seniority(value)) is not None:
+        return shared
+    key = _key(value)
+    return _MEUPADRINHO_SENIORITY_ALIASES.get(key) if key is not None else None
+
+
+def _normalize_meupadrinho_work_arrangement(value: str | None) -> WorkArrangement | None:
+    if (shared := normalize_work_arrangement(value)) is not None:
+        return shared
+    key = _key(value)
+    return _MEUPADRINHO_WORK_ARRANGEMENT_ALIASES.get(key) if key is not None else None
+
 
 _BRAZIL_STATES = {
     "AC",
@@ -40,7 +74,11 @@ _BRAZIL_STATES = {
     "TO",
 }
 
-_SALARY_NUMBER = re.compile(r"\d+(?:\.\d{3})*(?:,\d+)?|\d+(?:\.\d+)?")
+_SALARY_VALUE = r"(?:R\$\s*)?(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*([kK])?"
+_SALARY_FULL = re.compile(
+    rf"^\s*{_SALARY_VALUE}(?:\s*(?:-|–|—|~|\ba\b|\bat[eé]\b)\s*{_SALARY_VALUE})?\s*$",
+    re.I,
+)
 
 
 def _extract_payload(raw_job: Any) -> tuple[str, dict[str, Any]]:
@@ -105,7 +143,7 @@ def normalize_meupadrinho_location(value: Any) -> dict[str, str | None] | None:
     return {"city": None, "state": None, "country": None, "raw": raw}
 
 
-def _parse_salary_number(token: str) -> int | float:
+def _parse_salary_number(token: str, suffix: str | None = None) -> int | float:
     cleaned = token.strip()
     if "," in cleaned:
         cleaned = cleaned.replace(".", "").replace(",", ".")
@@ -116,6 +154,8 @@ def _parse_salary_number(token: str) -> int | float:
         if len(fractional_part) == 3 and integer_part.isdigit() and fractional_part.isdigit():
             cleaned = integer_part + fractional_part
     value = float(cleaned)
+    if suffix and suffix.casefold() == "k":
+        value *= 1000.0
     return int(value) if value.is_integer() else value
 
 
@@ -135,16 +175,16 @@ def normalize_meupadrinho_salary(
     text = normalize_text(value)
     if text is None:
         return None, None
-    numbers = [
-        parsed
-        for match in _SALARY_NUMBER.finditer(text)
-        if (parsed := _parse_salary_number(match.group(0))) > 0
-    ]
-    if not numbers:
+    match = _SALARY_FULL.fullmatch(text)
+    if match is None:
         return None, None
-    if len(numbers) == 1:
-        return {"min": numbers[0], "max": numbers[0]}, "BRL"
-    return {"min": min(numbers[0], numbers[1]), "max": max(numbers[0], numbers[1])}, "BRL"
+    first = _parse_salary_number(match.group(1), match.group(2))
+    if match.group(3) is None:
+        return ({"min": first, "max": first}, "BRL") if first > 0 else (None, None)
+    second = _parse_salary_number(match.group(3), match.group(4))
+    if first <= 0 or second <= 0:
+        return None, None
+    return {"min": min(first, second), "max": max(first, second)}, "BRL"
 
 
 def normalize_meupadrinho_skills(value: Any) -> list[str]:
@@ -235,7 +275,7 @@ def normalize_meupadrinho_job(raw_job: Any) -> dict[str, Any]:
     arrangement_raw = payload.get("forma_trabalho")
     if arrangement_raw is not None and not isinstance(arrangement_raw, str):
         raise ValueError("MeuPadrinho job has an invalid forma_trabalho")
-    arrangement = normalize_work_arrangement(arrangement_raw)
+    arrangement = _normalize_meupadrinho_work_arrangement(arrangement_raw)
 
     nivel_vaga_raw = payload.get("nivel_vaga")
     if nivel_vaga_raw is not None and not isinstance(nivel_vaga_raw, str):
@@ -243,7 +283,9 @@ def normalize_meupadrinho_job(raw_job: Any) -> dict[str, Any]:
     nivel_raw = payload.get("nivel")
     if nivel_raw is not None and not isinstance(nivel_raw, str):
         raise ValueError("MeuPadrinho job has an invalid nivel")
-    seniority = normalize_seniority(nivel_vaga_raw) or normalize_seniority(nivel_raw)
+    seniority = _normalize_meupadrinho_seniority(
+        nivel_vaga_raw
+    ) or _normalize_meupadrinho_seniority(nivel_raw)
 
     skills = normalize_meupadrinho_skills(payload.get("requisitos_tecnicos"))
     keywords = _normalize_keywords(payload, skills)

@@ -3,6 +3,8 @@ from datetime import UTC, datetime
 import pytest
 
 from src.domain.job import SeniorityLevel, WorkArrangement
+from src.domain.requirements import explicit_seniority
+from src.normalization.jobs.apibr import normalize_apibr_job
 from src.normalization.jobs.meupadrinho import (
     MEUPADRINHO_VAGA_URL_TEMPLATE,
     normalize_meupadrinho_job,
@@ -17,8 +19,8 @@ def _sample_record(**overrides):
         "titulo_vaga": "Python Developer",
         "local": "São Paulo, SP",
         "horario_registro": "2026-10-20T09:46:00.966098",
-        "link_vaga": "https://br.linkedin.com/jobs/view/python-developer-4480455704",
-        "link_plataforma_publicado": "https://br.linkedin.com/jobs/view/python-developer-4480455704",
+        "link_vaga": "https://example.org/jobs/python-developer-0faqqUu3",
+        "link_plataforma_publicado": "https://example.org/jobs/python-developer-0faqqUu3",
         "plataforma": "LINKEDIN",
         "forma_trabalho": "remoto",
         "cargo": "BACKEND",
@@ -29,7 +31,7 @@ def _sample_record(**overrides):
         "nivel_vaga": "Sênior",
         "tipo_contrato": "PJ",
         "salario": "12.000,00 - 15.000,00",
-        "nome_empresa": "AgileEngine",
+        "nome_empresa": "Acme Synthetic Tech",
         "vaga_encerrada": False,
     }
     contents.update(overrides)
@@ -63,7 +65,7 @@ def test_normalize_meupadrinho_job_maps_canonical_schema():
     assert set(normalized.keys()) == expected_keys
     assert normalized["platform"] == "meupadrinho"
     assert normalized["source_job_id"] == "0faqqUu3"
-    assert normalized["company"] == "AgileEngine"
+    assert normalized["company"] == "Acme Synthetic Tech"
     assert normalized["title"] == "Python Developer"
     assert normalized["description"] == (
         "Desenvolvedor Python Sênior para construir microserviços.\n"
@@ -87,7 +89,7 @@ def test_normalize_meupadrinho_job_maps_canonical_schema():
     ]
     assert normalized["salary"] == {"min": 12000, "max": 15000}
     assert normalized["currency"] == "BRL"
-    assert normalized["job_url"] == "https://br.linkedin.com/jobs/view/python-developer-4480455704"
+    assert normalized["job_url"] == "https://example.org/jobs/python-developer-0faqqUu3"
     assert normalized["publication_date"] == datetime(2026, 10, 20, 9, 46, 0, 966098, tzinfo=UTC)
     assert normalized["status"] == "ACTIVE"
     assert normalized["raw"] is None
@@ -157,6 +159,18 @@ def test_seniority_uses_nivel_vaga_with_fallback_to_nivel(nivel_vaga, nivel, exp
     assert job["seniority_level"] == expected
 
 
+def test_meupadrinho_seniority_and_typo_aliases_do_not_alter_apibr_or_candidate_scoring():
+    apibr_tech_lead = normalize_apibr_job(
+        {"id": 1, "title": "Tech Lead Sênior Python", "body": "", "labels": []}
+    )
+    apibr_staff = normalize_apibr_job(
+        {"id": 2, "title": "Senior Staff Engineer", "body": "", "labels": []}
+    )
+    assert apibr_tech_lead["seniority_level"] is SeniorityLevel.SENIOR
+    assert apibr_staff["seniority_level"] is SeniorityLevel.SENIOR
+    assert explicit_seniority("Senior Staff Engineer") is SeniorityLevel.SENIOR
+
+
 @pytest.mark.parametrize(
     ("forma", "expected"),
     [
@@ -183,6 +197,9 @@ def test_work_arrangement_normalizes_variants_and_typos(forma, expected):
         ("A combinar", None, None),
         ("8.000,00", {"min": 8000, "max": 8000}, "BRL"),
         ("9.471,38", {"min": 9471.38, "max": 9471.38}, "BRL"),
+        ("1500.50", {"min": 1500.5, "max": 1500.5}, "BRL"),
+        ("12k - 15k", {"min": 12000, "max": 15000}, "BRL"),
+        ("R$ 4.000,00 + VR R$ 600,00", None, None),
         ("100,00-150,00", {"min": 100, "max": 150}, "BRL"),
         ("120.000,00 – 160.000,00", {"min": 120000, "max": 160000}, "BRL"),
         ("12.000,00 a 15.000,00", {"min": 12000, "max": 15000}, "BRL"),
