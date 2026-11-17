@@ -676,3 +676,187 @@ def test_non_core_education_and_old_experience_skills_cannot_inflate_precision(d
         with Session(db_engine) as session, session.begin():
             session.execute(delete(Job).where(Job.source_id == source_id))
             session.execute(delete(JobSource).where(JobSource.id == source_id))
+
+
+def test_symmetric_seniority_hard_filter_and_adr016_eligibility_in_pipeline(db_engine):
+    from datetime import UTC, date, datetime
+
+    from src.domain.job import SeniorityLevel
+    from src.persistence.embedding import JobEmbedding
+    from src.persistence.extraction import JobExtraction
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    with Session(db_engine) as session, session.begin():
+        source = JobSource(name=f"seniority-{uuid4()}", type="api", polling_mode="INCREMENTAL")
+        session.add(source)
+        session.flush()
+        source_id = source.id
+        jobs_spec = [
+            ("intern", "Estágio Python", SeniorityLevel.INTERN, JobStatus.ACTIVE),
+            ("junior", "Dev Python Junior", SeniorityLevel.JUNIOR, JobStatus.ACTIVE),
+            ("mid", "Dev Python Pleno", SeniorityLevel.MID, JobStatus.ACTIVE),
+            ("senior", "Dev Python Senior", SeniorityLevel.SENIOR, JobStatus.ACTIVE),
+            ("unknown", "Dev Python", None, JobStatus.ACTIVE),
+            ("inactive-mid", "Dev Python Pleno", SeniorityLevel.MID, JobStatus.STALE),
+        ]
+        ids: dict[str, int] = {}
+        now = datetime.now(UTC)
+        for key, title, seniority, status in jobs_spec:
+            job = Job(
+                source_id=source_id,
+                platform="fixture",
+                source_job_id=key,
+                title=title,
+                description="Python PostgreSQL",
+                skills=["Python"],
+                seniority_level=seniority,
+                content_hash=f"h-{key}",
+                status=status,
+                embedding=VECTOR,
+            )
+            session.add(job)
+            session.flush()
+            ids[key] = job.id
+            session.add_all(
+                [
+                    JobExtraction(
+                        job_id=job.id,
+                        content_hash=job.content_hash,
+                        config_version=VERSION,
+                        status="SUCCEEDED",
+                        attempts=1,
+                        evidence=[],
+                        updated_at=now,
+                    ),
+                    JobEmbedding(
+                        job_id=job.id,
+                        content_hash=job.content_hash,
+                        model_version=EmbeddingConfig().model_version,
+                        extraction_version=VERSION,
+                        status="SUCCEEDED",
+                        attempts=1,
+                        updated_at=now,
+                        core_embedding=VECTOR,
+                    ),
+                ]
+            )
+    pipeline = MatchingPipeline(
+        lambda: Session(db_engine), Encoder(), VERSION, as_of_date=date(2026, 6, 1)
+    )
+    try:
+        # 1. Entry-level CV (4 months total, unmarked title -> JUNIOR): blocks SENIOR.
+        junior_body = curriculum()
+        junior_body["experiencias"][0]["cargo"] = "Desenvolvedor Python"
+        junior_body["experiencias"][0]["inicio"] = "2026-02-01"
+        junior_body["experiencias"][0]["fim"] = None
+        junior_res = pipeline(CurriculumRequest.model_validate(junior_body), 10)
+        junior_ids = [m.job.id for m in junior_res.matches]
+        assert ids["senior"] not in junior_ids
+        assert ids["junior"] in junior_ids and ids["unknown"] in junior_ids
+        assert ids["mid"] in junior_ids
+        # Active precedes inactive (ADR-016).
+        assert junior_ids[-1] == ids["inactive-mid"]
+        assert not junior_res.matches[-1].eligibility
+
+        # 2. Senior CV (6+ years unmarked title -> SENIOR): blocks INTERN and JUNIOR.
+        senior_body = curriculum()
+        senior_body["experiencias"][0]["cargo"] = "Engenheiro de Software"
+        senior_body["experiencias"][0]["inicio"] = "2020-01-01"
+        senior_body["experiencias"][0]["fim"] = None
+        senior_res = pipeline(CurriculumRequest.model_validate(senior_body), 10)
+        senior_ids = [m.job.id for m in senior_res.matches]
+        assert ids["intern"] not in senior_ids
+        assert ids["junior"] not in senior_ids
+        assert ids["senior"] in senior_ids and ids["unknown"] in senior_ids
+        # Mild gap (SENIOR vs MID) scores lower than exact SENIOR match.
+        score_by_id = {m.job.id: m.score for m in senior_res.matches}
+        assert score_by_id[ids["senior"]] > score_by_id[ids["mid"]]
+    finally:
+        with Session(db_engine) as session, session.begin():
+            session.execute(delete(Job).where(Job.source_id == source_id))
+            session.execute(delete(JobSource).where(JobSource.id == source_id))
+
+
+def test_seniority_hard_filter_refills_pool_instead_of_falling_back_to_inactive(db_engine):
+    from datetime import UTC, date, datetime
+
+    from src.domain.job import SeniorityLevel
+    from src.matching.ranking import RankingPolicy
+    from src.persistence.embedding import JobEmbedding
+    from src.persistence.extraction import JobExtraction
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    with Session(db_engine) as session, session.begin():
+        source = JobSource(name=f"refill-{uuid4()}", type="api", polling_mode="INCREMENTAL")
+        session.add(source)
+        session.flush()
+        source_id = source.id
+        now = datetime.now(UTC)
+        # With VECTOR matching all jobs and platform/source_job_id ordering:
+        # "a-senior-1", "a-senior-2" fill the first retrieval_limit=2 pool before "b-junior-*".
+        specs = [
+            ("a-senior-1", "Senior Python Dev", SeniorityLevel.SENIOR, JobStatus.ACTIVE),
+            ("a-senior-2", "Senior Python Dev", SeniorityLevel.SENIOR, JobStatus.ACTIVE),
+            ("b-junior-1", "Junior Python Dev", SeniorityLevel.JUNIOR, JobStatus.ACTIVE),
+            ("b-junior-2", "Junior Python Dev", SeniorityLevel.JUNIOR, JobStatus.ACTIVE),
+            ("c-inactive", "Mid Python Dev", SeniorityLevel.MID, JobStatus.STALE),
+        ]
+        ids: dict[str, int] = {}
+        for key, title, seniority, status in specs:
+            job = Job(
+                source_id=source_id,
+                platform="fixture",
+                source_job_id=key,
+                title=title,
+                description="Python PostgreSQL",
+                skills=["Python"],
+                seniority_level=seniority,
+                content_hash=f"h-{key}",
+                status=status,
+                embedding=VECTOR,
+            )
+            session.add(job)
+            session.flush()
+            ids[key] = job.id
+            session.add_all(
+                [
+                    JobExtraction(
+                        job_id=job.id,
+                        content_hash=job.content_hash,
+                        config_version=VERSION,
+                        status="SUCCEEDED",
+                        attempts=1,
+                        evidence=[],
+                        updated_at=now,
+                    ),
+                    JobEmbedding(
+                        job_id=job.id,
+                        content_hash=job.content_hash,
+                        model_version=EmbeddingConfig().model_version,
+                        extraction_version=VERSION,
+                        status="SUCCEEDED",
+                        attempts=1,
+                        updated_at=now,
+                        core_embedding=VECTOR,
+                    ),
+                ]
+            )
+    pipeline = MatchingPipeline(
+        lambda: Session(db_engine),
+        Encoder(),
+        VERSION,
+        ranking=RankingPolicy(retrieval_limit=2),
+        as_of_date=date(2026, 6, 1),
+    )
+    body = curriculum()
+    body["experiencias"][0]["cargo"] = "Desenvolvedor Python Júnior"
+    body["experiencias"][0]["inicio"] = "2026-01-01"
+    body["experiencias"][0]["fim"] = None
+    try:
+        res = pipeline(CurriculumRequest.model_validate(body), 2)
+        assert [m.job.id for m in res.matches] == [ids["b-junior-1"], ids["b-junior-2"]]
+        assert all(m.eligibility for m in res.matches)
+    finally:
+        with Session(db_engine) as session, session.begin():
+            session.execute(delete(Job).where(Job.source_id == source_id))
+            session.execute(delete(JobSource).where(JobSource.id == source_id))
