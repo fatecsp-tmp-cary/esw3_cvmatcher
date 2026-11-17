@@ -335,7 +335,10 @@ def ingest_meupadrinho_records(
         source = session.get(JobSource, source_id)
         if run is None or source is None:
             raise RuntimeError("Source execution state is unavailable")
-        status = "PARTIAL" if counts["rejected"] else "SUCCEEDED"
+        if counts["found"] > 0 and counts["rejected"] == counts["found"]:
+            status = "FAILED"
+        else:
+            status = "PARTIAL" if counts["rejected"] else "SUCCEEDED"
         run.status = status
         run.snapshot_complete = False
         run.finished_at = finished_at
@@ -517,10 +520,18 @@ def ingest_meupadrinho(
 
         observations: list[tuple[dict[str, Any], bool, datetime]] = []
         missing_ids: list[tuple[str, datetime]] = []
+        detail_failures = 0
+        last_detail_error: SourceError | None = None
 
         for nano_id in target_ids:
             counts["found"] += 1
-            raw_detail = client.fetch_job(nano_id)
+            try:
+                raw_detail = client.fetch_job(nano_id)
+            except SourceError as error:
+                detail_failures += 1
+                counts["rejected"] += 1
+                last_detail_error = error
+                continue
             observed_at = datetime.now(UTC)
             if raw_detail is None:
                 missing_ids.append((nano_id, observed_at))
@@ -531,6 +542,9 @@ def ingest_meupadrinho(
                 counts["rejected"] += 1
                 continue
             observations.append((normalized, True, observed_at))
+
+        if target_ids and detail_failures == len(target_ids) and last_detail_error is not None:
+            raise last_detail_error
 
         all_identities = [
             *((job["platform"], job["source_job_id"]) for job, _, _ in observations),
@@ -570,7 +584,10 @@ def ingest_meupadrinho(
         source = session.get(JobSource, source_id)
         if run is None or source is None:
             raise RuntimeError("Source execution state is unavailable")
-        status = "PARTIAL" if counts["rejected"] else "SUCCEEDED"
+        if counts["found"] > 0 and counts["rejected"] == counts["found"]:
+            status = "FAILED"
+        else:
+            status = "PARTIAL" if counts["rejected"] else "SUCCEEDED"
         run.status = status
         run.snapshot_complete = False
         run.finished_at = finished_at
