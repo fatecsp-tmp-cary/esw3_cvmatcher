@@ -3,11 +3,27 @@
 import math
 import re
 import unicodedata
+from collections.abc import Iterable
+from datetime import UTC, date, datetime
+from typing import Any
 
 from src.domain.categories import normalize_seniority
 from src.domain.job import SeniorityLevel
 
-VERSION = "bidirectional-tiered-adr021-v3"
+VERSION = "symmetric-seniority-filter-v4"
+SENIORITY_LADDER = {
+    SeniorityLevel.INTERN: 0,
+    SeniorityLevel.JUNIOR: 1,
+    SeniorityLevel.MID: 2,
+    SeniorityLevel.SENIOR: 3,
+    SeniorityLevel.SPECIALIST: 4,
+    SeniorityLevel.COORDINATOR: 4,
+}
+SENIORITY_MILD_GAP_SCORE = 40.0
+SENIORITY_MILD_GAP_MULTIPLIER = 0.85
+_DAYS_PER_MONTH = 30.4375
+_LOW_TENURE_MONTHS = 12.0
+_HIGH_TENURE_MONTHS = 60.0
 REQUIRED_SKILL_WEIGHT = 1.0
 PREFERRED_SKILL_WEIGHT = 0.4
 NICE_TO_HAVE_SKILL_WEIGHT = 0.15
@@ -76,6 +92,92 @@ def employment(value: str) -> str | None:
 def explicit_seniority(title: str) -> SeniorityLevel | None:
     values = {normalize_seniority(word) for word in re.findall(r"[\w-]+", title)} - {None}
     return next(iter(values)) if len(values) == 1 else None
+
+
+def _experience_months(entries: Iterable[Any], reference_date: date) -> float:
+    """Sum merged non-overlapping dated experience intervals in months."""
+    intervals: list[tuple[date, date]] = []
+    for entry in entries:
+        start = getattr(entry, "start_date", None)
+        if not isinstance(start, date):
+            continue
+        raw_end = getattr(entry, "end_date", None)
+        end = raw_end if isinstance(raw_end, date) else reference_date
+        if end >= start:
+            intervals.append((start, end))
+    if not intervals:
+        return 0.0
+    intervals.sort()
+    merged_days = 0
+    cur_start, cur_end = intervals[0]
+    for start, end in intervals[1:]:
+        if start <= cur_end:
+            if end > cur_end:
+                cur_end = end
+        else:
+            merged_days += (cur_end - cur_start).days
+            cur_start, cur_end = start, end
+    merged_days += (cur_end - cur_start).days
+    return merged_days / _DAYS_PER_MONTH
+
+
+def _tenure_seniority(
+    experiences: tuple[Any, ...],
+    relevant: tuple[Any, ...],
+    reference_date: date,
+) -> SeniorityLevel | None:
+    if not experiences:
+        return SeniorityLevel.JUNIOR
+    relevant_dated = [e for e in relevant if isinstance(getattr(e, "start_date", None), date)]
+    if relevant_dated and _experience_months(relevant_dated, reference_date) >= _HIGH_TENURE_MONTHS:
+        return SeniorityLevel.SENIOR
+    total_dated = [e for e in experiences if isinstance(getattr(e, "start_date", None), date)]
+    if total_dated and _experience_months(total_dated, reference_date) < _LOW_TENURE_MONTHS:
+        return SeniorityLevel.JUNIOR
+    return None
+
+
+def resolve_candidate_seniority(
+    candidate: Any,
+    relevant_experience: Iterable[Any] = (),
+    *,
+    as_of_date: date | None = None,
+) -> SeniorityLevel | None:
+    """Determine candidate seniority from relevant title markers and tenure.
+
+    When relevant tenure reaches 60+ months, take ``max(explicit, SENIOR)`` so an
+    early-career ``Junior`` title cannot permanently mask senior tenure.
+    ``as_of_date`` defaults to the current UTC date; callers should pass one
+    request-scoped UTC date for per-request determinism.
+    """
+    relevant = tuple(relevant_experience)
+    experiences = tuple(getattr(candidate, "experience", ()) or ())
+    reference = as_of_date or datetime.now(UTC).date()
+    tenure_level = _tenure_seniority(experiences, relevant, reference)
+    explicit = [
+        level for entry in relevant if (level := explicit_seniority(entry.title)) is not None
+    ]
+    if explicit:
+        explicit_max = max(explicit, key=SENIORITY_LADDER.__getitem__)
+        if tenure_level is SeniorityLevel.SENIOR:
+            return max(explicit_max, tenure_level, key=SENIORITY_LADDER.__getitem__)
+        return explicit_max
+    return tenure_level
+
+
+def seniority_alignment(
+    candidate_level: SeniorityLevel | None,
+    required_level: SeniorityLevel | None,
+) -> tuple[bool, float | None, float]:
+    """Return (allowed, seniority_dimension_score, final_score_multiplier)."""
+    if candidate_level is None or required_level is None:
+        return True, None, 1.0
+    gap = abs(SENIORITY_LADDER[candidate_level] - SENIORITY_LADDER[required_level])
+    if gap >= 2:
+        return False, 0.0, 0.0
+    if gap == 1:
+        return True, SENIORITY_MILD_GAP_SCORE, SENIORITY_MILD_GAP_MULTIPLIER
+    return True, 100.0, 1.0
 
 
 def mandatory_coverage_ratio(exact_required: set[str], exact_matched: set[str]) -> float | None:
@@ -168,6 +270,7 @@ def comparable_score(
     exact_required: set[str] | None = None,
     exact_matched: set[str] | None = None,
     candidate_core_skills: set[str] | None = None,
+    as_of_date: date | None = None,
 ) -> float:
     """Equal weights across comparable dimensions; unknown values are omitted.
 
@@ -195,28 +298,13 @@ def comparable_score(
                 exact_matched=exact_matched,
             )
         )
-    candidate_levels = {
-        level
-        for entry in relevant_experience
-        if (level := explicit_seniority(entry.title)) is not None
-    }
+    candidate_level = resolve_candidate_seniority(
+        candidate, relevant_experience, as_of_date=as_of_date
+    )
     required_level = job.seniority_level or explicit_seniority(job.title)
-    if candidate_levels and required_level is not None:
-        order = [
-            SeniorityLevel.INTERN,
-            SeniorityLevel.JUNIOR,
-            SeniorityLevel.MID,
-            SeniorityLevel.SENIOR,
-        ]
-        if required_level in candidate_levels:
-            dimensions.append(100.0)
-        elif required_level in order and any(value in order for value in candidate_levels):
-            compatible = any(
-                value in order and order.index(value) >= order.index(required_level)
-                for value in candidate_levels
-            )
-            dimensions.append(100.0 if compatible else 0.0)
-        # Specialist/coordinator are not inferred to be above/below other tracks.
+    _, seniority_score, _ = seniority_alignment(candidate_level, required_level)
+    if seniority_score is not None:
+        dimensions.append(seniority_score)
     levels: dict[str, set[str]] = {}
     for entry in candidate.languages:
         name, proficiency = language(entry.name), cefr(entry.level)

@@ -40,7 +40,7 @@ def dual_similarity(np: Any, core: Any, full: Any, core_weight: float) -> Any:
 
 @dataclass(frozen=True, slots=True)
 class RankingPolicy:
-    version: str = "compatibility-v2-dual-vector-provisional"
+    version: str = "compatibility-v3-seniority-provisional"
     textual: float = 0.45
     semantic: float = 0.35
     structured: float = 0.20
@@ -61,11 +61,22 @@ class RankingPolicy:
         ):
             raise ValueError("Invalid ranking policy")
 
-    def score(self, textual: float, semantic: float, structured: float) -> float:
+    def score(
+        self,
+        textual: float,
+        semantic: float,
+        structured: float,
+        *,
+        multiplier: float = 1.0,
+    ) -> float:
         values = (textual, semantic, structured)
         if any(not math.isfinite(v) or not 0 <= v <= 100 for v in values):
             raise ValueError("Component scores must be finite in [0,100]")
-        total = self.textual * textual + self.semantic * semantic + self.structured * structured
+        if not math.isfinite(multiplier) or not 0.0 <= multiplier <= 1.0:
+            raise ValueError("Multiplier must be finite in [0,1]")
+        total = (
+            self.textual * textual + self.semantic * semantic + self.structured * structured
+        ) * multiplier
         # Accepted weights may sum to one within floating-point tolerance. Keep
         # their blend inside the public score bounds even at the upper endpoint.
         return min(100.0, max(0.0, total))
