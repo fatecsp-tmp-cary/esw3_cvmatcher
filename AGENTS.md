@@ -32,6 +32,12 @@ impact. After approval, record the decision and update affected docs and tasks.
 
 ## Workflow
 
+Every pull request must have a matching GitHub issue created from the repository
+issue templates (`.github/ISSUE_TEMPLATE/`), use a compliant branch name
+(`<type>_<issue-number>_<short-description>` where `<type>` is `feat`, `task`,
+or `bug`), and link that issue (`Closes #<issue-number>`) using
+`.github/pull_request_template.md`.
+
 For a change, identify affected product, architecture, feature, quality, and
 supporting documents. Update them in the same change as the requirement,
 architecture, implementation plan, or task-status change. Keep task status
