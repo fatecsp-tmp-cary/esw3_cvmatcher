@@ -5,7 +5,7 @@ import unicodedata
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-VERSION = "explicit-aliases-single-edit-min5-v3"
+VERSION = "explicit-aliases-single-edit-min5-v4"
 
 _ALIASES = {
     "python": "Python",
@@ -45,6 +45,50 @@ _ALIASES = {
     "ruby on rails": "Rails",
     "php": "PHP",
     "wordpress": "WordPress",
+    "gcp": "Google Cloud Platform",
+    "google cloud platform": "Google Cloud Platform",
+    "cloud run": "Cloud Run",
+    "html": "HTML",
+    "html5": "HTML5",
+    "css": "CSS",
+    "css3": "CSS3",
+    "scss": "SCSS",
+    "ci/cd": "CI/CD",
+    "rest api": "REST API",
+    "apis restful": "RESTful API",
+    "restful": "RESTful",
+    "scrum": "Scrum",
+    "kanban": "Kanban",
+    "linux": "Linux",
+    "mysql": "MySQL",
+    "mssql": "SQL Server",
+    "sql server": "SQL Server",
+    "microsoft sql server": "Microsoft SQL Server",
+    "laravel": "Laravel",
+    "flutter": "Flutter",
+    "dart": "Dart",
+    "next.js": "Next.js",
+    "nextjs": "Next.js",
+    "next js": "Next.js",
+    "nuxt.js": "Nuxt.js",
+    "nuxtjs": "Nuxt.js",
+    "nuxt": "Nuxt.js",
+    "vue.js": "Vue.js",
+    "vuejs": "Vue.js",
+    "jquery": "jQuery",
+    "redux": "Redux",
+    "tailwind css": "Tailwind CSS",
+    "figma": "Figma",
+    "power bi": "Power BI",
+    "powerbi": "Power BI",
+    "tableau": "Tableau",
+    "looker": "Looker",
+    "etl": "ETL",
+    "oracle": "Oracle",
+    "github": "GitHub",
+    "gitlab ci": "GitLab CI",
+    "nestjs": "NestJS",
+    "nest.js": "NestJS",
     "coren": "COREN",
     "oab": "OAB",
     "crc": "CRC",
@@ -93,21 +137,45 @@ def canonical_skill(value: str) -> str | None:
     return _ALIASES.get(_fold(value))
 
 
+_URL_TLD_PREFIX = re.compile(
+    r"^(?:https?://|www\.|[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|org|net|io|dev|br|gov|edu|co|app|ai)(?:\.[a-z]{2})?(?:/|$))",
+    re.I,
+)
+_URL_DOMAIN_SUFFIX = re.compile(
+    r"^\.(?:com|org|net|io|dev|br|gov|edu|co|app|ai)(?:\.[a-z]{2})?(?:/|\b)",
+    re.I,
+)
+
+
 def alias_spans(text: str):
     """Supplement model detection with exact explicit vocabulary occurrences.
 
     Match original Unicode directly; no fuzzy-generated offsets or strength.
     """
     pattern = re.compile(
-        r"(?<![\w.+#])(?:"
+        r"(?<![\w.+#-])(?:"
         + "|".join(
             re.escape(a).replace(r"\ ", r"\s+")
             for a in sorted(_ALIASES, key=lambda a: (-len(a), a))
         )
-        + r")(?![\w+#])",
+        + r")(?![\w+#-])",
         re.I,
     )
     for match in pattern.finditer(text):
+        token_start = max(
+            text.rfind(" ", 0, match.start()),
+            text.rfind("\n", 0, match.start()),
+            text.rfind("\t", 0, match.start()),
+            text.rfind("(", 0, match.start()),
+            -1,
+        )
+        token_prefix = text[token_start + 1 : match.start()]
+        if (
+            text[match.end() : match.end() + 3] == "://"
+            or _URL_TLD_PREFIX.match(token_prefix)
+            or _URL_DOMAIN_SUFFIX.match(text[match.end() :])
+        ):
+            continue
         name = canonical_skill(match.group())
         if name:
             yield match.start(), match.end(), CATEGORIES.get(name, "skill")

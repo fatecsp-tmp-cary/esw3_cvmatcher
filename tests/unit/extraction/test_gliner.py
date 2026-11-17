@@ -46,7 +46,7 @@ def test_offsets_overlap_dedup_and_unclassified_evidence():
 
     def predict(chunk, labels, **kwargs):
         assert tuple(labels) == LABELS
-        assert kwargs == {"threshold": 0.3, "flat_ner": False}
+        assert kwargs == {"threshold": 0.25, "flat_ner": False}
         offset = chunk.find("Python")
         if offset < 0:
             return []
@@ -105,6 +105,8 @@ def test_exact_tokenized_prompt_budget_and_word_limit():
 
     subject.tokenizer = tokenizer
     assert subject._fits("Python")
+    assert subject._fits("x" * 241)
+    assert not subject._fits("x" * 242)
     assert not subject._fits("x" * 500)
     assert not subject._fits("x " * 385)
     assert calls[0]["truncation"] is False and calls[0]["add_special_tokens"] is False
