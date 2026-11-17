@@ -4,6 +4,7 @@
 - **Date:** 2026-11-14
 - **Authority:** User interview following the extraction correction and branch decision audit.
 - **Supersedes:** ADR-017 proposal for job-field precedence, multiple-value resolution and displayed extraction skills; ADR-008 explicit-source precedence for these two fields only. Original ADR-017 is preserved.
+- **Superseded in part by:** [ADR-027](ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) (supersedes only the note below that candidate-side seniority comparison and hard filters remain unchanged; job-field precedence and displayed skills stay in force).
 - **Implementation status:** Implemented and verified in PR #197; see the feature tasks and review report.
 
 ## Context
