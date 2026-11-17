@@ -80,7 +80,9 @@ and the reconciled production image build passed. See the
 - Dual job vectors (`jobs.embedding` and `job_embeddings.core_embedding` over title, seniority, skills and `REQUIRED` items) implemented under [ADR-027](../../docs/architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) (#214).
 - Bidirectional tiered skill scoring with `ADR-021` mandatory coverage and sparse-job Bayesian smoothing implemented in `src/domain/requirements.py` and `src/matching/pipeline.py` under [ADR-027](../../docs/architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) (#215).
 - Symmetric seniority ladder, `max(explicit, tenure)` seniority resolution with request-scoped UTC `as_of_date`, and bounded-refill severe-gap (`|gap| >= 2`) hard filter implemented under [ADR-027](../../docs/architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) (#216).
+- Length-normalized PostgreSQL FTS (`flag 32` + query-term norm), `focused_candidate_query_text`, whole-profile `candidate_summary_vector` core alignment, and CV-breadth coherence implemented under [ADR-027](../../docs/architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) (#217).
 - Symmetric seniority ladder, `max(explicit, tenure)` seniority resolution with request-scoped UTC `as_of_date`, and bounded-refill severe-gap (`|gap| >= 2`) hard filter implemented under [ADR-027](../../docs/architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) (#216).
+- Length-normalized PostgreSQL FTS (`flag 32` + query-term norm), `focused_candidate_query_text`, whole-profile `candidate_summary_vector` core alignment, and CV-breadth coherence implemented under [ADR-027](../../docs/architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) (#217).
 
 ## Remaining current-head work
 
