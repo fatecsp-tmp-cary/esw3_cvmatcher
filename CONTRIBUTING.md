@@ -8,6 +8,9 @@ and [Definition of Done](docs/quality/definition-of-done.md) before opening an i
 ## Before you start
 
 - Search existing issues and pull requests before opening a new one.
+- Every pull request must have a matching GitHub issue created using the
+  repository issue templates (`.github/ISSUE_TEMPLATE/`) before the pull request
+  is opened.
 - For larger changes, open an issue first so the scope and design can be
   discussed.
 - Do not include real CVs, personal data, credentials, API keys, or other
@@ -17,7 +20,8 @@ and [Definition of Done](docs/quality/definition-of-done.md) before opening an i
 
 ## Development workflow
 
-1. Create or select an issue describing the problem or proposed change.
+1. Create or select a matching issue (using `.github/ISSUE_TEMPLATE/`) describing
+   the problem or proposed change. Every pull request requires a matching issue.
 2. Create a branch using this format:
 
    ```text
