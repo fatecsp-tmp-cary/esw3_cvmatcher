@@ -159,13 +159,22 @@ def test_requirement_rows_combined_once_and_normalized_after_raw_sum(session):
                 )
             )
     session.flush()
+    import math
+
     raw = search_active_jobs(session, "Python", readiness=true())
     bounded = session.execute(textual_statement("Python", readiness=true())).all()
     assert identities(bounded) == ["both", "requirement"]
     assert len(raw) == len(bounded) == 2
-    for match, (job, score) in zip(raw, bounded, strict=True):
-        assert match.job.id == job.id
-        assert score == pytest.approx(100 * match.score / (1 + match.score))
+    # Bounded path uses PostgreSQL flag 32 (r/(r+1)) per path and query-term norm.
+    query_norm = 1.0 + 0.15 * math.log(2.0)
+    expected_both = (1.0 / 2.0) + (0.4 / 1.4)
+    expected_req = 0.4 / 1.4
+    assert bounded[0][1] == pytest.approx(
+        100.0 * (expected_both / query_norm) / (1.0 + expected_both / query_norm)
+    )
+    assert bounded[1][1] == pytest.approx(
+        100.0 * (expected_req / query_norm) / (1.0 + expected_req / query_norm)
+    )
     # Repeated rows do not multiply rank, and missing readiness withholds both paths.
     assert raw[0].score == pytest.approx(1.4)
     assert raw[1].score == pytest.approx(0.4)
@@ -188,3 +197,13 @@ def test_publication_ties_descending_and_nulls_last(session):
         "b-old",
         "a-null",
     ]
+
+
+def test_longer_distinct_query_is_damped_by_query_length_normalization(session):
+    add_job(session, "py", title="Python Developer")
+    focused = session.execute(textual_statement("Python", readiness=true())).all()[0][1]
+    bloated_terms = " ".join(f"unrelatedterm{i}" for i in range(40))
+    bloated = session.execute(textual_statement(f"Python {bloated_terms}", readiness=true())).all()[
+        0
+    ][1]
+    assert focused > bloated > 0

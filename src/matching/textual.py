@@ -1,12 +1,18 @@
 """Deterministic status/readiness-gated PostgreSQL textual retrieval."""
 
 from dataclasses import dataclass
+from datetime import date
 
-from sqlalchemy import Select, false, func, select, union_all
+from sqlalchemy import Select, Text, false, func, literal, select, union_all
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.elements import ColumnElement
 
-from src.indexing.textual import any_term_query, job_search_document, requirement_search_document
+from src.indexing.textual import (
+    _CONFIG,
+    any_term_query,
+    job_search_document,
+    requirement_search_document,
+)
 from src.normalization.candidate.curriculum import NormalizedCandidate
 from src.persistence.job.job import ACTIVE_STATUSES, Job, JobStatus, status_predicate
 from src.persistence.job.skill import JobRequirement
@@ -26,6 +32,40 @@ def candidate_query_text(candidate: NormalizedCandidate) -> str:
         ((x.name, x.level) for x in candidate.languages),
     )
     return "\n".join(value for section in sections for entry in section for value in entry)
+
+
+def focused_candidate_query_text(candidate: NormalizedCandidate) -> str:
+    """Focused, deduplicated candidate projection for FTS retrieval (ADR-027).
+
+    Keeps competencies, all experience titles, the three most recent experience
+    descriptions, project titles/technologies, education courses, and language
+    names so sprawling profiles do not flood any-term FTS queries. Falls back to
+    ``candidate_query_text`` when all focused fields are blank.
+    """
+    recent_experiences = sorted(
+        candidate.experience,
+        key=lambda x: (x.end_date is None, x.end_date or date.min, x.start_date),
+        reverse=True,
+    )[:3]
+    raw_items = [
+        *(x.description for x in candidate.competencies),
+        *(x.title for x in candidate.experience),
+        *(x.description for x in recent_experiences),
+        *(value for x in candidate.projects for value in (x.title, x.technologies)),
+        *(x.course for x in candidate.education),
+        *(x.name for x in candidate.languages),
+    ]
+    seen: set[str] = set()
+    unique: list[str] = []
+    for item in raw_items:
+        cleaned = " ".join(item.split())
+        if not cleaned:
+            continue
+        folded = cleaned.casefold()
+        if folded not in seen:
+            seen.add(folded)
+            unique.append(cleaned)
+    return "\n".join(unique) if unique else candidate_query_text(candidate)
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,14 +100,22 @@ def _retrieval_statement(
     if exclude_ids:
         job_filters.append(Job.id.not_in(exclude_ids))
         req_filters.append(Job.id.not_in(exclude_ids))
-    job_matches = select(
-        Job.id.label("job_id"), func.ts_rank_cd(document, query).label("rank")
-    ).where(*job_filters)
+    # When bounded, PostgreSQL flag 32 saturates cover density without
+    # penalizing long descriptions or varying city-name token counts (ADR-005/027).
+    rank_expr = (
+        func.ts_rank_cd(document, query, 32) if bounded else func.ts_rank_cd(document, query)
+    )
+    req_rank_expr = (
+        func.ts_rank_cd(requirement_document, query, 32)
+        if bounded
+        else func.ts_rank_cd(requirement_document, query)
+    )
+    job_matches = select(Job.id.label("job_id"), rank_expr.label("rank")).where(*job_filters)
     # Maximum avoids multiplying evidence by the number of requirement rows.
     requirement_matches = (
         select(
             JobRequirement.job_id.label("job_id"),
-            func.max(func.ts_rank_cd(requirement_document, query)).label("rank"),
+            func.max(req_rank_expr).label("rank"),
         )
         .join(Job, Job.id == JobRequirement.job_id)
         .where(*req_filters)
@@ -80,7 +128,13 @@ def _retrieval_statement(
         .subquery()
     )
     raw = scores.c.rank
-    score = (100.0 * raw / (1.0 + raw) if bounded else raw).label("textual_score")
+    if bounded:
+        distinct_terms = func.length(func.to_tsvector(_CONFIG, literal(query_text, type_=Text)))
+        query_norm = literal(1.0) + literal(0.15) * func.ln(literal(1.0) + distinct_terms)
+        normalized_rank = raw / query_norm
+        score = (100.0 * normalized_rank / (1.0 + normalized_rank)).label("textual_score")
+    else:
+        score = raw.label("textual_score")
     return (
         select(Job, score)
         .join(scores, scores.c.job_id == Job.id)
@@ -158,7 +212,7 @@ def retrieve_textual(
 ) -> list[tuple[Job, float]]:
     """Run one request-scoped query; persist/log none of its candidate evidence."""
     statement = textual_statement(
-        candidate_query_text(candidate),
+        focused_candidate_query_text(candidate),
         readiness=readiness,
         requirements=requirements,
         limit=limit,

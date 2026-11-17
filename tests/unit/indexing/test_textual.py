@@ -121,3 +121,35 @@ def test_retrieve_textual_passes_default_readiness_and_preserves_tuple_shape():
     rows = retrieve_textual(session, NormalizedCandidate((), (), (), (), ()))
     assert rows == [(job, 12.0)]
     assert _sql(session.statement).count("WHERE false") == 2
+
+
+def test_focused_candidate_query_limits_old_descriptions_and_deduplicates():
+    from src.matching.textual import focused_candidate_query_text
+
+    exps = tuple(
+        Experience(
+            f"Company {i}",
+            f"Title {i}",
+            f"UniqueOldToken{i}" if i == 0 else f"RecentDesc{i}",
+            date(2020 + i, 1, 1),
+            date(2020 + i, 12, 31),
+        )
+        for i in range(5)
+    )
+    candidate = NormalizedCandidate(
+        experience=exps,
+        education=(
+            Education("Univ", "Computer Science", "graduacao", "concluido", date.min, date.min),
+        ),
+        projects=(Project("API", "Long project prose excluded", "Python FastAPI"),),
+        competencies=(Competency("Python", "avancado"), Competency("python", "basico")),
+        languages=(Language("English", "B2"),),
+    )
+    focused = focused_candidate_query_text(candidate)
+    assert "Title 0" in focused
+    assert "UniqueOldToken0" not in focused
+    assert "RecentDesc4" in focused and "RecentDesc3" in focused and "RecentDesc2" in focused
+    assert "RecentDesc1" not in focused
+    assert "Long project prose excluded" not in focused
+    assert "Python FastAPI" in focused and "Computer Science" in focused and "English" in focused
+    assert focused.splitlines().count("Python") == 1
