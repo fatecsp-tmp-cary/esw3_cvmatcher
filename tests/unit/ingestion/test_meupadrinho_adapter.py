@@ -146,3 +146,103 @@ async def test_async_adapter_rejects_invalid_discovery_records():
     adapter = MeuPadrinhoAdapter(MeuPadrinhoClient(transport=Transport({"vagas": [{}]})))
     with pytest.raises(SourceError, match="^invalid_discovery_record$"):
         await anext(adapter.discover())
+
+
+def test_apibr_client_uses_shared_rate_limiter():
+    from src.ingestion.apibr import APiBRClient
+
+    waits = []
+    now = [10.0]
+
+    def fake_sleep(delay):
+        waits.append(delay)
+        now[0] += delay
+
+    limiter = RateLimiter(10.0, jitter_seconds=0.0, clock=lambda: now[0])
+    client = APiBRClient(
+        transport=Transport([], []),
+        rate_limiter=limiter,
+        sleep=fake_sleep,
+    )
+    assert client.fetch_page(1) == []
+    assert client.fetch_page(2) == []
+    assert len(waits) == 1
+    assert abs(waits[0] - 0.1) < 1e-6
+
+
+def test_ingest_meupadrinho_isolates_per_job_source_error_and_fails_on_full_batch(monkeypatch):
+    from contextlib import nullcontext
+    from types import SimpleNamespace
+
+    from src.ingestion import meupadrinho as mp_mod
+
+    source = SimpleNamespace(
+        id=1, polling_mode="INCREMENTAL", last_run_at=None, last_success_at=None, last_error=None
+    )
+    run = SimpleNamespace(
+        id=10, status="RUNNING", snapshot_complete=False, polling_mode="INCREMENTAL"
+    )
+
+    class FakeSession:
+        def __init__(self):
+            self.committed = 0
+            self.rolled_back = 0
+
+        def get(self, model, pk):
+            return source if model is mp_mod.JobSource else run
+
+        def add(self, obj):
+            pass
+
+        def commit(self):
+            self.committed += 1
+
+        def rollback(self):
+            self.rolled_back += 1
+
+        def flush(self):
+            pass
+
+        def begin_nested(self):
+            return nullcontext()
+
+        def scalars(self, _stmt):
+            return SimpleNamespace(all=lambda: ["bad_job", "good_job"])
+
+        def scalar(self, _stmt):
+            return None
+
+    upserted = []
+    monkeypatch.setattr(mp_mod, "lock_job_identities", lambda *_: None)
+    monkeypatch.setattr(
+        mp_mod,
+        "upsert_job",
+        lambda _s, _sid, norm, _obs, _ver: (
+            upserted.append(norm["source_job_id"]) or ("updated", True, False)
+        ),
+    )
+
+    class MixedClient:
+        def fetch_job(self, nano_id: str):
+            if nano_id == "bad_job":
+                raise SourceError("server_error")
+            return {"nano_id": "good_job", "contents": detail_payload("Good Job", closed=True)}
+
+    session = FakeSession()
+    res = mp_mod.ingest_meupadrinho(session, 1, MixedClient(), validation_limit=10)
+    assert res.status == "PARTIAL"
+    assert res.jobs_found == 2
+    assert res.jobs_rejected == 1
+    assert res.jobs_updated == 1
+    assert res.jobs_expired == 1
+    assert upserted == ["good_job"]
+
+    class AllFailingClient:
+        def fetch_job(self, nano_id: str):
+            raise SourceError("transport_failure")
+
+    session2 = FakeSession()
+    with pytest.raises(SourceError, match="^transport_failure$"):
+        mp_mod.ingest_meupadrinho(session2, 1, AllFailingClient(), validation_limit=10)
+    assert session2.rolled_back == 1
+    assert run.status == "FAILED"

@@ -22,7 +22,7 @@ title with the only evidence.
 record shape produced by the MeuPadrinho collection script (`meu_padriho.sh`) and
 `GET /api/vagas/{nano_id}`. All identifiers, companies, titles, and URLs are
 synthetic. It covers structured field mapping, URL fallback priority, salary range
-parsing, `Staff`/`Techlead` seniority aliases, `presecial` work-arrangement typo
+parsing, `Techlead` seniority normalization, `presecial` work-arrangement typo
 normalization, and explicit `vaga_encerrada` closure.
 
 ## File Location

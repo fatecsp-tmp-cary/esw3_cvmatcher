@@ -92,7 +92,7 @@ def test_worker_validates_availability_by_oldest_verified_and_expires_closed_or_
     jsonl_file.write_text(
         "\n".join(
             [
-                json.dumps(_record("job_open")),
+                json.dumps(_record("job_newest")),
                 json.dumps(_record("job_closed")),
                 json.dumps(_record("job_404")),
             ]
@@ -103,9 +103,15 @@ def test_worker_validates_availability_by_oldest_verified_and_expires_closed_or_
     ingest_meupadrinho_jsonl(db_session, source.id, jsonl_file)
 
     now = datetime.now(UTC)
-    for idx, jid in enumerate(("job_open", "job_closed", "job_404")):
+    # Insert oldest last in DB id order and use validation_limit=2 (< 3) so id order cannot pass.
+    timestamps = {
+        "job_newest": now - timedelta(hours=1),
+        "job_closed": now - timedelta(hours=5),
+        "job_404": now - timedelta(hours=10),
+    }
+    for jid, verified_at in timestamps.items():
         row = db_session.scalar(select(Job).where(Job.source_job_id == jid))
-        row.last_verified_at = now - timedelta(hours=10 - idx)
+        row.last_verified_at = verified_at
     db_session.commit()
 
     class FakeClient:
@@ -114,21 +120,18 @@ def test_worker_validates_availability_by_oldest_verified_and_expires_closed_or_
 
         def fetch_job(self, nano_id: str):
             self.checked.append(nano_id)
-            if nano_id == "job_open":
-                return _record("job_open", title="Backend Python Updated")
-            if nano_id == "job_closed":
-                return _record("job_closed", closed=True)
             if nano_id == "job_404":
                 return None
+            if nano_id == "job_closed":
+                return _record("job_closed", closed=True)
             raise AssertionError(f"unexpected {nano_id}")
 
     client = FakeClient()
-    result = ingest_meupadrinho(db_session, source.id, client, validation_limit=10)
+    result = ingest_meupadrinho(db_session, source.id, client, validation_limit=2)
 
-    assert client.checked == ["job_open", "job_closed", "job_404"]
+    assert client.checked == ["job_404", "job_closed"]
     assert result.status == "SUCCEEDED"
-    assert result.jobs_found == 3
-    assert result.jobs_updated == 1
+    assert result.jobs_found == 2
     assert result.jobs_unchanged == 2
     assert result.jobs_expired == 2
 
@@ -136,10 +139,54 @@ def test_worker_validates_availability_by_oldest_verified_and_expires_closed_or_
         job.source_job_id: job
         for job in db_session.scalars(select(Job).where(Job.platform == "meupadrinho")).all()
     }
-    assert jobs["job_open"].status is JobStatus.ACTIVE
-    assert jobs["job_open"].title == "Backend Python Updated"
+    assert jobs["job_newest"].status is JobStatus.ACTIVE
     assert jobs["job_closed"].status is JobStatus.EXPIRED
     assert jobs["job_404"].status is JobStatus.EXPIRED
+
+
+def test_worker_isolates_per_job_detail_source_error_from_batch(db_session, source, tmp_path):
+    jsonl_file = tmp_path / "seed.jsonl"
+    jsonl_file.write_text(
+        "\n".join([json.dumps(_record("job_broken")), json.dumps(_record("job_closed"))]) + "\n",
+        encoding="utf-8",
+    )
+    ingest_meupadrinho_jsonl(db_session, source.id, jsonl_file)
+
+    now = datetime.now(UTC)
+    db_session.scalar(select(Job).where(Job.source_job_id == "job_broken")).last_verified_at = (
+        now - timedelta(hours=10)
+    )
+    db_session.scalar(select(Job).where(Job.source_job_id == "job_closed")).last_verified_at = (
+        now - timedelta(hours=5)
+    )
+    db_session.commit()
+
+    class MixedClient:
+        def fetch_job(self, nano_id: str):
+            if nano_id == "job_broken":
+                raise SourceError("server_error")
+            return _record("job_closed", closed=True)
+
+    result = ingest_meupadrinho(db_session, source.id, MixedClient(), validation_limit=10)
+    assert result.status == "PARTIAL"
+    assert result.jobs_found == 2
+    assert result.jobs_rejected == 1
+    assert result.jobs_expired == 1
+
+    broken = db_session.scalar(select(Job).where(Job.source_job_id == "job_broken"))
+    closed = db_session.scalar(select(Job).where(Job.source_job_id == "job_closed"))
+    assert broken.status is JobStatus.ACTIVE
+    assert closed.status is JobStatus.EXPIRED
+
+
+def test_ingest_meupadrinho_jsonl_all_rejected_marks_failed(db_session, source, tmp_path):
+    bad_file = tmp_path / "not_jsonl.json"
+    bad_file.write_text('{broken\n{"nano_id": "bad"}\n', encoding="utf-8")
+
+    result = ingest_meupadrinho_jsonl(db_session, source.id, bad_file)
+    assert result.status == "FAILED"
+    assert result.jobs_found == 2
+    assert result.jobs_rejected == 2
 
 
 def test_validation_network_failure_rolls_back_run_changes(db_session, source, tmp_path):
