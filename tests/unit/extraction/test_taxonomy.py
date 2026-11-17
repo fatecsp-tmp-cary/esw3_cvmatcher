@@ -93,9 +93,19 @@ def test_ties_across_concepts_remain_unknown_and_short_names_are_exact_only():
 def test_alias_spans_ignore_hyphenated_package_names_and_urls_and_emit_domain_labels():
     from src.extraction.taxonomy import alias_spans
 
-    text = "Use react-table, material-react-table, React, PostgreSQL, AWS, and https://example.com/react-job"
+    text = (
+        "Use react-table, material-react-table, React, PostgreSQL, AWS, Node.js/Vue.js, "
+        "github.com/empresa, https://careers.example-company.com/engineering/backend/python, "
+        "and https://example.com/react-job"
+    )
     spans = [(text[s:e], label) for s, e, label in alias_spans(text)]
-    assert spans == [("React", "framework"), ("PostgreSQL", "database"), ("AWS", "cloud")]
+    assert spans == [
+        ("React", "framework"),
+        ("PostgreSQL", "database"),
+        ("AWS", "cloud"),
+        ("Node.js", "framework"),
+        ("Vue.js", "framework"),
+    ]
 
 
 @pytest.mark.parametrize(
@@ -128,17 +138,40 @@ def test_label_only_aliases_never_trigger_prose_false_positives():
     assert canonical_skill("IA") == "Artificial Intelligence"
     assert canonical_skill("Tempo") == "Grafana Tempo"
     assert canonical_skill("REST") == "REST"
+    assert canonical_skill("APIs REST") == "REST"
     assert canonical_skill("Shell") == "Shell Script"
+    assert canonical_skill("redes") == "Networking"
+    assert canonical_skill("SOLID") == "SOLID"
+    assert canonical_skill("SAFe") == "SAFe"
 
-    prose = "Preciso de tempo para ir ao trabalho; eu ia fazer o rest of the code and we shall see."
-    assert list(alias_spans(prose)) == []
+    prose = (
+        "Preciso de tempo para ir ao trabalho; eu ia fazer o rest of the code and we shall see. "
+        "Requirements: solid experience with Python and Docker, safe deployment. "
+        "Requisitos: experiência com gestão de redes sociais."
+    )
+    assert [(prose[s:e], label) for s, e, label in alias_spans(prose)] == [
+        ("Python", "skill"),
+        ("Docker", "tool"),
+    ]
     assert (
         find_skills(
             [prose],
-            ["Artificial Intelligence", "Grafana Tempo", "REST", "Shell Script"],
+            [
+                "Artificial Intelligence",
+                "Grafana Tempo",
+                "REST",
+                "Shell Script",
+                "SOLID",
+                "SAFe",
+                "Networking",
+            ],
         )
         == set()
     )
+    assert find_skills(
+        ["Experiência com APIs REST, princípios SOLID e Scaled Agile."],
+        ["REST", "SOLID", "SAFe"],
+    ) == {"rest", "solid", "safe"}
 
 
 @pytest.mark.parametrize(
@@ -158,6 +191,9 @@ def test_label_only_aliases_never_trigger_prose_false_positives():
         ("metodologias ágeis (Scrum, Kanban)", ("Agile", "Scrum", "Kanban")),
         ("bancos de dados relacionais e não relacionais", ("Relational Databases", "NoSQL")),
         ("Observabilidade (Datadog", ("Observability", "Datadog")),
+        ("Visual Basic avançado", ("Visual Basic",)),
+        ("Suporte técnico avançado", ("Technical Support",)),
+        ("CNH A e B", ("CNH A", "CNH B")),
         ("unknown-tool-xyz", ()),
     ],
 )
