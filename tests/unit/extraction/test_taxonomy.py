@@ -74,6 +74,10 @@ def test_one_edit_typos_are_score_only_support(typo, name):
         ("Cython", "Python"),
         ("CPython", "Python"),
         ("Pythnoo", "Python"),
+        ("Nest.js", "Next.js"),
+        ("Nuxt.js", "Next.js"),
+        ("NuxtJS", "Next.js"),
+        ("MSSQL", "MySQL"),
     ],
 )
 def test_distinct_names_and_large_edits_never_become_aliases(left, right):
@@ -93,6 +97,11 @@ def test_ties_across_concepts_remain_unknown_and_short_names_are_exact_only():
 def test_alias_spans_ignore_hyphenated_package_names_and_urls():
     from src.extraction.taxonomy import alias_spans
 
-    text = "Use react-table, material-react-table, React, and https://example.com/react-job"
+    text = (
+        "Use react-table, material-react-table, Python-based, docker-compose, React, "
+        "Node.js/Vue.js, github.com/empresa, "
+        "https://careers.example-company.com/engineering/backend/python, and "
+        "https://example.com/react-job"
+    )
     spans = [text[s:e] for s, e, _ in alias_spans(text)]
-    assert spans == ["React"]
+    assert spans == ["React", "Node.js", "Vue.js"]

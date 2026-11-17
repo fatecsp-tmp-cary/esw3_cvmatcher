@@ -61,6 +61,7 @@ _ALIASES = {
     "kanban": "Kanban",
     "linux": "Linux",
     "mysql": "MySQL",
+    "mssql": "SQL Server",
     "sql server": "SQL Server",
     "microsoft sql server": "Microsoft SQL Server",
     "laravel": "Laravel",
@@ -69,6 +70,9 @@ _ALIASES = {
     "next.js": "Next.js",
     "nextjs": "Next.js",
     "next js": "Next.js",
+    "nuxt.js": "Nuxt.js",
+    "nuxtjs": "Nuxt.js",
+    "nuxt": "Nuxt.js",
     "vue.js": "Vue.js",
     "vuejs": "Vue.js",
     "jquery": "jQuery",
@@ -84,6 +88,7 @@ _ALIASES = {
     "github": "GitHub",
     "gitlab ci": "GitLab CI",
     "nestjs": "NestJS",
+    "nest.js": "NestJS",
     "coren": "COREN",
     "oab": "OAB",
     "crc": "CRC",
@@ -132,6 +137,16 @@ def canonical_skill(value: str) -> str | None:
     return _ALIASES.get(_fold(value))
 
 
+_URL_TLD_PREFIX = re.compile(
+    r"^(?:https?://|www\.|[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|org|net|io|dev|br|gov|edu|co|app|ai)(?:\.[a-z]{2})?(?:/|$))",
+    re.I,
+)
+_URL_DOMAIN_SUFFIX = re.compile(
+    r"^\.(?:com|org|net|io|dev|br|gov|edu|co|app|ai)(?:\.[a-z]{2})?(?:/|\b)",
+    re.I,
+)
+
+
 def alias_spans(text: str):
     """Supplement model detection with exact explicit vocabulary occurrences.
 
@@ -147,8 +162,19 @@ def alias_spans(text: str):
         re.I,
     )
     for match in pattern.finditer(text):
-        prefix = text[max(0, match.start() - 40) : match.start()]
-        if re.search(r"https?://\S*$", prefix, re.I):
+        token_start = max(
+            text.rfind(" ", 0, match.start()),
+            text.rfind("\n", 0, match.start()),
+            text.rfind("\t", 0, match.start()),
+            text.rfind("(", 0, match.start()),
+            -1,
+        )
+        token_prefix = text[token_start + 1 : match.start()]
+        if (
+            text[match.end() : match.end() + 3] == "://"
+            or _URL_TLD_PREFIX.match(token_prefix)
+            or _URL_DOMAIN_SUFFIX.match(text[match.end() :])
+        ):
             continue
         name = canonical_skill(match.group())
         if name:
