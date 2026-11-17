@@ -123,3 +123,36 @@ def test_negation_and_inline_background_do_not_persist_positive_associations(db_
     java = next(row for row in raw if text[row["start"] : row["end"]] == "Java")
     assert java["requirement_class"] is None
     assert not java["exclusion_safe"]
+
+
+def test_seed_taxonomy_populates_categories_and_parents_while_preserving_curated(db_session):
+    custom_root = Skill(canonical_name="Custom Root", category="custom_domain")
+    legacy_pg = Skill(canonical_name="PostgreSQL", category="technology", aliases=["postgres"])
+    curated_react = Skill(canonical_name="React", category="curated_ui")
+    db_session.add_all([custom_root, legacy_pg, curated_react])
+    db_session.flush()
+
+    nextjs_curated = Skill(
+        canonical_name="Next.js",
+        category="curated_ssr",
+        parent_skill_id=custom_root.id,
+        aliases=["nextjs"],
+    )
+    db_session.add(nextjs_curated)
+    db_session.flush()
+
+    seed_taxonomy(db_session)
+
+    pg = db_session.scalar(select(Skill).where(Skill.canonical_name == "PostgreSQL"))
+    aws = db_session.scalar(select(Skill).where(Skill.canonical_name == "AWS"))
+    aws_lambda = db_session.scalar(select(Skill).where(Skill.canonical_name == "AWS Lambda"))
+    react = db_session.scalar(select(Skill).where(Skill.canonical_name == "React"))
+    nextjs = db_session.scalar(select(Skill).where(Skill.canonical_name == "Next.js"))
+
+    assert pg.category == "database"
+    assert aws.category == "cloud"
+    assert aws_lambda.parent_skill_id == aws.id
+    # Independently curated non-default categories and parent links are preserved.
+    assert react.category == "curated_ui"
+    assert nextjs.category == "curated_ssr"
+    assert nextjs.parent_skill_id == custom_root.id
