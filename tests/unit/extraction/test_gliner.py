@@ -46,7 +46,7 @@ def test_offsets_overlap_dedup_and_unclassified_evidence():
 
     def predict(chunk, labels, **kwargs):
         assert tuple(labels) == LABELS
-        assert kwargs == {"threshold": 0.3, "flat_ner": False}
+        assert kwargs == {"threshold": 0.25, "flat_ner": False}
         offset = chunk.find("Python")
         if offset < 0:
             return []
