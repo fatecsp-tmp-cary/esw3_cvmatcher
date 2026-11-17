@@ -4,31 +4,60 @@ from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 
 from src.extraction.classification import annotate_spans
-from src.extraction.taxonomy import _ALIASES, CATEGORIES, VERSION
+from src.extraction.taxonomy import _ALIASES, CATEGORIES, PARENTS, VERSION
 from src.persistence.job.skill import JobRequirement, JobSkill, Skill
 
 SEED_VERSION = VERSION
-SEED_PROVENANCE = "Project-maintained explicit aliases in src/extraction/taxonomy.py"
+SEED_PROVENANCE = "Project-maintained explicit taxonomy in src/extraction/taxonomy.py"
 
 
 def seed_taxonomy(session):
-    """Idempotent flat roots: no inferred categories/parent relationships."""
-    names = sorted(set(_ALIASES.values()))
-    for name in names:
-        aliases = sorted(alias for alias, canonical in _ALIASES.items() if canonical == name)
-        # Preserve independently curated parent/category values. The explicit
-        # project seed owns its canonical names and additive aliases only.
-        session.execute(
-            insert(Skill)
-            .values(
-                canonical_name=name, aliases=aliases, category=CATEGORIES.get(name, "technology")
+    """Idempotent upsert of canonical skills, aliases, categories, and curated parents."""
+    aliases_by_name: dict[str, set[str]] = {}
+    for alias, canonical in _ALIASES.items():
+        aliases_by_name.setdefault(canonical, set()).add(alias)
+    names = sorted(aliases_by_name)
+    if not names:
+        return
+
+    rows = [
+        {
+            "canonical_name": name,
+            "aliases": sorted(aliases_by_name[name]),
+            "category": CATEGORIES.get(name, "technology"),
+        }
+        for name in names
+    ]
+    session.execute(
+        insert(Skill).values(rows).on_conflict_do_nothing(index_elements=[Skill.canonical_name])
+    )
+    existing = session.scalars(
+        select(Skill).where(Skill.canonical_name.in_(names)).order_by(Skill.id).with_for_update()
+    ).all()
+    by_name = {skill.canonical_name: skill for skill in existing}
+
+    # Preserve independently curated non-default category and parent values.
+    for name, skill in by_name.items():
+        merged_aliases = sorted(set(skill.aliases or []) | aliases_by_name[name])
+        if skill.aliases != merged_aliases:
+            skill.aliases = merged_aliases
+        target_category = CATEGORIES.get(name, "technology")
+        if (
+            skill.category is None
+            or skill.category == "technology"
+            or (
+                skill.category == "professional license"
+                and target_category == "professional_license"
             )
-            .on_conflict_do_nothing(index_elements=[Skill.canonical_name])
-        )
-        skill = session.scalar(select(Skill).where(Skill.canonical_name == name).with_for_update())
-        skill.aliases = sorted(set(skill.aliases or []) | set(aliases))
-        if skill.category is None:
-            skill.category = CATEGORIES.get(name, "technology")
+        ):
+            skill.category = target_category
+    session.flush()
+
+    for name, parent_name in PARENTS.items():
+        skill = by_name.get(name)
+        parent = by_name.get(parent_name)
+        if skill is not None and parent is not None and skill.parent_skill_id is None:
+            skill.parent_skill_id = parent.id
     session.flush()
 
 

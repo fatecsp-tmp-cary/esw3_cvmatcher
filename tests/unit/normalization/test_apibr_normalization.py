@@ -177,12 +177,12 @@ def _live_shape_fixture() -> dict[int, dict]:
             910001,
             SeniorityLevel.SENIOR,
             WorkArrangement.REMOTE,
-            ["AWS", "Docker", "Java", "PostgreSQL"],
+            ["AWS", "Docker", "Java", "PostgreSQL", "Spring Framework"],
         ),
         # Decorated and prefixed labels agree on one value each.
         (910002, SeniorityLevel.SENIOR, WorkArrangement.REMOTE, ["Python"]),
         # Every issue-form option arrives as a label; only the checked body options resolve.
-        (910003, SeniorityLevel.SPECIALIST, WorkArrangement.REMOTE, []),
+        (910003, SeniorityLevel.SPECIALIST, WorkArrangement.REMOTE, ["Rust"]),
         # Only repository topics and a title without category words.
         (910004, None, None, []),
         # No label or section: a lone word of the title is the only evidence.
