@@ -15,7 +15,7 @@ from sqlalchemy import func, select, update
 from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session
 
-from src.ingestion.adapters import PollingMode, RetryPolicy, SourceError
+from src.ingestion.adapters import PollingMode, RateLimiter, RetryPolicy, SourceError
 from src.ingestion.completeness import SnapshotAttestation
 from src.ingestion.upsert import lock_all_job_identities, lock_job_identities, upsert_job
 from src.normalization.jobs.apibr import normalize_apibr_job
@@ -42,11 +42,13 @@ class APiBRClient:
         *,
         transport: Callable[[Request, int], bytes] | None = None,
         retry_policy: RetryPolicy | None = None,
+        rate_limiter: RateLimiter | None = None,
         sleep: Callable[[float], None] = time.sleep,
         now: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         self.transport = transport or self._read_response
         self.retry_policy = retry_policy or RetryPolicy()
+        self.rate_limiter = rate_limiter
         self.sleep = sleep
         self.now = now
         self.request_failures = 0
@@ -56,18 +58,20 @@ class APiBRClient:
         with urlopen(request, timeout=timeout) as response:
             return response.read()
 
-    def request_page(self, page: int) -> list[Any]:
+    def request_page(self, page: int, *, pace: bool = True) -> list[Any]:
         """Perform one request; errors expose categories, never upstream text."""
         if isinstance(page, bool) or not isinstance(page, int) or page < 1:
             raise ValueError("page must be a positive integer")
         query = urlencode({"per_page": _PAGE_SIZE, "page": page, "includeBody": "true"})
-        payload = self._request_json(f"{_APIBR_ISSUES_URL}?{query}")
+        payload = self._request_json(f"{_APIBR_ISSUES_URL}?{query}", pace=pace)
         if not isinstance(payload, list):
             self.request_failures += 1
             raise SourceError("invalid_page")
         return payload
 
-    def _request_json(self, url: str):
+    def _request_json(self, url: str, *, pace: bool = True):
+        if pace and self.rate_limiter is not None:
+            self.rate_limiter.wait(self.sleep)
         request = Request(
             url,
             headers={"Accept": "application/json", "User-Agent": "cv-match-job-ingestor"},
@@ -156,9 +160,13 @@ class APiBRAdapter:
         policy = self.client.retry_policy
         for attempt in range(1, policy.max_attempts + 1):
             try:
+                if self.client.rate_limiter is not None:
+                    delay = self.client.rate_limiter.acquire_delay()
+                    if delay > 0.0:
+                        await self.sleep(delay)
                 # Only the bounded blocking HTTP operation runs in a thread;
                 # retry waits remain cancellable in the event loop.
-                return await asyncio.to_thread(self.client.request_page, page)
+                return await asyncio.to_thread(self.client.request_page, page, pace=False)
             except SourceError as error:
                 if not error.retryable or attempt == policy.max_attempts:
                     raise
