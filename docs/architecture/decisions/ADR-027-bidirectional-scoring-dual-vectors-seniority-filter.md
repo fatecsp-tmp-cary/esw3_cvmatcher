@@ -20,9 +20,9 @@
   readiness, privacy and the frozen public contract remain in force.
 - **Issues:** #214 (dual vectors), #215 (skills), #216 (seniority), #217 (length
   normalization).
-- **Implementation status:** Accepted; implemented incrementally across the
-  stacked PRs for #214, #215, #216 and #217. Calibration and reviewed held-out
-  evaluation remain pending.
+- **Implementation status:** Decision 2 is implemented in #214. Decisions 1, 3
+  and 4 are implemented by the stacked PRs for #216, #215 and #217. Calibration and
+  reviewed held-out evaluation remain pending.
 
 ## Context
 
