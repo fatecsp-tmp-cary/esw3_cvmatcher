@@ -7,7 +7,11 @@ import signal
 from collections.abc import Callable, Sequence
 from threading import Event
 
-from src.worker.bootstrap import create_default_worker, retry_default_extraction
+from src.worker.bootstrap import (
+    create_default_worker,
+    import_default_meupadrinho,
+    retry_default_extraction,
+)
 from src.worker.runtime import BackgroundWorker
 
 logger = logging.getLogger(__name__)
@@ -24,11 +28,24 @@ def main(
     operation.add_argument(
         "--retry-extraction", type=int, metavar="JOB_ID", help="Explicitly requeue a stored job"
     )
+    operation.add_argument(
+        "--import-meupadrinho",
+        type=str,
+        metavar="PATH",
+        help="Import a MeuPadrinho JSONL dump file into PostgreSQL",
+    )
     args = parser.parse_args(argv)
-    # Recovery must work even when the serving model artifacts are unavailable.
+    # Recovery and offline JSONL imports must work without serving model artifacts.
     if args.retry_extraction is not None and worker_factory is None:
         try:
             retry_default_extraction(args.retry_extraction)
+            return 0
+        except Exception:
+            logger.error(json.dumps({"event": "worker_operation_failed"}, sort_keys=True))
+            return 1
+    if args.import_meupadrinho is not None and worker_factory is None:
+        try:
+            import_default_meupadrinho(args.import_meupadrinho)
             return 0
         except Exception:
             logger.error(json.dumps({"event": "worker_operation_failed"}, sort_keys=True))
@@ -41,6 +58,9 @@ def main(
     try:
         if args.retry_extraction is not None:
             worker.retry_extraction(args.retry_extraction)
+            return 0
+        if args.import_meupadrinho is not None:
+            worker.import_meupadrinho(args.import_meupadrinho)
             return 0
         if args.once:
             return int(bool(worker.run_once().errors))

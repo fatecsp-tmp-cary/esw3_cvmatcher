@@ -18,7 +18,7 @@ from src.persistence.database import create_db_engine, create_session_factory
 from src.persistence.job.job_source import JobSource
 
 # Names with a registered poller in ``SourceScheduler``.
-SUPPORTED_SOURCES = ("apibr",)
+SUPPORTED_SOURCES = ("apibr", "meupadrinho")
 
 logger = logging.getLogger(__name__)
 

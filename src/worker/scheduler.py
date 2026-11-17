@@ -2,6 +2,8 @@
 
 import json
 import logging
+import math
+import random
 import re
 from collections import deque
 from collections.abc import Callable, Iterable, Iterator, Mapping
@@ -14,6 +16,7 @@ from sqlalchemy import Engine, func, or_, select
 from sqlalchemy.orm import Session
 
 from src.ingestion.apibr import ingest_apibr
+from src.ingestion.meupadrinho import ingest_meupadrinho
 from src.persistence.job.job_source import JobSource
 
 logger = logging.getLogger(__name__)
@@ -102,24 +105,44 @@ class SourceScheduler:
         daily_at: time | None = None,
         timezone: tzinfo = UTC,
         startup_min_gap_seconds: int = 600,
+        jitter_seconds: float = 0.0,
+        rng: Callable[[], float] = random.random,
     ) -> None:
         if type(startup_min_gap_seconds) is not int or startup_min_gap_seconds < 0:
             raise ValueError("startup polling gap must be a non-negative integer")
+        if (
+            isinstance(jitter_seconds, bool)
+            or not isinstance(jitter_seconds, (int, float))
+            or not math.isfinite(jitter_seconds)
+            or not 0.0 <= jitter_seconds <= 300.0
+        ):
+            raise ValueError("jitter_seconds must be finite and between 0 and 300")
         self.engine = engine
         self.sessions = sessions
-        self.pollers = dict(pollers) if pollers is not None else {"apibr": ingest_apibr}
+        self.pollers: dict[str, SourcePoller] = (
+            dict(pollers)
+            if pollers is not None
+            else {"apibr": ingest_apibr, "meupadrinho": ingest_meupadrinho}
+        )
         self.default_interval_seconds = interval_seconds(None, default_interval_seconds)
         self.clock = clock
         self.daily_at = daily_at
         self.timezone = timezone
         self.startup_min_gap = timedelta(seconds=startup_min_gap_seconds)
+        self.jitter_seconds = float(jitter_seconds)
+        self.rng = rng
         self._startup_sources: deque[int] | None = None
 
     def _next_run(self, after: datetime, interval: int) -> datetime:
         """A configured daily time replaces interval polling for every source."""
+        jitter = (
+            min(max(float(self.rng()), 0.0), 1.0) * self.jitter_seconds
+            if self.jitter_seconds > 0.0
+            else 0.0
+        )
         if self.daily_at is not None:
-            return next_daily_run(after, self.daily_at, self.timezone)
-        return after + timedelta(seconds=interval)
+            return next_daily_run(after, self.daily_at, self.timezone) + timedelta(seconds=jitter)
+        return after + timedelta(seconds=interval + jitter)
 
     def _is_due(self, source: JobSource, now: datetime, force: bool) -> bool:
         if force:

@@ -5,7 +5,12 @@ from src.worker.sources import main
 
 @pytest.mark.parametrize(
     "arguments",
-    [["register", "gupy"], ["register", "apibr", "--polling-mode", "HOURLY"], []],
+    [
+        ["register", "gupy"],
+        ["register", "apibr", "--polling-mode", "HOURLY"],
+        ["register", "meupadrinho", "--polling-mode", "HOURLY"],
+        [],
+    ],
 )
 def test_command_rejects_invalid_arguments_before_any_database_access(arguments):
     def forbidden():

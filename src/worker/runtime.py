@@ -3,6 +3,7 @@
 import json
 import logging
 import math
+import random
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
@@ -12,9 +13,11 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from src.extraction.service import ExtractionWorker, enqueue
+from src.ingestion.meupadrinho import ingest_meupadrinho_jsonl
 from src.persistence.extraction import JobExtraction
 from src.persistence.job.job import Job, JobStatus
 from src.worker.scheduler import PollOutcome, SourceScheduler
+from src.worker.sources import register_source
 
 logger = logging.getLogger(__name__)
 
@@ -56,12 +59,21 @@ class BackgroundWorker:
         max_extractions_per_cycle: int = 100,
         enqueue_batch_size: int = 100,
         poll_on_start: bool = False,
+        poll_jitter_seconds: float = 0.0,
+        rng: Callable[[], float] = random.random,
     ) -> None:
         if not config_version or config_version != extraction_worker.config_version:
             raise ValueError("worker and extractor configuration versions must agree")
         for value in (max_extractions_per_cycle, enqueue_batch_size):
             if type(value) is not int or value <= 0:
                 raise ValueError("worker batch sizes must be positive integers")
+        if (
+            isinstance(poll_jitter_seconds, bool)
+            or not isinstance(poll_jitter_seconds, (int, float))
+            or not math.isfinite(poll_jitter_seconds)
+            or not 0.0 <= poll_jitter_seconds <= 60.0
+        ):
+            raise ValueError("poll_jitter_seconds must be finite and between 0 and 60")
         self.scheduler = scheduler
         self.sessions = sessions
         self.extraction_worker = extraction_worker
@@ -71,6 +83,8 @@ class BackgroundWorker:
         self.max_extractions_per_cycle = max_extractions_per_cycle
         self.enqueue_batch_size = enqueue_batch_size
         self.poll_on_start = bool(poll_on_start)
+        self.poll_jitter_seconds = float(poll_jitter_seconds)
+        self.rng = rng
 
     def enqueue_missing(self) -> int:
         """Never reset FAILED/current work; new content/config must reprocess."""
@@ -97,6 +111,16 @@ class BackgroundWorker:
 
     def retry_extraction(self, job_id: int) -> None:
         retry_extraction(self.sessions, job_id, self.config_version)
+
+    def import_meupadrinho(self, path: str) -> None:
+        if not isinstance(path, str) or not path.strip():
+            raise ValueError("A non-empty MeuPadrinho JSONL path is required")
+        with self.sessions() as session:
+            source_id, _ = register_source(session, "meupadrinho")
+            session.commit()
+            result = ingest_meupadrinho_jsonl(session, source_id, path.strip())
+            if result.status == "FAILED":
+                raise RuntimeError("MeuPadrinho JSONL import failed")
 
     def run_once(self, *, now: datetime | None = None, force_poll: bool = False) -> CycleResult:
         errors = []
@@ -134,15 +158,38 @@ class BackgroundWorker:
             stage("embedding", self.embedding_hook, None)
         return CycleResult(polls, enqueued, extractions, tuple(errors))
 
-    def run_forever(self, stop: Event, *, poll_seconds: float = 5.0) -> None:
+    def run_forever(
+        self,
+        stop: Event,
+        *,
+        poll_seconds: float = 5.0,
+        max_backoff_seconds: float = 60.0,
+    ) -> None:
         if not math.isfinite(poll_seconds) or poll_seconds <= 0:
             raise ValueError("worker polling delay must be finite and positive")
+        if not math.isfinite(max_backoff_seconds) or max_backoff_seconds < poll_seconds:
+            raise ValueError("max_backoff_seconds must be finite and >= poll_seconds")
         # Drain the finite startup snapshot across bounded cycles before ordinary polling.
         force_poll = self.poll_on_start
+        consecutive_error_cycles = 0
         while not stop.is_set():
             if force_poll:
-                self.run_once(force_poll=True)
+                result = self.run_once(force_poll=True)
                 force_poll = self.scheduler.startup_pending
             else:
-                self.run_once()
-            stop.wait(poll_seconds)
+                result = self.run_once()
+            if getattr(result, "errors", ()):
+                consecutive_error_cycles += 1
+                base_wait = min(
+                    poll_seconds * (2 ** min(consecutive_error_cycles, 6)),
+                    max_backoff_seconds,
+                )
+            else:
+                consecutive_error_cycles = 0
+                base_wait = poll_seconds
+            jitter = (
+                min(max(float(self.rng()), 0.0), 1.0) * self.poll_jitter_seconds
+                if self.poll_jitter_seconds > 0.0
+                else 0.0
+            )
+            stop.wait(base_wait + jitter)

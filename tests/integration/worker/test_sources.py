@@ -22,6 +22,19 @@ def test_register_creates_an_enabled_incremental_source_by_default(db_session):
     )
 
 
+def test_register_meupadrinho_creates_enabled_incremental_source(db_session):
+    source_id, created = register_source(db_session, "MeuPadrinho")
+    source = db_session.get(JobSource, source_id)
+
+    assert created is True
+    assert (source.name, source.type, source.polling_mode, source.enabled) == (
+        "meupadrinho",
+        "api",
+        "INCREMENTAL",
+        True,
+    )
+
+
 def test_register_is_idempotent_and_preserves_scheduling_state(db_session):
     last_run = datetime(2026, 11, 12, 11, tzinfo=UTC)
     db_session.add(
