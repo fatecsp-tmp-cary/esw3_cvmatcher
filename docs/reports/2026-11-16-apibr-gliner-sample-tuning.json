@@ -1,0 +1,2132 @@
+{
+  "caveats": [
+    "gold = extracted_required/extracted_preferred, which look like another system's output: this measures agreement with that system, not accuracy",
+    "in-sample numbers (threshold_sweep, selected_in_sample) are descriptive; use cv_out_of_fold or split_70_30.heldout for generalization",
+    "jobs=23; wide CIs are expected at this size"
+  ],
+  "config": {
+    "folds": 5,
+    "seed": "apibr-cv-v1",
+    "beta": 1.0,
+    "dedupe_pred": true,
+    "flat_ner": false,
+    "raw_floor": 0.001,
+    "baseline_threshold": 0.3,
+    "assignment": "greedy",
+    "matching": {
+      "min_len": 3,
+      "contain_ratio": 0.65,
+      "seq_ratio": 0.78,
+      "jaccard": 0.6
+    }
+  },
+  "model_span_drops": {},
+  "folds": [
+    {
+      "fold": 0,
+      "threshold": 0.2,
+      "job_ids": [
+        "2624071267",
+        "2609492861",
+        "5620459912",
+        "5620446646",
+        "4504487673"
+      ],
+      "train_class_f": 0.7415254237288137,
+      "heldout_class_f": 0.5714285714285715
+    },
+    {
+      "fold": 1,
+      "threshold": 0.25,
+      "job_ids": [
+        "2636258859",
+        "2609494986",
+        "2528385115",
+        "2319484362",
+        "1294303201"
+      ],
+      "train_class_f": 0.7051282051282052,
+      "heldout_class_f": 0.7121212121212122
+    },
+    {
+      "fold": 2,
+      "threshold": 0.25,
+      "job_ids": [
+        "2614720067",
+        "2612739767",
+        "2608295223",
+        "2321591027",
+        "4479596644"
+      ],
+      "train_class_f": 0.6994106090373281,
+      "heldout_class_f": 0.7472527472527473
+    },
+    {
+      "fold": 3,
+      "threshold": 0.25,
+      "job_ids": [
+        "2416989053",
+        "2605299335",
+        "5669198623",
+        "561162237"
+      ],
+      "train_class_f": 0.7216890595009596,
+      "heldout_class_f": 0.6075949367088608
+    },
+    {
+      "fold": 4,
+      "threshold": 0.45,
+      "job_ids": [
+        "2629245173",
+        "2626219945",
+        "2622143707",
+        "5647302555"
+      ],
+      "train_class_f": 0.6787564766839378,
+      "heldout_class_f": 0.6874999999999999
+    }
+  ],
+  "split_70_30": {
+    "seed": "apibr-70-30-v1",
+    "calibration_ids": [
+      2416989053,
+      2629245173,
+      2624071267,
+      2614720067,
+      2612739767,
+      2609494986,
+      2609492861,
+      2605299335,
+      2528385115,
+      2321591027,
+      1294303201,
+      5669198623,
+      5620459912,
+      5647302555,
+      4504487673,
+      561162237
+    ],
+    "heldout_ids": [
+      2636258859,
+      2626219945,
+      2622143707,
+      2608295223,
+      2319484362,
+      5620446646,
+      4479596644
+    ],
+    "selected_threshold": 0.25,
+    "calibration_sweep": {
+      "0.05": {
+        "cc_PREFERRED": 28,
+        "cc_REQUIRED": 145,
+        "class_matches": 173,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 191,
+        "pred": 362,
+        "pred_None": 1,
+        "pred_PREFERRED": 74,
+        "pred_REQUIRED": 287,
+        "text_precision": 0.5276243093922652,
+        "text_recall": 0.880184331797235,
+        "text_f": 0.6597582037996546,
+        "class_precision": 0.47790055248618785,
+        "class_recall": 0.7972350230414746,
+        "class_f": 0.5975820379965457,
+        "count_ratio": 1.6682027649769586,
+        "REQUIRED_precision": 0.5052264808362369,
+        "REQUIRED_recall": 0.8238636363636364,
+        "REQUIRED_f": 0.6263498920086393,
+        "PREFERRED_precision": 0.3783783783783784,
+        "PREFERRED_recall": 0.6829268292682927,
+        "PREFERRED_f": 0.48695652173913045
+      },
+      "0.1": {
+        "cc_PREFERRED": 25,
+        "cc_REQUIRED": 136,
+        "class_matches": 161,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 177,
+        "pred": 296,
+        "pred_PREFERRED": 57,
+        "pred_REQUIRED": 239,
+        "text_precision": 0.597972972972973,
+        "text_recall": 0.815668202764977,
+        "text_f": 0.6900584795321638,
+        "class_precision": 0.543918918918919,
+        "class_recall": 0.7419354838709677,
+        "class_f": 0.6276803118908382,
+        "count_ratio": 1.3640552995391706,
+        "REQUIRED_precision": 0.5690376569037657,
+        "REQUIRED_recall": 0.7727272727272727,
+        "REQUIRED_f": 0.6554216867469881,
+        "PREFERRED_precision": 0.43859649122807015,
+        "PREFERRED_recall": 0.6097560975609756,
+        "PREFERRED_f": 0.5102040816326531
+      },
+      "0.15": {
+        "cc_PREFERRED": 22,
+        "cc_REQUIRED": 133,
+        "class_matches": 155,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 171,
+        "pred": 268,
+        "pred_PREFERRED": 49,
+        "pred_REQUIRED": 219,
+        "text_precision": 0.6380597014925373,
+        "text_recall": 0.7880184331797235,
+        "text_f": 0.7051546391752578,
+        "class_precision": 0.5783582089552238,
+        "class_recall": 0.7142857142857143,
+        "class_f": 0.6391752577319587,
+        "count_ratio": 1.2350230414746544,
+        "REQUIRED_precision": 0.6073059360730594,
+        "REQUIRED_recall": 0.7556818181818182,
+        "REQUIRED_f": 0.6734177215189874,
+        "PREFERRED_precision": 0.4489795918367347,
+        "PREFERRED_recall": 0.5365853658536586,
+        "PREFERRED_f": 0.4888888888888889
+      },
+      "0.2": {
+        "cc_PREFERRED": 23,
+        "cc_REQUIRED": 128,
+        "class_matches": 151,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 166,
+        "pred": 234,
+        "pred_PREFERRED": 45,
+        "pred_REQUIRED": 189,
+        "text_precision": 0.7094017094017094,
+        "text_recall": 0.7649769585253456,
+        "text_f": 0.7361419068736142,
+        "class_precision": 0.6452991452991453,
+        "class_recall": 0.695852534562212,
+        "class_f": 0.6696230598669622,
+        "count_ratio": 1.0783410138248848,
+        "REQUIRED_precision": 0.6772486772486772,
+        "REQUIRED_recall": 0.7272727272727273,
+        "REQUIRED_f": 0.7013698630136986,
+        "PREFERRED_precision": 0.5111111111111111,
+        "PREFERRED_recall": 0.5609756097560976,
+        "PREFERRED_f": 0.5348837209302325
+      },
+      "0.25": {
+        "cc_PREFERRED": 22,
+        "cc_REQUIRED": 123,
+        "class_matches": 145,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 160,
+        "pred": 213,
+        "pred_PREFERRED": 41,
+        "pred_REQUIRED": 172,
+        "text_precision": 0.7511737089201878,
+        "text_recall": 0.7373271889400922,
+        "text_f": 0.7441860465116279,
+        "class_precision": 0.6807511737089202,
+        "class_recall": 0.6682027649769585,
+        "class_f": 0.6744186046511629,
+        "count_ratio": 0.9815668202764977,
+        "REQUIRED_precision": 0.7151162790697675,
+        "REQUIRED_recall": 0.6988636363636364,
+        "REQUIRED_f": 0.706896551724138,
+        "PREFERRED_precision": 0.5365853658536586,
+        "PREFERRED_recall": 0.5365853658536586,
+        "PREFERRED_f": 0.5365853658536586
+      },
+      "0.3": {
+        "cc_PREFERRED": 19,
+        "cc_REQUIRED": 116,
+        "class_matches": 135,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 150,
+        "pred": 191,
+        "pred_PREFERRED": 34,
+        "pred_REQUIRED": 157,
+        "text_precision": 0.7853403141361257,
+        "text_recall": 0.6912442396313364,
+        "text_f": 0.7352941176470589,
+        "class_precision": 0.7068062827225131,
+        "class_recall": 0.6221198156682027,
+        "class_f": 0.6617647058823529,
+        "count_ratio": 0.880184331797235,
+        "REQUIRED_precision": 0.7388535031847133,
+        "REQUIRED_recall": 0.6590909090909091,
+        "REQUIRED_f": 0.6966966966966966,
+        "PREFERRED_precision": 0.5588235294117647,
+        "PREFERRED_recall": 0.4634146341463415,
+        "PREFERRED_f": 0.5066666666666667
+      },
+      "0.35": {
+        "cc_PREFERRED": 18,
+        "cc_REQUIRED": 109,
+        "class_matches": 127,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 142,
+        "pred": 177,
+        "pred_PREFERRED": 31,
+        "pred_REQUIRED": 146,
+        "text_precision": 0.8022598870056498,
+        "text_recall": 0.6543778801843319,
+        "text_f": 0.7208121827411168,
+        "class_precision": 0.7175141242937854,
+        "class_recall": 0.5852534562211982,
+        "class_f": 0.6446700507614215,
+        "count_ratio": 0.815668202764977,
+        "REQUIRED_precision": 0.7465753424657534,
+        "REQUIRED_recall": 0.6193181818181818,
+        "REQUIRED_f": 0.6770186335403726,
+        "PREFERRED_precision": 0.5806451612903226,
+        "PREFERRED_recall": 0.43902439024390244,
+        "PREFERRED_f": 0.5
+      },
+      "0.4": {
+        "cc_PREFERRED": 17,
+        "cc_REQUIRED": 98,
+        "class_matches": 115,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 130,
+        "pred": 154,
+        "pred_PREFERRED": 28,
+        "pred_REQUIRED": 126,
+        "text_precision": 0.8441558441558441,
+        "text_recall": 0.5990783410138248,
+        "text_f": 0.7008086253369271,
+        "class_precision": 0.7467532467532467,
+        "class_recall": 0.5299539170506913,
+        "class_f": 0.6199460916442049,
+        "count_ratio": 0.7096774193548387,
+        "REQUIRED_precision": 0.7777777777777778,
+        "REQUIRED_recall": 0.5568181818181818,
+        "REQUIRED_f": 0.6490066225165563,
+        "PREFERRED_precision": 0.6071428571428571,
+        "PREFERRED_recall": 0.4146341463414634,
+        "PREFERRED_f": 0.49275362318840576
+      },
+      "0.45": {
+        "cc_PREFERRED": 16,
+        "cc_REQUIRED": 94,
+        "class_matches": 110,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 125,
+        "pred": 143,
+        "pred_PREFERRED": 26,
+        "pred_REQUIRED": 117,
+        "text_precision": 0.8741258741258742,
+        "text_recall": 0.576036866359447,
+        "text_f": 0.6944444444444443,
+        "class_precision": 0.7692307692307693,
+        "class_recall": 0.5069124423963134,
+        "class_f": 0.611111111111111,
+        "count_ratio": 0.6589861751152074,
+        "REQUIRED_precision": 0.8034188034188035,
+        "REQUIRED_recall": 0.5340909090909091,
+        "REQUIRED_f": 0.6416382252559728,
+        "PREFERRED_precision": 0.6153846153846154,
+        "PREFERRED_recall": 0.3902439024390244,
+        "PREFERRED_f": 0.47761194029850756
+      },
+      "0.5": {
+        "cc_PREFERRED": 15,
+        "cc_REQUIRED": 90,
+        "class_matches": 105,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 120,
+        "pred": 135,
+        "pred_PREFERRED": 24,
+        "pred_REQUIRED": 111,
+        "text_precision": 0.8888888888888888,
+        "text_recall": 0.5529953917050692,
+        "text_f": 0.6818181818181818,
+        "class_precision": 0.7777777777777778,
+        "class_recall": 0.4838709677419355,
+        "class_f": 0.5965909090909092,
+        "count_ratio": 0.6221198156682027,
+        "REQUIRED_precision": 0.8108108108108109,
+        "REQUIRED_recall": 0.5113636363636364,
+        "REQUIRED_f": 0.6271777003484321,
+        "PREFERRED_precision": 0.625,
+        "PREFERRED_recall": 0.36585365853658536,
+        "PREFERRED_f": 0.4615384615384615
+      },
+      "0.55": {
+        "cc_PREFERRED": 15,
+        "cc_REQUIRED": 86,
+        "class_matches": 101,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 114,
+        "pred": 125,
+        "pred_PREFERRED": 23,
+        "pred_REQUIRED": 102,
+        "text_precision": 0.912,
+        "text_recall": 0.5253456221198156,
+        "text_f": 0.6666666666666665,
+        "class_precision": 0.808,
+        "class_recall": 0.46543778801843316,
+        "class_f": 0.5906432748538012,
+        "count_ratio": 0.576036866359447,
+        "REQUIRED_precision": 0.8431372549019608,
+        "REQUIRED_recall": 0.48863636363636365,
+        "REQUIRED_f": 0.6187050359712231,
+        "PREFERRED_precision": 0.6521739130434783,
+        "PREFERRED_recall": 0.36585365853658536,
+        "PREFERRED_f": 0.46874999999999994
+      },
+      "0.6": {
+        "cc_PREFERRED": 14,
+        "cc_REQUIRED": 83,
+        "class_matches": 97,
+        "gold": 217,
+        "gold_PREFERRED": 41,
+        "gold_REQUIRED": 176,
+        "matches": 110,
+        "pred": 120,
+        "pred_PREFERRED": 22,
+        "pred_REQUIRED": 98,
+        "text_precision": 0.9166666666666666,
+        "text_recall": 0.5069124423963134,
+        "text_f": 0.6528189910979229,
+        "class_precision": 0.8083333333333333,
+        "class_recall": 0.4470046082949309,
+        "class_f": 0.5756676557863502,
+        "count_ratio": 0.5529953917050692,
+        "REQUIRED_precision": 0.8469387755102041,
+        "REQUIRED_recall": 0.4715909090909091,
+        "REQUIRED_f": 0.6058394160583942,
+        "PREFERRED_precision": 0.6363636363636364,
+        "PREFERRED_recall": 0.34146341463414637,
+        "PREFERRED_f": 0.4444444444444445
+      }
+    },
+    "calibration_at_selected": {
+      "cc_PREFERRED": 22,
+      "cc_REQUIRED": 123,
+      "class_matches": 145,
+      "gold": 217,
+      "gold_PREFERRED": 41,
+      "gold_REQUIRED": 176,
+      "matches": 160,
+      "pred": 213,
+      "pred_PREFERRED": 41,
+      "pred_REQUIRED": 172,
+      "text_precision": 0.7511737089201878,
+      "text_recall": 0.7373271889400922,
+      "text_f": 0.7441860465116279,
+      "class_precision": 0.6807511737089202,
+      "class_recall": 0.6682027649769585,
+      "class_f": 0.6744186046511629,
+      "count_ratio": 0.9815668202764977,
+      "REQUIRED_precision": 0.7151162790697675,
+      "REQUIRED_recall": 0.6988636363636364,
+      "REQUIRED_f": 0.706896551724138,
+      "PREFERRED_precision": 0.5365853658536586,
+      "PREFERRED_recall": 0.5365853658536586,
+      "PREFERRED_f": 0.5365853658536586
+    },
+    "heldout_at_selected": {
+      "cc_PREFERRED": 20,
+      "cc_REQUIRED": 47,
+      "class_matches": 67,
+      "gold": 79,
+      "gold_PREFERRED": 25,
+      "gold_REQUIRED": 54,
+      "matches": 68,
+      "pred": 91,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 26,
+      "pred_REQUIRED": 64,
+      "text_precision": 0.7472527472527473,
+      "text_recall": 0.8607594936708861,
+      "text_f": 0.7999999999999999,
+      "class_precision": 0.7362637362637363,
+      "class_recall": 0.8481012658227848,
+      "class_f": 0.788235294117647,
+      "count_ratio": 1.1518987341772151,
+      "REQUIRED_precision": 0.734375,
+      "REQUIRED_recall": 0.8703703703703703,
+      "REQUIRED_f": 0.7966101694915254,
+      "PREFERRED_precision": 0.7692307692307693,
+      "PREFERRED_recall": 0.8,
+      "PREFERRED_f": 0.7843137254901961
+    },
+    "heldout_at_baseline_0_30": {
+      "cc_PREFERRED": 20,
+      "cc_REQUIRED": 46,
+      "class_matches": 66,
+      "gold": 79,
+      "gold_PREFERRED": 25,
+      "gold_REQUIRED": 54,
+      "matches": 67,
+      "pred": 86,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 26,
+      "pred_REQUIRED": 59,
+      "text_precision": 0.7790697674418605,
+      "text_recall": 0.8481012658227848,
+      "text_f": 0.812121212121212,
+      "class_precision": 0.7674418604651163,
+      "class_recall": 0.8354430379746836,
+      "class_f": 0.8,
+      "count_ratio": 1.0886075949367089,
+      "REQUIRED_precision": 0.7796610169491526,
+      "REQUIRED_recall": 0.8518518518518519,
+      "REQUIRED_f": 0.8141592920353983,
+      "PREFERRED_precision": 0.7692307692307693,
+      "PREFERRED_recall": 0.8,
+      "PREFERRED_f": 0.7843137254901961
+    },
+    "heldout_at_0_20": {
+      "cc_PREFERRED": 20,
+      "cc_REQUIRED": 48,
+      "class_matches": 68,
+      "gold": 79,
+      "gold_PREFERRED": 25,
+      "gold_REQUIRED": 54,
+      "matches": 69,
+      "pred": 96,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 27,
+      "pred_REQUIRED": 68,
+      "text_precision": 0.71875,
+      "text_recall": 0.8734177215189873,
+      "text_f": 0.7885714285714285,
+      "class_precision": 0.7083333333333334,
+      "class_recall": 0.8607594936708861,
+      "class_f": 0.7771428571428572,
+      "count_ratio": 1.2151898734177216,
+      "REQUIRED_precision": 0.7058823529411765,
+      "REQUIRED_recall": 0.8888888888888888,
+      "REQUIRED_f": 0.7868852459016393,
+      "PREFERRED_precision": 0.7407407407407407,
+      "PREFERRED_recall": 0.8,
+      "PREFERRED_f": 0.7692307692307692
+    }
+  },
+  "tmp_gline_prototype_at_0_30": {
+    "all_jobs": {
+      "cc_PREFERRED": 28,
+      "cc_REQUIRED": 27,
+      "class_matches": 55,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 191,
+      "pred": 301,
+      "pred_None": 204,
+      "pred_PREFERRED": 43,
+      "pred_REQUIRED": 54,
+      "text_precision": 0.6345514950166113,
+      "text_recall": 0.6452702702702703,
+      "text_f": 0.6398659966499163,
+      "class_precision": 0.18272425249169436,
+      "class_recall": 0.1858108108108108,
+      "class_f": 0.1842546063651591,
+      "count_ratio": 1.0168918918918919,
+      "REQUIRED_precision": 0.5,
+      "REQUIRED_recall": 0.11739130434782609,
+      "REQUIRED_f": 0.19014084507042253,
+      "PREFERRED_precision": 0.6511627906976745,
+      "PREFERRED_recall": 0.42424242424242425,
+      "PREFERRED_f": 0.5137614678899082
+    },
+    "calibration_70": {
+      "cc_PREFERRED": 20,
+      "cc_REQUIRED": 14,
+      "class_matches": 34,
+      "gold": 217,
+      "gold_PREFERRED": 41,
+      "gold_REQUIRED": 176,
+      "matches": 129,
+      "pred": 207,
+      "pred_None": 150,
+      "pred_PREFERRED": 29,
+      "pred_REQUIRED": 28,
+      "text_precision": 0.6231884057971014,
+      "text_recall": 0.5944700460829493,
+      "text_f": 0.6084905660377358,
+      "class_precision": 0.1642512077294686,
+      "class_recall": 0.15668202764976957,
+      "class_f": 0.16037735849056606,
+      "count_ratio": 0.9539170506912442,
+      "REQUIRED_precision": 0.5,
+      "REQUIRED_recall": 0.07954545454545454,
+      "REQUIRED_f": 0.1372549019607843,
+      "PREFERRED_precision": 0.6896551724137931,
+      "PREFERRED_recall": 0.4878048780487805,
+      "PREFERRED_f": 0.5714285714285714
+    },
+    "heldout_30": {
+      "cc_PREFERRED": 8,
+      "cc_REQUIRED": 13,
+      "class_matches": 21,
+      "gold": 79,
+      "gold_PREFERRED": 25,
+      "gold_REQUIRED": 54,
+      "matches": 62,
+      "pred": 94,
+      "pred_None": 54,
+      "pred_PREFERRED": 14,
+      "pred_REQUIRED": 26,
+      "text_precision": 0.6595744680851063,
+      "text_recall": 0.7848101265822784,
+      "text_f": 0.7167630057803469,
+      "class_precision": 0.22340425531914893,
+      "class_recall": 0.26582278481012656,
+      "class_f": 0.24277456647398843,
+      "count_ratio": 1.1898734177215189,
+      "REQUIRED_precision": 0.5,
+      "REQUIRED_recall": 0.24074074074074073,
+      "REQUIRED_f": 0.325,
+      "PREFERRED_precision": 0.5714285714285714,
+      "PREFERRED_recall": 0.32,
+      "PREFERRED_f": 0.41025641025641024
+    }
+  },
+  "threshold_sweep_in_sample": {
+    "0.05": {
+      "cc_PREFERRED": 51,
+      "cc_REQUIRED": 197,
+      "class_matches": 248,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 267,
+      "pred": 512,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_None": 1,
+      "pred_PREFERRED": 119,
+      "pred_REQUIRED": 391,
+      "text_precision": 0.521484375,
+      "text_recall": 0.902027027027027,
+      "text_f": 0.6608910891089108,
+      "class_precision": 0.484375,
+      "class_recall": 0.8378378378378378,
+      "class_f": 0.6138613861386139,
+      "count_ratio": 1.7297297297297298,
+      "REQUIRED_precision": 0.5038363171355499,
+      "REQUIRED_recall": 0.8565217391304348,
+      "REQUIRED_f": 0.6344605475040258,
+      "PREFERRED_precision": 0.42857142857142855,
+      "PREFERRED_recall": 0.7727272727272727,
+      "PREFERRED_f": 0.5513513513513514
+    },
+    "0.1": {
+      "cc_PREFERRED": 48,
+      "cc_REQUIRED": 187,
+      "class_matches": 235,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 252,
+      "pred": 416,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 91,
+      "pred_REQUIRED": 324,
+      "text_precision": 0.6057692307692307,
+      "text_recall": 0.8513513513513513,
+      "text_f": 0.7078651685393257,
+      "class_precision": 0.5649038461538461,
+      "class_recall": 0.793918918918919,
+      "class_f": 0.6601123595505618,
+      "count_ratio": 1.4054054054054055,
+      "REQUIRED_precision": 0.5771604938271605,
+      "REQUIRED_recall": 0.8130434782608695,
+      "REQUIRED_f": 0.6750902527075812,
+      "PREFERRED_precision": 0.5274725274725275,
+      "PREFERRED_recall": 0.7272727272727273,
+      "PREFERRED_f": 0.6114649681528662
+    },
+    "0.15": {
+      "cc_PREFERRED": 43,
+      "cc_REQUIRED": 183,
+      "class_matches": 226,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 243,
+      "pred": 376,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 79,
+      "pred_REQUIRED": 296,
+      "text_precision": 0.6462765957446809,
+      "text_recall": 0.8209459459459459,
+      "text_f": 0.7232142857142857,
+      "class_precision": 0.601063829787234,
+      "class_recall": 0.7635135135135135,
+      "class_f": 0.6726190476190477,
+      "count_ratio": 1.2702702702702702,
+      "REQUIRED_precision": 0.6182432432432432,
+      "REQUIRED_recall": 0.7956521739130434,
+      "REQUIRED_f": 0.6958174904942966,
+      "PREFERRED_precision": 0.5443037974683544,
+      "PREFERRED_recall": 0.6515151515151515,
+      "PREFERRED_f": 0.5931034482758619
+    },
+    "0.2": {
+      "cc_PREFERRED": 43,
+      "cc_REQUIRED": 176,
+      "class_matches": 219,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 235,
+      "pred": 330,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 72,
+      "pred_REQUIRED": 257,
+      "text_precision": 0.7121212121212122,
+      "text_recall": 0.793918918918919,
+      "text_f": 0.7507987220447284,
+      "class_precision": 0.6636363636363637,
+      "class_recall": 0.7398648648648649,
+      "class_f": 0.6996805111821087,
+      "count_ratio": 1.114864864864865,
+      "REQUIRED_precision": 0.6848249027237354,
+      "REQUIRED_recall": 0.7652173913043478,
+      "REQUIRED_f": 0.7227926078028747,
+      "PREFERRED_precision": 0.5972222222222222,
+      "PREFERRED_recall": 0.6515151515151515,
+      "PREFERRED_f": 0.6231884057971014
+    },
+    "0.25": {
+      "cc_PREFERRED": 42,
+      "cc_REQUIRED": 170,
+      "class_matches": 212,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 228,
+      "pred": 304,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 67,
+      "pred_REQUIRED": 236,
+      "text_precision": 0.75,
+      "text_recall": 0.7702702702702703,
+      "text_f": 0.7600000000000001,
+      "class_precision": 0.6973684210526315,
+      "class_recall": 0.7162162162162162,
+      "class_f": 0.7066666666666668,
+      "count_ratio": 1.027027027027027,
+      "REQUIRED_precision": 0.7203389830508474,
+      "REQUIRED_recall": 0.7391304347826086,
+      "REQUIRED_f": 0.7296137339055793,
+      "PREFERRED_precision": 0.6268656716417911,
+      "PREFERRED_recall": 0.6363636363636364,
+      "PREFERRED_f": 0.6315789473684211
+    },
+    "0.3": {
+      "cc_PREFERRED": 39,
+      "cc_REQUIRED": 162,
+      "class_matches": 201,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 217,
+      "pred": 277,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 60,
+      "pred_REQUIRED": 216,
+      "text_precision": 0.7833935018050542,
+      "text_recall": 0.7331081081081081,
+      "text_f": 0.7574171029668413,
+      "class_precision": 0.7256317689530686,
+      "class_recall": 0.6790540540540541,
+      "class_f": 0.7015706806282723,
+      "count_ratio": 0.9358108108108109,
+      "REQUIRED_precision": 0.75,
+      "REQUIRED_recall": 0.7043478260869566,
+      "REQUIRED_f": 0.7264573991031391,
+      "PREFERRED_precision": 0.65,
+      "PREFERRED_recall": 0.5909090909090909,
+      "PREFERRED_f": 0.6190476190476191
+    },
+    "0.35": {
+      "cc_PREFERRED": 38,
+      "cc_REQUIRED": 155,
+      "class_matches": 193,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 209,
+      "pred": 257,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 54,
+      "pred_REQUIRED": 202,
+      "text_precision": 0.8132295719844358,
+      "text_recall": 0.706081081081081,
+      "text_f": 0.7558770343580471,
+      "class_precision": 0.7509727626459144,
+      "class_recall": 0.652027027027027,
+      "class_f": 0.6980108499095841,
+      "count_ratio": 0.8682432432432432,
+      "REQUIRED_precision": 0.7673267326732673,
+      "REQUIRED_recall": 0.6739130434782609,
+      "REQUIRED_f": 0.7175925925925924,
+      "PREFERRED_precision": 0.7037037037037037,
+      "PREFERRED_recall": 0.5757575757575758,
+      "PREFERRED_f": 0.6333333333333334
+    },
+    "0.4": {
+      "cc_PREFERRED": 37,
+      "cc_REQUIRED": 144,
+      "class_matches": 181,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 197,
+      "pred": 233,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 50,
+      "pred_REQUIRED": 182,
+      "text_precision": 0.8454935622317596,
+      "text_recall": 0.6655405405405406,
+      "text_f": 0.7448015122873347,
+      "class_precision": 0.776824034334764,
+      "class_recall": 0.6114864864864865,
+      "class_f": 0.6843100189035917,
+      "count_ratio": 0.7871621621621622,
+      "REQUIRED_precision": 0.7912087912087912,
+      "REQUIRED_recall": 0.6260869565217392,
+      "REQUIRED_f": 0.6990291262135923,
+      "PREFERRED_precision": 0.74,
+      "PREFERRED_recall": 0.5606060606060606,
+      "PREFERRED_f": 0.6379310344827586
+    },
+    "0.45": {
+      "cc_PREFERRED": 36,
+      "cc_REQUIRED": 139,
+      "class_matches": 175,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 191,
+      "pred": 218,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 47,
+      "pred_REQUIRED": 170,
+      "text_precision": 0.8761467889908257,
+      "text_recall": 0.6452702702702703,
+      "text_f": 0.7431906614785992,
+      "class_precision": 0.8027522935779816,
+      "class_recall": 0.5912162162162162,
+      "class_f": 0.6809338521400777,
+      "count_ratio": 0.7364864864864865,
+      "REQUIRED_precision": 0.8176470588235294,
+      "REQUIRED_recall": 0.6043478260869565,
+      "REQUIRED_f": 0.695,
+      "PREFERRED_precision": 0.7659574468085106,
+      "PREFERRED_recall": 0.5454545454545454,
+      "PREFERRED_f": 0.6371681415929202
+    },
+    "0.5": {
+      "cc_PREFERRED": 35,
+      "cc_REQUIRED": 135,
+      "class_matches": 170,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 186,
+      "pred": 208,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 45,
+      "pred_REQUIRED": 162,
+      "text_precision": 0.8942307692307693,
+      "text_recall": 0.6283783783783784,
+      "text_f": 0.7380952380952381,
+      "class_precision": 0.8173076923076923,
+      "class_recall": 0.5743243243243243,
+      "class_f": 0.6746031746031745,
+      "count_ratio": 0.7027027027027027,
+      "REQUIRED_precision": 0.8333333333333334,
+      "REQUIRED_recall": 0.5869565217391305,
+      "REQUIRED_f": 0.6887755102040817,
+      "PREFERRED_precision": 0.7777777777777778,
+      "PREFERRED_recall": 0.5303030303030303,
+      "PREFERRED_f": 0.6306306306306307
+    },
+    "0.55": {
+      "cc_PREFERRED": 33,
+      "cc_REQUIRED": 130,
+      "class_matches": 163,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 177,
+      "pred": 194,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 41,
+      "pred_REQUIRED": 152,
+      "text_precision": 0.9123711340206185,
+      "text_recall": 0.597972972972973,
+      "text_f": 0.7224489795918367,
+      "class_precision": 0.8402061855670103,
+      "class_recall": 0.5506756756756757,
+      "class_f": 0.6653061224489797,
+      "count_ratio": 0.6554054054054054,
+      "REQUIRED_precision": 0.8552631578947368,
+      "REQUIRED_recall": 0.5652173913043478,
+      "REQUIRED_f": 0.6806282722513088,
+      "PREFERRED_precision": 0.8048780487804879,
+      "PREFERRED_recall": 0.5,
+      "PREFERRED_f": 0.6168224299065421
+    },
+    "0.6": {
+      "cc_PREFERRED": 32,
+      "cc_REQUIRED": 126,
+      "class_matches": 158,
+      "gold": 296,
+      "gold_PREFERRED": 66,
+      "gold_REQUIRED": 230,
+      "matches": 172,
+      "pred": 188,
+      "pred_NICE_TO_HAVE": 1,
+      "pred_PREFERRED": 40,
+      "pred_REQUIRED": 147,
+      "text_precision": 0.9148936170212766,
+      "text_recall": 0.581081081081081,
+      "text_f": 0.7107438016528925,
+      "class_precision": 0.8404255319148937,
+      "class_recall": 0.5337837837837838,
+      "class_f": 0.6528925619834711,
+      "count_ratio": 0.6351351351351351,
+      "REQUIRED_precision": 0.8571428571428571,
+      "REQUIRED_recall": 0.5478260869565217,
+      "REQUIRED_f": 0.6684350132625994,
+      "PREFERRED_precision": 0.8,
+      "PREFERRED_recall": 0.48484848484848486,
+      "PREFERRED_f": 0.6037735849056605
+    }
+  },
+  "baseline_all_jobs": {
+    "cc_PREFERRED": 39,
+    "cc_REQUIRED": 162,
+    "class_matches": 201,
+    "gold": 296,
+    "gold_PREFERRED": 66,
+    "gold_REQUIRED": 230,
+    "matches": 217,
+    "pred": 277,
+    "pred_NICE_TO_HAVE": 1,
+    "pred_PREFERRED": 60,
+    "pred_REQUIRED": 216,
+    "text_precision": 0.7833935018050542,
+    "text_recall": 0.7331081081081081,
+    "text_f": 0.7574171029668413,
+    "class_precision": 0.7256317689530686,
+    "class_recall": 0.6790540540540541,
+    "class_f": 0.7015706806282723,
+    "count_ratio": 0.9358108108108109,
+    "REQUIRED_precision": 0.75,
+    "REQUIRED_recall": 0.7043478260869566,
+    "REQUIRED_f": 0.7264573991031391,
+    "PREFERRED_precision": 0.65,
+    "PREFERRED_recall": 0.5909090909090909,
+    "PREFERRED_f": 0.6190476190476191
+  },
+  "cv_out_of_fold": {
+    "cc_PREFERRED": 43,
+    "cc_REQUIRED": 150,
+    "class_matches": 193,
+    "gold": 296,
+    "gold_PREFERRED": 66,
+    "gold_REQUIRED": 230,
+    "matches": 209,
+    "pred": 288,
+    "pred_NICE_TO_HAVE": 1,
+    "pred_PREFERRED": 69,
+    "pred_REQUIRED": 218,
+    "text_precision": 0.7256944444444444,
+    "text_recall": 0.706081081081081,
+    "text_f": 0.7157534246575343,
+    "class_precision": 0.6701388888888888,
+    "class_recall": 0.652027027027027,
+    "class_f": 0.660958904109589,
+    "count_ratio": 0.972972972972973,
+    "REQUIRED_precision": 0.6880733944954128,
+    "REQUIRED_recall": 0.6521739130434783,
+    "REQUIRED_f": 0.6696428571428572,
+    "PREFERRED_precision": 0.6231884057971014,
+    "PREFERRED_recall": 0.6515151515151515,
+    "PREFERRED_f": 0.6370370370370371,
+    "bootstrap": {
+      "tuned_oof_class_f_ci95": [
+        0.5703703703703704,
+        0.7459807073954985
+      ],
+      "baseline_class_f_ci95": [
+        0.5955555555555555,
+        0.781651376146789
+      ],
+      "diff_class_f_ci95": [
+        -0.10253655820656005,
+        0.014215264996292998
+      ],
+      "p_tuned_better": 0.142
+    }
+  },
+  "selected_in_sample": {
+    "threshold": 0.25,
+    "cc_PREFERRED": 42,
+    "cc_REQUIRED": 170,
+    "class_matches": 212,
+    "gold": 296,
+    "gold_PREFERRED": 66,
+    "gold_REQUIRED": 230,
+    "matches": 228,
+    "pred": 304,
+    "pred_NICE_TO_HAVE": 1,
+    "pred_PREFERRED": 67,
+    "pred_REQUIRED": 236,
+    "text_precision": 0.75,
+    "text_recall": 0.7702702702702703,
+    "text_f": 0.7600000000000001,
+    "class_precision": 0.6973684210526315,
+    "class_recall": 0.7162162162162162,
+    "class_f": 0.7066666666666668,
+    "count_ratio": 1.027027027027027,
+    "REQUIRED_precision": 0.7203389830508474,
+    "REQUIRED_recall": 0.7391304347826086,
+    "REQUIRED_f": 0.7296137339055793,
+    "PREFERRED_precision": 0.6268656716417911,
+    "PREFERRED_recall": 0.6363636363636364,
+    "PREFERRED_f": 0.6315789473684211
+  },
+  "cases_at_selected_in_sample": [
+    {
+      "id": "2416989053",
+      "missing": [],
+      "unmatched_predictions": [
+        [
+          "exceptional organizational",
+          "PREFERRED"
+        ],
+        [
+          "working remotely",
+          "PREFERRED"
+        ],
+        [
+          "backend development",
+          "REQUIRED"
+        ],
+        [
+          "5+ years of experience in software development",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 6,
+        "pred": 10,
+        "matches": 6,
+        "gold_REQUIRED": 5,
+        "gold_PREFERRED": 1,
+        "pred_REQUIRED": 7,
+        "pred_PREFERRED": 3,
+        "class_matches": 6,
+        "cc_REQUIRED": 5,
+        "cc_PREFERRED": 1
+      }
+    },
+    {
+      "id": "2636258859",
+      "missing": [
+        [
+          "DRE",
+          "REQUIRED"
+        ],
+        [
+          "Relatórios Contáveis",
+          "REQUIRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "Análise de dados financeiros",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 6,
+        "pred": 5,
+        "matches": 4,
+        "gold_REQUIRED": 6,
+        "pred_REQUIRED": 5,
+        "class_matches": 4,
+        "cc_REQUIRED": 4
+      }
+    },
+    {
+      "id": "2629245173",
+      "missing": [
+        [
+          "Ciência de Dados",
+          "REQUIRED"
+        ],
+        [
+          "Estatística",
+          "REQUIRED"
+        ],
+        [
+          "Ciência da Computação",
+          "REQUIRED"
+        ],
+        [
+          "análise de dados",
+          "REQUIRED"
+        ],
+        [
+          "business intelligence",
+          "REQUIRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "analíticas sólidas",
+          "REQUIRED"
+        ],
+        [
+          "Excelentes habilidades de comunicação e apresentação",
+          "REQUIRED"
+        ],
+        [
+          "Mínimo de 5 anos",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [
+        [
+          "AWS",
+          "REQUIRED",
+          "AWS",
+          "PREFERRED"
+        ]
+      ],
+      "counts": {
+        "gold": 13,
+        "pred": 11,
+        "matches": 8,
+        "gold_REQUIRED": 12,
+        "gold_PREFERRED": 1,
+        "pred_REQUIRED": 11,
+        "class_matches": 7,
+        "cc_REQUIRED": 7
+      }
+    },
+    {
+      "id": "2626219945",
+      "missing": [
+        [
+          "AWS",
+          "PREFERRED"
+        ]
+      ],
+      "unmatched_predictions": [],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 4,
+        "pred": 3,
+        "matches": 3,
+        "gold_REQUIRED": 3,
+        "gold_PREFERRED": 1,
+        "pred_REQUIRED": 3,
+        "class_matches": 3,
+        "cc_REQUIRED": 3
+      }
+    },
+    {
+      "id": "2624071267",
+      "missing": [
+        [
+          "APIs RESTful",
+          "REQUIRED"
+        ],
+        [
+          "Design Patterns",
+          "REQUIRED"
+        ],
+        [
+          "SOLID",
+          "REQUIRED"
+        ],
+        [
+          "Metodologias ágeis",
+          "REQUIRED"
+        ],
+        [
+          "SQL Injection",
+          "PREFERRED"
+        ],
+        [
+          "XSS",
+          "PREFERRED"
+        ],
+        [
+          "CSRF",
+          "PREFERRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "compreensão das boas práticas de programação",
+          "REQUIRED"
+        ],
+        [
+          "segurança de desenvolvimento",
+          "PREFERRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 27,
+        "pred": 22,
+        "matches": 20,
+        "gold_REQUIRED": 17,
+        "gold_PREFERRED": 10,
+        "pred_REQUIRED": 14,
+        "pred_PREFERRED": 8,
+        "class_matches": 20,
+        "cc_REQUIRED": 13,
+        "cc_PREFERRED": 7
+      }
+    },
+    {
+      "id": "2622143707",
+      "missing": [
+        [
+          "Responsive Web Design",
+          "PREFERRED"
+        ],
+        [
+          "Continuous Integration/Deployment",
+          "PREFERRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "HTML5",
+          "PREFERRED"
+        ],
+        [
+          "Computer Science or Software Engineering",
+          "PREFERRED"
+        ],
+        [
+          "Working",
+          "PREFERRED"
+        ],
+        [
+          "Solid Computer Science fundamentals knowledge",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 15,
+        "pred": 17,
+        "matches": 13,
+        "gold_REQUIRED": 2,
+        "gold_PREFERRED": 13,
+        "pred_PREFERRED": 14,
+        "pred_REQUIRED": 3,
+        "class_matches": 13,
+        "cc_PREFERRED": 11,
+        "cc_REQUIRED": 2
+      }
+    },
+    {
+      "id": "2614720067",
+      "missing": [
+        [
+          "Infraestruturas/Arquitetura de redes",
+          "REQUIRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "AWS",
+          "REQUIRED"
+        ],
+        [
+          "básicos",
+          "REQUIRED"
+        ],
+        [
+          "Disponibilidade para part-time",
+          "REQUIRED"
+        ],
+        [
+          "Ser habituado a trabalhar com metodologia ágil",
+          "REQUIRED"
+        ],
+        [
+          "Ter interesse para atuar com gestão de tecnologia",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 8,
+        "pred": 12,
+        "matches": 7,
+        "gold_REQUIRED": 7,
+        "gold_PREFERRED": 1,
+        "pred_REQUIRED": 11,
+        "pred_PREFERRED": 1,
+        "class_matches": 7,
+        "cc_REQUIRED": 6,
+        "cc_PREFERRED": 1
+      }
+    },
+    {
+      "id": "2612739767",
+      "missing": [],
+      "unmatched_predictions": [
+        [
+          "desenvolvimento web",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 3,
+        "pred": 4,
+        "matches": 3,
+        "gold_REQUIRED": 2,
+        "gold_PREFERRED": 1,
+        "pred_PREFERRED": 1,
+        "pred_REQUIRED": 3,
+        "class_matches": 3,
+        "cc_REQUIRED": 2,
+        "cc_PREFERRED": 1
+      }
+    },
+    {
+      "id": "2609494986",
+      "missing": [
+        [
+          "Metodologias ágeis",
+          "REQUIRED"
+        ],
+        [
+          "EntityFramework Core",
+          "REQUIRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "js",
+          "REQUIRED"
+        ],
+        [
+          "Azure Storage",
+          "PREFERRED"
+        ],
+        [
+          "Tables",
+          "PREFERRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 15,
+        "pred": 16,
+        "matches": 13,
+        "gold_REQUIRED": 12,
+        "gold_PREFERRED": 3,
+        "pred_REQUIRED": 11,
+        "pred_PREFERRED": 5,
+        "class_matches": 13,
+        "cc_REQUIRED": 10,
+        "cc_PREFERRED": 3
+      }
+    },
+    {
+      "id": "2609492861",
+      "missing": [
+        [
+          "Oracle Forms",
+          "REQUIRED"
+        ],
+        [
+          "AWS ECR",
+          "REQUIRED"
+        ],
+        [
+          "Oracle 11g",
+          "REQUIRED"
+        ],
+        [
+          "Oracle 12c",
+          "REQUIRED"
+        ],
+        [
+          "Oracle RDS",
+          "REQUIRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "Amazon EC2",
+          "REQUIRED"
+        ],
+        [
+          "banco de dados",
+          "REQUIRED"
+        ],
+        [
+          "OCA",
+          "REQUIRED"
+        ],
+        [
+          "LPI I",
+          "PREFERRED"
+        ],
+        [
+          "ferramentas de monitoramento e gerenciamento de banco de dados",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [
+        [
+          "OCP",
+          "REQUIRED",
+          "Certificação Oracle (OCA ou OCP)",
+          "PREFERRED"
+        ]
+      ],
+      "counts": {
+        "gold": 13,
+        "pred": 13,
+        "matches": 8,
+        "gold_REQUIRED": 11,
+        "gold_PREFERRED": 2,
+        "pred_REQUIRED": 11,
+        "pred_PREFERRED": 2,
+        "class_matches": 7,
+        "cc_REQUIRED": 6,
+        "cc_PREFERRED": 1
+      }
+    },
+    {
+      "id": "2608295223",
+      "missing": [],
+      "unmatched_predictions": [
+        [
+          "AWS",
+          "REQUIRED"
+        ],
+        [
+          "iniciativa",
+          "REQUIRED"
+        ],
+        [
+          "GIT",
+          "REQUIRED"
+        ],
+        [
+          "trabalho em equipe",
+          "REQUIRED"
+        ],
+        [
+          "comprovada",
+          "REQUIRED"
+        ],
+        [
+          "controle de versão",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 9,
+        "pred": 15,
+        "matches": 9,
+        "gold_REQUIRED": 6,
+        "gold_PREFERRED": 3,
+        "pred_REQUIRED": 12,
+        "pred_PREFERRED": 3,
+        "class_matches": 9,
+        "cc_PREFERRED": 3,
+        "cc_REQUIRED": 6
+      }
+    },
+    {
+      "id": "2605299335",
+      "missing": [
+        [
+          "CRM",
+          "REQUIRED"
+        ],
+        [
+          "SAP",
+          "REQUIRED"
+        ],
+        [
+          "Português brasileiro",
+          "REQUIRED"
+        ],
+        [
+          "Caixa Econômica",
+          "PREFERRED"
+        ],
+        [
+          "e-social",
+          "PREFERRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "desenvolvimento de soluções RPA escaláveis",
+          "PREFERRED"
+        ],
+        [
+          "governança de RPA e automação escalável",
+          "PREFERRED"
+        ],
+        [
+          "Forte compreensão dos conceitos de RPA e automação de processos de negócios",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [
+        [
+          "Blue Prism",
+          "PREFERRED",
+          "BLue Prism",
+          "REQUIRED"
+        ]
+      ],
+      "counts": {
+        "gold": 12,
+        "pred": 10,
+        "matches": 7,
+        "gold_REQUIRED": 7,
+        "gold_PREFERRED": 5,
+        "pred_PREFERRED": 6,
+        "pred_REQUIRED": 4,
+        "class_matches": 6,
+        "cc_REQUIRED": 3,
+        "cc_PREFERRED": 3
+      }
+    },
+    {
+      "id": "2528385115",
+      "missing": [
+        [
+          "Clojure",
+          "REQUIRED"
+        ],
+        [
+          "React",
+          "REQUIRED"
+        ],
+        [
+          "Next Js",
+          "REQUIRED"
+        ],
+        [
+          "Typescript",
+          "REQUIRED"
+        ]
+      ],
+      "unmatched_predictions": [],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 4,
+        "pred": 0,
+        "matches": 0,
+        "gold_REQUIRED": 4
+      }
+    },
+    {
+      "id": "2321591027",
+      "missing": [],
+      "unmatched_predictions": [
+        [
+          "CRUDs",
+          "REQUIRED"
+        ],
+        [
+          "segurança web",
+          "REQUIRED"
+        ],
+        [
+          "Procedures",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 7,
+        "pred": 10,
+        "matches": 7,
+        "gold_REQUIRED": 7,
+        "pred_REQUIRED": 10,
+        "class_matches": 7,
+        "cc_REQUIRED": 7
+      }
+    },
+    {
+      "id": "2319484362",
+      "missing": [
+        [
+          "ARIA roles",
+          "REQUIRED"
+        ],
+        [
+          "Semantic UI",
+          "REQUIRED"
+        ],
+        [
+          "Wordpress Theme Boilerplates",
+          "PREFERRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "Vanilla JavaScript",
+          "REQUIRED"
+        ],
+        [
+          "Over 4 years",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [
+        [
+          "Gutenberg",
+          "NICE_TO_HAVE",
+          "Gutenberg",
+          "REQUIRED"
+        ]
+      ],
+      "counts": {
+        "gold": 28,
+        "pred": 27,
+        "matches": 25,
+        "gold_REQUIRED": 21,
+        "gold_PREFERRED": 7,
+        "pred_REQUIRED": 20,
+        "pred_PREFERRED": 6,
+        "pred_NICE_TO_HAVE": 1,
+        "class_matches": 24,
+        "cc_REQUIRED": 18,
+        "cc_PREFERRED": 6
+      }
+    },
+    {
+      "id": "1294303201",
+      "missing": [
+        [
+          "SVN",
+          "REQUIRED"
+        ],
+        [
+          "Maven 3",
+          "REQUIRED"
+        ],
+        [
+          "Hibernate 3",
+          "REQUIRED"
+        ],
+        [
+          "JAX-RS",
+          "REQUIRED"
+        ],
+        [
+          "JUnit",
+          "PREFERRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "MySQL 5.7",
+          "REQUIRED"
+        ],
+        [
+          "Cloud",
+          "REQUIRED"
+        ],
+        [
+          "Lógica de Programação",
+          "REQUIRED"
+        ],
+        [
+          "Orientação a Objetos",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [
+        [
+          "JQuery",
+          "REQUIRED",
+          "JQuery",
+          "PREFERRED"
+        ],
+        [
+          "GCP",
+          "REQUIRED",
+          "GCP",
+          "PREFERRED"
+        ],
+        [
+          "HTML",
+          "REQUIRED",
+          "HTML",
+          "PREFERRED"
+        ],
+        [
+          "CSS",
+          "REQUIRED",
+          "CSS",
+          "PREFERRED"
+        ],
+        [
+          "Vue.js",
+          "REQUIRED",
+          "Vue.js",
+          "PREFERRED"
+        ]
+      ],
+      "counts": {
+        "gold": 16,
+        "pred": 15,
+        "matches": 11,
+        "gold_REQUIRED": 10,
+        "gold_PREFERRED": 6,
+        "pred_REQUIRED": 15,
+        "class_matches": 6,
+        "cc_REQUIRED": 6
+      }
+    },
+    {
+      "id": "5669198623",
+      "missing": [],
+      "unmatched_predictions": [
+        [
+          "bancos de dados",
+          "REQUIRED"
+        ],
+        [
+          "prática",
+          "REQUIRED"
+        ],
+        [
+          "APIs",
+          "REQUIRED"
+        ],
+        [
+          "7+ anos",
+          "REQUIRED"
+        ],
+        [
+          "estruturas de dados",
+          "REQUIRED"
+        ],
+        [
+          "Base sólida",
+          "REQUIRED"
+        ],
+        [
+          "engenharia de software profissional",
+          "REQUIRED"
+        ],
+        [
+          "código limpo",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 11,
+        "pred": 19,
+        "matches": 11,
+        "gold_REQUIRED": 11,
+        "pred_REQUIRED": 19,
+        "class_matches": 11,
+        "cc_REQUIRED": 11
+      }
+    },
+    {
+      "id": "5620459912",
+      "missing": [],
+      "unmatched_predictions": [
+        [
+          "Tier 1",
+          "REQUIRED"
+        ],
+        [
+          "VSCode",
+          "PREFERRED"
+        ],
+        [
+          "universidades",
+          "REQUIRED"
+        ],
+        [
+          "prática",
+          "PREFERRED"
+        ],
+        [
+          "- 5+ anos",
+          "PREFERRED"
+        ],
+        [
+          "Escrita técnica clara e objetiva",
+          "REQUIRED"
+        ],
+        [
+          "bases de código grandes",
+          "PREFERRED"
+        ],
+        [
+          "pipelines",
+          "PREFERRED"
+        ]
+      ],
+      "class_mismatches": [
+        [
+          "Golang",
+          "PREFERRED",
+          "Golang",
+          "REQUIRED"
+        ],
+        [
+          "TypeScript",
+          "PREFERRED",
+          "TypeScript",
+          "REQUIRED"
+        ],
+        [
+          "Python",
+          "PREFERRED",
+          "Python",
+          "REQUIRED"
+        ],
+        [
+          "JavaScript",
+          "PREFERRED",
+          "JavaScript",
+          "REQUIRED"
+        ]
+      ],
+      "counts": {
+        "gold": 5,
+        "pred": 13,
+        "matches": 5,
+        "gold_REQUIRED": 5,
+        "pred_PREFERRED": 9,
+        "pred_REQUIRED": 4,
+        "class_matches": 1,
+        "cc_REQUIRED": 1
+      }
+    },
+    {
+      "id": "5620446646",
+      "missing": [
+        [
+          "GCP",
+          "REQUIRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "containers",
+          "REQUIRED"
+        ],
+        [
+          "bancos SQL",
+          "REQUIRED"
+        ],
+        [
+          "5+ anos",
+          "REQUIRED"
+        ],
+        [
+          "Python avançado",
+          "REQUIRED"
+        ],
+        [
+          "sistemas distribuídos",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 7,
+        "pred": 11,
+        "matches": 6,
+        "gold_REQUIRED": 7,
+        "pred_REQUIRED": 11,
+        "class_matches": 6,
+        "cc_REQUIRED": 6
+      }
+    },
+    {
+      "id": "5647302555",
+      "missing": [
+        [
+          "Vite",
+          "REQUIRED"
+        ],
+        [
+          "@truckpag/components",
+          "REQUIRED"
+        ],
+        [
+          "Metodologias ágeis",
+          "REQUIRED"
+        ],
+        [
+          "XSS",
+          "REQUIRED"
+        ],
+        [
+          "CSRF",
+          "REQUIRED"
+        ],
+        [
+          "CORS",
+          "REQUIRED"
+        ],
+        [
+          "CSP",
+          "REQUIRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "GitLab",
+          "REQUIRED"
+        ],
+        [
+          "npm",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 48,
+        "pred": 43,
+        "matches": 41,
+        "gold_REQUIRED": 48,
+        "pred_REQUIRED": 43,
+        "class_matches": 41,
+        "cc_REQUIRED": 41
+      }
+    },
+    {
+      "id": "4504487673",
+      "missing": [
+        [
+          "UX",
+          "REQUIRED"
+        ],
+        [
+          "UI",
+          "REQUIRED"
+        ],
+        [
+          "UI Design",
+          "REQUIRED"
+        ],
+        [
+          "Design System",
+          "REQUIRED"
+        ],
+        [
+          "Wireframes",
+          "REQUIRED"
+        ],
+        [
+          "IA",
+          "REQUIRED"
+        ],
+        [
+          "Auto Layout",
+          "REQUIRED"
+        ],
+        [
+          "Make",
+          "REQUIRED"
+        ],
+        [
+          "prototipação",
+          "REQUIRED"
+        ],
+        [
+          "Design Systems",
+          "PREFERRED"
+        ],
+        [
+          "legaltech",
+          "PREFERRED"
+        ],
+        [
+          "fintech",
+          "PREFERRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "Figma",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [
+        [
+          "Make",
+          "REQUIRED",
+          "Make",
+          "PREFERRED"
+        ]
+      ],
+      "counts": {
+        "gold": 22,
+        "pred": 11,
+        "matches": 10,
+        "gold_REQUIRED": 13,
+        "gold_PREFERRED": 9,
+        "pred_REQUIRED": 6,
+        "pred_PREFERRED": 5,
+        "class_matches": 9,
+        "cc_PREFERRED": 5,
+        "cc_REQUIRED": 4
+      }
+    },
+    {
+      "id": "4479596644",
+      "missing": [
+        [
+          "Clean Architecture",
+          "REQUIRED"
+        ],
+        [
+          "APIs",
+          "PREFERRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "Capacidade de atuar bem em contextos de alta ambiguidade",
+          "PREFERRED"
+        ],
+        [
+          "ferramentas para desenvolvedores",
+          "PREFERRED"
+        ],
+        [
+          "Capacidade de diagnosticar problemas",
+          "REQUIRED"
+        ],
+        [
+          "Histórico de mentoria técnica",
+          "PREFERRED"
+        ],
+        [
+          "ferramentas de AI coding",
+          "REQUIRED"
+        ]
+      ],
+      "class_mismatches": [],
+      "counts": {
+        "gold": 10,
+        "pred": 13,
+        "matches": 8,
+        "gold_REQUIRED": 9,
+        "gold_PREFERRED": 1,
+        "pred_REQUIRED": 10,
+        "pred_PREFERRED": 3,
+        "class_matches": 8,
+        "cc_REQUIRED": 8
+      }
+    },
+    {
+      "id": "561162237",
+      "missing": [
+        [
+          "Java",
+          "REQUIRED"
+        ],
+        [
+          "C#",
+          "REQUIRED"
+        ],
+        [
+          "Python",
+          "REQUIRED"
+        ],
+        [
+          "Dart",
+          "REQUIRED"
+        ]
+      ],
+      "unmatched_predictions": [
+        [
+          "Github",
+          "PREFERRED"
+        ]
+      ],
+      "class_mismatches": [
+        [
+          "Flutter",
+          "REQUIRED",
+          "Flutter",
+          "PREFERRED"
+        ],
+        [
+          "Java",
+          "REQUIRED",
+          "Java",
+          "PREFERRED"
+        ]
+      ],
+      "counts": {
+        "gold": 7,
+        "pred": 4,
+        "matches": 3,
+        "gold_REQUIRED": 5,
+        "gold_PREFERRED": 2,
+        "pred_PREFERRED": 1,
+        "pred_REQUIRED": 3,
+        "class_matches": 1,
+        "cc_REQUIRED": 1
+      }
+    }
+  ],
+  "labels": [
+    "skill",
+    "tool",
+    "framework",
+    "database",
+    "cloud",
+    "education",
+    "work experience requirement",
+    "professional credential",
+    "professional license",
+    "language",
+    "certification"
+  ]
+}
