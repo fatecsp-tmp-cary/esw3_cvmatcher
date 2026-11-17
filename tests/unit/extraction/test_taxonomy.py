@@ -74,6 +74,10 @@ def test_one_edit_typos_are_score_only_support(typo, name):
         ("Cython", "Python"),
         ("CPython", "Python"),
         ("Pythnoo", "Python"),
+        ("Nest.js", "Next.js"),
+        ("Nuxt.js", "Next.js"),
+        ("NuxtJS", "Next.js"),
+        ("MSSQL", "MySQL"),
     ],
 )
 def test_distinct_names_and_large_edits_never_become_aliases(left, right):

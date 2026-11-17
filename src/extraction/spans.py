@@ -2,14 +2,19 @@
 
 import re
 
-VERSION = "smallest-meaningful-entity-v3"
+VERSION = "smallest-meaningful-entity-v4"
 PREFIX = re.compile(
     r"^(?:(?:registro(?:\s+profissional)?|certifica[cç][aã]o|certification)\s+(?:em\s+|in\s+)?|"
-    r"(?:experi[eê]ncia|experience)\s+(?:(?:em|com|in|with)\s+)?|"
+    r"(?:(?:s[oó]lid[oa]s?|bons?|boas?|fortes?|importante|ampla|forte|avan[cç]ad[oa]s?|"
+    r"b[aá]sic[oa]s?|good|strong|solid|entry[\s-]+level)\s+)?"
+    r"(?:experi[eê]ncias?|experience|conhecimentos?|knowledge|dom[ií]nio|profici[eê]ncia|"
+    r"proficiency|familiaridade|familiarity|viv[eê]ncia|habilidades?|skills?)\s+"
+    r"(?:(?:avan[cç]ad[oa]s?|b[aá]sic[oa]s?|s[oó]lid[oa]s?|pr[aá]tic[oa]s?|comprovad[oa]s?)\s+)?"
+    r"(?:(?:em|com|de|na|no|nas|nos|in|with|of|on)\s+)?|"
     r"(?:senioridade|seniority)\s+)",
     re.I,
 )
-SUFFIX = re.compile(r"\s+(?:experience|skills?)$", re.I)
+SUFFIX = re.compile(r"\s+(?:experience|skills?|speaker)$", re.I)
 
 
 def entity_bounds(text: str, start: int, end: int) -> tuple[int, int]:

@@ -9,22 +9,65 @@ from src.extraction.contracts import SpanEvidence
 from src.extraction.spans import entity_bounds
 from src.extraction.taxonomy import alias_spans, match_skill
 
-VERSION = "clause-strongest-negation-hedge-conflict-v4"
+VERSION = "clause-strongest-negation-hedge-conflict-v5"
 STRENGTH = {None: 0, "NICE_TO_HAVE": 1, "PREFERRED": 2, "REQUIRED": 3}
 CUES = {
     "REQUIRED": (
-        r"\b(?:requisitos?|obrigatori[oa]s?|exigid[oa]s?|exigimos|exigir|necessari[oa]s?|"
-        r"indispensave(?:l|is)|essencia(?:l|is)|minim[oa]s?|required|requirements?|must|"
-        r"mandatory|essential|minimum|need(?:ed|s)?|necessary)\b"
+        r"\b(?:(?<!preferred\s)(?<!desirable\s)(?<!optional\s)requirements?|"
+        r"requisitos?(?!\s+(?:desejave(?:l|is)|desejad[oa]s?|opciona(?:l|is)|diferencia(?:l|is)))|"
+        r"obrigatori[oa]s?|mandatori[oa]s?|exigid[oa]s?|exigimos|exigir|necessari[oa]s?|"
+        r"indispensave(?:l|is)|essencia(?:l|is)|minim[oa]s?|required|must|"
+        r"mandatory|essential|minimum|need(?:ed|s)?|necessary|"
+        r"o que (?:buscamos|esperamos|precisa)|what we(?:'|’)?re looking for)\b"
     ),
     "PREFERRED": (
-        r"\b(?:desejave(?:l|is)|preferencia(?:l|is)|preferencia|preferencialmente|"
-        r"diferencia(?:l|is)|valorizad[oa]s?|preferred|preferably|desirable)\b"
+        r"\b(?:desejave(?:l|is)|desejad[oa]s?|preferencia(?:l|is)|preferencia|preferencialmente|"
+        r"diferencia(?:l|is)|valorizad[oa]s?|preferred|preferably|desirable|differentials?|"
+        r"perfil desejado)\b"
     ),
     "NICE_TO_HAVE": (
         r"\b(?:opciona(?:l|is)|bonus|plus|pontos? extras?|"
         r"nice[\s_–—-]+to[\s_–—-]+have|optional)\b"
     ),
+}
+STOPWORDS = {
+    "experience",
+    "experiencia",
+    "skill",
+    "skills",
+    "requisito",
+    "requisitos",
+    "conhecimento",
+    "conhecimentos",
+    "conhecimento basico",
+    "conhecimentos basicos",
+    "bons conhecimentos",
+    "solidos conhecimentos",
+    "conhecimento e vivencia",
+    "familiaridade",
+    "proficiencia",
+    "dominio",
+    "solida",
+    "solido",
+    "previa",
+    "solida experiencia",
+    "importante experiencia",
+    "fortes habilidades",
+    "habilidades",
+    "proficient",
+    "knowledge",
+    "good knowledge",
+    "entry level knowledge",
+    "fluency",
+    "intermediate",
+    "able",
+    "sr.",
+    "jr.",
+    "mid-level",
+    "equipes",
+    "autonomia",
+    "proatividade",
+    "pragmatismo",
 }
 HEDGE = re.compile(
     r"\b(?:maybe|perhaps|might|may|could|would|talvez|pode|podem|poderia[m]?|seria[m]?)\b"
@@ -38,6 +81,61 @@ ANY_CUE = re.compile("|".join(f"(?:{p})" for p in (*CUES.values(), HEDGE.pattern
 
 def _cue(text: str):
     return ANY_CUE.search(key(text))
+
+
+_PT_NO_PRECEDING = {
+    "projetos",
+    "projeto",
+    "experiencia",
+    "experiencias",
+    "vivencia",
+    "vivencias",
+    "conhecimento",
+    "conhecimentos",
+    "atuacao",
+    "atuando",
+    "trabalho",
+    "trabalhando",
+    "solida",
+    "solido",
+    "avancado",
+    "avancada",
+    "intermediario",
+    "intermediaria",
+    "basico",
+    "basica",
+    "foco",
+    "uso",
+    "deploy",
+    "desenvolvimento",
+    "pratica",
+    "ambiente",
+    "ecosistema",
+    "ecossistema",
+    "especialista",
+    "proficiencia",
+    "dominio",
+}
+
+
+def _has_negated_mention(context: str, mention: str) -> bool:
+    for match in re.finditer(
+        r"\b(without|no|sem|not|nao)\s+" + re.escape(mention) + r"\b",
+        context,
+    ):
+        if match.group(1) != "no":
+            return True
+        prev_words = re.findall(r"\b\w+\b", context[: match.start()])
+        # Guard Portuguese contraction "no" (em + o, e.g. "vivência no Linux") while
+        # preserving English negation ("no Python", "requires no Java").
+        if not prev_words or prev_words[-1] not in _PT_NO_PRECEDING:
+            return True
+    return False
+
+
+def _section_strength(heading: str) -> str:
+    strength = _local(heading, 0, len(heading))[0]
+    return strength if strength is not None else "REQUIRED"
 
 
 def _local(text: str, start: int, end: int):
@@ -59,7 +157,7 @@ def _local(text: str, start: int, end: int):
             else:
                 strengths.append(name)
     mention = key(text[start:end])
-    if re.search(r"\b(?:without|no|sem|not|nao)\s+" + re.escape(mention) + r"\b", context):
+    if _has_negated_mention(context, mention):
         negated = True
         strengths = []
     strengths.extend("NICE_TO_HAVE" for h in hedges if not NEGATION.search(context[: h.start()]))
@@ -77,12 +175,15 @@ def classify(text: str, start: int, end: int) -> str | None:
         return strength
     section = next((s for s in sections(text) if s.start <= start < s.end), None)
     if section and section.kind == "requirements":
-        return _local(section.heading, 0, len(section.heading))[0]
+        return _section_strength(section.heading)
     return None
 
 
 def _cue_only(value):
-    remaining = key(value)
+    folded = key(value)
+    if folded in STOPWORDS:
+        return True
+    remaining = folded
     for pattern in CUES.values():
         remaining = re.sub(pattern, "", remaining)
     remaining = re.sub(r"\b(?:is|are|be|e|sao|a|an|um|uma|not|no|nao)\b", "", remaining)
@@ -121,8 +222,7 @@ def annotate_spans(text, evidence):
             or _cue_only(value)
             or (section and section.kind in {"background", "heading"})
             or BACKGROUND_PREFIX.search(context)
-            or key(value)
-            in {"experience", "experiencia", "skill", "skills", "requisito", "requisitos"}
+            or key(value) in STOPWORDS
         )
         if (
             strength is None
@@ -131,7 +231,7 @@ def annotate_spans(text, evidence):
             and section
             and section.kind == "requirements"
         ):
-            strength = _local(section.heading, 0, len(section.heading))[0]
+            strength = _section_strength(section.heading)
         selected = not ignored and bool(
             strength
             or negated

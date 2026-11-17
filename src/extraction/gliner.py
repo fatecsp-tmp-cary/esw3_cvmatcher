@@ -29,8 +29,9 @@ LABELS = (
     "language",
     "certification",
 )
-THRESHOLD = 0.3
+THRESHOLD = 0.25
 MAX_TOKENS = 384
+SPECIAL_TOKENS = 2
 MAX_CHARACTERS = 1200
 OVERLAP_CHARACTERS = 200
 INFERENCE_PACKAGES = {
@@ -155,7 +156,7 @@ class GlinerExtractor:
     def _fits(self, text: str) -> bool:
         processor = self.model.data_processor
         words = [value[0] for value in processor.words_splitter(text)]
-        if len(words) > MAX_TOKENS:
+        if len(words) > MAX_TOKENS - SPECIAL_TOKENS:
             return False
         inputs, _ = processor.prepare_inputs([words], list(LABELS))
         encoded = self.tokenizer(
@@ -165,7 +166,7 @@ class GlinerExtractor:
             truncation=False,
             padding=False,
         )
-        return len(encoded["input_ids"][0]) <= MAX_TOKENS
+        return len(encoded["input_ids"][0]) <= MAX_TOKENS - SPECIAL_TOKENS
 
     def extract(self, text: str) -> list[SpanEvidence]:
         if not isinstance(text, str):
