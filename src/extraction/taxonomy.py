@@ -5,7 +5,7 @@ import unicodedata
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-VERSION = "explicit-aliases-single-edit-min5-v3"
+VERSION = "explicit-aliases-single-edit-min5-v4"
 
 _ALIASES = {
     "python": "Python",
@@ -45,6 +45,45 @@ _ALIASES = {
     "ruby on rails": "Rails",
     "php": "PHP",
     "wordpress": "WordPress",
+    "gcp": "Google Cloud Platform",
+    "google cloud platform": "Google Cloud Platform",
+    "cloud run": "Cloud Run",
+    "html": "HTML",
+    "html5": "HTML5",
+    "css": "CSS",
+    "css3": "CSS3",
+    "scss": "SCSS",
+    "ci/cd": "CI/CD",
+    "rest api": "REST API",
+    "apis restful": "RESTful API",
+    "restful": "RESTful",
+    "scrum": "Scrum",
+    "kanban": "Kanban",
+    "linux": "Linux",
+    "mysql": "MySQL",
+    "sql server": "SQL Server",
+    "microsoft sql server": "Microsoft SQL Server",
+    "laravel": "Laravel",
+    "flutter": "Flutter",
+    "dart": "Dart",
+    "next.js": "Next.js",
+    "nextjs": "Next.js",
+    "next js": "Next.js",
+    "vue.js": "Vue.js",
+    "vuejs": "Vue.js",
+    "jquery": "jQuery",
+    "redux": "Redux",
+    "tailwind css": "Tailwind CSS",
+    "figma": "Figma",
+    "power bi": "Power BI",
+    "powerbi": "Power BI",
+    "tableau": "Tableau",
+    "looker": "Looker",
+    "etl": "ETL",
+    "oracle": "Oracle",
+    "github": "GitHub",
+    "gitlab ci": "GitLab CI",
+    "nestjs": "NestJS",
     "coren": "COREN",
     "oab": "OAB",
     "crc": "CRC",
@@ -99,15 +138,18 @@ def alias_spans(text: str):
     Match original Unicode directly; no fuzzy-generated offsets or strength.
     """
     pattern = re.compile(
-        r"(?<![\w.+#])(?:"
+        r"(?<![\w.+#-])(?:"
         + "|".join(
             re.escape(a).replace(r"\ ", r"\s+")
             for a in sorted(_ALIASES, key=lambda a: (-len(a), a))
         )
-        + r")(?![\w+#])",
+        + r")(?![\w+#-])",
         re.I,
     )
     for match in pattern.finditer(text):
+        prefix = text[max(0, match.start() - 40) : match.start()]
+        if re.search(r"https?://\S*$", prefix, re.I):
+            continue
         name = canonical_skill(match.group())
         if name:
             yield match.start(), match.end(), CATEGORIES.get(name, "skill")

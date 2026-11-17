@@ -88,3 +88,11 @@ def test_ties_across_concepts_remain_unknown_and_short_names_are_exact_only():
     assert match_skill("C sharp").name == "C#"
     assert match_skill("C sharp").approximate is False
     assert match_skill("Py.thon") is None
+
+
+def test_alias_spans_ignore_hyphenated_package_names_and_urls():
+    from src.extraction.taxonomy import alias_spans
+
+    text = "Use react-table, material-react-table, React, and https://example.com/react-job"
+    spans = [text[s:e] for s, e, _ in alias_spans(text)]
+    assert spans == ["React"]
