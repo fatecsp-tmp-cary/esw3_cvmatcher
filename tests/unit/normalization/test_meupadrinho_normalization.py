@@ -81,7 +81,7 @@ def test_normalize_meupadrinho_job_maps_canonical_schema():
     assert normalized["work_arrangement"] is WorkArrangement.REMOTE
     assert normalized["seniority_level"] is SeniorityLevel.SENIOR
     assert normalized["skills"] == [
-        "design patterns",
+        "Design Patterns",
         "Docker",
         "FastAPI",
         "PostgreSQL",
