@@ -5,6 +5,7 @@ import json
 import logging
 import time
 from collections.abc import Callable, Iterable
+from datetime import date
 from typing import Any, Protocol
 
 from sqlalchemy import select
@@ -30,17 +31,50 @@ from src.matching.semantic import (
     semantic_score,
 )
 from src.matching.textual import candidate_query_text, retrieve_textual, textual_statement
-from src.normalization.candidate.curriculum import normalize_curriculum
+from src.normalization.candidate.curriculum import NormalizedCandidate, normalize_curriculum
 from src.persistence.embedding import JobEmbedding
 from src.persistence.extraction import JobExtraction
 from src.persistence.job.job import ACTIVE_STATUSES, INACTIVE_STATUSES, Job, status_predicate
-from src.persistence.job.skill import JobRequirement, JobSkill, Skill
+from src.persistence.job.skill import JobRequirement, JobSkill, RequirementClass, Skill
 from src.processing import ProcessingUnavailable, checkpoint
 from src.schemas.candidate.curriculum import CurriculumRequest
 from src.schemas.matches import MatchedJob, MatchesResponse, MatchResult
 
 logger = logging.getLogger(__name__)
 DISPLAYED_SKILLS_VERSION = "exact-affirmative-nonconflicting-v1"
+
+
+def _candidate_core_texts(candidate: NormalizedCandidate) -> list[str]:
+    """Return core sections (competencies, projects, 3 most recent experiences)."""
+    recent = sorted(
+        candidate.experience,
+        key=lambda x: (x.end_date is None, x.end_date or date.min, x.start_date),
+        reverse=True,
+    )[:3]
+    texts = [x.description for x in candidate.competencies if x.description.strip()]
+    texts.extend(f"{x.title}\n{x.description}\n{x.technologies}" for x in candidate.projects)
+    texts.extend(f"{x.title}\n{x.description}" for x in recent)
+    return texts
+
+
+def _tiered_job_skills(
+    own: list[str] | None,
+    associated: set[str],
+    tiered_extracted: dict[RequirementClass, set[str]],
+    trusted_names: set[str],
+) -> tuple[set[str], set[str], set[str], set[str]]:
+    """Partition job skills into REQUIRED / PREFERRED / NICE_TO_HAVE and exact REQUIRED."""
+    req = set(tiered_extracted.get(RequirementClass.REQUIRED, ()))
+    pref = set(tiered_extracted.get(RequirementClass.PREFERRED, ())) - req
+    opt = set(tiered_extracted.get(RequirementClass.NICE_TO_HAVE, ())) - req - pref
+    classified = req | pref | opt
+    source_skills = _normalized_skill_labels(own or [])
+    # Source-supplied skills without an extraction class count as REQUIRED;
+    # score-only associations without a class count as PREFERRED (ADR-027).
+    req |= source_skills - classified
+    pref |= associated - (req | pref | opt)
+    exact_required = set(tiered_extracted.get(RequirementClass.REQUIRED, ())) & trusted_names
+    return req, pref, opt, exact_required
 
 
 def _normalized_skill_labels(values: Iterable[str]) -> set[str]:
@@ -160,8 +194,11 @@ class MatchingPipeline:
         candidate_label_skills = _normalized_skill_labels(
             x.description for x in candidate.competencies
         )
-        skill_matcher = compile_skill_matcher([query_text])
-        candidate_skills = candidate_label_skills | skill_matcher.match(_ALIASES.values())
+        core_texts = _candidate_core_texts(candidate)
+        core_skill_matcher = compile_skill_matcher(core_texts) if core_texts else None
+        candidate_core_base = candidate_label_skills | (
+            core_skill_matcher.match(_ALIASES.values()) if core_skill_matcher else set()
+        )
         # Each entry is embedded separately, once per request. No candidate cache.
         experience_texts = [f"{x.title}\n{x.description}" for x in candidate.experience]
         education_texts = [f"{x.course}\n{x.level}" for x in candidate.education]
@@ -285,12 +322,22 @@ class MatchingPipeline:
                     if normalize_skill(name) in trusted_names.get(identifier, set()):
                         extracted_names.setdefault(identifier, {})[normalize_skill(name)] = name
                 requirements: dict[int, list[str]] = {}
-                for identifier, text in session.execute(
-                    select(JobRequirement.job_id, JobRequirement.text).where(
-                        JobRequirement.job_id.in_(pool)
+                tiered_skills: dict[int, dict[RequirementClass, set[str]]] = {}
+                for identifier, text, req_class, canonical_name in session.execute(
+                    select(
+                        JobRequirement.job_id,
+                        JobRequirement.text,
+                        JobRequirement.requirement_class,
+                        Skill.canonical_name,
                     )
+                    .outerjoin(Skill, Skill.id == JobRequirement.skill_id)
+                    .where(JobRequirement.job_id.in_(pool))
                 ):
                     requirements.setdefault(identifier, []).append(text)
+                    if isinstance(canonical_name, str) and canonical_name.strip():
+                        tiered_skills.setdefault(identifier, {}).setdefault(req_class, set()).add(
+                            normalize_skill(canonical_name)
+                        )
                 scored = []
                 entry_matrix: Any = np.asarray(vectors[: len(texts)], dtype=np.float64)
                 for job in jobs:
@@ -321,9 +368,23 @@ class MatchingPipeline:
                             for index in selected_experience_indices(experiences)
                             if experiences[index].score >= 50.0
                         )
-                    skills = _normalized_skill_labels(job.skills or [])
-                    skills |= associated_skills.get(job.id, set())
-                    matched = skill_matcher.match(skills) | (candidate_label_skills & skills)
+                    req_skills, pref_skills, opt_skills, exact_required = _tiered_job_skills(
+                        job.skills,
+                        associated_skills.get(job.id, set()),
+                        tiered_skills.get(job.id, {}),
+                        trusted_names.get(job.id, set()),
+                    )
+                    skills = req_skills | pref_skills | opt_skills
+                    matched = (
+                        core_skill_matcher.match(skills)
+                        if core_skill_matcher is not None
+                        else set()
+                    ) | (candidate_label_skills & skills)
+                    exact_matched = (
+                        core_skill_matcher.match(exact_required, include_approximate=False)
+                        if core_skill_matcher is not None
+                        else set()
+                    ) | (candidate_label_skills & exact_required)
                     structured = comparable_score(
                         candidate,
                         job,
@@ -331,7 +392,13 @@ class MatchingPipeline:
                         matched=matched,
                         requirements=requirements.get(job.id, []),
                         relevant_experience=relevant_experience,
-                        candidate_skills=candidate_skills | matched,
+                        candidate_skills=candidate_core_base | matched,
+                        required_skills=req_skills,
+                        preferred_skills=pref_skills,
+                        nice_to_have_skills=opt_skills,
+                        exact_required=exact_required,
+                        exact_matched=exact_matched,
+                        candidate_core_skills=candidate_core_base | matched,
                     )
                     total = self.ranking.score(
                         float(text_scores.get(job.id, 0)), semantic, structured
