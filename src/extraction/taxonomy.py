@@ -11,7 +11,6 @@ from src.extraction.taxonomy_data import CATEGORY_SPAN_LABELS, TAXONOMY_SPECS
 VERSION = "explicit-aliases-single-edit-min5-v5"
 
 
-
 def _fold(value: str) -> str:
     if not isinstance(value, str):
         raise TypeError("Skill alias must be text")

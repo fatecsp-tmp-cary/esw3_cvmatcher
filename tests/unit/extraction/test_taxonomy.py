@@ -98,12 +98,14 @@ def test_alias_spans_ignore_hyphenated_package_names_and_urls_and_emit_domain_la
     from src.extraction.taxonomy import alias_spans
 
     text = (
-        "Use react-table, material-react-table, React, PostgreSQL, AWS, Node.js/Vue.js, "
-        "github.com/empresa, https://careers.example-company.com/engineering/backend/python, "
+        "Use react-table, material-react-table, Python-based, docker-compose, React, "
+        "PostgreSQL, AWS, Node.js/Vue.js, github.com/empresa, "
+        "https://careers.example-company.com/engineering/backend/python, "
         "and https://example.com/react-job"
     )
     spans = [(text[s:e], label) for s, e, label in alias_spans(text)]
     assert spans == [
+        ("docker-compose", "tool"),
         ("React", "framework"),
         ("PostgreSQL", "database"),
         ("AWS", "cloud"),
