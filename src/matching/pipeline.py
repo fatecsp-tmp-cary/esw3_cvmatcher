@@ -5,14 +5,19 @@ import json
 import logging
 import time
 from collections.abc import Callable, Iterable
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Any, Protocol
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.domain.requirements import VERSION as REQUIREMENTS_VERSION
-from src.domain.requirements import comparable_score
+from src.domain.requirements import (
+    comparable_score,
+    explicit_seniority,
+    resolve_candidate_seniority,
+    seniority_alignment,
+)
 from src.embeddings.config import EmbeddingConfig
 from src.embeddings.retrieval import retrieve_semantic
 from src.embeddings.service import ready_predicate as embedding_ready
@@ -134,12 +139,14 @@ class MatchingPipeline:
         *,
         ranking: RankingPolicy | None = None,
         calibration: SimilarityCalibration | None = None,
+        as_of_date: date | None = None,
     ):
         self.sessions = sessions
         self.encoder = encoder
         self.extraction_version = extraction_version
         self.ranking = ranking or RankingPolicy()
         self.calibration = calibration or SimilarityCalibration()
+        self.as_of_date = as_of_date
 
     @property
     def algorithm_version(self) -> str:
@@ -185,6 +192,7 @@ class MatchingPipeline:
         import numpy as np
 
         checkpoint()
+        request_date = self.as_of_date or datetime.now(UTC).date()
         candidate = normalize_curriculum(request)
         query_text = candidate_query_text(candidate)
         if not query_text.strip():
@@ -216,195 +224,228 @@ class MatchingPipeline:
         checkpoint()
         with self.sessions() as session:
             matches: list[MatchResult] = []
+            entry_matrix: Any = np.asarray(vectors[: len(texts)], dtype=np.float64)
             # Active jobs are ranked first; inactive jobs only complete the list (ADR-016).
             for statuses, eligible in ((ACTIVE_STATUSES, True), (INACTIVE_STATUSES, False)):
                 if len(matches) >= limit:
                     break
-                # Exclude prior results in SQL before either retrieval LIMIT.
-                # A concurrent status transition must not consume an inactive slot.
-                returned_ids = tuple(sorted(match.job.id for match in matches))
-                group_gate = gate & Job.id.not_in(returned_ids) if returned_ids else gate
-                pool: set[int] = set()
-                for job, _ in retrieve_textual(
-                    session,
-                    candidate,
-                    readiness=group_gate,
-                    limit=self.ranking.retrieval_limit,
-                    statuses=statuses,
-                ):
-                    pool.add(job.id)
-                checkpoint()
-                for vector in vectors:
-                    checkpoint()
-                    for job, _ in retrieve_semantic(
+                needed = limit - len(matches)
+                returned_ids_set = {match.job.id for match in matches}
+                group_seen: set[int] = set()
+                group_scored: list[tuple[float, Job, list[str], dict[str, str]]] = []
+                # Bounded refill rounds so severe seniority hard-filtering does not
+                # exhaust the retrieval pool below `limit` when eligible jobs exist.
+                for _ in range(5):
+                    # Exclude prior results and already-inspected IDs in SQL before
+                    # either retrieval LIMIT.
+                    exclude_ids = tuple(sorted(returned_ids_set | group_seen))
+                    group_gate = gate & Job.id.not_in(exclude_ids) if exclude_ids else gate
+                    pool: set[int] = set()
+                    for job, _ in retrieve_textual(
                         session,
-                        vector,
-                        config,
-                        self.extraction_version,
+                        candidate,
+                        readiness=group_gate,
                         limit=self.ranking.retrieval_limit,
                         statuses=statuses,
-                        exclude_ids=returned_ids,
-                        vector="best",
+                        exclude_ids=exclude_ids,
                     ):
                         pool.add(job.id)
-                if not pool:
-                    continue
-                checkpoint()
-                jobs = session.scalars(
-                    select(Job)
-                    .where(Job.id.in_(sorted(pool)), status_predicate(statuses), group_gate)
-                    .order_by(Job.platform, Job.source_job_id, Job.id)
-                    .execution_options(populate_existing=True)
-                ).all()
-                # Recheck all readiness after pool retrieval; no stale embeddings are scored.
-                vector_jobs = set(
-                    session.scalars(
-                        select(Job.id).where(
-                            Job.id.in_(sorted(pool)),
-                            status_predicate(statuses),
-                            group_gate,
-                        )
-                    )
-                )
-                # Recompute the complete textual component (including requirement
-                # rows) for the considered union, even for semantic-only retrieval.
-                text_scores: dict[int, float] = {
-                    job.id: float(score)
-                    for job, score in session.execute(
-                        textual_statement(
-                            query_text, readiness=group_gate, limit=len(pool), statuses=statuses
-                        ).where(Job.id.in_(sorted(pool)))
-                    )
-                }
-                # Internal job-core vectors (ADR-027); readiness already requires them.
-                core_vectors: dict[int, Any] = {}
-                if texts:
-                    for identifier, core in session.execute(
-                        select(JobEmbedding.job_id, JobEmbedding.core_embedding).where(
-                            JobEmbedding.job_id.in_(sorted(pool)),
-                            JobEmbedding.core_embedding.is_not(None),
-                        )
-                    ):
-                        if core is not None:
-                            core_vectors[identifier] = np.asarray(
-                                normalized_vector(core), dtype=np.float64
-                            )
-                # ADR-024 / ADR-027 require current extraction and both vectors,
-                # even for textual-only candidates. Recheck after pool retrieval.
-                jobs = [
-                    job
-                    for job in jobs
-                    if job.id in vector_jobs
-                    and (job.id in text_scores or texts)
-                    and (not texts or (job.embedding is not None and job.id in core_vectors))
-                ]
-                associated_skills: dict[int, set[str]] = {}
-                extracted_names: dict[int, dict[str, str]] = {}
-                trusted_names = {
-                    identifier: trusted_extracted_skills(evidence)
-                    for identifier, evidence in session.execute(
-                        select(JobExtraction.job_id, JobExtraction.evidence)
-                        .join(Job, Job.id == JobExtraction.job_id)
-                        .where(
-                            JobExtraction.job_id.in_(pool),
-                            JobExtraction.status == "SUCCEEDED",
-                            JobExtraction.content_hash == Job.content_hash,
-                            JobExtraction.config_version == self.extraction_version,
-                        )
-                    )
-                }
-                for identifier, name in session.execute(
-                    select(JobSkill.job_id, Skill.canonical_name)
-                    .join(Skill, Skill.id == JobSkill.skill_id)
-                    .where(JobSkill.job_id.in_(pool))
-                ):
-                    associated_skills.setdefault(identifier, set()).add(normalize_skill(name))
-                    if normalize_skill(name) in trusted_names.get(identifier, set()):
-                        extracted_names.setdefault(identifier, {})[normalize_skill(name)] = name
-                requirements: dict[int, list[str]] = {}
-                tiered_skills: dict[int, dict[RequirementClass, set[str]]] = {}
-                for identifier, text, req_class, canonical_name in session.execute(
-                    select(
-                        JobRequirement.job_id,
-                        JobRequirement.text,
-                        JobRequirement.requirement_class,
-                        Skill.canonical_name,
-                    )
-                    .outerjoin(Skill, Skill.id == JobRequirement.skill_id)
-                    .where(JobRequirement.job_id.in_(pool))
-                ):
-                    requirements.setdefault(identifier, []).append(text)
-                    if isinstance(canonical_name, str) and canonical_name.strip():
-                        tiered_skills.setdefault(identifier, {}).setdefault(req_class, set()).add(
-                            normalize_skill(canonical_name)
-                        )
-                scored = []
-                entry_matrix: Any = np.asarray(vectors[: len(texts)], dtype=np.float64)
-                for job in jobs:
                     checkpoint()
-                    semantic = 0.0
-                    relevant_experience: tuple[Any, ...] = ()
-                    if texts and job.embedding is not None:
-                        job_vector: Any = np.asarray(
-                            normalized_vector(job.embedding), dtype=np.float64
+                    for vector in vectors:
+                        checkpoint()
+                        for job, _ in retrieve_semantic(
+                            session,
+                            vector,
+                            config,
+                            self.extraction_version,
+                            limit=self.ranking.retrieval_limit,
+                            statuses=statuses,
+                            exclude_ids=exclude_ids,
+                            vector="best",
+                        ):
+                            pool.add(job.id)
+                    pool -= group_seen
+                    if not pool:
+                        break
+                    group_seen |= pool
+                    checkpoint()
+                    jobs = session.scalars(
+                        select(Job)
+                        .where(Job.id.in_(sorted(pool)), status_predicate(statuses), group_gate)
+                        .order_by(Job.platform, Job.source_job_id, Job.id)
+                        .execution_options(populate_existing=True)
+                    ).all()
+                    # Recheck all readiness after pool retrieval; no stale embeddings are scored.
+                    vector_jobs = set(
+                        session.scalars(
+                            select(Job.id).where(
+                                Job.id.in_(sorted(pool)),
+                                status_predicate(statuses),
+                                group_gate,
+                            )
                         )
-                        similarities = np.clip(entry_matrix @ job_vector, -1.0, 1.0)
-                        core_similarities = np.clip(entry_matrix @ core_vectors[job.id], -1.0, 1.0)
-                        similarities = dual_similarity(
-                            np, core_similarities, similarities, self.ranking.core_weight
-                        )
-                        entry_scores = [
-                            self.calibration.score(float(value)) for value in similarities
-                        ]
-                        experiences = tuple(
-                            ExperienceScore(entry_scores[i], entry.start_date, entry.end_date)
-                            for i, entry in enumerate(candidate.experience)
-                        )
-                        semantic = semantic_score(
-                            experiences, tuple(entry_scores[len(experience_texts) :])
-                        )
-                        relevant_experience = tuple(
-                            candidate.experience[index]
-                            for index in selected_experience_indices(experiences)
-                            if experiences[index].score >= 50.0
-                        )
-                    req_skills, pref_skills, opt_skills, exact_required = _tiered_job_skills(
-                        job.skills,
-                        associated_skills.get(job.id, set()),
-                        tiered_skills.get(job.id, {}),
-                        trusted_names.get(job.id, set()),
                     )
-                    skills = req_skills | pref_skills | opt_skills
-                    matched = (
-                        core_skill_matcher.match(skills)
-                        if core_skill_matcher is not None
-                        else set()
-                    ) | (candidate_label_skills & skills)
-                    exact_matched = (
-                        core_skill_matcher.match(exact_required, include_approximate=False)
-                        if core_skill_matcher is not None
-                        else set()
-                    ) | (candidate_label_skills & exact_required)
-                    structured = comparable_score(
-                        candidate,
-                        job,
-                        skills=skills,
-                        matched=matched,
-                        requirements=requirements.get(job.id, []),
-                        relevant_experience=relevant_experience,
-                        candidate_skills=candidate_core_base | matched,
-                        required_skills=req_skills,
-                        preferred_skills=pref_skills,
-                        nice_to_have_skills=opt_skills,
-                        exact_required=exact_required,
-                        exact_matched=exact_matched,
-                        candidate_core_skills=candidate_core_base | matched,
-                    )
-                    total = self.ranking.score(
-                        float(text_scores.get(job.id, 0)), semantic, structured
-                    )
-                    scored.append((total, job, sorted(matched & skills)))
-                scored.sort(
+                    # Recompute the complete textual component (including requirement
+                    # rows) for the considered union, even for semantic-only retrieval.
+                    text_scores: dict[int, float] = {
+                        job.id: float(score)
+                        for job, score in session.execute(
+                            textual_statement(
+                                query_text,
+                                readiness=group_gate,
+                                limit=len(pool),
+                                statuses=statuses,
+                            ).where(Job.id.in_(sorted(pool)))
+                        )
+                    }
+                    # Internal job-core vectors (ADR-027); readiness already requires them.
+                    core_vectors: dict[int, Any] = {}
+                    if texts:
+                        for identifier, core in session.execute(
+                            select(JobEmbedding.job_id, JobEmbedding.core_embedding).where(
+                                JobEmbedding.job_id.in_(sorted(pool)),
+                                JobEmbedding.core_embedding.is_not(None),
+                            )
+                        ):
+                            if core is not None:
+                                core_vectors[identifier] = np.asarray(
+                                    normalized_vector(core), dtype=np.float64
+                                )
+                    # ADR-024 / ADR-027 require current extraction and both vectors,
+                    # even for textual-only candidates. Recheck after pool retrieval.
+                    jobs = [
+                        job
+                        for job in jobs
+                        if job.id in vector_jobs
+                        and (job.id in text_scores or texts)
+                        and (not texts or (job.embedding is not None and job.id in core_vectors))
+                    ]
+                    associated_skills: dict[int, set[str]] = {}
+                    extracted_names: dict[int, dict[str, str]] = {}
+                    trusted_names = {
+                        identifier: trusted_extracted_skills(evidence)
+                        for identifier, evidence in session.execute(
+                            select(JobExtraction.job_id, JobExtraction.evidence)
+                            .join(Job, Job.id == JobExtraction.job_id)
+                            .where(
+                                JobExtraction.job_id.in_(pool),
+                                JobExtraction.status == "SUCCEEDED",
+                                JobExtraction.content_hash == Job.content_hash,
+                                JobExtraction.config_version == self.extraction_version,
+                            )
+                        )
+                    }
+                    for identifier, name in session.execute(
+                        select(JobSkill.job_id, Skill.canonical_name)
+                        .join(Skill, Skill.id == JobSkill.skill_id)
+                        .where(JobSkill.job_id.in_(pool))
+                    ):
+                        associated_skills.setdefault(identifier, set()).add(normalize_skill(name))
+                        if normalize_skill(name) in trusted_names.get(identifier, set()):
+                            extracted_names.setdefault(identifier, {})[normalize_skill(name)] = name
+                    requirements: dict[int, list[str]] = {}
+                    tiered_skills: dict[int, dict[RequirementClass, set[str]]] = {}
+                    for identifier, text, req_class, canonical_name in session.execute(
+                        select(
+                            JobRequirement.job_id,
+                            JobRequirement.text,
+                            JobRequirement.requirement_class,
+                            Skill.canonical_name,
+                        )
+                        .outerjoin(Skill, Skill.id == JobRequirement.skill_id)
+                        .where(JobRequirement.job_id.in_(pool))
+                    ):
+                        requirements.setdefault(identifier, []).append(text)
+                        if isinstance(canonical_name, str) and canonical_name.strip():
+                            tiered_skills.setdefault(identifier, {}).setdefault(
+                                req_class, set()
+                            ).add(normalize_skill(canonical_name))
+                    seniority_filtered = 0
+                    for job in jobs:
+                        checkpoint()
+                        semantic = 0.0
+                        relevant_experience: tuple[Any, ...] = ()
+                        if texts and job.embedding is not None:
+                            job_vector: Any = np.asarray(
+                                normalized_vector(job.embedding), dtype=np.float64
+                            )
+                            similarities = np.clip(entry_matrix @ job_vector, -1.0, 1.0)
+                            core_similarities = np.clip(
+                                entry_matrix @ core_vectors[job.id], -1.0, 1.0
+                            )
+                            similarities = dual_similarity(
+                                np, core_similarities, similarities, self.ranking.core_weight
+                            )
+                            entry_scores = [
+                                self.calibration.score(float(value)) for value in similarities
+                            ]
+                            experiences = tuple(
+                                ExperienceScore(entry_scores[i], entry.start_date, entry.end_date)
+                                for i, entry in enumerate(candidate.experience)
+                            )
+                            semantic = semantic_score(
+                                experiences, tuple(entry_scores[len(experience_texts) :])
+                            )
+                            relevant_experience = tuple(
+                                candidate.experience[index]
+                                for index in selected_experience_indices(experiences)
+                                if experiences[index].score >= 50.0
+                            )
+                        candidate_level = resolve_candidate_seniority(
+                            candidate, relevant_experience, as_of_date=request_date
+                        )
+                        required_level = job.seniority_level or explicit_seniority(job.title)
+                        allowed, _, seniority_multiplier = seniority_alignment(
+                            candidate_level, required_level
+                        )
+                        if not allowed:
+                            seniority_filtered += 1
+                            continue
+                        req_skills, pref_skills, opt_skills, exact_required = _tiered_job_skills(
+                            job.skills,
+                            associated_skills.get(job.id, set()),
+                            tiered_skills.get(job.id, {}),
+                            trusted_names.get(job.id, set()),
+                        )
+                        skills = req_skills | pref_skills | opt_skills
+                        matched = (
+                            core_skill_matcher.match(skills)
+                            if core_skill_matcher is not None
+                            else set()
+                        ) | (candidate_label_skills & skills)
+                        exact_matched = (
+                            core_skill_matcher.match(exact_required, include_approximate=False)
+                            if core_skill_matcher is not None
+                            else set()
+                        ) | (candidate_label_skills & exact_required)
+                        structured = comparable_score(
+                            candidate,
+                            job,
+                            skills=skills,
+                            matched=matched,
+                            requirements=requirements.get(job.id, []),
+                            relevant_experience=relevant_experience,
+                            candidate_skills=candidate_core_base | matched,
+                            required_skills=req_skills,
+                            preferred_skills=pref_skills,
+                            nice_to_have_skills=opt_skills,
+                            exact_required=exact_required,
+                            exact_matched=exact_matched,
+                            candidate_core_skills=candidate_core_base | matched,
+                            as_of_date=request_date,
+                        )
+                        total = self.ranking.score(
+                            float(text_scores.get(job.id, 0)),
+                            semantic,
+                            structured,
+                            multiplier=seniority_multiplier,
+                        )
+                        group_scored.append(
+                            (total, job, sorted(matched & skills), extracted_names.get(job.id, {}))
+                        )
+                    if seniority_filtered == 0 or len(group_scored) >= needed:
+                        break
+                group_scored.sort(
                     key=lambda item: (
                         -item[0],
                         item[1].platform,
@@ -412,11 +453,9 @@ class MatchingPipeline:
                         item[1].id,
                     )
                 )
-                for score, job, matched_skills in scored[: limit - len(matches)]:
+                for score, job, matched_skills, job_extracted_names in group_scored[:needed]:
                     payload = {name: getattr(job, name) for name in MatchedJob.model_fields}
-                    payload["skills"] = displayed_skills(
-                        job.skills, extracted_names.get(job.id, {})
-                    )
+                    payload["skills"] = displayed_skills(job.skills, job_extracted_names)
                     matches.append(
                         MatchResult(
                             rank=len(matches) + 1,

@@ -17,6 +17,8 @@ _SENIORITY_ALIASES = {
     "intern": SeniorityLevel.INTERN,
     "internship": SeniorityLevel.INTERN,
     "estagio": SeniorityLevel.INTERN,
+    "estagiario": SeniorityLevel.INTERN,
+    "estagiaria": SeniorityLevel.INTERN,
     "junior": SeniorityLevel.JUNIOR,
     "jr": SeniorityLevel.JUNIOR,
     "mid": SeniorityLevel.MID,

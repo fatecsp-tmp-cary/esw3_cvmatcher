@@ -20,9 +20,9 @@
   readiness, privacy and the frozen public contract remain in force.
 - **Issues:** #214 (dual vectors), #215 (skills), #216 (seniority), #217 (length
   normalization).
-- **Implementation status:** Decisions 2 and 3 are implemented in #214 and #215.
-  Decisions 1 and 4 are implemented by the stacked PRs for #216 and #217.
-  Calibration and reviewed held-out evaluation remain pending.
+- **Implementation status:** Decisions 1, 2 and 3 are implemented in #216, #214
+  and #215. Decision 4 is implemented by the stacked PR for #217. Calibration and
+  reviewed held-out evaluation remain pending.
 
 ## Context
 
@@ -51,21 +51,25 @@ Observed rankings showed five coupled problems:
 - One ladder: `INTERN(0) < JUNIOR(1) < MID(2) < SENIOR(3) < SPECIALIST(4) = COORDINATOR(4)`,
   consistent with the ADR-019 restrictive order.
 - Job level: `job.seniority_level`, else an explicit title marker.
-- Candidate level: the highest explicit title marker among the already selected
-  relevant experiences (semantic score at least 50). Without such a marker, a
-  conservative tenure fallback: under 12 months of **total** experience (including
-  none) is `JUNIOR`; at least 60 months across the **relevant** experiences is
-  `SENIOR`; anything else stays unknown. Total tenure is used for the low end so
+- Candidate level: take the highest explicit title marker among the already
+  selected relevant experiences (semantic score at least 50), and when
+  relevant tenure reaches at least 60 months, take `max(explicit, SENIOR)` so an
+  early-career `Junior` title cannot permanently mask senior tenure. Without an
+  explicit marker, under 12 months of **total** experience (including none) is
+  `JUNIOR`; at least 60 months across **relevant** experiences is `SENIOR`;
+  anything else stays unknown. Total tenure is used for the low end so
   entry-level profiles are recognized; relevant tenure is used for the high end so
   career changers are not blocked from junior roles in a new field. Ongoing
-  experience is measured to a request reference date (injectable for tests).
+  experience is measured to one request-scoped UTC date (`as_of_date`, explicit
+  request input for determinism, injectable in tests).
 - When both levels are known: a gap of two or more levels **removes the job** from
   the response (both directions); a gap of one keeps it with a seniority dimension
   of 40 and a 0.85 multiplier on the final score; an exact match scores 100.
 - When either level is unknown, nothing is filtered and the dimension is omitted.
-- Filtering happens before ranking inside each status group, so ADR-016 is
-  unchanged: `eligibility` still means active versus not active, filtered jobs are
-  simply absent, and the inactive group may still fill remaining positions.
+- Filtering happens inside each status group before ranking, with bounded
+  `exclude_ids` refill rounds when seniority filtering drops pool entries below
+  `limit`, so eligible active jobs are not skipped for inactive ones while
+  ADR-016 `eligibility` semantics remain unchanged.
 
 ### 2. Dual job vectors (#214)
 

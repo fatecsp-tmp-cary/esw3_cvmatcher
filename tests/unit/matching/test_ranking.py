@@ -66,3 +66,12 @@ def test_dual_similarity_never_lets_long_descriptions_drag_the_core_below_itself
 def test_core_weight_is_a_finite_share(weight):
     with pytest.raises(ValueError, match="Invalid ranking policy"):
         RankingPolicy(core_weight=weight)
+
+
+def test_ranking_policy_multiplier_scales_and_validates():
+    policy = RankingPolicy()
+    assert policy.score(100, 100, 100, multiplier=0.85) == pytest.approx(85.0)
+    with pytest.raises(ValueError, match="Multiplier"):
+        policy.score(50, 50, 50, multiplier=1.1)
+    with pytest.raises(ValueError, match="Multiplier"):
+        policy.score(50, 50, 50, multiplier=float("nan"))

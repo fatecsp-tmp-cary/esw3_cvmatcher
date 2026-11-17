@@ -115,6 +115,7 @@ def test_unrelated_or_nonordinal_seniority_is_unknown_not_a_penalty():
         relevant_experience=(),
     ) == pytest.approx(expected)
     coordinator = [SimpleNamespace(title="Project coordinator")]
+    # ADR-027 places COORDINATOR (4) one step above SENIOR (3): gap=1 -> score 40.
     assert comparable_score(
         candidate,
         job,
@@ -122,7 +123,7 @@ def test_unrelated_or_nonordinal_seniority_is_unknown_not_a_penalty():
         matched={"python"},
         requirements=[],
         relevant_experience=coordinator,
-    ) == pytest.approx(expected)
+    ) == pytest.approx((expected + 40.0) / 2)
 
 
 def test_missing_candidate_skills_are_omitted_but_explicit_nonmatching_skills_compare():
@@ -280,3 +281,115 @@ def test_precision_denominator_caps_at_15_and_exact_skill_matcher_excludes_typos
     matcher = compile_skill_matcher(["Pythom e PostgreSQL"])
     assert matcher.match({"python", "postgresql"}) == {"postgresql", "python"}
     assert matcher.match({"python", "postgresql"}, include_approximate=False) == {"postgresql"}
+
+
+def test_seniority_ladder_and_symmetric_hard_filter():
+    from src.domain.requirements import SENIORITY_LADDER, seniority_alignment
+
+    assert SENIORITY_LADDER[SeniorityLevel.INTERN] < SENIORITY_LADDER[SeniorityLevel.JUNIOR]
+    assert SENIORITY_LADDER[SeniorityLevel.JUNIOR] < SENIORITY_LADDER[SeniorityLevel.MID]
+    assert SENIORITY_LADDER[SeniorityLevel.MID] < SENIORITY_LADDER[SeniorityLevel.SENIOR]
+    assert SENIORITY_LADDER[SeniorityLevel.SENIOR] < SENIORITY_LADDER[SeniorityLevel.SPECIALIST]
+    assert (
+        SENIORITY_LADDER[SeniorityLevel.SPECIALIST] == SENIORITY_LADDER[SeniorityLevel.COORDINATOR]
+    )
+
+    # Gap >= 2 hard-filters in both directions.
+    assert seniority_alignment(SeniorityLevel.JUNIOR, SeniorityLevel.SENIOR) == (False, 0.0, 0.0)
+    assert seniority_alignment(SeniorityLevel.SENIOR, SeniorityLevel.JUNIOR) == (False, 0.0, 0.0)
+    assert seniority_alignment(SeniorityLevel.INTERN, SeniorityLevel.MID) == (False, 0.0, 0.0)
+    assert seniority_alignment(SeniorityLevel.COORDINATOR, SeniorityLevel.MID) == (False, 0.0, 0.0)
+
+    # Gap == 1 stays allowed with score penalty + multiplier.
+    assert seniority_alignment(SeniorityLevel.MID, SeniorityLevel.SENIOR) == (True, 40.0, 0.85)
+    assert seniority_alignment(SeniorityLevel.SENIOR, SeniorityLevel.MID) == (True, 40.0, 0.85)
+
+    # Exact or unknown never filters.
+    assert seniority_alignment(SeniorityLevel.SPECIALIST, SeniorityLevel.COORDINATOR) == (
+        True,
+        100.0,
+        1.0,
+    )
+    assert seniority_alignment(None, SeniorityLevel.SENIOR) == (True, None, 1.0)
+    assert seniority_alignment(SeniorityLevel.SENIOR, None) == (True, None, 1.0)
+
+
+def test_conservative_tenure_fallback_handles_overlap_career_change_and_dates():
+    from datetime import date
+
+    from src.domain.requirements import resolve_candidate_seniority
+
+    as_of = date(2026, 6, 1)
+    # Zero experiences -> JUNIOR.
+    assert resolve_candidate_seniority(SimpleNamespace(experience=[]), ()) is SeniorityLevel.JUNIOR
+
+    # Concurrent 6-month roles stay 6 months (< 12) -> JUNIOR.
+    concurrent = [
+        SimpleNamespace(
+            title="Backend Developer", start_date=date(2026, 1, 1), end_date=date(2026, 6, 1)
+        ),
+        SimpleNamespace(title="Freelance Dev", start_date=date(2026, 1, 1), end_date=None),
+    ]
+    assert (
+        resolve_candidate_seniority(
+            SimpleNamespace(experience=concurrent), concurrent, as_of_date=as_of
+        )
+        is SeniorityLevel.JUNIOR
+    )
+
+    # >= 60 months across relevant experiences -> SENIOR.
+    long_relevant = [
+        SimpleNamespace(title="Software Engineer", start_date=date(2021, 1, 1), end_date=None)
+    ]
+    assert (
+        resolve_candidate_seniority(
+            SimpleNamespace(experience=long_relevant), long_relevant, as_of_date=as_of
+        )
+        is SeniorityLevel.SENIOR
+    )
+
+    # Career changer: 60+ months unrelated (relevant_experience=()) stays unknown, not SENIOR.
+    assert (
+        resolve_candidate_seniority(SimpleNamespace(experience=long_relevant), (), as_of_date=as_of)
+        is None
+    )
+
+    # Explicit relevant title marker overrides tenure.
+    marked = [
+        SimpleNamespace(title="Tech Lead", start_date=date(2026, 1, 1), end_date=date(2026, 4, 1))
+    ]
+    assert (
+        resolve_candidate_seniority(
+            SimpleNamespace(experience=marked),
+            [SimpleNamespace(title="Junior Developer", start_date=date(2026, 1, 1), end_date=None)],
+            as_of_date=as_of,
+        )
+        is SeniorityLevel.JUNIOR
+    )
+
+
+def test_estagiario_alias_and_stale_junior_marker_overridden_by_senior_tenure():
+    from datetime import date
+
+    from src.domain.requirements import explicit_seniority, resolve_candidate_seniority
+
+    assert explicit_seniority("Estagiário Python") is SeniorityLevel.INTERN
+    assert explicit_seniority("Estagiária de Dados") is SeniorityLevel.INTERN
+
+    as_of = date(2026, 6, 1)
+    career = [
+        SimpleNamespace(
+            title="Desenvolvedor Júnior",
+            start_date=date(2020, 1, 1),
+            end_date=date(2021, 1, 1),
+        ),
+        SimpleNamespace(
+            title="Engenheiro de Software",
+            start_date=date(2021, 1, 2),
+            end_date=None,
+        ),
+    ]
+    assert (
+        resolve_candidate_seniority(SimpleNamespace(experience=career), career, as_of_date=as_of)
+        is SeniorityLevel.SENIOR
+    )
