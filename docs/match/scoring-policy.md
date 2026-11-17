@@ -40,8 +40,12 @@ Calibration remains provisional and release approval remains disabled.
   This job-readiness gate does not invent candidate semantic evidence.
   Production API composition in `src/api/runtime.py` is implemented in #175.
   Per-entry cosine calibration is explicit and provisional.
-  Its provisional policy version is `semantic-aggregation-v2-provisional`; v2
-  corrects available-section normalization for extreme finite configured weights.
+  Its provisional policy version is `semantic-aggregation-v3-provisional`; v3
+  adds bidirectional candidate-summary alignment (`summary_weight = 0.25` against
+  `core_embedding`) and a gentle CV-breadth coherence factor (`0.8 + 0.2*ratio`)
+  under [ADR-027](../architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md),
+  paired with `ts_rank_cd` saturation (`flag 32`), query-term length
+  normalization, and `focused_candidate_query_text` for FTS.
   The default 80/20 weights, recency weights and final blend are unchanged.
 - Retrieval-pool limits must be positive integer counts; booleans, fractions and
   nonfinite values are rejected before reaching SQL `LIMIT`.

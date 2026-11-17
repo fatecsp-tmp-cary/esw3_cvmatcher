@@ -144,7 +144,7 @@ def test_background_to_api_ranking_is_repeatable_private_and_source_independent(
     assert body["curriculo_id"] not in first.text + caplog.text
     assert body["experiencias"][0]["descricao"] not in caplog.text
     assert all("candidate" not in name for name in inspect(db_engine).get_table_names())
-    assert len(encoder.calls[0]) == len(body["experiencias"]) + len(body["formacoes"])
+    assert len(encoder.calls[0]) == len(body["experiencias"]) + len(body["formacoes"]) + 1
 
 
 def test_empty_sections_do_not_invent_evidence_or_run_inference(populated):

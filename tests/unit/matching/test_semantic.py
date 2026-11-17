@@ -102,4 +102,22 @@ def test_absent_section_weight_cannot_underflow_available_evidence(available):
     entries = (experience(100),) if experience_only else ()
     education = () if experience_only else (100,)
     assert semantic_score(entries, education, policy) == 100
-    assert policy.version == "semantic-aggregation-v2-provisional"
+    assert policy.version == "semantic-aggregation-v3-provisional"
+
+
+def test_summary_alignment_and_breadth_coherence_factor():
+    from src.matching.semantic import coherence_factor
+
+    assert coherence_factor(1, 0) == 1.0
+    assert coherence_factor(3, 0) == 1.0
+    assert coherence_factor(10, 5) == 1.0
+    assert coherence_factor(10, 1) == pytest.approx(0.84)
+
+    entries = tuple(experience(80, 2020 + i) for i in range(6))
+    focused = semantic_score(entries[:3], (), summary_score=80.0, relevant_count=3)
+    sprawling = semantic_score(entries, (), summary_score=40.0, relevant_count=1)
+    assert focused == pytest.approx(80.0)
+    assert sprawling < focused
+
+    with pytest.raises(ValueError, match="summary_weight"):
+        SemanticPolicy(summary_weight=1.1)

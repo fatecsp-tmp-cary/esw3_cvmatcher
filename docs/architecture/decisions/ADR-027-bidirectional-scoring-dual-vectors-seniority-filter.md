@@ -20,9 +20,9 @@
   readiness, privacy and the frozen public contract remain in force.
 - **Issues:** #214 (dual vectors), #215 (skills), #216 (seniority), #217 (length
   normalization).
-- **Implementation status:** Decisions 1, 2 and 3 are implemented in #216, #214
-  and #215. Decision 4 is implemented by the stacked PR for #217. Calibration and
-  reviewed held-out evaluation remain pending.
+- **Implementation status:** All four decisions are implemented across the stacked
+  PRs for #214, #215, #216 and #217. Calibration and reviewed held-out
+  evaluation remain pending.
 
 ## Context
 
@@ -105,14 +105,15 @@ Observed rankings showed five coupled problems:
 
 ### 4. Length normalization and profile alignment (#217)
 
-- `ts_rank_cd` uses PostgreSQL document-length normalization (flag 1) and the
-  textual score is divided by `1 + 0.15*ln(1 + distinct query terms)` before the
-  existing `100*r/(1+r)` bound.
-- The candidate text query is a focused, deduplicated projection: experience
+- Bounded `ts_rank_cd` uses PostgreSQL rank saturation (flag 32, `r/(1+r)` per
+  path without penalizing long descriptions or city-name length under ADR-005)
+  and divides the combined rank by `1 + 0.15*ln(1 + distinct query terms)` before
+  the `100*r/(1+r)` bound.
+- The candidate FTS query uses a focused, deduplicated projection: experience
   titles, competencies, project titles/technologies, education courses, language
-  names and the three most recent experience descriptions. The skill matcher uses
-  the same core sections. This is a derived matching representation; the
-  normalized candidate still preserves every section (ADR-006).
+  names and the three most recent experience descriptions. Skill matching uses
+  only the single core skill projection from Decision 3. Both are derived matching
+  representations; the normalized candidate still preserves every section (ADR-006).
 - A concise candidate summary vector is compared with the job-core vector. It adds
   one core-vector retrieval scan and contributes 25% of the semantic component.
 - Profiles with more than three experiences receive a gentle coherence factor

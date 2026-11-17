@@ -5,7 +5,7 @@ No candidate data, per-entry embeddings or evidence are persisted here.
 
 from dataclasses import dataclass
 from datetime import date
-from math import isfinite
+from math import ceil, isfinite
 
 
 @dataclass(frozen=True, slots=True, repr=False)
@@ -33,10 +33,12 @@ def _validate_score(value: float) -> None:
 class SemanticPolicy:
     """Interview starting coefficients; calibration/release approval is pending."""
 
-    version: str = "semantic-aggregation-v2-provisional"
+    version: str = "semantic-aggregation-v3-provisional"
     experience_weight: float = 0.8
     education_weight: float = 0.2
     recency_weights: tuple[float, float, float] = (1.5, 1.25, 1.0)
+    # ADR-027: weight of whole-profile summary -> job-core cosine score.
+    summary_weight: float = 0.25
 
     def __post_init__(self) -> None:
         weights = (self.experience_weight, self.education_weight, *self.recency_weights)
@@ -46,6 +48,8 @@ class SemanticPolicy:
             self.recency_weights[0] > self.recency_weights[1] > self.recency_weights[2]
         ):
             raise ValueError("three strictly descending recency weights are required")
+        if not isfinite(self.summary_weight) or not 0.0 <= self.summary_weight <= 1.0:
+            raise ValueError("summary_weight must be finite and within [0,1]")
 
 
 _DEFAULT_POLICY = SemanticPolicy()
@@ -62,10 +66,22 @@ def selected_experience_indices(experiences: tuple[ExperienceScore, ...]) -> tup
     )
 
 
+def coherence_factor(total_experiences: int, relevant_count: int) -> float:
+    """Gentle breadth factor damping sprawling profiles with few relevant entries."""
+    if total_experiences <= 3:
+        return 1.0
+    target = ceil(total_experiences / 2)
+    ratio = min(1.0, max(0, relevant_count) / target)
+    return 0.8 + 0.2 * ratio
+
+
 def semantic_score(
     experiences: tuple[ExperienceScore, ...],
     education_scores: tuple[float, ...],
     policy: SemanticPolicy = _DEFAULT_POLICY,
+    *,
+    summary_score: float | None = None,
+    relevant_count: int | None = None,
 ) -> float:
     """Select by relevance, then weight by recency and blend available sections.
 
@@ -73,9 +89,14 @@ def semantic_score(
     Equal similarity sorts by recency, then original input position. Recency
     groups receive weights 1.5/1.25/1.0 from newest to oldest; tied dates share a
     group. With fewer distinct groups, use the first one/two weights.
+    When ``summary_score`` is supplied, it contributes ``policy.summary_weight``
+    (ADR-027 bidirectional profile alignment); ``relevant_count`` applies the
+    CV-breadth coherence factor.
     """
     for score in education_scores:
         _validate_score(score)
+    if summary_score is not None:
+        _validate_score(summary_score)
     # Stable sorting preserves input position when both score and recency tie.
     selected = [experiences[index] for index in selected_experience_indices(experiences)]
     total = denominator = 0.0
@@ -102,4 +123,9 @@ def semantic_score(
     if education_scores:
         total += education_weight * max(education_scores)
         denominator += education_weight
-    return min(100.0, max(0.0, total / denominator)) if denominator else 0.0
+    base = min(100.0, max(0.0, total / denominator)) if denominator else 0.0
+    if summary_score is not None and denominator:
+        base = (1.0 - policy.summary_weight) * base + policy.summary_weight * summary_score
+    if relevant_count is not None:
+        base *= coherence_factor(len(experiences), relevant_count)
+    return min(100.0, max(0.0, base))

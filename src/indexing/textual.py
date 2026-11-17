@@ -6,7 +6,7 @@ from sqlalchemy.sql.elements import ColumnElement, SQLColumnExpression
 
 _CONFIG: ColumnElement = literal_column("'pg_catalog.portuguese'::regconfig")
 _EMPTY_TEXT: ColumnElement = literal_column("''::text")
-TEXTUAL_VERSION = "portuguese-weighted-any-term-v2"
+TEXTUAL_VERSION = "portuguese-weighted-normalized-v3"
 
 
 def _text_vector(value: SQLColumnExpression, weight: str) -> ColumnElement:

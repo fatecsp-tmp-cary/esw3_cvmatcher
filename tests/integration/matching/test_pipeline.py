@@ -129,7 +129,7 @@ def test_background_to_api_ranking_is_repeatable_private_and_source_independent(
     assert body["curriculo_id"] not in first.text + caplog.text
     assert body["experiencias"][0]["descricao"] not in caplog.text
     assert all("candidate" not in name for name in inspect(db_engine).get_table_names())
-    assert len(encoder.calls[0]) == len(body["experiencias"]) + len(body["formacoes"])
+    assert len(encoder.calls[0]) == len(body["experiencias"]) + len(body["formacoes"]) + 1
 
 
 def test_empty_sections_do_not_invent_evidence_or_run_inference(populated):
@@ -856,6 +856,114 @@ def test_seniority_hard_filter_refills_pool_instead_of_falling_back_to_inactive(
         res = pipeline(CurriculumRequest.model_validate(body), 2)
         assert [m.job.id for m in res.matches] == [ids["b-junior-1"], ids["b-junior-2"]]
         assert all(m.eligibility for m in res.matches)
+    finally:
+        with Session(db_engine) as session, session.begin():
+            session.execute(delete(Job).where(Job.source_id == source_id))
+            session.execute(delete(JobSource).where(JobSource.id == source_id))
+
+
+def test_sprawling_cv_scores_lower_than_focused_cv_and_summary_retrieves_core(db_engine):
+    from datetime import UTC, datetime
+
+    from src.persistence.embedding import JobEmbedding
+    from src.persistence.extraction import JobExtraction
+    from src.schemas.candidate.curriculum import CurriculumRequest
+
+    orthogonal = [0.0, 1.0] + [0.0] * 382
+    summary_vec = [0.0, 0.0, 1.0] + [0.0] * 381
+
+    class SummaryEncoder(Encoder):
+        def encode_queries(self, texts):
+            # Last entry is the summary vector when texts has >1 entries; entries get VECTOR.
+            return [VECTOR for _ in texts[:-1]] + [summary_vec]
+
+    with Session(db_engine) as session, session.begin():
+        source = JobSource(name=f"breadth-{uuid4()}", type="api", polling_mode="INCREMENTAL")
+        session.add(source)
+        session.flush()
+        source_id = source.id
+        job = Job(
+            source_id=source_id,
+            platform="fixture",
+            source_job_id="core-summary",
+            title="Python Backend Developer",
+            description="Construção de serviços REST",
+            skills=["Python", "PostgreSQL"],
+            content_hash="h-breadth",
+            status=JobStatus.ACTIVE,
+            embedding=orthogonal,
+        )
+        session.add(job)
+        session.flush()
+        job_id = job.id
+        now = datetime.now(UTC)
+        session.add_all(
+            [
+                JobExtraction(
+                    job_id=job_id,
+                    content_hash=job.content_hash,
+                    config_version=VERSION,
+                    status="SUCCEEDED",
+                    attempts=1,
+                    evidence=[],
+                    updated_at=now,
+                ),
+                JobEmbedding(
+                    job_id=job_id,
+                    content_hash=job.content_hash,
+                    model_version=EmbeddingConfig().model_version,
+                    extraction_version=VERSION,
+                    status="SUCCEEDED",
+                    attempts=1,
+                    updated_at=now,
+                    core_embedding=summary_vec,
+                ),
+            ]
+        )
+
+    focused_body = curriculum()
+    focused_body["experiencias"] = [
+        {
+            "empresa": "Acme",
+            "cargo": "Python Developer",
+            "descricao": "Python PostgreSQL APIs",
+            "inicio": "2023-01-01",
+            "fim": None,
+        }
+    ]
+    focused_body["competencias"] = [{"descricao": "Python", "nivel": "avancado"}]
+
+    sprawling_body = deepcopy(focused_body)
+    for i in range(7):
+        sprawling_body["experiencias"].append(
+            {
+                "empresa": f"OldCo {i}",
+                "cargo": f"Chef Cozinheiro {i}",
+                "descricao": f"Gastronomia padaria estoque atendimento {i}",
+                "inicio": f"201{i}-01-01",
+                "fim": f"201{i}-12-01",
+            }
+        )
+    for i in range(8):
+        sprawling_body["competencias"].append({"descricao": f"SkillExtra{i}", "nivel": "basico"})
+
+    try:
+        focused_res = MatchingPipeline(lambda: Session(db_engine), Encoder(), VERSION)(
+            CurriculumRequest.model_validate(focused_body), 10
+        )
+        sprawling_res = MatchingPipeline(lambda: Session(db_engine), Encoder(), VERSION)(
+            CurriculumRequest.model_validate(sprawling_body), 10
+        )
+        assert [m.job.id for m in focused_res.matches] == [job_id]
+        assert [m.job.id for m in sprawling_res.matches] == [job_id]
+        assert focused_res.matches[0].score > sprawling_res.matches[0].score
+
+        # Verify summary_vector alone can pull the job via vector="core" even when
+        # entry vectors match nothing (orthogonal to core and full).
+        summary_res = MatchingPipeline(lambda: Session(db_engine), SummaryEncoder(), VERSION)(
+            CurriculumRequest.model_validate(focused_body), 10
+        )
+        assert [m.job.id for m in summary_res.matches] == [job_id]
     finally:
         with Session(db_engine) as session, session.begin():
             session.execute(delete(Job).where(Job.source_id == source_id))
