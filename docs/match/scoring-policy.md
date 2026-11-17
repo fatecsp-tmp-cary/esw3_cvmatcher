@@ -90,11 +90,18 @@ score cutoff before held-out evaluation. Semantic role AUC >=0.90 and accuracy
 >=80% are required separately per language; these targets remain unmeasured on
 human-reviewed held-out gold. Existing agent labels are not substituted for it.
 
-Seniority comparison uses explicit title markers only in the already selected
-experience entries whose versioned semantic role score reaches the frozen relevance
-cutoff 50. Unrelated career levels never establish job-specific seniority. Specialist
-and coordinator tracks are not assigned an invented numeric ordering relative to
-intern/junior/mid/senior; noncomparable tracks are omitted unless exactly matched.
+Seniority comparison uses the [ADR-027](../architecture/decisions/ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md)
+symmetric ladder (`INTERN(0) < JUNIOR(1) < MID(2) < SENIOR(3) < SPECIALIST(4) = COORDINATOR(4)`).
+Candidate seniority uses explicit title markers in the already selected relevant
+experience entries (frozen semantic cutoff 50), taking `max(explicit, SENIOR)`
+when relevant tenure reaches `>= 60` months, and falling back conservatively to
+tenure when unmarked (`< 12` months total or `0` experiences -> `JUNIOR`;
+`>= 60` months relevant -> `SENIOR`). Ongoing experiences use one request-scoped
+UTC date (`as_of_date`, injectable in tests) so identical inputs within a day/pin
+stay deterministic. When both sides are known, a gap `>= 2` hard-filters the job
+symmetrically (with bounded pool refills if needed); a gap of `1` scores `40.0`
+with a `0.85` score multiplier. Unknown seniority never filters. All other
+exclusions remain disabled until user review.
 
 A job skill list alone does not establish candidate skill evidence. When no
 explicit competencies or recognized skill mentions exist in the curriculum, omit

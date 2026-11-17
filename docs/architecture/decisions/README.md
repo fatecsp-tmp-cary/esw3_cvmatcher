@@ -31,7 +31,7 @@ new accepted records supersede the relevant rules rather than rewriting history.
 | 024 | [Current extraction and embeddings for every returned job](ADR-024-all-result-extraction-and-embedding-readiness.md) | Accepted and implemented in PR #195 |
 | 025 | [Initial matching stack: PostgreSQL FTS, pgvector and multilingual-e5-small](ADR-025-initial-matching-stack.md) | Accepted; records implemented decisions (#26) |
 | 026 | [MeuPadrinho source adapter, JSONL import, and bounded availability validation](ADR-026-meupadrinho-source-and-validation.md) | Accepted and implemented |
-| 027 | [Bidirectional scoring, dual job vectors and seniority hard filter](ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) | Accepted (#214, #215, #216, #217); decisions 2 & 3 implemented |
+| 027 | [Bidirectional scoring, dual job vectors and seniority hard filter](ADR-027-bidirectional-scoring-dual-vectors-seniority-filter.md) | Accepted (#214, #215, #216, #217); decisions 1, 2 & 3 implemented |
 
 ## Identifier reconciliation
 
