@@ -29,6 +29,7 @@ new accepted records supersede the relevant rules rather than rewriting history.
 | 022 | [Bilingual ASCII search projection and bounded fuzzy fallback](ADR-022-bilingual-ascii-search-and-fuzzy-fallback.md) | Accepted policy; implementation and verification pending |
 | 023 | [External deployment and second-source selection remain deferred](ADR-023-deferred-external-deployment-and-second-source.md) | Accepted deferral; no external deployment or second source authorized |
 | 024 | [Current extraction and embeddings for every returned job](ADR-024-all-result-extraction-and-embedding-readiness.md) | Accepted and implemented in PR #195 |
+| 025 | [Initial matching stack: PostgreSQL FTS, pgvector and multilingual-e5-small](ADR-025-initial-matching-stack.md) | Accepted; records implemented decisions (#26) |
 
 ## Identifier reconciliation
 
